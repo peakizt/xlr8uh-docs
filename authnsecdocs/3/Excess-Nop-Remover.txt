@@ -1,0 +1,367 @@
+Directory structure:
+└── rivatesu-excess-nop-remover/
+    └── Excess Nop Remover/
+        ├── App.config
+        ├── Excess Nop Remover.csproj
+        ├── Excess Nop Remover.sln
+        ├── Program.cs
+        ├── Remover.cs
+        ├── Properties/
+        │   └── AssemblyInfo.cs
+        └── lib/
+
+================================================
+File: Excess Nop Remover/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.8" />
+    </startup>
+</configuration>
+
+
+================================================
+File: Excess Nop Remover/Excess Nop Remover.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{0EEBCA80-2F82-4B94-AB57-29CB9726F32B}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Excess_Nop_Remover</RootNamespace>
+    <AssemblyName>Excess Nop Remover</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Remover.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib">
+      <HintPath>..\Coisas\Reverse Engineering\Tools\Dotnet\Tool's\SizeOf Fixer\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Remover.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Remover.ico" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: Excess Nop Remover/Excess Nop Remover.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Excess Nop Remover", "Excess Nop Remover.csproj", "{0EEBCA80-2F82-4B94-AB57-29CB9726F32B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0EEBCA80-2F82-4B94-AB57-29CB9726F32B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EEBCA80-2F82-4B94-AB57-29CB9726F32B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0EEBCA80-2F82-4B94-AB57-29CB9726F32B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0EEBCA80-2F82-4B94-AB57-29CB9726F32B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A13DE89C-DE55-4E29-95C9-AAC4D2110482}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: Excess Nop Remover/Program.cs
+================================================
+using System;
+using System.IO;
+using dnlib.DotNet;
+using dnlib.DotNet.Writer;
+
+namespace Excess_Nop_Remover
+{
+    class Program
+    {
+        private static string Asmpath;
+        private static ModuleDefMD AsmethodMdOriginal;
+
+        static void Main(string[] args)
+        {
+            Console.Title = "Excess Nop Remover - iYaReM";
+
+            if (args.Length == 0)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Drag'n drop file.");
+                Console.ReadKey();
+                return;
+            }
+
+            try
+            {
+                AsmethodMdOriginal = ModuleDefMD.Load(args[0]);
+                Asmpath = args[0];
+
+                var directoryName = Path.GetDirectoryName(args[0]);
+
+                if (!directoryName.EndsWith("\\"))
+                    directoryName += "\\";
+
+                Remover.NopRemover(AsmethodMdOriginal);
+                Console.WriteLine("Working..");
+
+                var filename = $"{directoryName}{Path.GetFileNameWithoutExtension(Asmpath)}-NopRemoved{Path.GetExtension(Asmpath)}";
+
+                if (!AsmethodMdOriginal.Is32BitRequired)
+                {
+                    var moduleWriterOptions = new ModuleWriterOptions(AsmethodMdOriginal)
+                    {
+                        MetaDataLogger = DummyLogger.NoThrowInstance,
+                        MetaDataOptions =
+                        {
+                            Flags = MetaDataFlags.PreserveAll
+                        }
+                    };
+                    AsmethodMdOriginal.Write(filename, moduleWriterOptions);
+                }
+                else
+                {
+                    var moduleWriterOptions = new NativeModuleWriterOptions(AsmethodMdOriginal)
+                    {
+                        MetaDataLogger = DummyLogger.NoThrowInstance,
+                        MetaDataOptions =
+                        {
+                            Flags = MetaDataFlags.PreserveAll
+                        }
+                    };
+                    AsmethodMdOriginal.NativeWrite(filename, moduleWriterOptions);
+                }
+
+                Console.ForegroundColor = ConsoleColor.Green;
+
+                Console.WriteLine("\nDone! Saving Assembly...");
+            }
+            catch { Console.ForegroundColor = ConsoleColor.Red; Console.WriteLine("Invalid file."); }
+
+            Console.ReadKey();
+        }
+    }
+}
+
+
+
+================================================
+File: Excess Nop Remover/Remover.cs
+================================================
+using System.Linq;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace Excess_Nop_Remover
+{
+    internal class Remover
+    {
+        public static void NopRemover(ModuleDefMD module)
+        {
+            foreach (var typeDef in module.Types)
+            {
+                foreach (var methodDef in typeDef.Methods)
+                {
+                    if (methodDef.HasBody)
+                        RemoveUnusedNops(methodDef);
+                }
+            }
+        }
+
+        private static void RemoveUnusedNops(MethodDef methodDef)
+        {
+            if (!methodDef.HasBody)
+                return;
+
+            for (var i = 0; i < methodDef.Body.Instructions.Count; ++i)
+            {
+                var instruction = methodDef.Body.Instructions[i];
+
+                if (instruction.OpCode != OpCodes.Nop)
+                    continue;
+
+                if (IsNopBranchTarget(methodDef, instruction))
+                    continue;
+
+                if (IsNopSwitchTarget(methodDef, instruction))
+                    continue;
+
+                if (IsNopExceptionHandlerTarget(methodDef, instruction))
+                    continue;
+
+                methodDef.Body.Instructions.RemoveAt(i);
+                i--;
+            }
+        }
+
+        private static bool IsNopBranchTarget(MethodDef methodDef, Instruction nopInstr)
+        {
+            foreach (var instruction in methodDef.Body.Instructions)
+            {
+                switch (instruction.OpCode.OperandType)
+                {
+                    case OperandType.InlineBrTarget:
+                    case OperandType.ShortInlineBrTarget:
+                        {
+                            if (instruction.Operand == null)
+                                continue;
+
+                            if ((Instruction)instruction.Operand == nopInstr)
+                                return true;
+
+                            break;
+                        }
+                }
+            }
+
+            return false;
+        }
+
+        private static bool IsNopSwitchTarget(MethodDef methodDef, Instruction nopInstr)
+        {
+            foreach (var instruction in methodDef.Body.Instructions)
+            {
+                if (instruction.OpCode.OperandType != OperandType.InlineSwitch)
+                    continue;
+
+                if (instruction.Operand == null)
+                    continue;
+
+                var source = (Instruction[])instruction.Operand;
+
+                if (source.Contains(nopInstr))
+                    return true;
+            }
+
+            return false;
+        }
+
+        private static bool IsNopExceptionHandlerTarget(MethodDef methodDef, Instruction nopInstr)
+        {
+            if (methodDef.Body.HasExceptionHandlers) 
+                return false;
+
+            var exceptionHandlers = methodDef.Body.ExceptionHandlers;
+
+            foreach (var exceptionHandler in exceptionHandlers)
+            {
+                if (exceptionHandler.FilterStart == nopInstr)
+                    return true;
+
+                if (exceptionHandler.HandlerEnd == nopInstr)
+                    return true;
+                
+                if (exceptionHandler.HandlerStart == nopInstr)
+                    return true;
+
+                if (exceptionHandler.TryEnd == nopInstr)
+                    return true;
+
+                if (exceptionHandler.TryStart == nopInstr)
+                    return true;
+            }
+
+            return false;
+        }
+    }
+}
+
+
+
+================================================
+File: Excess Nop Remover/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// As informaÃ§Ãµes gerais sobre um assembly sÃ£o controladas por
+// conjunto de atributos. Altere estes valores de atributo para modificar as informaÃ§Ãµes
+// associadas a um assembly.
+[assembly: AssemblyTitle("Excess Nop Remover")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("30700")]
+[assembly: AssemblyProduct("Excess Nop Remover")]
+[assembly: AssemblyCopyright("Copyright Â© 30700 2019")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Definir ComVisible como false torna os tipos neste assembly invisÃ­veis
+// para componentes COM. Caso precise acessar um tipo neste assembly de
+// COM, defina o atributo ComVisible como true nesse tipo.
+[assembly: ComVisible(false)]
+
+// O GUID a seguir serÃ¡ destinado Ã  ID de typelib se este projeto for exposto para COM
+[assembly: Guid("0eebca80-2f82-4b94-ab57-29cb9726f32b")]
+
+// As informaÃ§Ãµes da versÃ£o de um assembly consistem nos quatro valores a seguir:
+//
+//      VersÃ£o Principal
+//      VersÃ£o SecundÃ¡ria 
+//      NÃºmero da VersÃ£o
+//      RevisÃ£o
+//
+// Ã‰ possÃ­vel especificar todos os valores ou usar como padrÃ£o os NÃºmeros de Build e da RevisÃ£o
+// usando o "*" como mostrado abaixo:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+

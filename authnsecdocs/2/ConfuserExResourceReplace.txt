@@ -1,0 +1,822 @@
+Directory structure:
+└── yuqselx-confuserexresourcereplace/
+    ├── ConfuserExResourceReplace.sln
+    └── ConfuserExResourceReplace/
+        ├── ConfuserExResourceReplace.csproj
+        ├── Form1.Designer.cs
+        ├── Form1.cs
+        ├── Form1.resx
+        ├── Program.cs
+        ├── packages.config
+        └── Properties/
+            ├── AssemblyInfo.cs
+            ├── Resources.Designer.cs
+            ├── Resources.resx
+            ├── Settings.Designer.cs
+            └── Settings.settings
+
+================================================
+File: ConfuserExResourceReplace.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConfuserExResourceReplace", "ConfuserExResourceReplace\ConfuserExResourceReplace.csproj", "{A0363622-632D-4B3A-9F3B-CBB2DBFCCC80}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A0363622-632D-4B3A-9F3B-CBB2DBFCCC80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0363622-632D-4B3A-9F3B-CBB2DBFCCC80}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0363622-632D-4B3A-9F3B-CBB2DBFCCC80}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0363622-632D-4B3A-9F3B-CBB2DBFCCC80}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: ConfuserExResourceReplace/ConfuserExResourceReplace.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{A0363622-632D-4B3A-9F3B-CBB2DBFCCC80}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>ConfuserExResourceReplace</RootNamespace>
+    <AssemblyName>ConfuserExResourceReplace</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib, Version=1.6.0.0, Culture=neutral, PublicKeyToken=50e96378b6e77999, processorArchitecture=MSIL">
+      <HintPath>..\packages\dnlib.1.6.1\lib\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Form1.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form1.Designer.cs">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Form1.resx">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: ConfuserExResourceReplace/Form1.Designer.cs
+================================================
+ï»¿namespace ConfuserExResourceReplace
+{
+    partial class Form1
+    {
+        /// <summary>
+        ///Gerekli tasarÄ±mcÄ± deÄŸiÅŸkeni.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        ///KullanÄ±lan tÃ¼m kaynaklarÄ± temizleyin.
+        /// </summary>
+        ///<param name="disposing">yÃ¶netilen kaynaklar dispose edilmeliyse doÄŸru; aksi halde yanlÄ±ÅŸ.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer Ã¼retilen kod
+
+        /// <summary>
+        /// TasarÄ±mcÄ± desteÄŸi iÃ§in gerekli metot - bu metodun 
+        ///iÃ§eriÄŸini kod dÃ¼zenleyici ile deÄŸiÅŸtirmeyin.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
+            this.mainexefile = new System.Windows.Forms.OpenFileDialog();
+            this.dllfile = new System.Windows.Forms.OpenFileDialog();
+            this.SuspendLayout();
+            // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(21, 25);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(543, 22);
+            this.textBox1.TabIndex = 0;
+            this.textBox1.Click += new System.EventHandler(this.textBox1_Click);
+            // 
+            // textBox2
+            // 
+            this.textBox2.Location = new System.Drawing.Point(21, 73);
+            this.textBox2.Name = "textBox2";
+            this.textBox2.Size = new System.Drawing.Size(543, 22);
+            this.textBox2.TabIndex = 1;
+            this.textBox2.Click += new System.EventHandler(this.textBox2_Click);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(18, 5);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(65, 17);
+            this.label1.TabIndex = 2;
+            this.label1.Text = "Main Exe";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(18, 53);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(99, 17);
+            this.label2.TabIndex = 3;
+            this.label2.Text = "Resource DLL";
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(21, 101);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(543, 38);
+            this.button1.TabIndex = 4;
+            this.button1.Text = "DO";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // Form1
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(576, 141);
+            this.Controls.Add(this.button1);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.textBox2);
+            this.Controls.Add(this.textBox1);
+            this.Name = "Form1";
+            this.Text = "ConfuserEx Resource Replacer";
+            this.ResumeLayout(false);
+            this.PerformLayout();
+
+        }
+
+        #endregion
+
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.OpenFileDialog mainexefile;
+        private System.Windows.Forms.OpenFileDialog dllfile;
+    }
+}
+
+
+
+
+================================================
+File: ConfuserExResourceReplace/Form1.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Writer;
+using System;
+using System.IO;
+using System.Windows.Forms;
+
+namespace ConfuserExResourceReplace
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+            this.AllowDrop = true;
+            this.DragEnter += new DragEventHandler(Form1_DragEnter);
+            this.DragDrop += new DragEventHandler(Form1_DragDrop);
+        }
+
+        private ModuleDefMD mainasm;
+        private ModuleDefMD resasm;
+        private int totalreplace = 0;
+
+        private void Form1_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop)) e.Effect = DragDropEffects.Copy;
+        }
+
+        private void Form1_DragDrop(object sender, DragEventArgs e)
+        {
+            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+            foreach (string file in files)
+            {
+                string ext = Path.GetExtension(file);
+                if(ext == ".dll")
+                {
+                    this.textBox2.Text = file;
+                    this.textBox2.Click -= new System.EventHandler(this.textBox2_Click);
+
+                }
+                else if(ext == ".exe")
+                {
+                    this.textBox1.Text = file;
+                    this.textBox1.Click -= new System.EventHandler(this.textBox1_Click);
+
+                }
+                else
+                {
+                    MessageBox.Show("File cannot accepted.");
+                }
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                mainasm = ModuleDefMD.Load(this.textBox1.Text);
+                resasm = ModuleDefMD.Load(this.textBox2.Text);
+
+                if (resasm.HasResources && mainasm.HasResources)
+                {
+                    if (resasm.Resources.Count == mainasm.Resources.Count)
+                    {
+                        foreach (var goodres in resasm.Resources)
+                        {
+                            mainasm.Resources.Remove(mainasm.Resources.Find(goodres.Name));
+                            mainasm.Resources.Add(goodres);
+                            totalreplace++;
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Resource counts must be equal !");
+                    }
+                }
+                ModuleWriterOptions moduleWriterOptions = new ModuleWriterOptions(mainasm);
+                if (mainasm.IsILOnly)
+                {
+                    
+                    moduleWriterOptions.MetaDataOptions.Flags |= (MetaDataFlags.PreserveTypeRefRids | MetaDataFlags.PreserveTypeDefRids | MetaDataFlags.PreserveFieldRids | MetaDataFlags.PreserveMethodRids | MetaDataFlags.PreserveParamRids | MetaDataFlags.PreserveMemberRefRids | MetaDataFlags.PreserveStandAloneSigRids | MetaDataFlags.PreserveEventRids | MetaDataFlags.PreservePropertyRids | MetaDataFlags.PreserveTypeSpecRids | MetaDataFlags.PreserveMethodSpecRids | MetaDataFlags.PreserveUSOffsets | MetaDataFlags.PreserveBlobOffsets | MetaDataFlags.PreserveExtraSignatureData | MetaDataFlags.KeepOldMaxStack);
+                    moduleWriterOptions.Logger = DummyLogger.NoThrowInstance;
+                }
+
+                mainasm.Write(this.textBox1.Text.Replace(".exe", "_fixed.exe"), moduleWriterOptions);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            MessageBox.Show("Total " + totalreplace.ToString() + " resource replaced.");
+        }
+
+        private void textBox1_Click(object sender, EventArgs e)
+        {
+            mainexefile.Filter = ".exe |*.exe";
+            if (mainexefile.ShowDialog() == DialogResult.OK)
+            {
+                this.textBox1.Text = mainexefile.FileName;
+            }
+        }
+
+        private void textBox2_Click(object sender, EventArgs e)
+        {
+            dllfile.Filter = ".dll |*.dll";
+            if (dllfile.ShowDialog() == DialogResult.OK)
+            {
+                this.textBox2.Text = dllfile.FileName;
+            }
+        }
+
+    }
+}
+
+
+================================================
+File: ConfuserExResourceReplace/Form1.resx
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <metadata name="mainexefile.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>17, 17</value>
+  </metadata>
+  <metadata name="dllfile.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>184, 17</value>
+  </metadata>
+</root>
+
+
+================================================
+File: ConfuserExResourceReplace/Program.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Forms;
+
+namespace ConfuserExResourceReplace
+{
+    static class Program
+    {
+        /// <summary>
+        /// UygulamanÄ±n ana girdi noktasÄ±.
+        /// </summary>
+        [STAThread]
+        static void Main()
+        {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new Form1());
+        }
+    }
+}
+
+
+
+================================================
+File: ConfuserExResourceReplace/packages.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<packages>
+  <package id="dnlib" version="1.6.1" targetFramework="net40" />
+</packages>
+
+
+================================================
+File: ConfuserExResourceReplace/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// Bir bÃ¼tÃ¼nleÅŸtirilmiÅŸ koda iliÅŸkin Genel Bilgiler aÅŸaÄŸÄ±daki Ã¶znitelikler kÃ¼mesiyle
+// denetlenir. BÃ¼tÃ¼nleÅŸtirilmiÅŸ kod ile iliÅŸkili bilgileri deÄŸiÅŸtirmek iÃ§in
+// bu Ã¶znitelik deÄŸerlerini deÄŸiÅŸtirin.
+[assembly: AssemblyTitle("ConfuserExResourceReplace")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("ConfuserExResourceReplace")]
+[assembly: AssemblyCopyright("Copyright Â©  2017")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// ComVisible Ã¶zniteliÄŸinin false olarak ayarlanmasÄ± bu bÃ¼tÃ¼nleÅŸtirilmiÅŸ koddaki tÃ¼rleri
+// COM bileÅŸenleri iÃ§in gÃ¶rÃ¼nmez yapar. Bu bÃ¼tÃ¼nleÅŸtirilmiÅŸ koddaki bir tÃ¼re
+// eriÅŸmeniz gerekirse ComVisible Ã¶zniteliÄŸini o tÃ¼rde true olarak ayarlayÄ±n.
+[assembly: ComVisible(false)]
+
+// Bu proje COM'un kullanÄ±mÄ±na sunulursa, aÅŸaÄŸÄ±daki GUID tÃ¼r kitaplÄ±ÄŸÄ±nÄ±n kimliÄŸi iÃ§indir
+[assembly: Guid("a0363622-632d-4b3a-9f3b-cbb2dbfccc80")]
+
+// Bir derlemenin sÃ¼rÃ¼m bilgileri aÅŸaÄŸÄ±daki dÃ¶rt deÄŸerden oluÅŸur:
+//
+//      Ana SÃ¼rÃ¼m
+//      Ä°kincil SÃ¼rÃ¼m 
+//      YapÄ± NumarasÄ±
+//      DÃ¼zeltme
+//
+// TÃ¼m deÄŸerleri belirtebilir veya varsayÄ±lan Derleme ve DÃ¼zeltme NumaralarÄ±nÄ± kullanmak iÃ§in
+// '*' kullanarak varsayÄ±lana ayarlayabilirsiniz:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+
+================================================
+File: ConfuserExResourceReplace/Properties/Resources.Designer.cs
+================================================
+ï»¿//------------------------------------------------------------------------------
+// <auto-generated>
+//     Bu kod bir araÃ§ tarafÄ±ndan oluÅŸturuldu.
+//     Ã‡alÄ±ÅŸma ZamanÄ± SÃ¼rÃ¼mÃ¼: 4.0.30319.42000
+//
+//     Bu dosyada yapÄ±lan deÄŸiÅŸiklikler yanlÄ±ÅŸ davranÄ±ÅŸa yol aÃ§abilir ve ÅŸu durumda kaybolur
+//     kod yeniden oluÅŸturulduÄŸunda.
+// </auto-generated>
+//------------------------------------------------------------------------------
+
+namespace ConfuserExResourceReplace.Properties
+{
+
+
+    /// <summary>
+    ///   YerelleÅŸtirilmiÅŸ dizeleri vs. aramak iÃ§in tÃ¼rÃ¼ kesin belirlenmiÅŸ bir kaynak sÄ±nÄ±fÄ±.
+    /// </summary>
+    // Bu sÄ±nÄ±f, StronglyTypedResourceBuilder tarafÄ±ndan otomatik olarak
+    // ResGen ya da Visual Studio gibi bir araÃ§ ile oluÅŸturuldu.
+    // Bir Ã¼ye eklemek ya da kaldÄ±rmak iÃ§in .ResX dosyanÄ±zÄ± dÃ¼yenleyin, sonra da ResGen
+    // Ã¶ÄŸesini /str seÃ§eneÄŸiyle yeniden Ã§alÄ±ÅŸtÄ±rÄ±n veya VS projenizi yeniden derleyin.
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    internal class Resources
+    {
+
+        private static global::System.Resources.ResourceManager resourceMan;
+
+        private static global::System.Globalization.CultureInfo resourceCulture;
+
+        [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+        internal Resources()
+        {
+        }
+
+        /// <summary>
+        ///   Bu sÄ±nÄ±f tarafÄ±ndan kullanÄ±lan, Ã¶nbelleÄŸe alÄ±nmÄ±ÅŸ ResourceManager Ã¶rneÄŸini dÃ¶ndÃ¼rÃ¼r.
+        /// </summary>
+        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
+        internal static global::System.Resources.ResourceManager ResourceManager
+        {
+            get
+            {
+                if ((resourceMan == null))
+                {
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ConfuserExResourceReplace.Properties.Resources", typeof(Resources).Assembly);
+                    resourceMan = temp;
+                }
+                return resourceMan;
+            }
+        }
+
+        /// <summary>
+        ///   GeÃ§erli iÅŸ parÃ§acÄ±ÄŸÄ±nÄ±n CurrentUICulture Ã¶zelliÄŸini, tÃ¼rÃ¼ kesin belirlenmiÅŸ
+        ///   bu kaynak sÄ±nÄ±fÄ±nÄ± kullanan tÃ¼m kaynak aramalarÄ± iÃ§in geÃ§ersiz kÄ±lar.
+        /// </summary>
+        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
+        internal static global::System.Globalization.CultureInfo Culture
+        {
+            get
+            {
+                return resourceCulture;
+            }
+            set
+            {
+                resourceCulture = value;
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: ConfuserExResourceReplace/Properties/Resources.resx
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+</root>
+
+
+================================================
+File: ConfuserExResourceReplace/Properties/Settings.Designer.cs
+================================================
+ï»¿//------------------------------------------------------------------------------
+// <auto-generated>
+//     This code was generated by a tool.
+//     Runtime Version:4.0.30319.42000
+//
+//     Changes to this file may cause incorrect behavior and will be lost if
+//     the code is regenerated.
+// </auto-generated>
+//------------------------------------------------------------------------------
+
+namespace ConfuserExResourceReplace.Properties
+{
+
+
+    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "11.0.0.0")]
+    internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase
+    {
+
+        private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
+
+        public static Settings Default
+        {
+            get
+            {
+                return defaultInstance;
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: ConfuserExResourceReplace/Properties/Settings.settings
+================================================
+ï»¿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)">
+  <Profiles>
+    <Profile Name="(Default)" />
+  </Profiles>
+  <Settings />
+</SettingsFile>
+
+

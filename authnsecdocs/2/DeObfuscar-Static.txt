@@ -1,0 +1,305 @@
+Directory structure:
+└── darkobb-deobfuscar-static/
+    ├── README.md
+    ├── DeObfuscar.sln
+    └── DeObfuscar/
+        ├── App.config
+        ├── DeObfuscar.csproj
+        ├── Program.cs
+        ├── packages.config
+        └── Properties/
+            └── AssemblyInfo.cs
+
+================================================
+File: README.md
+================================================
+# Static Obfuscar Deobfuscator
+
+## How to use
+-Drag n Drop
+
+## Notes:
+-This is a very simple deobfuscator for Obfuscar
+
+-Enjoy!
+
+
+
+================================================
+File: DeObfuscar.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29020.237
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeObfuscar", "DeObfuscar\DeObfuscar.csproj", "{C584FF26-6B30-4140-AD7B-259AF6B0F513}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C584FF26-6B30-4140-AD7B-259AF6B0F513}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C584FF26-6B30-4140-AD7B-259AF6B0F513}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C584FF26-6B30-4140-AD7B-259AF6B0F513}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C584FF26-6B30-4140-AD7B-259AF6B0F513}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {565B7E45-2997-472B-A591-596B2776DF45}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: DeObfuscar/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.5.2" />
+    </startup>
+</configuration>
+
+
+================================================
+File: DeObfuscar/DeObfuscar.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{C584FF26-6B30-4140-AD7B-259AF6B0F513}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>DeObfuscar</RootNamespace>
+    <AssemblyName>DeObfuscar</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib, Version=3.2.0.0, Culture=neutral, PublicKeyToken=50e96378b6e77999, processorArchitecture=MSIL">
+      <HintPath>..\packages\dnlib.3.2.0\lib\net45\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: DeObfuscar/Program.cs
+================================================
+ï»¿using System;
+using System.IO;
+using System.Text;
+using System.Threading;
+
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using dnlib.DotNet.Writer;
+
+namespace DeObfuscar {
+    class Program {
+        internal static string ClassName;
+        internal static ModuleDefMD module;
+        internal static byte[] StringStorage;
+
+        static void Main(string[] args) {
+            try {
+                module = ModuleDefMD.Load(args[0]);
+                if (GetArray()) {
+                    PrepareArray();
+
+                    foreach (var type in module.GetTypes()) {
+                        if (!type.HasMethods)
+                            continue;
+
+                        foreach (var method in type.Methods) {
+                            if (!method.HasBody)
+                                continue;
+
+                            for (var i = 0; i < method.Body.Instructions.Count; i++) {
+                                if (method.Body.Instructions[i].OpCode == OpCodes.Call &&
+                                    method.Body.Instructions[i].Operand.ToString().Contains(ClassName)) {
+
+                                    var decMethod = (MethodDef)method.Body.Instructions[i].Operand;
+                                    if (decMethod.Body.Instructions.Count == 11) {
+                                        method.Body.Instructions[i].OpCode = OpCodes.Ldstr;
+                                        method.Body.Instructions[i].Operand = Decrypt(decMethod.Body.Instructions[7].GetLdcI4Value(), decMethod.Body.Instructions[8].GetLdcI4Value());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                else {
+                    Console.WriteLine("Could not find array :(");
+                    Thread.Sleep(3000);
+                    Environment.Exit(0);
+                }
+
+                Console.WriteLine("Saving methods...");
+                Save(args[0], module);
+                Console.WriteLine("Saved!");
+            }
+            catch { }
+        }
+
+        internal static string Decrypt(int index, int count) => Encoding.UTF8.GetString(StringStorage, index, count);
+
+        internal static void PrepareArray() {
+            for (int i = 0; i < StringStorage.Length; i++)
+                StringStorage[i] = (byte)(StringStorage[i] ^ i ^ 170);
+        }
+
+        internal static bool GetArray() {
+            try {
+                foreach (var type in module.GetTypes()) {
+                    if (!type.HasMethods)
+                        continue;
+
+                    foreach (var method in type.Methods) {
+                        if (!method.HasBody)
+                            continue;
+
+                        for (var i = 0; i < method.Body.Instructions.Count; i++) { //Has 33 instructions!!! (check if static or dynamic)
+                            if (method.IsStatic &&
+                                method.Body.Instructions[i].IsLdcI4() &&
+                                method.Body.Instructions[i + 1].OpCode == OpCodes.Newarr &&
+                                method.Body.Instructions[i + 1].Operand.ToString() == "System.String" &&
+                                method.Body.Instructions[i + 2].OpCode == OpCodes.Stsfld &&
+                                method.Body.Instructions[i + 3].IsLdcI4() &&
+                                method.Body.Instructions[i + 4].OpCode == OpCodes.Newarr &&
+                                method.Body.Instructions[i + 4].Operand.ToString() == "System.Byte" &&
+                                method.Body.Instructions[i + 5].OpCode == OpCodes.Dup &&
+                                method.Body.Instructions[i + 6].OpCode == OpCodes.Ldtoken &&
+                                method.Body.Instructions[i + 7].OpCode == OpCodes.Call &&
+                                method.Body.Instructions[i + 7].Operand.ToString() == "System.Void System.Runtime.CompilerServices.RuntimeHelpers::InitializeArray(System.Array,System.RuntimeFieldHandle)" &&
+                                method.Body.Instructions[i + 8].OpCode == OpCodes.Stsfld) {
+
+                                ClassName = type.Name;
+                                StringStorage = ((FieldDef)method.Body.Instructions[i + 6].Operand).InitialValue;
+
+                                return true;
+                            }
+                        }
+                    }
+                }
+
+                return false;
+            } catch { return false; }
+        }
+
+        static void Save(string location, ModuleDefMD module) {
+
+            Console.WriteLine("saving module!");
+
+            var Writer = new NativeModuleWriterOptions(module, true) {
+                KeepExtraPEData = true,
+                KeepWin32Resources = true,
+                Logger = DummyLogger.NoThrowInstance //prevents errors from being thrown
+            };
+
+            Writer.MetadataOptions.Flags = MetadataFlags.PreserveAll | MetadataFlags.KeepOldMaxStack;
+            module.NativeWrite($"{Path.GetFileNameWithoutExtension(location)}-Dec{Path.GetExtension(location)}", Writer);
+
+        }
+    }
+}
+
+/* Made by DarkObb */
+
+
+================================================
+File: DeObfuscar/packages.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<packages>
+  <package id="dnlib" version="3.2.0" targetFramework="net452" />
+</packages>
+
+
+================================================
+File: DeObfuscar/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("DeObfuscar")]
+[assembly: AssemblyDescription("Made by DarkObb")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("DeObfuscar")]
+[assembly: AssemblyCopyright("Copyright Â©  2019")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Setting ComVisible to false makes the types in this assembly not visible
+// to COM components.  If you need to access a type in this assembly from
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("c584ff26-6b30-4140-ad7b-259af6b0f513")]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+

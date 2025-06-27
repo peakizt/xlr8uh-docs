@@ -1,0 +1,2937 @@
+Directory structure:
+└── anerruption-logic.net/
+    ├── README.md
+    ├── LICENSE
+    ├── LoGiC.NET.sln
+    ├── LoGiC.NET.v1/
+    │   ├── App.config
+    │   ├── InjectContext.cs
+    │   ├── InjectHelper.cs
+    │   ├── LoGiC.NET.csproj
+    │   ├── MemberRenamer.cs
+    │   ├── Program.cs
+    │   ├── ProxyExtension.cs
+    │   ├── Randomizer.cs
+    │   ├── Reference.cs
+    │   ├── StringDecoder.cs
+    │   ├── TamperClass.cs
+    │   ├── Watermark.cs
+    │   ├── config.txt
+    │   ├── packages.config
+    │   ├── Analyzer/
+    │   │   ├── DefAnalyzer.cs
+    │   │   ├── EventDefAnalyzer.cs
+    │   │   ├── FieldDefAnalyzer.cs
+    │   │   ├── MethodDefAnalyzer.cs
+    │   │   ├── ParameterAnalyzer.cs
+    │   │   ├── PropertyDefAnalyzer.cs
+    │   │   └── TypeDefAnalyzer.cs
+    │   ├── Properties/
+    │   │   └── AssemblyInfo.cs
+    │   └── Protections/
+    │       ├── AntiDe4dot.cs
+    │       ├── AntiTamper.cs
+    │       ├── ControlFlow.cs
+    │       ├── IntEncoding.cs
+    │       ├── InvalidMetadata.cs
+    │       ├── JunkDefs.cs
+    │       ├── Protection.cs
+    │       ├── ProxyAdder.cs
+    │       ├── Renamer.cs
+    │       ├── StringEncryption.cs
+    │       └── StripDOSHeader.cs
+    └── LoGiC.NET.v2/
+        ├── LoGiC.NET.v2.csproj
+        ├── ObfuscationContext.cs
+        ├── Program.cs
+        ├── Terminal.cs
+        ├── Obfuscation/
+        │   ├── BaseObfuscation.cs
+        │   ├── CallifyInstructionsObfuscation.cs
+        │   ├── InstructionExpansionObfuscation.cs
+        │   ├── IntEncodingObfuscation.cs
+        │   ├── JunkMembersObfuscation.cs
+        │   ├── MethodProxying.cs
+        │   └── RenameObfuscation.cs
+        └── Utils/
+            └── NumberUtils.cs
+
+================================================
+File: README.md
+================================================
+# Introduction
+LoGiC.NET is a free and open-source .NET obfuscator using dnlib. It is currently under a rewrite.
+
+# Dependencies
+dnlib v3.6.0
+
+
+================================================
+File: LICENSE
+================================================
+MIT License
+
+Copyright (c) 2019 ShiningLea
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+
+================================================
+File: LoGiC.NET.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoGiC.NET.v2", "LoGiC.NET.v2\LoGiC.NET.v2.csproj", "{04AA9C88-85B9-4AA4-9DBE-4939B16E0773}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{04AA9C88-85B9-4AA4-9DBE-4939B16E0773}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04AA9C88-85B9-4AA4-9DBE-4939B16E0773}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04AA9C88-85B9-4AA4-9DBE-4939B16E0773}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04AA9C88-85B9-4AA4-9DBE-4939B16E0773}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: LoGiC.NET.v1/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.7.2" />
+    </startup>
+</configuration>
+
+
+================================================
+File: LoGiC.NET.v1/InjectContext.cs
+================================================
+ï»¿using dnlib.DotNet;
+using System.Collections.Generic;
+
+namespace LoGiC.NET.Utils
+{
+    /// <summary>
+    /// The context of an injection process.
+    /// </summary>
+    public class InjectContext
+    {
+        /// <summary>
+        /// The mapping of origin definitions to injected definitions.
+        /// </summary>
+        public readonly Dictionary<IDnlibDef, IDnlibDef> Map = new Dictionary<IDnlibDef, IDnlibDef>();
+
+        /// <summary>
+        /// The module which source type originated from.
+        /// </summary>
+        public readonly ModuleDef OriginModule;
+
+        /// <summary>
+        /// The module which source type is being injected to.
+        /// </summary>
+        public readonly ModuleDef TargetModule;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InjectContext" /> class.
+        /// </summary>
+        /// <param name="module">The origin module.</param>
+        /// <param name="target">The target module.</param>
+        public InjectContext(ModuleDef module, ModuleDef target)
+        {
+            OriginModule = module;
+            TargetModule = target;
+            Importer = new Importer(target, ImporterOptions.TryToUseTypeDefs);
+        }
+
+        /// <summary>
+        /// Gets the importer.
+        /// </summary>
+        /// <value>The importer.</value>
+        public Importer Importer { get; }
+    }
+}
+
+
+
+================================================
+File: LoGiC.NET.v1/InjectHelper.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace LoGiC.NET.Utils
+{
+    /// <summary>
+    ///     Provides methods to inject a <see cref="TypeDef" /> into another module.
+    /// </summary>
+    public static class InjectHelper
+    {
+        /// <summary>
+        ///     Clones the specified origin TypeDef.
+        /// </summary>
+        /// <param name="origin">The origin TypeDef.</param>
+        /// <returns>The cloned TypeDef.</returns>
+        public static TypeDefUser Clone(TypeDef origin)
+        {
+            TypeDefUser ret = new TypeDefUser(origin.Namespace, origin.Name)
+            {
+                Attributes = origin.Attributes
+            };
+
+            if (origin.ClassLayout != null)
+                ret.ClassLayout = new ClassLayoutUser(origin.ClassLayout.PackingSize, origin.ClassSize);
+
+            foreach (GenericParam genericParam in origin.GenericParameters)
+                ret.GenericParameters.Add(new GenericParamUser(genericParam.Number, genericParam.Flags,
+                    "-"));
+
+            return ret;
+        }
+
+        /// <summary>
+        ///     Clones the specified origin MethodDef.
+        /// </summary>
+        /// <param name="origin">The origin MethodDef.</param>
+        /// <returns>The cloned MethodDef.</returns>
+        public static MethodDefUser Clone(MethodDef origin)
+        {
+            MethodDefUser ret = new MethodDefUser(origin.Name, null, origin.ImplAttributes,
+                origin.Attributes);
+
+            foreach (GenericParam genericParam in origin.GenericParameters)
+                ret.GenericParameters.Add(new GenericParamUser(genericParam.Number, genericParam.Flags,
+                    "-"));
+
+            return ret;
+        }
+
+        /// <summary>
+        ///     Clones the specified origin FieldDef.
+        /// </summary>
+        /// <param name="origin">The origin FieldDef.</param>
+        /// <returns>The cloned FieldDef.</returns>
+        public static FieldDefUser Clone(FieldDef origin)
+        {
+            return new FieldDefUser(origin.Name, null, origin.Attributes);
+        }
+
+        /// <summary>
+        ///     Populates the context mappings.
+        /// </summary>
+        /// <param name="typeDef">The origin TypeDef.</param>
+        /// <param name="ctx">The injection context.</param>
+        /// <returns>The new TypeDef.</returns>
+        public static TypeDef PopulateContext(TypeDef typeDef, InjectContext ctx)
+        {
+            TypeDef ret;
+            if (!ctx.Map.TryGetValue(typeDef, out IDnlibDef existing))
+            {
+                ret = Clone(typeDef);
+                ctx.Map[typeDef] = ret;
+            }
+            else
+                ret = (TypeDef)existing;
+
+            foreach (TypeDef nestedType in typeDef.NestedTypes)
+                ret.NestedTypes.Add(PopulateContext(nestedType, ctx));
+
+            foreach (MethodDef method in typeDef.Methods)
+                ret.Methods.Add((MethodDef)(ctx.Map[method] = Clone(method)));
+
+            foreach (FieldDef field in typeDef.Fields)
+                ret.Fields.Add((FieldDef)(ctx.Map[field] = Clone(field)));
+
+            return ret;
+        }
+
+        /// <summary>
+        ///     Copies the information from the origin type to injected type.
+        /// </summary>
+        /// <param name="typeDef">The origin TypeDef.</param>
+        /// <param name="ctx">The injection context.</param>
+        public static void CopyTypeDef(TypeDef typeDef, InjectContext ctx)
+        {
+            TypeDef newTypeDef = (TypeDef)ctx.Map[typeDef];
+            newTypeDef.BaseType = ctx.Importer.Import(typeDef.BaseType);
+
+            foreach (InterfaceImpl iface in typeDef.Interfaces)
+                newTypeDef.Interfaces.Add(new InterfaceImplUser(ctx.Importer.Import(iface.Interface)));
+        }
+
+        /// <summary>
+        ///     Copies the information from the origin method to injected method.
+        /// </summary>
+        /// <param name="methodDef">The origin MethodDef.</param>
+        /// <param name="ctx">The injection context.</param>
+        public static void CopyMethodDef(MethodDef methodDef, InjectContext ctx)
+        {
+            MethodDef newMethodDef = (MethodDef)ctx.Map[methodDef];
+
+            newMethodDef.Signature = ctx.Importer.Import(methodDef.Signature);
+            newMethodDef.Parameters.UpdateParameterTypes();
+
+            if (methodDef.ImplMap != null)
+                newMethodDef.ImplMap = new ImplMapUser(new ModuleRefUser(ctx.TargetModule, methodDef.ImplMap.Module.Name), methodDef.ImplMap.Name, methodDef.ImplMap.Attributes);
+
+            foreach (CustomAttribute ca in methodDef.CustomAttributes)
+                newMethodDef.CustomAttributes.Add(new CustomAttribute((ICustomAttributeType)ctx.Importer.Import(ca.Constructor)));
+
+            if (methodDef.HasBody)
+            {
+                newMethodDef.Body = new CilBody(methodDef.Body.InitLocals, new List<Instruction>(), new List<ExceptionHandler>(), new List<Local>());
+                newMethodDef.Body.MaxStack = methodDef.Body.MaxStack;
+
+                Dictionary<object, object> bodyMap = new Dictionary<object, object>();
+
+                foreach (Local local in methodDef.Body.Variables)
+                {
+                    Local newLocal = new Local(ctx.Importer.Import(local.Type));
+                    newMethodDef.Body.Variables.Add(newLocal);
+                    newLocal.Name = local.Name;
+                    newLocal.Attributes = local.Attributes;
+
+                    bodyMap[local] = newLocal;
+                }
+
+                foreach (Instruction instr in methodDef.Body.Instructions)
+                {
+                    Instruction newInstr = new Instruction(instr.OpCode, instr.Operand)
+                    {
+                        SequencePoint = instr.SequencePoint
+                    };
+
+                    if (newInstr.Operand is IType)
+                        newInstr.Operand = ctx.Importer.Import((IType)newInstr.Operand);
+
+                    else if (newInstr.Operand is IMethod)
+                        newInstr.Operand = ctx.Importer.Import((IMethod)newInstr.Operand);
+
+                    else if (newInstr.Operand is IField)
+                        newInstr.Operand = ctx.Importer.Import((IField)newInstr.Operand);
+
+                    newMethodDef.Body.Instructions.Add(newInstr);
+                    bodyMap[instr] = newInstr;
+                }
+
+                foreach (Instruction instr in newMethodDef.Body.Instructions)
+                {
+                    if (instr.Operand != null && bodyMap.ContainsKey(instr.Operand))
+                        instr.Operand = bodyMap[instr.Operand];
+
+                    else if (instr.Operand is Instruction[])
+                        instr.Operand = ((Instruction[])instr.Operand).Select(target => (Instruction)bodyMap[target]).ToArray();
+                }
+
+                foreach (ExceptionHandler eh in methodDef.Body.ExceptionHandlers)
+                    newMethodDef.Body.ExceptionHandlers.Add(new ExceptionHandler(eh.HandlerType)
+                    {
+                        CatchType = eh.CatchType == null ? null : ctx.Importer.Import(eh.CatchType),
+                        TryStart = (Instruction)bodyMap[eh.TryStart],
+                        TryEnd = (Instruction)bodyMap[eh.TryEnd],
+                        HandlerStart = (Instruction)bodyMap[eh.HandlerStart],
+                        HandlerEnd = (Instruction)bodyMap[eh.HandlerEnd],
+                        FilterStart = eh.FilterStart == null ? null : (Instruction)bodyMap[eh.FilterStart]
+                    });
+
+                newMethodDef.Body.SimplifyMacros(newMethodDef.Parameters);
+            }
+        }
+
+        /// <summary>
+        ///     Copies the information from the origin field to injected field.
+        /// </summary>
+        /// <param name="fieldDef">The origin FieldDef.</param>
+        /// <param name="ctx">The injection context.</param>
+        public static void CopyFieldDef(FieldDef fieldDef, InjectContext ctx)
+        {
+            FieldDef newFieldDef = (FieldDef)ctx.Map[fieldDef];
+            newFieldDef.Signature = ctx.Importer.Import(fieldDef.Signature);
+        }
+
+        /// <summary>
+        ///     Copies the information to the injected definitions.
+        /// </summary>
+        /// <param name="typeDef">The origin TypeDef.</param>
+        /// <param name="ctx">The injection context.</param>
+        /// <param name="copySelf">if set to <c>true</c>, copy information of <paramref name="typeDef" />.</param>
+        public static void Copy(TypeDef typeDef, InjectContext ctx, bool copySelf)
+        {
+            if (copySelf)
+                CopyTypeDef(typeDef, ctx);
+
+            foreach (TypeDef nestedType in typeDef.NestedTypes)
+                Copy(nestedType, ctx, true);
+
+            foreach (MethodDef method in typeDef.Methods)
+                CopyMethodDef(method, ctx);
+
+            foreach (FieldDef field in typeDef.Fields)
+                CopyFieldDef(field, ctx);
+        }
+
+        /// <summary>
+        ///     Injects the members of specified TypeDef to another module.
+        /// </summary>
+        /// <param name="typeDef">The source TypeDef.</param>
+        /// <param name="newType">The new type.</param>
+        /// <param name="target">The target module.</param>
+        /// <returns>Injected members.</returns>
+        public static IEnumerable<IDnlibDef> Inject(TypeDef typeDef, TypeDef newType, ModuleDef target)
+        {
+            InjectContext ctx = new InjectContext(typeDef.Module, target);
+            ctx.Map[typeDef] = newType;
+            PopulateContext(typeDef, ctx);
+            Copy(typeDef, ctx, false);
+            return ctx.Map.Values.Except(new[] { newType });
+        }
+    }
+}
+
+
+================================================
+File: LoGiC.NET.v1/LoGiC.NET.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{9C7A7E96-A9D9-4D5B-9F70-8B84D1C50B5D}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>LoGiC.NET</RootNamespace>
+    <AssemblyName>LoGiC.NET</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>LoGiC.NET.Program</StartupObject>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib, Version=3.3.3.0, Culture=neutral, PublicKeyToken=50e96378b6e77999, processorArchitecture=MSIL">
+      <HintPath>packages\dnlib.3.3.3\lib\net45\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpConfigParser">
+      <HintPath>.\SharpConfigParser.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Protections\AntiDe4dot.cs" />
+    <Compile Include="Protections\AntiTamper.cs" />
+    <Compile Include="Protections\ControlFlow.cs" />
+    <Compile Include="Protections\IntEncoding.cs" />
+    <Compile Include="Protections\InvalidMetadata.cs" />
+    <Compile Include="Protections\JunkDefs.cs" />
+    <Compile Include="Protections\Protection.cs" />
+    <Compile Include="Protections\ProxyAdder.cs" />
+    <Compile Include="Protections\Renamer.cs" />
+    <Compile Include="Protections\StringEncryption.cs" />
+    <Compile Include="Protections\StripDOSHeader.cs" />
+    <Compile Include="Utils\Analyzer\DefAnalyzer.cs" />
+    <Compile Include="Utils\Analyzer\EventDefAnalyzer.cs" />
+    <Compile Include="Utils\Analyzer\FieldDefAnalyzer.cs" />
+    <Compile Include="Utils\Analyzer\MethodDefAnalyzer.cs" />
+    <Compile Include="Utils\Analyzer\ParameterAnalyzer.cs" />
+    <Compile Include="Utils\Analyzer\PropertyDefAnalyzer.cs" />
+    <Compile Include="Utils\Analyzer\TypeDefAnalyzer.cs" />
+    <Compile Include="Utils\InjectContext.cs" />
+    <Compile Include="Utils\InjectHelper.cs" />
+    <Compile Include="Utils\ProxyExtension.cs" />
+    <Compile Include="Utils\Randomizer.cs" />
+    <Compile Include="Utils\Reference.cs" />
+    <Compile Include="Utils\MemberRenamer.cs" />
+    <Compile Include="Utils\StringDecoder.cs" />
+    <Compile Include="Utils\TamperClass.cs" />
+    <Compile Include="Utils\Watermark.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: LoGiC.NET.v1/MemberRenamer.cs
+================================================
+ï»¿using dnlib.DotNet;
+
+namespace LoGiC.NET.Utils
+{
+    public static class MemberRenamer
+    {
+        // Thanks to the AsStrongAsFuck project!
+        public static void GetRenamed(this IMemberDef member)
+        {
+            member.Name = Randomizer.String(StringLength());
+        }
+
+        public static int StringLength()
+        {
+            return Randomizer.Next(120, 30);
+        }
+    }
+}
+
+
+
+================================================
+File: LoGiC.NET.v1/Program.cs
+================================================
+ï»¿using System;
+using System.IO;
+using dnlib.DotNet;
+using LoGiC.NET.Protections;
+using SharpConfigParser;
+using LoGiC.NET.Utils;
+using dnlib.DotNet.Writer;
+
+namespace LoGiC.NET
+{
+    class Program
+    {
+        public static ModuleDefMD Module { get; set; }
+
+        public static string FileExtension { get; set; }
+
+        public static bool DontRename { get; set; }
+
+        public static bool ForceWinForms { get; set; }
+
+        public static string FilePath { get; set; }
+
+        public static MemoryStream Stream = new MemoryStream();
+
+        static void Main(string[] _)
+        {
+            Console.WriteLine("- Drag & drop your file:");
+            string path = Console.ReadLine().Replace("\"", string.Empty);
+
+            Console.WriteLine("- Preparing obfuscation...");
+            if (!File.Exists("config.txt"))
+            {
+                Console.WriteLine("Config file not found, continuing without it.");
+                goto obfuscation;
+            }
+
+            Parser p = new Parser() { ConfigFile = "config.txt" };
+            try { ForceWinForms = bool.Parse(p.Read("ForceWinFormsCompatibility").ReadResponse().ReplaceSpaces()); } catch { }
+            try { DontRename = bool.Parse(p.Read("DontRename").ReadResponse().ReplaceSpaces()); } catch { }
+            try { ProxyAdder.Intensity = int.Parse(p.Read("ProxyCallsIntensity").ReadResponse().ReplaceSpaces()); } catch { }
+
+            Console.WriteLine("\n- ForceWinForms: " + ForceWinForms);
+            Console.WriteLine("- DontRename: " + DontRename);
+            Console.WriteLine("- ProxyCallsIntensity: " + ProxyAdder.Intensity + "\n");
+
+            obfuscation:
+            Module = ModuleDefMD.Load(path);
+            FileExtension = Path.GetExtension(path);
+
+            Protection[] protections = new Protection[]
+            {
+                new Renamer(),
+                new AntiTamper(),
+                new JunkDefs(),
+                new StringEncryption(),
+                new AntiDe4dot(),
+                new ControlFlow(),
+                new IntEncoding(),
+                new ProxyAdder(),
+                new InvalidMetadata()
+            };
+
+            foreach (Protection protection in protections)
+            {
+                Console.WriteLine("- Executing protection: " + protection.Name);
+                protection.Execute();
+            }
+
+            Console.WriteLine("- Watermarking...");
+            Watermark.AddAttribute();
+
+            Console.WriteLine("- Saving file...");
+            FilePath = @"C:\Users\" + Environment.UserName + @"\Desktop\" + Path.GetFileNameWithoutExtension(path) + "_protected" + FileExtension;
+            Module.Write(Stream, new ModuleWriterOptions(Module) { Logger = DummyLogger.NoThrowInstance });
+
+            Console.WriteLine("- Stripping DOS header...");
+            StripDOSHeader.Execute();
+
+            // Save stream to file
+            File.WriteAllBytes(FilePath, Stream.ToArray());
+
+            if (AntiTamper.Tampered)
+                AntiTamper.Inject(FilePath);
+
+            Console.WriteLine("- Done! Press any key to exit...");
+            Console.ReadKey();
+        }
+    }
+}
+
+
+
+================================================
+File: LoGiC.NET.v1/ProxyExtension.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace LoGiC.NET.Utils
+{
+    /// <summary>
+    /// The class that contains extensions for MethodDefs. It's used for the 'ProxyAdder' method.
+    /// </summary>
+    public static class ProxyExtension
+    {
+        public static MethodDef CloneSignature(this MethodDef from, MethodDef to)
+        {
+            to.Attributes = from.Attributes;
+            if (from.IsHideBySig) to.IsHideBySig = true;
+            if (from.IsStatic) to.IsStatic = true;
+            return to;
+        }
+
+        public static MethodDef CopyMethod(this MethodDef originMethod, ModuleDef mod)
+        {
+            InjectContext ctx = new InjectContext(mod, mod);
+
+            MethodDefUser newMethodDef = new MethodDefUser
+            {
+                Signature = ctx.Importer.Import(originMethod.Signature),
+                Name = Randomizer.String(MemberRenamer.StringLength())
+            };
+            newMethodDef.Parameters.UpdateParameterTypes();
+
+            if (originMethod.ImplMap != null) newMethodDef.ImplMap = new ImplMapUser(new ModuleRefUser(ctx.TargetModule,
+                    originMethod.ImplMap.Module.Name), originMethod.ImplMap.Name, originMethod.ImplMap.Attributes);
+
+            foreach (CustomAttribute ca in originMethod.CustomAttributes)
+                newMethodDef.CustomAttributes.Add(new CustomAttribute((ICustomAttributeType)
+                    ctx.Importer.Import(ca.Constructor)));
+
+            if (originMethod.HasBody)
+            {
+                newMethodDef.Body = new CilBody()
+                {
+                    InitLocals = originMethod.Body.InitLocals,
+                    MaxStack = originMethod.Body.MaxStack
+                };
+
+                Dictionary<object, object> bodyMap = new Dictionary<object, object>();
+
+                foreach (Local local in originMethod.Body.Variables)
+                {
+                    Local newLocal = new Local(ctx.Importer.Import(local.Type));
+                    newMethodDef.Body.Variables.Add(newLocal);
+                    newLocal.Name = local.Name;
+
+                    bodyMap[local] = newLocal;
+                }
+
+                foreach (Instruction instr in originMethod.Body.Instructions)
+                {
+                    Instruction newInstr = new Instruction(instr.OpCode, instr.Operand)
+                    { SequencePoint = instr.SequencePoint };
+
+                    if (newInstr.Operand is IType) newInstr.Operand = ctx.Importer.Import((IType)newInstr.Operand);
+                    else if (newInstr.Operand is IMethod) newInstr.Operand = ctx.Importer.Import((IMethod)newInstr.Operand);
+                    else if (newInstr.Operand is IField) newInstr.Operand = ctx.Importer.Import((IField)newInstr.Operand);
+
+                    newMethodDef.Body.Instructions.Add(newInstr);
+                    bodyMap[instr] = newInstr;
+                }
+
+                foreach (Instruction instr in newMethodDef.Body.Instructions)
+                    if (instr.Operand != null && bodyMap.ContainsKey(instr.Operand)) instr.Operand = bodyMap[instr.Operand];
+                    else if (instr.Operand is Instruction[]) instr.Operand = ((Instruction[])instr.Operand).Select(
+                        target => (Instruction)bodyMap[target]).ToArray();
+
+                foreach (ExceptionHandler eh in originMethod.Body.ExceptionHandlers)
+                    newMethodDef.Body.ExceptionHandlers.Add(new ExceptionHandler(eh.HandlerType)
+                    {
+                        CatchType = eh.CatchType == null ? null : ctx.Importer.Import(eh.CatchType),
+                        TryStart = (Instruction)bodyMap[eh.TryStart],
+                        TryEnd = (Instruction)bodyMap[eh.TryEnd],
+                        HandlerStart = (Instruction)bodyMap[eh.HandlerStart],
+                        HandlerEnd = (Instruction)bodyMap[eh.HandlerEnd],
+                        FilterStart = eh.FilterStart == null ? null : (Instruction)bodyMap[eh.FilterStart]
+                    });
+
+                newMethodDef.Body.SimplifyMacros(newMethodDef.Parameters);
+            }
+
+            return newMethodDef;
+        }
+    }
+}
+
+
+
+================================================
+File: LoGiC.NET.v1/Randomizer.cs
+================================================
+ï»¿using System;
+using System.Security.Cryptography;
+using System.Text;
+
+namespace LoGiC.NET.Utils
+{
+    /// <summary>
+    /// This class is the one that generates random integers and strings.
+    /// </summary>
+    public class Randomizer
+    {
+        private static readonly RandomNumberGenerator csp = RandomNumberGenerator.Create();
+
+        public static int Next(int maxValue, int minValue = 0)
+        {
+            if (minValue >= maxValue)
+                throw new ArgumentOutOfRangeException(nameof(minValue));
+
+            long diff = (long) maxValue - minValue;
+            long upperBound = uint.MaxValue / diff * diff;
+            uint ui;
+            do { ui = RandomUInt(); } while (ui >= upperBound);
+            return (int)(minValue + (ui % diff));
+        }
+
+        public static string String(int size)
+        {
+            return Encoding.UTF7.GetString(RandomBytes(size))
+                .Replace("\0", ".")
+                .Replace("\n", ".")
+                .Replace("\r", ".");
+        }
+
+        public static int Next()
+        {
+            return BitConverter.ToInt32(RandomBytes(sizeof(int)), 0);
+        }
+
+        private static uint RandomUInt()
+        {
+            return BitConverter.ToUInt32(RandomBytes(sizeof(uint)), 0);
+        }
+
+        private static byte[] RandomBytes(int bytes)
+        {
+            byte[] buffer = new byte[bytes];
+            csp.GetBytes(buffer);
+            return buffer;
+        }
+    }
+}
+
+
+
+================================================
+File: LoGiC.NET.v1/Reference.cs
+================================================
+ï»¿namespace LoGiC.NET.Utils
+{
+    public class Reference
+    {
+        public static string Name = "LoGiC.NET";
+        public static string Version = "1.5";
+    }
+}
+
+
+
+================================================
+File: LoGiC.NET.v1/StringDecoder.cs
+================================================
+ï»¿using System.Text;
+
+namespace LoGiC.NET.Utils
+{
+    public static class StringDecoder
+    {
+        public static string Decrypt(string str, int min, int key, int hash, int length, int max)
+        {
+            if (max > 78787878) ;
+            if (length > 485941) ;
+
+            StringBuilder builder = new StringBuilder();
+            foreach (char c in str.ToCharArray())
+                builder.Append((char)(c - key));
+
+            if (min < 14141) ;
+            if (length < 1548174) ;
+
+            return builder.ToString();
+        }
+    }
+}
+
+
+
+================================================
+File: LoGiC.NET.v1/TamperClass.cs
+================================================
+ï»¿using System;
+using System.IO;
+using System.Security.Cryptography;
+using System.Reflection;
+
+namespace LoGiC.NET.Utils
+{
+    public static class TamperClass
+    {
+        public static void NoTampering()
+        {
+            string p = Assembly.GetExecutingAssembly().Location;
+            Stream l = new StreamReader(p).BaseStream;
+            BinaryReader r = new BinaryReader(l);
+            string g = BitConverter.ToString(MD5.Create().ComputeHash(r.ReadBytes(File.ReadAllBytes(p).Length - 16)));
+            l.Seek(-16, SeekOrigin.End);
+            if (g != BitConverter.ToString(r.ReadBytes(16))) throw new EntryPointNotFoundException();
+        }
+    }
+}
+
+
+
+================================================
+File: LoGiC.NET.v1/Watermark.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace LoGiC.NET.Utils
+{
+    public class Watermark
+    {
+        public static void AddAttribute()
+        {
+            TypeRef attrRef = Program.Module.CorLibTypes.GetTypeRef("System", "Attribute");
+            TypeDefUser attrType = new TypeDefUser(string.Empty, "LoGiCdotNetAttribute", attrRef);
+            Program.Module.Types.Add(attrType);
+            MethodDefUser ctor = new MethodDefUser(".ctor", MethodSig.CreateInstance(Program.Module
+                .CorLibTypes.Void, Program.Module.CorLibTypes.String), MethodImplAttributes.Managed,
+                MethodAttributes.HideBySig | MethodAttributes.Public | MethodAttributes.SpecialName |
+                MethodAttributes.RTSpecialName)
+            {
+                Body = new CilBody { MaxStack = 1 }
+            };
+
+            ctor.Body.Instructions.Add(OpCodes.Ldarg_0.ToInstruction());
+            ctor.Body.Instructions.Add(OpCodes.Call.ToInstruction(new MemberRefUser(Program.Module, ".ctor",
+                MethodSig.CreateInstance(Program.Module.CorLibTypes.Void), attrRef)));
+            ctor.Body.Instructions.Add(OpCodes.Ret.ToInstruction());
+            attrType.Methods.Add(ctor);
+
+            CustomAttribute attr = new CustomAttribute(ctor);
+            attr.ConstructorArguments.Add(new CAArgument(Program.Module.CorLibTypes.String, $"Obfuscated" +
+                $" with {Reference.Name} version {Reference.Version}."));
+            Program.Module.CustomAttributes.Add(attr);
+        }
+    }
+}
+
+
+
+================================================
+File: LoGiC.NET.v1/config.txt
+================================================
+ProxyCallsIntensity: 4
+
+
+================================================
+File: LoGiC.NET.v1/packages.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<packages>
+  <package id="dnlib" version="3.3.3" targetFramework="net472" />
+</packages>
+
+
+================================================
+File: LoGiC.NET.v1/Analyzer/DefAnalyzer.cs
+================================================
+ï»¿namespace LoGiC.NET.Utils.Analyzer
+{
+    /// <summary>
+    /// This class is the one that is inherited in mostly all def analyzers.
+    /// </summary>
+	public abstract class DefAnalyzer
+	{
+		public abstract bool Execute(object context);
+	}
+}
+
+
+================================================
+File: LoGiC.NET.v1/Analyzer/EventDefAnalyzer.cs
+================================================
+ï»¿using dnlib.DotNet;
+
+namespace LoGiC.NET.Utils.Analyzer
+{
+    /// <summary>
+    /// This class will analyze an event def.
+    /// </summary>
+	public class EventDefAnalyzer : DefAnalyzer
+    {
+		public override bool Execute(object context)
+		{
+			return !((EventDef)context).IsRuntimeSpecialName;
+		}
+	}
+}
+
+
+================================================
+File: LoGiC.NET.v1/Analyzer/FieldDefAnalyzer.cs
+================================================
+ï»¿using dnlib.DotNet;
+
+namespace LoGiC.NET.Utils.Analyzer
+{
+    /// <summary>
+    /// This class will analyze a field def.
+    /// </summary>
+	public class FieldDefAnalyzer : DefAnalyzer
+	{
+		public override bool Execute(object context)
+		{
+			FieldDef field = (FieldDef)context;
+			return !field.IsRuntimeSpecialName && !(field.IsLiteral && field.DeclaringType.IsEnum);
+		}
+	}
+}
+
+
+================================================
+File: LoGiC.NET.v1/Analyzer/MethodDefAnalyzer.cs
+================================================
+ï»¿using dnlib.DotNet;
+
+namespace LoGiC.NET.Utils.Analyzer
+{
+    /// <summary>
+    /// This class will analyze a method def.
+    /// </summary>
+	public class MethodDefAnalyzer : DefAnalyzer
+	{
+		public override bool Execute(object context)
+		{
+			MethodDef method = (MethodDef)context;
+			return !method.IsRuntimeSpecialName && !method.DeclaringType.IsForwarder && !method.IsConstructor && !method.IsVirtual;
+		}
+	}
+}
+
+
+================================================
+File: LoGiC.NET.v1/Analyzer/ParameterAnalyzer.cs
+================================================
+ï»¿using dnlib.DotNet;
+
+namespace LoGiC.NET.Utils.Analyzer
+{
+    /// <summary>
+    /// This class will analyze a function parameter.
+    /// </summary>
+    public class ParameterAnalyzer : DefAnalyzer
+    {
+        public override bool Execute(object context)
+        {
+            return ((Parameter)context).Name != string.Empty;
+        }
+    }
+}
+
+
+
+================================================
+File: LoGiC.NET.v1/Analyzer/PropertyDefAnalyzer.cs
+================================================
+using dnlib.DotNet;
+
+namespace LoGiC.NET.Utils.Analyzer
+{
+	public class PropertyDefAnalyzer : DefAnalyzer
+	{
+		public override bool Execute(object context)
+		{
+			PropertyDef propertyDef = (PropertyDef)context;
+			return !propertyDef.IsRuntimeSpecialName && !propertyDef.IsEmpty && propertyDef.IsSpecialName;
+		}
+	}
+}
+
+
+
+================================================
+File: LoGiC.NET.v1/Analyzer/TypeDefAnalyzer.cs
+================================================
+ï»¿using dnlib.DotNet;
+
+namespace LoGiC.NET.Utils.Analyzer
+{
+    public class TypeDefAnalyzer : DefAnalyzer
+    {
+        public override bool Execute(object context)
+        {
+            TypeDef type = (TypeDef)context;
+            return !type.IsSpecialName && !type.IsWindowsRuntime && !type.IsForwarder && !type.IsRuntimeSpecialName;
+        }
+    }
+}
+
+
+
+================================================
+File: LoGiC.NET.v1/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Resources;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// Les informations gÃ©nÃ©rales relatives Ã  un assembly dÃ©pendent de
+// l'ensemble d'attributs suivant. Changez les valeurs de ces attributs pour modifier les informations
+// associÃ©es Ã  un assembly.
+[assembly: AssemblyTitle("LoGiC.NET")]
+[assembly: AssemblyDescription("A free, open-source and complex .NET obfuscator using dnlib.")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("Sartox Free Software")]
+[assembly: AssemblyProduct("LoGiC.NET")]
+[assembly: AssemblyCopyright("Â© AnErrupTion 2021")]
+[assembly: AssemblyTrademark("Sartox Free Software")]
+[assembly: AssemblyCulture("")]
+
+// L'affectation de la valeur false Ã  ComVisible rend les types invisibles dans cet assembly
+// aux composants COM. Si vous devez accÃ©der Ã  un type dans cet assembly Ã  partir de
+// COM, affectez la valeur true Ã  l'attribut ComVisible sur ce type.
+[assembly: ComVisible(true)]
+
+// Le GUID suivant est pour l'ID de la typelib si ce projet est exposÃ© Ã  COM
+[assembly: Guid("9c7a7e96-a9d9-4d5b-9f70-8b84d1c50b5d")]
+
+// Les informations de version pour un assembly se composent des quatre valeurs suivantes :
+//
+//      Version principale
+//      Version secondaire
+//      NumÃ©ro de build
+//      RÃ©vision
+//
+// Vous pouvez spÃ©cifier toutes les valeurs ou indiquer les numÃ©ros de build et de rÃ©vision par dÃ©faut
+// en utilisant '*', comme indiquÃ© ci-dessousÂ :
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.5.0.0")]
+[assembly: AssemblyFileVersion("1.5.0.0")]
+[assembly: NeutralResourcesLanguage("en-US")]
+
+
+
+================================================
+File: LoGiC.NET.v1/Protections/AntiDe4dot.cs
+================================================
+ï»¿using dnlib.DotNet;
+
+namespace LoGiC.NET.Protections
+{
+    public class AntiDe4dot : Protection
+    {
+        public AntiDe4dot()
+        {
+            Name = "Anti-De4dot";
+        }
+
+        public override void Execute()
+        {
+            foreach (ModuleDef module in Program.Module.Assembly.Modules)
+            {
+                InterfaceImplUser int1 = new InterfaceImplUser(module.GlobalType);
+                for (int i = 0; i < 1; i++)
+                {
+                    TypeDefUser typeDef1 = new TypeDefUser(string.Empty, $"Form{i}", module.CorLibTypes.GetTypeRef("System", "Attribute"));
+                    InterfaceImplUser int2 = new InterfaceImplUser(typeDef1);
+
+                    module.Types.Add(typeDef1);
+
+                    typeDef1.Interfaces.Add(int2);
+                    typeDef1.Interfaces.Add(int1);
+                }
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: LoGiC.NET.v1/Protections/AntiTamper.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Security.Cryptography;
+using LoGiC.NET.Utils;
+
+namespace LoGiC.NET.Protections
+{
+    public class AntiTamper : Protection
+    {
+        public AntiTamper()
+        {
+            Name = "Anti-Tamper";
+        }
+
+        // Thanks to the EOF Anti-Tamper project by Xenocode on GitHub!
+
+        public static bool Tampered { get; set; }
+
+        public static void Inject(string filePath)
+        {
+            using (MD5 hash = MD5.Create())
+            {
+                byte[] bytes = hash.ComputeHash(File.ReadAllBytes(filePath));
+
+                using (FileStream fs = new FileStream(filePath, FileMode.Append))
+                    fs.Write(bytes, 0, bytes.Length);
+            }
+        }
+
+        public override void Execute()
+        {
+            ModuleDefMD typeModule = ModuleDefMD.Load(typeof(TamperClass).Module);
+            TypeDef typeDef = typeModule.ResolveTypeDef(MDToken.ToRID(typeof(TamperClass).MetadataToken));
+            IEnumerable<IDnlibDef> members = InjectHelper.Inject(typeDef, Program.Module.GlobalType, Program.Module);
+            MethodDef init = (MethodDef)members.Single(method => method.Name == "NoTampering");
+            init.GetRenamed();
+
+            Program.Module.GlobalType.FindOrCreateStaticConstructor().Body.Instructions.Insert(0,
+                Instruction.Create(OpCodes.Call, init));
+
+            foreach (MethodDef method in Program.Module.GlobalType.Methods)
+                if (method.Name.Equals(".ctor"))
+                {
+                    Program.Module.GlobalType.Remove(method);
+                    break;
+                }
+
+            Tampered = true;
+        }
+    }
+}
+
+
+
+================================================
+File: LoGiC.NET.v1/Protections/ControlFlow.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using LoGiC.NET.Utils;
+using System;
+
+namespace LoGiC.NET.Protections
+{
+    public class ControlFlow : Protection
+    {
+        public ControlFlow()
+        {
+            Name = "Control Flow";
+        }
+
+        public override void Execute()
+        {
+            int amount = 0;
+
+            for (int x = 0; x < Program.Module.Types.Count; x++)
+            {
+                TypeDef tDef = Program.Module.Types[x];
+
+                for (int i = 0; i < tDef.Methods.Count; i++)
+                {
+                    MethodDef mDef = tDef.Methods[i];
+
+                    if (!mDef.Name.StartsWith("get_") && !mDef.Name.StartsWith("set_"))
+                    {
+                        if (!mDef.HasBody || mDef.IsConstructor) continue;
+
+                        mDef.Body.SimplifyBranches();
+                        ExecuteMethod(mDef);
+
+                        amount++;
+                    }
+                }
+            }
+        }
+
+        private void ExecuteMethod(MethodDef method)
+        {
+            for (int i = 0; i < method.Body.Instructions.Count; i++)
+                if (method.Body.Instructions[i].IsLdcI4())
+                {
+                    int numorig = Randomizer.Next();
+                    int div = Randomizer.Next();
+
+                    int num = numorig ^ div;
+
+                    int lastIndex = Randomizer.Next(types.Length);
+                    Type randType = types[lastIndex];
+
+                    Instruction nop = OpCodes.Nop.ToInstruction();
+                    Local local = new Local(method.Module.ImportAsTypeSig(randType));
+                    Instruction localCode = OpCodes.Stloc.ToInstruction(local);
+
+                    method.Body.Variables.Add(local);
+
+                    method.Body.Instructions.Insert(i + 1, localCode);
+                    method.Body.Instructions.Insert(i + 2, Instruction.Create(OpCodes.Ldc_I4, method.Body.Instructions[i].GetLdcI4Value() - sizes[lastIndex]));
+                    method.Body.Instructions.Insert(i + 3, Instruction.Create(OpCodes.Ldc_I4, num));
+                    method.Body.Instructions.Insert(i + 4, Instruction.Create(OpCodes.Ldc_I4, div));
+                    method.Body.Instructions.Insert(i + 5, Instruction.Create(OpCodes.Xor));
+                    method.Body.Instructions.Insert(i + 6, Instruction.Create(OpCodes.Ldc_I4, numorig));
+                    method.Body.Instructions.Insert(i + 7, Instruction.Create(OpCodes.Bne_Un, nop));
+                    method.Body.Instructions.Insert(i + 8, Instruction.Create(OpCodes.Ldc_I4, 2));
+                    method.Body.Instructions.Insert(i + 9, localCode);
+                    method.Body.Instructions.Insert(i + 10, Instruction.Create(OpCodes.Sizeof, method.Module.Import(randType)));
+                    method.Body.Instructions.Insert(i + 11, Instruction.Create(OpCodes.Add));
+                    method.Body.Instructions.Insert(i + 12, nop);
+
+                    i += method.Body.Instructions.Count - i;
+                }
+        }
+
+        private readonly Type[] types = new Type[]
+        {
+            typeof(uint),
+            typeof(int),
+            typeof(long),
+            typeof(ulong),
+            typeof(ushort),
+            typeof(short),
+            typeof(double)
+        };
+
+        private readonly int[] sizes = new int[]
+        {
+            sizeof(uint),
+            sizeof(int),
+            sizeof(long),
+            sizeof(ulong),
+            sizeof(ushort),
+            sizeof(short),
+            sizeof(double)
+        };
+    }
+}
+
+
+
+================================================
+File: LoGiC.NET.v1/Protections/IntEncoding.cs
+================================================
+ï»¿using System;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using LoGiC.NET.Utils;
+
+namespace LoGiC.NET.Protections
+{
+    public class IntEncoding : Protection
+    {
+        public IntEncoding()
+        {
+            Name = "Integer Encoding";
+        }
+
+        /// <summary>
+        /// The amount of encoded ints.
+        /// </summary>
+        private int Amount { get; set; }
+
+        /// <summary>
+        /// Execution of the 'IntEncoding' method. It'll encodes the integers within different methods.
+        /// Absolute : This method will add Math.Abs(int) before each integer.
+        /// StringLen : This method will replace each integer by their string equivalent.
+        /// </summary>
+        public override void Execute()
+        {
+            IMethod absMethod = Program.Module.Import(typeof(Math).GetMethod("Abs", new Type[] { typeof(int) }));
+            IMethod minMethod = Program.Module.Import(typeof(Math).GetMethod("Min", new Type[] { typeof(int), typeof(int) }));
+
+            foreach (TypeDef type in Program.Module.Types)
+                foreach (MethodDef method in type.Methods)
+                {
+                    if (!method.HasBody)
+                        continue;
+
+                    for (int i = 0; i < method.Body.Instructions.Count; i++)
+                        if (method.Body.Instructions[i] != null && method.Body.Instructions[i].IsLdcI4())
+                        {
+                            int operand = method.Body.Instructions[i].GetLdcI4Value();
+                            if (operand <= 0) // Prevents errors.
+                                continue;
+
+                            // The Absolute method.
+                            method.Body.Instructions.Insert(i + 1, OpCodes.Call.ToInstruction(absMethod));
+
+                            // The String Length method.
+                            // TODO: Fix
+                            /*method.Body.Instructions[i].OpCode = OpCodes.Ldstr;
+                            method.Body.Instructions[i].Operand = String(operand);
+                            method.Body.Instructions.Insert(i + 1, OpCodes.Call.ToInstruction(
+                                Program.Module.Import(typeof(string).GetMethod("get_Length"))));*/
+
+                            // The Negative method.
+                            int neg = Randomizer.Next(MemberRenamer.StringLength(), 8);
+                            if (neg % 2 != 0)
+                                neg += 1;
+
+                            for (var j = 0; j < neg; j++)
+                                method.Body.Instructions.Insert(i + j + 1, Instruction.Create(OpCodes.Neg));
+
+                            // The Max method.
+                            /*if (operand > 1)
+                            {
+                                method.Body.Instructions.Insert(i + 1, OpCodes.Ldc_I4.ToInstruction(1));
+                                method.Body.Instructions.Insert(i + 2, OpCodes.Call.ToInstruction(Program.Module.Import(typeof(Math).GetMethod("Max", new Type[] { typeof(int), typeof(int) }))));
+                            }*/
+
+                            // The Min method.
+                            if (operand < int.MaxValue)
+                            {
+                                method.Body.Instructions.Insert(i + 1, OpCodes.Ldc_I4.ToInstruction(int.MaxValue));
+                                method.Body.Instructions.Insert(i + 2, OpCodes.Call.ToInstruction(minMethod));
+                            }
+
+                            ++Amount;
+                        }
+                }
+
+            Console.WriteLine($"  Encoded {Amount} ints.");
+        }
+    }
+}
+
+
+
+================================================
+File: LoGiC.NET.v1/Protections/InvalidMetadata.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using LoGiC.NET.Utils;
+
+namespace LoGiC.NET.Protections
+{
+    public class InvalidMetadata : Protection
+    {
+        public InvalidMetadata()
+        {
+            Name = "Invalid Metadata";
+        }
+
+        public override void Execute()
+        {
+            AssemblyDef asm = Program.Module.Assembly;
+            asm.ManifestModule.Import(new FieldDefUser(Randomizer.String(MemberRenamer.StringLength())));
+
+            foreach (var current in asm.ManifestModule.Types)
+            {
+                TypeDefUser typeDef = new TypeDefUser(Randomizer.String(MemberRenamer.StringLength()));
+                typeDef.Methods.Add(new MethodDefUser());
+                typeDef.NestedTypes.Add(new TypeDefUser(Randomizer.String(MemberRenamer.StringLength())));
+
+                MethodDefUser item = new MethodDefUser();
+                typeDef.Methods.Add(item);
+                current.NestedTypes.Add(typeDef);
+                current.Events.Add(new EventDefUser());
+
+                MethodDefUser methodDef = new MethodDefUser
+                {
+                    MethodSig = new MethodSig()
+                };
+
+                foreach (MethodDef current2 in current.Methods)
+                {
+                    if (current2.IsConstructor || !current2.HasBody)
+                        continue;
+
+                    current2.Body.SimplifyBranches();
+                    if (current2.ReturnType.FullName == "System.Void" && current2.Body.Instructions.Count > 0 && !current2.Body.HasExceptionHandlers)
+                    {
+                        Local local = new Local(asm.ManifestModule.Import(typeof(int)).ToTypeSig());
+                        Local local2 = new Local(asm.ManifestModule.Import(typeof(bool)).ToTypeSig());
+
+                        current2.Body.Variables.Add(local);
+                        current2.Body.Variables.Add(local2);
+
+                        Instruction operand = current2.Body.Instructions[current2.Body.Instructions.Count - 1];
+                        Instruction instruction = new Instruction(OpCodes.Ret);
+                        Instruction instruction2 = new Instruction(OpCodes.Ldc_I4_1);
+
+                        current2.Body.Instructions.Insert(0, new Instruction(OpCodes.Ldc_I4_0));
+                        current2.Body.Instructions.Insert(1, new Instruction(OpCodes.Stloc, local));
+                        current2.Body.Instructions.Insert(2, new Instruction(OpCodes.Br, instruction2));
+
+                        Instruction instruction3 = new Instruction(OpCodes.Ldloc, local);
+
+                        current2.Body.Instructions.Insert(3, instruction3);
+                        current2.Body.Instructions.Insert(4, new Instruction(OpCodes.Ldc_I4_0));
+                        current2.Body.Instructions.Insert(5, new Instruction(OpCodes.Ceq));
+                        current2.Body.Instructions.Insert(6, new Instruction(OpCodes.Ldc_I4_1));
+                        current2.Body.Instructions.Insert(7, new Instruction(OpCodes.Ceq));
+                        current2.Body.Instructions.Insert(8, new Instruction(OpCodes.Stloc, local2));
+                        current2.Body.Instructions.Insert(9, new Instruction(OpCodes.Ldloc, local2));
+                        current2.Body.Instructions.Insert(10, new Instruction(OpCodes.Brtrue, current2.Body.Instructions[10]));
+                        current2.Body.Instructions.Insert(11, new Instruction(OpCodes.Ret));
+                        current2.Body.Instructions.Insert(12, new Instruction(OpCodes.Calli));
+                        current2.Body.Instructions.Insert(13, new Instruction(OpCodes.Sizeof, operand));
+                        current2.Body.Instructions.Insert(14, new Instruction(OpCodes.Nop));
+                        current2.Body.Instructions.Insert(current2.Body.Instructions.Count, instruction2);
+                        current2.Body.Instructions.Insert(current2.Body.Instructions.Count, new Instruction(OpCodes.Stloc, local2));
+                        current2.Body.Instructions.Insert(current2.Body.Instructions.Count, new Instruction(OpCodes.Br, instruction3));
+                        current2.Body.Instructions.Insert(current2.Body.Instructions.Count, instruction);
+
+                        ExceptionHandler exceptionHandler = new ExceptionHandler(ExceptionHandlerType.Fault)
+                        {
+                            HandlerStart = current2.Body.Instructions[10],
+                            HandlerEnd = current2.Body.Instructions[11],
+                            TryEnd = current2.Body.Instructions[14],
+                            TryStart = current2.Body.Instructions[12]
+                        };
+
+                        current2.Body.ExceptionHandlers.Add(exceptionHandler);
+
+                        current2.Body.OptimizeBranches();
+                        current2.Body.OptimizeMacros();
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: LoGiC.NET.v1/Protections/JunkDefs.cs
+================================================
+ï»¿using System;
+using LoGiC.NET.Utils;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace LoGiC.NET.Protections
+{
+    public class JunkDefs : Protection
+    {
+        public JunkDefs()
+        {
+            Name = "Junk Defs";
+        }
+
+        /// <summary>
+        /// The amount of added junk defs.
+        /// </summary>
+        private int Amount;
+        
+        /// <summary>
+        /// This obfuscation will add random junk defs to make the code harder to decrypt to people if they think the junk methods are actually used.
+        /// </summary>
+        public override void Execute()
+        {
+            // Add junk types
+            for (int i = 0; i < MemberRenamer.StringLength(); i++)
+            {
+                TypeDef type = new TypeDefUser(Randomizer.String(MemberRenamer.StringLength())) { Namespace = string.Empty };
+                Program.Module.Types.Add(type);
+
+                Amount++;
+            }
+
+            // Add junk methods
+            foreach (TypeDef type in Program.Module.Types)
+                for (int i = 0; i < MemberRenamer.StringLength(); i++)
+                {
+                    MethodDef strings = CreateNewJunkMethod(Randomizer.String(MemberRenamer.StringLength()));
+                    MethodDef ints = CreateNewJunkMethod(MemberRenamer.StringLength());
+
+                    type.Methods.Add(strings);
+                    type.Methods.Add(ints);
+
+                    Amount += 2;
+                }
+
+            Console.WriteLine($"  Added {Amount} junk defs.");
+        }
+
+        /// <summary>
+		/// Creates a new method with a return value.
+		/// </summary>
+		private MethodDef CreateNewJunkMethod(object value)
+        {
+            CorLibTypeSig corlib = null;
+            if (value is int)
+                corlib = Program.Module.CorLibTypes.Int32;
+            else if (value is string)
+                corlib = Program.Module.CorLibTypes.String;
+
+            MethodDef newMethod = new MethodDefUser(Randomizer.String(MemberRenamer.StringLength()), MethodSig.CreateStatic(corlib),
+                    MethodImplAttributes.IL | MethodImplAttributes.Managed,
+                    MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.HideBySig)
+            {
+                Body = new CilBody()
+            };
+
+            if (value is int)
+                newMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldc_I4, Convert.ToInt32(value)));
+            else if (value is string)
+                newMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldstr, value.ToString()));
+
+            newMethod.Body.Instructions.Add(OpCodes.Ret.ToInstruction());
+
+            return newMethod;
+        }
+    }
+}
+
+
+
+================================================
+File: LoGiC.NET.v1/Protections/Protection.cs
+================================================
+ï»¿namespace LoGiC.NET.Protections
+{
+    public abstract class Protection
+    {
+        public string Name { get; set; }
+
+        public abstract void Execute();
+    }
+}
+
+
+
+================================================
+File: LoGiC.NET.v1/Protections/ProxyAdder.cs
+================================================
+ï»¿using System;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using LoGiC.NET.Utils;
+
+namespace LoGiC.NET.Protections
+{
+    public class ProxyAdder : Protection
+    {
+        public ProxyAdder()
+        {
+            Name = "Proxy Adder";
+        }
+
+        /// <summary>
+        /// The intensity of the proxy calls. The more the intensity is, the more proxy calls will be added!
+        /// </summary>
+        public static int Intensity { get; set; } = 2;
+
+        /// <summary>
+        /// The amount of added proxy calls.
+        /// </summary>
+        private int Amount { get; set; }
+
+        // Thanks to the BasicProxyObfuscator project by XenocodeRCE on GitHub!
+
+        /// <summary>
+        /// Execution of the 'ProxyAdder' method. It'll add proxy calls, basically each proxy call will call another method that will call another method, etc. until it calls a real method (example : InitializeComponent).
+        /// </summary>
+        public override void Execute()
+        {
+            for (int o = 0; o < Intensity; o++)
+                foreach (TypeDef t in Program.Module.Types)
+                    for (int i = 0; i < t.Methods.Count; i++)
+                    {
+                        MethodDef m = t.Methods[i];
+
+                        if (!m.HasBody)
+                            continue;
+
+                        for (int z = 0; z < m.Body.Instructions.Count; z++)
+                            if (m.Body.Instructions[z].OpCode == OpCodes.Call)
+                            {
+                                if (!(m.Body.Instructions[z].Operand is MethodDef targetMethod) || !targetMethod.FullName.Contains(Program.Module.Assembly.Name) || targetMethod.Parameters.Count > 4)
+                                    continue;
+
+                                MethodDef newMeth = targetMethod.CopyMethod(Program.Module);
+                                targetMethod.DeclaringType.Methods.Add(newMeth);
+                                targetMethod.CloneSignature(newMeth);
+
+                                CilBody body = new CilBody();
+                                body.Instructions.Add(OpCodes.Nop.ToInstruction());
+
+                                if (targetMethod.Parameters.Count > 0)
+                                    for (int x = 0; x < targetMethod.Parameters.Count; x++)
+                                        switch (x)
+                                        {
+                                            case 0:
+                                                body.Instructions.Add(OpCodes.Ldarg_0.ToInstruction());
+                                                break;
+                                            case 1:
+                                                body.Instructions.Add(OpCodes.Ldarg_1.ToInstruction());
+                                                break;
+                                            case 2:
+                                                body.Instructions.Add(OpCodes.Ldarg_2.ToInstruction());
+                                                break;
+                                            case 3:
+                                                body.Instructions.Add(OpCodes.Ldarg_3.ToInstruction());
+                                                break;
+                                        }
+
+                                body.Instructions.Add(OpCodes.Call.ToInstruction(newMeth));
+                                body.Instructions.Add(OpCodes.Ret.ToInstruction());
+
+                                targetMethod.Body = body;
+                                ++Amount;
+                            }
+                    }
+
+            Console.WriteLine($"  Added {Amount} proxy calls.");
+        }
+    }
+}
+
+
+
+================================================
+File: LoGiC.NET.v1/Protections/Renamer.cs
+================================================
+ï»¿using System;
+using dnlib.DotNet;
+using LoGiC.NET.Utils;
+using LoGiC.NET.Utils.Analyzer;
+
+namespace LoGiC.NET.Protections
+{
+    public class Renamer : Protection
+    {
+        public Renamer()
+        {
+            Name = "Renamer";
+        }
+
+        private int MethodAmount { get; set; }
+
+        private int ParameterAmount { get; set; }
+
+        private int PropertyAmount { get; set; }
+
+        private int FieldAmount { get; set; }
+
+        private int EventAmount { get; set; }
+
+        /// <summary>
+        /// Execution of the 'Renamer' method. It'll rename types, methods and their parameters, properties, fields and events to random strings. But before they get renamed, they get analyzed to see if they are good to be renamed. (That prevents the program being broken)
+        /// </summary>
+        public override void Execute()
+        {
+            if (Program.DontRename)
+                return;
+
+            Program.Module.Mvid = Guid.NewGuid();
+            Program.Module.EncId = Guid.NewGuid();
+            Program.Module.EncBaseId = Guid.NewGuid();
+
+            Program.Module.Name = Randomizer.String(MemberRenamer.StringLength());
+            Program.Module.EntryPoint.Name = Randomizer.String(MemberRenamer.StringLength());
+
+            foreach (TypeDef type in Program.Module.Types)
+            {
+                if (CanRename(type))
+                {
+                    // Hide namespace
+                    type.Namespace = string.Empty;
+                    type.Name = Randomizer.String(MemberRenamer.StringLength());
+                }
+
+                foreach (MethodDef m in type.Methods)
+                {
+                    if (CanRename(m) && !Program.ForceWinForms && !Program.FileExtension.Contains("dll"))
+                    {
+                        m.Name = Randomizer.String(MemberRenamer.StringLength());
+                        ++MethodAmount;
+                    }
+
+                    foreach (Parameter para in m.Parameters)
+                        if (CanRename(para))
+                        {
+                            para.Name = Randomizer.String(MemberRenamer.StringLength());
+                            ++ParameterAmount;
+                        }
+                }
+
+                foreach (PropertyDef p in type.Properties)
+                    if (CanRename(p))
+                    {
+                        p.Name = Randomizer.String(MemberRenamer.StringLength());
+                        ++PropertyAmount;
+                    }
+
+                foreach (FieldDef field in type.Fields)
+                    if (CanRename(field))
+                    {
+                        field.Name = Randomizer.String(MemberRenamer.StringLength());
+                        ++FieldAmount;
+                    }
+
+                foreach (EventDef e in type.Events)
+                    if (CanRename(e))
+                    {
+                        e.Name = Randomizer.String(MemberRenamer.StringLength());
+                        ++EventAmount;
+                    }
+            }
+
+            Console.WriteLine($"  Renamed {MethodAmount} methods.\n  Renamed {ParameterAmount} parameters." +
+                $"\n  Renamed {PropertyAmount} properties.\n  Renamed {FieldAmount} fields.\n  Renamed {EventAmount} events.");
+        }
+
+        /// <summary>
+        /// This will check with some analyzers if it's possible to rename a member def { TypeDef, PropertyDef, MethodDef, EventDef, FieldDef, Parameter (NOT DEF) }.
+        /// </summary>
+        /// <param name="obj">The determinate to check.</param>
+        /// <returns>If the determinate can be renamed.</returns>
+		public static bool CanRename(object obj)
+        {
+            DefAnalyzer analyze;
+            if (obj is MethodDef) analyze = new MethodDefAnalyzer();
+            else if (obj is PropertyDef) analyze = new PropertyDefAnalyzer();
+            else if (obj is EventDef) analyze = new EventDefAnalyzer();
+            else if (obj is FieldDef) analyze = new FieldDefAnalyzer();
+            else if (obj is Parameter) analyze = new ParameterAnalyzer();
+            else if (obj is TypeDef) analyze = new TypeDefAnalyzer();
+            else return false;
+            return analyze.Execute(obj);
+        }
+    }
+}
+
+
+
+================================================
+File: LoGiC.NET.v1/Protections/StringEncryption.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using LoGiC.NET.Utils;
+
+namespace LoGiC.NET.Protections
+{
+    public class StringEncryption : Protection
+    {
+        public StringEncryption()
+        {
+            Name = "String Encryption";
+        }
+
+        private int Amount { get; set; }
+
+        public override void Execute()
+        {
+            ModuleDefMD typeModule = ModuleDefMD.Load(typeof(StringDecoder).Module);
+            TypeDef typeDef = typeModule.ResolveTypeDef(MDToken.ToRID(typeof(StringDecoder).MetadataToken));
+            IEnumerable<IDnlibDef> members = InjectHelper.Inject(typeDef, Program.Module.GlobalType, Program.Module);
+            MethodDef init = (MethodDef)members.Single(method => method.Name == "Decrypt");
+            init.GetRenamed();
+
+            foreach (MethodDef method in Program.Module.GlobalType.Methods)
+                if (method.Name.Equals(".ctor"))
+                {
+                    Program.Module.GlobalType.Remove(method);
+                    break;
+                }
+
+            foreach (TypeDef type in Program.Module.Types)
+                foreach (MethodDef method in type.Methods)
+                {
+                    if (!method.HasBody)
+                        continue;
+
+                    method.Body.SimplifyBranches();
+
+                    for (int i = 0; i < method.Body.Instructions.Count; i++)
+                        if (method.Body.Instructions[i] != null && method.Body.Instructions[i].OpCode == OpCodes.Ldstr)
+                        {
+                            int key = Randomizer.Next();
+                            object op = method.Body.Instructions[i].Operand;
+
+                            if (op == null)
+                                continue;
+
+                            method.Body.Instructions[i].Operand = Encrypt(op.ToString(), key);
+                            method.Body.Instructions.Insert(i + 1, OpCodes.Ldc_I4.ToInstruction(Randomizer.Next()));
+                            method.Body.Instructions.Insert(i + 2, OpCodes.Ldc_I4.ToInstruction(key));
+                            method.Body.Instructions.Insert(i + 3, OpCodes.Ldc_I4.ToInstruction(Randomizer.Next()));
+                            method.Body.Instructions.Insert(i + 4, OpCodes.Ldc_I4.ToInstruction(Randomizer.Next()));
+                            method.Body.Instructions.Insert(i + 5, OpCodes.Ldc_I4.ToInstruction(Randomizer.Next()));
+                            method.Body.Instructions.Insert(i + 6, OpCodes.Call.ToInstruction(init));
+                            
+                            ++Amount;
+                        }
+
+                    method.Body.OptimizeBranches();
+                }
+
+            Console.WriteLine($"  Encrypted {Amount} strings.");
+        }
+
+        private string Encrypt(string str, int key)
+        {
+            //str = Convert.ToBase64String(Encoding.UTF32.GetBytes(str));
+            /*I'm using UTF32, but you can
+            also use UTF8 or Unicode for example for shorter encryption.*/
+            //char[] chars = "*$,;:!Ã¹^*&Ã©\"'(-Ã¨_Ã§Ã )".ToCharArray();
+
+            //for (int i = 0; i < 5; i++)
+            /*<-- this is how many times you will add every character from the
+                array at a random position. 5 is just enough for what we want to do.*/
+            //foreach (char c in chars) str = str.Insert(Next(str.Length), c.ToString());
+            //return str;
+
+            StringBuilder builder = new StringBuilder();
+            foreach (char c in str.ToCharArray())
+                builder.Append((char)(c + key));
+
+            return builder.ToString();
+        }
+    }
+}
+
+
+
+================================================
+File: LoGiC.NET.v1/Protections/StripDOSHeader.cs
+================================================
+ï»¿using System.IO;
+
+namespace LoGiC.NET.Protections
+{
+    public class StripDOSHeader
+    {
+        private static readonly uint offset_lfanew = 0x3C;
+        private static readonly int length_lfanew = sizeof(uint);
+
+        private static readonly uint offset_magic = 0x00;
+        private static readonly int length_magic = sizeof(ushort);
+
+        public static void Execute()
+        {
+            byte[] blank_dos = new byte[64];
+            byte[] magic = ReadArray(offset_magic, length_magic, Program.Stream);
+            byte[] lfanew = ReadArray(offset_lfanew, length_lfanew, Program.Stream);
+
+            Program.Stream.Position = 0;
+            WriteArray(0, blank_dos, Program.Stream);
+            WriteArray(offset_magic, magic, Program.Stream);
+            WriteArray(offset_lfanew, lfanew, Program.Stream);
+            WriteArray(0x4e, new byte[39], Program.Stream); // Overrides "This program can not be run in DOS mode."
+        }
+
+        private static byte[] ReadArray(uint offset, int length, Stream stream)
+        {
+            var data = new byte[length];
+            stream.Position = offset;
+            stream.Read(data, 0, data.Length);
+            return data;
+        }
+
+        private static int WriteArray(uint offset, byte[] data, Stream stream)
+        {
+            stream.Position = offset;
+            stream.Write(data, 0, data.Length);
+            return data.Length;
+        }
+    }
+}
+
+
+
+================================================
+File: LoGiC.NET.v2/LoGiC.NET.v2.csproj
+================================================
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="dnlib" Version="3.6.0" />
+    </ItemGroup>
+
+</Project>
+
+
+
+================================================
+File: LoGiC.NET.v2/ObfuscationContext.cs
+================================================
+using dnlib.DotNet;
+
+namespace LoGiC.NET.v2;
+
+public sealed class ObfuscationContext
+{
+    public readonly ModuleDefMD Module;
+
+    public Importer Importer;
+
+    public ObfuscationContext(string inputPath)
+    {
+        Module = ModuleDefMD.Load(inputPath);
+        Importer = new Importer(Module);
+    }
+
+    public void Save(string outputPath)
+    {
+        Module.Write(outputPath);
+    }
+}
+
+
+================================================
+File: LoGiC.NET.v2/Program.cs
+================================================
+ï»¿using LoGiC.NET.v2;
+using LoGiC.NET.v2.Obfuscation;
+
+Terminal.Initialize();
+
+if (args.Length != 2)
+{
+    Terminal.Error("Correct usage: LoGiC.NET <input.dll> <output.dll>");
+    Environment.Exit(1);
+    return;
+}
+
+Terminal.Info("Loading module");
+
+var inputPath = args[0];
+var outputPath = args[1];
+
+var context = new ObfuscationContext(inputPath);
+
+Terminal.Info("Loading obfuscations");
+
+var obfuscations = new BaseObfuscation[]
+{
+    new RenameObfuscation(),
+    new JunkMembersObfuscation(),
+    new InstructionExpansionObfuscation(),
+    //new CallifyInstructionsObfuscation(),
+    new IntEncodingObfuscation(),
+    //new MethodProxying()
+};
+
+Terminal.Info("Executing obfuscations");
+
+foreach (var obfuscation in obfuscations)
+{
+    Terminal.Info($"Executing: {obfuscation.Name}");
+    obfuscation.Run(context);
+}
+
+Terminal.Info("Saving file");
+
+context.Save(outputPath);
+
+
+================================================
+File: LoGiC.NET.v2/Terminal.cs
+================================================
+namespace LoGiC.NET.v2;
+
+public static class Terminal
+{
+    public static void Initialize()
+    {
+        Console.ResetColor();
+        Console.Clear();
+    }
+
+    public static void Info(string text)
+    {
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.Write('[');
+        Console.Write(text);
+        Console.Write(']');
+        Console.WriteLine();
+        Console.ResetColor();
+    }
+
+    public static void Warn(string text)
+    {
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.Write('[');
+        Console.Write(text);
+        Console.Write(']');
+        Console.WriteLine();
+        Console.ResetColor();
+    }
+
+    public static void Error(string text)
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.Write('[');
+        Console.Write(text);
+        Console.Write(']');
+        Console.WriteLine();
+        Console.ResetColor();
+        Environment.Exit(1);
+    }
+}
+
+
+================================================
+File: LoGiC.NET.v2/Obfuscation/BaseObfuscation.cs
+================================================
+namespace LoGiC.NET.v2.Obfuscation;
+
+public abstract class BaseObfuscation
+{
+    public abstract string Name { get; }
+
+    public abstract void Run(ObfuscationContext context);
+}
+
+
+================================================
+File: LoGiC.NET.v2/Obfuscation/CallifyInstructionsObfuscation.cs
+================================================
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using LoGiC.NET.v2.Utils;
+
+namespace LoGiC.NET.v2.Obfuscation;
+
+// TODO: Fix
+public sealed class CallifyInstructionsObfuscation : BaseObfuscation
+{
+    public override string Name => "Callify instructions";
+
+    public override void Run(ObfuscationContext context)
+    {
+        foreach (var type in context.Module.Types)
+        {
+            foreach (var method in type.Methods)
+            {
+                if (!method.HasBody || method.Body.HasExceptionHandlers)
+                {
+                    Terminal.Warn($"Method has no body: {method.FullName}");
+                    continue;
+                }
+
+                var instructions = new Instruction[method.Body.Instructions.Count];
+
+                for (var i = 0; i < method.Body.Instructions.Count; i++)
+                {
+                    var instruction = method.Body.Instructions[i];
+
+                    TypeSig returnType;
+
+                    switch (instruction.OpCode.Code)
+                    {
+                        case Code.Ldc_I4:
+                        case Code.Ldc_I4_S:
+                        case Code.Ldc_I4_M1:
+                        case Code.Ldc_I4_0:
+                        case Code.Ldc_I4_1:
+                        case Code.Ldc_I4_2:
+                        case Code.Ldc_I4_3:
+                        case Code.Ldc_I4_4:
+                        case Code.Ldc_I4_5:
+                        case Code.Ldc_I4_6:
+                        case Code.Ldc_I4_7:
+                        case Code.Ldc_I4_8:
+                        {
+                            returnType = context.Module.CorLibTypes.Int32;
+                            break;
+                        }
+                        default:
+                        {
+                            Terminal.Warn($"Unimplemented OpCode: {instruction.OpCode.Code}");
+                            instructions[i] = instruction;
+                            continue;
+                        }
+                    }
+
+                    var body = new CilBody();
+                    body.Instructions.Add(instruction);
+                    body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+
+                    var newMethod = new MethodDefUser(NumberUtils.Random.NextInt64().ToString(),
+                        MethodSig.CreateStatic(returnType))
+                    {
+                        Body = body
+                    };
+
+                    context.Module.Types[0].Methods.Add(newMethod);
+
+                    instructions[i] = Instruction.Create(OpCodes.Call, newMethod);
+                }
+
+                // Correct branch instructions
+                for (var i = 0; i < instructions.Length; i++)
+                {
+                    var instruction = instructions[i];
+
+                    if (instruction.OpCode.OperandType is not OperandType.InlineBrTarget and not OperandType.ShortInlineBrTarget)
+                    {
+                        continue;
+                    }
+
+                    var targetInstruction = instruction.Operand as Instruction;
+                    var targetIndex = -1;
+
+                    for (var j = 0; j < method.Body.Instructions.Count; j++)
+                    {
+                        var inst = method.Body.Instructions[j];
+
+                        if (inst.Offset == targetInstruction?.Offset)
+                        {
+                            targetIndex = j;
+                            break;
+                        }
+                    }
+
+                    if (targetIndex is -1)
+                        throw new InvalidOperationException("Catastrophic failure");
+
+                    instructions[i] = instruction.OpCode.Code switch
+                    {
+                        Code.Br or Code.Br_S => Instruction.Create(OpCodes.Br, instructions[targetIndex]),
+                        Code.Brtrue or Code.Brtrue_S => Instruction.Create(OpCodes.Brtrue, instructions[targetIndex]),
+                        Code.Brfalse or Code.Brfalse_S => Instruction.Create(OpCodes.Brfalse, instructions[targetIndex]),
+                        Code.Beq or Code.Beq_S => Instruction.Create(OpCodes.Beq, instructions[targetIndex]),
+                        Code.Bne_Un or Code.Bne_Un_S => Instruction.Create(OpCodes.Bne_Un, instructions[targetIndex]),
+                        Code.Blt or Code.Blt_S => Instruction.Create(OpCodes.Blt, instructions[targetIndex]),
+                        Code.Blt_Un or Code.Blt_Un_S => Instruction.Create(OpCodes.Blt_Un, instructions[targetIndex]),
+                        Code.Ble or Code.Ble_S => Instruction.Create(OpCodes.Ble, instructions[targetIndex]),
+                        Code.Ble_Un or Code.Ble_Un_S => Instruction.Create(OpCodes.Ble_Un, instructions[targetIndex]),
+                        Code.Bgt or Code.Bgt_S => Instruction.Create(OpCodes.Bgt, instructions[targetIndex]),
+                        Code.Bgt_Un or Code.Bgt_Un_S => Instruction.Create(OpCodes.Bgt_Un, instructions[targetIndex]),
+                        Code.Bge or Code.Bge_S => Instruction.Create(OpCodes.Bge, instructions[targetIndex]),
+                        Code.Bge_Un or Code.Bge_Un_S => Instruction.Create(OpCodes.Bge_Un, instructions[targetIndex]),
+                        _ => throw new NotImplementedException(instruction.OpCode.Code.ToString())
+                    };
+                }
+
+                method.Body.Instructions.Clear();
+                foreach (var instruction in instructions)
+                {
+                    method.Body.Instructions.Add(instruction);
+                }
+            }
+        }
+    }
+}
+
+
+================================================
+File: LoGiC.NET.v2/Obfuscation/InstructionExpansionObfuscation.cs
+================================================
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using LoGiC.NET.v2.Utils;
+
+namespace LoGiC.NET.v2.Obfuscation;
+
+public sealed class InstructionExpansionObfuscation : BaseObfuscation
+{
+    public override string Name => "Instruction expansion";
+
+    private MethodDef _method;
+    private IMethod? _stringConcatMethod;
+    private int _index;
+    private uint _expandedInstructions;
+
+    public override void Run(ObfuscationContext context)
+    {
+        _stringConcatMethod =
+            context.Importer.Import(typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) }));
+        
+        foreach (var type in context.Module.Types)
+        {
+            foreach (var method in type.Methods)
+            {
+                if (!method.HasBody)
+                {
+                    Terminal.Warn($"Method has no body: {method.FullName}");
+                    continue;
+                }
+
+                _method = method;
+                _index = 0;
+
+                while (_index < method.Body.Instructions.Count)
+                {
+                    var instruction = method.Body.Instructions[_index];
+                    var skipInstruction = false;
+
+                    foreach (var handler in method.Body.ExceptionHandlers)
+                    {
+                        if (handler.HandlerStart != instruction && handler.HandlerEnd != instruction)
+                        {
+                            continue;
+                        }
+
+                        Terminal.Warn($"Instruction is the first or last instruction of an exception handler: {instruction}");
+                        skipInstruction = true;
+                        break;
+                    }
+
+                    if (skipInstruction)
+                    {
+                        _index++;
+                        continue;
+                    }
+
+                    switch (instruction.OpCode.Code)
+                    {
+                        case Code.Ldc_I4_0: ExpandLdcI4(0); break;
+                        case Code.Ldc_I4_1: ExpandLdcI4(1); break;
+                        case Code.Ldc_I4_2: ExpandLdcI4(2); break;
+                        case Code.Ldc_I4_3: ExpandLdcI4(3); break;
+                        case Code.Ldc_I4_4: ExpandLdcI4(4); break;
+                        case Code.Ldc_I4_5: ExpandLdcI4(5); break;
+                        case Code.Ldc_I4_6: ExpandLdcI4(6); break;
+                        case Code.Ldc_I4_7: ExpandLdcI4(7); break;
+                        case Code.Ldc_I4_8: ExpandLdcI4(8); break;
+                        case Code.Ldc_I4_S:
+                        case Code.Ldc_I4: ExpandLdcI4(Convert.ToInt32(instruction.Operand)); break;
+                        case Code.Ldstr: ExpandLdstr(instruction.Operand.ToString()!); break;
+                        default: _index++; break;
+                    }
+                }
+                
+                method.Body.OptimizeMacros();
+            }
+        }
+
+        Terminal.Info($"Expanded {_expandedInstructions} instructions");
+    }
+
+    private void ExpandLdcI4(int value)
+    {
+        // TODO: Find a better solution
+        if (value is < 0 or > 1000)
+        {
+            _index++;
+            return;
+        }
+
+        var upperBound = int.MinValue;
+        while (upperBound * 2 < value)
+            upperBound++;
+
+        var numbers = NumberUtils.GetAddOperationFor(value, 2, int.MinValue, upperBound);
+
+        var instruction = _method.Body.Instructions[_index];
+        instruction.OpCode = OpCodes.Ldc_I4;
+        instruction.Operand = numbers[0];
+        _method.Body.Instructions[_index++] = instruction;
+
+        _method.Body.Instructions.Insert(_index++, Instruction.CreateLdcI4(numbers[1]));
+        _method.Body.Instructions.Insert(_index++, Instruction.Create(OpCodes.Add));
+
+        _expandedInstructions++;
+    }
+
+    private void ExpandLdstr(string value)
+    {
+        var splitIndex = NumberUtils.Random.Next(0, value.Length);
+        var str1 = value[splitIndex..];
+        var str2 = value.Remove(splitIndex);
+
+        var instruction = _method.Body.Instructions[_index];
+        instruction.OpCode = OpCodes.Ldstr;
+        instruction.Operand = str2;
+        _method.Body.Instructions[_index++] = instruction;
+
+        _method.Body.Instructions.Insert(_index++, Instruction.Create(OpCodes.Ldstr, str1));
+        _method.Body.Instructions.Insert(_index++, Instruction.Create(OpCodes.Call, _stringConcatMethod));
+
+        _expandedInstructions++;
+    }
+}
+
+
+================================================
+File: LoGiC.NET.v2/Obfuscation/IntEncodingObfuscation.cs
+================================================
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using LoGiC.NET.v2.Utils;
+
+namespace LoGiC.NET.v2.Obfuscation;
+
+public sealed class IntEncodingObfuscation : BaseObfuscation
+{
+    public override string Name => "Int encoding";
+
+    private uint _encodedInts;
+
+    private IMethod
+        _absIntMethod, _minIntMethod, _maxIntMethod,
+        _absLongMethod, _minLongMethod, _maxLongMethod,
+        _absFloatMethod, _minFloatMethod, _maxFloatMethod,
+        _absDoubleMethod, _minDoubleMethod, _maxDoubleMethod;
+
+    public override void Run(ObfuscationContext context)
+    {
+        _absIntMethod = context.Importer.Import(typeof(Math).GetMethod("Abs", new[] { typeof(int) }));
+        _minIntMethod = context.Importer.Import(typeof(Math).GetMethod("Min", new[] { typeof(int), typeof(int) }));
+        _maxIntMethod = context.Importer.Import(typeof(Math).GetMethod("Max", new[] { typeof(int), typeof(int) }));
+
+        _absLongMethod = context.Importer.Import(typeof(Math).GetMethod("Abs", new[] { typeof(long) }));
+        _minLongMethod = context.Importer.Import(typeof(Math).GetMethod("Min", new[] { typeof(long), typeof(long) }));
+        _maxLongMethod = context.Importer.Import(typeof(Math).GetMethod("Max", new[] { typeof(long), typeof(long) }));
+
+        _absFloatMethod = context.Importer.Import(typeof(Math).GetMethod("Abs", new[] { typeof(float) }));
+        _minFloatMethod = context.Importer.Import(typeof(Math).GetMethod("Min", new[] { typeof(float), typeof(float) }));
+        _maxFloatMethod = context.Importer.Import(typeof(Math).GetMethod("Max", new[] { typeof(float), typeof(float) }));
+
+        _absDoubleMethod = context.Importer.Import(typeof(Math).GetMethod("Abs", new[] { typeof(double) }));
+        _minDoubleMethod = context.Importer.Import(typeof(Math).GetMethod("Min", new[] { typeof(double), typeof(double) }));
+        _maxDoubleMethod = context.Importer.Import(typeof(Math).GetMethod("Max", new[] { typeof(double), typeof(double) }));
+
+        foreach (var type in context.Module.Types)
+        {
+            foreach (var method in type.Methods)
+            {
+                if (!method.HasBody)
+                {
+                    Terminal.Warn($"Method has no body: {method.FullName}");
+                    continue;
+                }
+
+                var instructions = new List<Instruction>(method.Body.Instructions);
+                
+                for (var i = 0; i < instructions.Count; i++)
+                {
+                    var instruction = instructions[i];
+
+                    if (instruction.IsLdcI4())
+                    {
+                        EncodeInt(method, instruction.GetLdcI4Value(), i);
+                    }
+                    else if (instruction.OpCode == OpCodes.Ldc_I8)
+                    {
+                        EncodeLong(method, Convert.ToInt64(instruction.Operand), i);
+                    }
+                    else if (instruction.OpCode == OpCodes.Ldc_R4)
+                    {
+                        EncodeFloat(method, Convert.ToSingle(instruction.Operand), i);
+                    }
+                    else if (instruction.OpCode == OpCodes.Ldc_R8)
+                    {
+                        EncodeDouble(method, Convert.ToSingle(instruction.Operand), i);
+                    }
+                }
+
+                method.Body.SimplifyBranches();
+                method.Body.OptimizeBranches();
+
+                _encodedInts++;
+            }
+        }
+
+        Terminal.Info($"Encoded {_encodedInts} ints");
+    }
+
+    private void EncodeInt(MethodDef method, int operand, int i)
+    {
+        if (operand >= 0)
+        {
+            method.Body.Instructions.Insert(i + 1, OpCodes.Call.ToInstruction(_absIntMethod));
+        }
+
+        var neg = NumberUtils.Random.Next(2, 65);
+        if (neg % 2 != 0)
+        {
+            neg++;
+        }
+
+        for (var j = 0; j < neg; j++)
+        {
+            method.Body.Instructions.Insert(i + j + 1, OpCodes.Neg.ToInstruction());
+        }
+
+        if (operand > 1)
+        {
+            method.Body.Instructions.Insert(i + 1, OpCodes.Ldc_I4.ToInstruction(1));
+            method.Body.Instructions.Insert(i + 2, OpCodes.Call.ToInstruction(_maxIntMethod));
+        }
+
+        if (operand < int.MaxValue)
+        {
+            method.Body.Instructions.Insert(i + 1, OpCodes.Ldc_I4.ToInstruction(int.MaxValue));
+            method.Body.Instructions.Insert(i + 2, OpCodes.Call.ToInstruction(_minIntMethod));
+        }
+
+        var randomValue = NumberUtils.Random.Next();
+
+        for (;;)
+        {
+            try
+            {
+                _ = checked(operand + randomValue);
+                break;
+            }
+            catch (OverflowException)
+            {
+                randomValue = NumberUtils.Random.Next(randomValue);
+            }
+        }
+
+        var inst = OpCodes.Ldc_I4.ToInstruction(randomValue);
+        method.Body.Instructions.Insert(i + 1, inst);
+        method.Body.Instructions.Insert(i + 2, OpCodes.Add.ToInstruction());
+        method.Body.Instructions.Insert(i + 3, inst);
+        method.Body.Instructions.Insert(i + 4, OpCodes.Sub.ToInstruction());
+    }
+
+    private void EncodeLong(MethodDef method, long operand, int i)
+    {
+        if (operand >= 0)
+        {
+            method.Body.Instructions.Insert(i + 1, OpCodes.Call.ToInstruction(_absLongMethod));
+        }
+
+        var neg = NumberUtils.Random.Next(2, 65);
+        if (neg % 2 != 0)
+        {
+            neg++;
+        }
+
+        for (var j = 0; j < neg; j++)
+        {
+            method.Body.Instructions.Insert(i + j + 1, OpCodes.Neg.ToInstruction());
+        }
+
+        if (operand > 1)
+        {
+            method.Body.Instructions.Insert(i + 1, OpCodes.Ldc_I8.ToInstruction(1L));
+            method.Body.Instructions.Insert(i + 2, OpCodes.Call.ToInstruction(_maxLongMethod));
+        }
+
+        if (operand < long.MaxValue)
+        {
+            method.Body.Instructions.Insert(i + 1, OpCodes.Ldc_I8.ToInstruction(long.MaxValue));
+            method.Body.Instructions.Insert(i + 2, OpCodes.Call.ToInstruction(_minLongMethod));
+        }
+
+        var randomValue = NumberUtils.Random.NextInt64();
+
+        for (;;)
+        {
+            try
+            {
+                _ = checked(operand + randomValue);
+                break;
+            }
+            catch (OverflowException)
+            {
+                randomValue = NumberUtils.Random.NextInt64(randomValue);
+            }
+        }
+
+        var inst = OpCodes.Ldc_I8.ToInstruction(randomValue);
+        method.Body.Instructions.Insert(i + 1, inst);
+        method.Body.Instructions.Insert(i + 2, OpCodes.Add.ToInstruction());
+        method.Body.Instructions.Insert(i + 3, inst);
+        method.Body.Instructions.Insert(i + 4, OpCodes.Sub.ToInstruction());
+    }
+    
+    private void EncodeFloat(MethodDef method, float operand, int i)
+    {
+        if (operand >= 0)
+        {
+            method.Body.Instructions.Insert(i + 1, OpCodes.Call.ToInstruction(_absFloatMethod));
+        }
+
+        var neg = NumberUtils.Random.Next(2, 65);
+        if (neg % 2 != 0)
+        {
+            neg++;
+        }
+
+        for (var j = 0; j < neg; j++)
+        {
+            method.Body.Instructions.Insert(i + j + 1, OpCodes.Neg.ToInstruction());
+        }
+
+        if (operand > 1)
+        {
+            method.Body.Instructions.Insert(i + 1, OpCodes.Ldc_R4.ToInstruction(1F));
+            method.Body.Instructions.Insert(i + 2, OpCodes.Call.ToInstruction(_maxFloatMethod));
+        }
+
+        if (operand < float.MaxValue)
+        {
+            method.Body.Instructions.Insert(i + 1, OpCodes.Ldc_R4.ToInstruction(float.MaxValue));
+            method.Body.Instructions.Insert(i + 2, OpCodes.Call.ToInstruction(_minFloatMethod));
+        }
+
+        var randomValue = NumberUtils.Random.NextSingle();
+        var inst = OpCodes.Ldc_R4.ToInstruction(randomValue);
+
+        method.Body.Instructions.Insert(i + 1, inst);
+        method.Body.Instructions.Insert(i + 2, OpCodes.Add.ToInstruction());
+        method.Body.Instructions.Insert(i + 3, inst);
+        method.Body.Instructions.Insert(i + 4, OpCodes.Sub.ToInstruction());
+    }
+    
+    private void EncodeDouble(MethodDef method, float operand, int i)
+    {
+        if (operand >= 0)
+        {
+            method.Body.Instructions.Insert(i + 1, OpCodes.Call.ToInstruction(_absDoubleMethod));
+        }
+
+        var neg = NumberUtils.Random.Next(2, 65);
+        if (neg % 2 != 0)
+        {
+            neg++;
+        }
+
+        for (var j = 0; j < neg; j++)
+        {
+            method.Body.Instructions.Insert(i + j + 1, OpCodes.Neg.ToInstruction());
+        }
+
+        if (operand > 1)
+        {
+            method.Body.Instructions.Insert(i + 1, OpCodes.Ldc_R8.ToInstruction(1D));
+            method.Body.Instructions.Insert(i + 2, OpCodes.Call.ToInstruction(_maxDoubleMethod));
+        }
+
+        if (operand < double.MaxValue)
+        {
+            method.Body.Instructions.Insert(i + 1, OpCodes.Ldc_R8.ToInstruction(double.MaxValue));
+            method.Body.Instructions.Insert(i + 2, OpCodes.Call.ToInstruction(_minDoubleMethod));
+        }
+
+        var randomValue = NumberUtils.Random.NextDouble();
+        var inst = OpCodes.Ldc_R8.ToInstruction(randomValue);
+
+        method.Body.Instructions.Insert(i + 1, inst);
+        method.Body.Instructions.Insert(i + 2, OpCodes.Add.ToInstruction());
+        method.Body.Instructions.Insert(i + 3, inst);
+        method.Body.Instructions.Insert(i + 4, OpCodes.Sub.ToInstruction());
+    }
+}
+
+
+================================================
+File: LoGiC.NET.v2/Obfuscation/JunkMembersObfuscation.cs
+================================================
+using System.Diagnostics;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using LoGiC.NET.v2.Utils;
+
+namespace LoGiC.NET.v2.Obfuscation;
+
+public sealed class JunkMembersObfuscation : BaseObfuscation
+{
+    public override string Name => "Junk definitions";
+
+    private uint _junkMembersAdded;
+
+    public override void Run(ObfuscationContext context)
+    {
+        // Add junk types
+        for (var i = 0; i < NumberUtils.Random.Next(10, 33); i++)
+        {
+            var newType = new TypeDefUser(NumberUtils.Random.NextInt64().ToString(), NumberUtils.Random.NextInt64().ToString());
+
+            context.Module.Types.Add(newType);
+
+            _junkMembersAdded++;
+        }
+
+        // Add junk methods, and call them
+        foreach (var type in context.Module.Types)
+        {
+            for (var i = 0; i < NumberUtils.Random.Next(10, 33); i++)
+            {
+                MethodDefUser newMethod;
+
+                switch (NumberUtils.Random.Next(0, 3))
+                {
+                    case 0: // Int32
+                    {
+                        var body = new CilBody();
+                        body.Instructions.Add(OpCodes.Ldc_I4.ToInstruction(NumberUtils.Random.Next()));
+                        body.Instructions.Add(OpCodes.Ret.ToInstruction());
+                        body.OptimizeMacros();
+
+                        newMethod = new MethodDefUser(
+                            NumberUtils.Random.NextInt64().ToString(),
+                            MethodSig.CreateStatic(context.Module.CorLibTypes.Int32),
+                            MethodImplAttributes.IL | MethodImplAttributes.Managed,
+                            MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.HideBySig)
+                        {
+                            Body = body
+                        };
+                        break;
+                    }
+                    case 1: // Int64
+                    {
+                        var body = new CilBody();
+                        body.Instructions.Add(OpCodes.Ldc_I8.ToInstruction(NumberUtils.Random.NextInt64()));
+                        body.Instructions.Add(OpCodes.Ret.ToInstruction());
+                        body.OptimizeMacros();
+
+                        newMethod = new MethodDefUser(
+                            NumberUtils.Random.NextInt64().ToString(),
+                            MethodSig.CreateStatic(context.Module.CorLibTypes.Int64),
+                            MethodImplAttributes.IL | MethodImplAttributes.Managed,
+                            MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.HideBySig)
+                        {
+                            Body = body
+                        };
+                        break;
+                    }
+                    case 2: // String
+                    {
+                        var body = new CilBody();
+                        body.Instructions.Add(OpCodes.Ldstr.ToInstruction(NumberUtils.Random.NextInt64().ToString()));
+                        body.Instructions.Add(OpCodes.Ret.ToInstruction());
+                        body.OptimizeMacros();
+
+                        newMethod = new MethodDefUser(
+                            NumberUtils.Random.NextInt64().ToString(),
+                            MethodSig.CreateStatic(context.Module.CorLibTypes.String),
+                            MethodImplAttributes.IL | MethodImplAttributes.Managed,
+                            MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.HideBySig)
+                        {
+                            Body = body
+                        };
+                        break;
+                    }
+                    default: throw new UnreachableException();
+                }
+
+                type.Methods.Add(newMethod);
+
+                /*var filteredMethods = (from aType in context.Module.Types from aMethod in aType.Methods where aMethod.HasBody && aMethod.FullName != newMethod.FullName select aMethod).ToArray();
+                var randomMethod = filteredMethods[NumberUtils.Random.Next(0, filteredMethods.Length)];
+
+                // TODO: Why does it say it couldn't load the type because "the parent does not exist"?
+                randomMethod.Body.Instructions.Insert(0, OpCodes.Call.ToInstruction(newMethod));
+                randomMethod.Body.Instructions.Insert(1, OpCodes.Pop.ToInstruction());*/
+
+                _junkMembersAdded++;
+            }
+        }
+
+        Terminal.Info($"Added {_junkMembersAdded} junk members");
+    }
+}
+
+
+================================================
+File: LoGiC.NET.v2/Obfuscation/MethodProxying.cs
+================================================
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using LoGiC.NET.v2.Utils;
+
+namespace LoGiC.NET.v2.Obfuscation;
+
+// TODO: Fix
+public sealed class MethodProxying : BaseObfuscation
+{
+    public override string Name => "Method proxying";
+
+    private uint _proxiedMethods;
+
+    public override void Run(ObfuscationContext context)
+    {
+        foreach (var type in context.Module.Types)
+        {
+            var methods = new List<MethodDef>(type.Methods);
+
+            foreach (var method in methods)
+            {
+                if (!method.HasBody)
+                {
+                    Terminal.Warn($"Method has no body: {method.FullName}");
+                    continue;
+                }
+
+                foreach (var instruction in method.Body.Instructions)
+                {
+                    if (instruction.OpCode != OpCodes.Call || instruction.Operand is not MethodDef methodToCall || !methodToCall.FullName.Contains(context.Module.Assembly.Name))
+                    {
+                        continue;
+                    }
+
+                    var newMethod = new MethodDefUser(NumberUtils.Random.NextInt64().ToString(), methodToCall.MethodSig, methodToCall.Attributes);
+                    var newMethodBody = new CilBody();
+
+                    for (ushort j = 0; j < newMethod.Parameters.Count; j++)
+                    {
+                        newMethodBody.Instructions.Add(new Instruction(OpCodes.Ldarg, j));
+                    }
+
+                    newMethodBody.Instructions.Add(OpCodes.Call.ToInstruction(newMethod));
+                    newMethodBody.Instructions.Add(OpCodes.Ret.ToInstruction());
+                    newMethodBody.OptimizeMacros();
+
+                    type.Methods.Add(newMethod);
+                }
+
+                _proxiedMethods++;
+            }
+        }
+
+        Terminal.Info($"Proxied {_proxiedMethods} methods");
+    }
+}
+
+
+================================================
+File: LoGiC.NET.v2/Obfuscation/RenameObfuscation.cs
+================================================
+using LoGiC.NET.v2.Utils;
+
+namespace LoGiC.NET.v2.Obfuscation;
+
+public sealed class RenameObfuscation : BaseObfuscation
+{
+    public override string Name => "Rename";
+
+    private uint _renamedTypes, _renamedFields, _renamedProperties, _renamedEvents, _renamedMethods, _renamedParameters;
+
+    public override void Run(ObfuscationContext context)
+    {
+        context.Module.Mvid = Guid.NewGuid();
+        context.Module.EncId = Guid.NewGuid();
+        context.Module.EncBaseId = Guid.NewGuid();
+
+        context.Module.Name = NumberUtils.Random.NextInt64().ToString();
+
+        foreach (var type in context.Module.Types)
+        {
+            if (type is
+                {
+                    IsSpecialName: false, IsRuntimeSpecialName: false, IsWindowsRuntime: false, IsPublic: false
+                })
+            {
+                type.Namespace = NumberUtils.Random.NextInt64().ToString();
+                type.Name = NumberUtils.Random.NextInt64().ToString();
+
+                _renamedTypes++;
+            }
+            else
+            {
+                Terminal.Warn($"Found special type: {type.FullName}");
+            }
+
+            foreach (var field in type.Fields)
+            {
+                if (field is
+                    {
+                        IsSpecialName: false, IsRuntimeSpecialName: false, IsPublic: false
+                    })
+                {
+                    field.Name = NumberUtils.Random.NextInt64().ToString();
+
+                    _renamedFields++;
+                }
+                else
+                {
+                    Terminal.Warn($"Found special field: {field.FullName}");
+                }
+            }
+
+            foreach (var property in type.Properties)
+            {
+                if (property is
+                    {
+                        IsSpecialName: false, IsRuntimeSpecialName: false
+                    })
+                {
+                    property.Name = NumberUtils.Random.NextInt64().ToString();
+
+                    _renamedProperties++;
+                }
+                else
+                {
+                    Terminal.Warn($"Found special property: {property.FullName}");
+                }
+            }
+
+            foreach (var ev in type.Events)
+            {
+                if (ev is
+                    {
+                        IsSpecialName: false, IsRuntimeSpecialName: false
+                    })
+                {
+                    ev.Name = NumberUtils.Random.NextInt64().ToString();
+
+                    _renamedEvents++;
+                }
+                else
+                {
+                    Terminal.Warn($"Found special event: {ev.FullName}");
+                }
+            }
+
+            foreach (var method in type.Methods)
+            {
+                if (method is
+                    {
+                        IsSpecialName: false, IsRuntimeSpecialName: false, IsRuntime: false, IsConstructor: false, IsPublic: false
+                    })
+                {
+                    method.Name = NumberUtils.Random.NextInt64().ToString();
+
+                    _renamedMethods++;
+                }
+                else
+                {
+                    Terminal.Warn($"Found special method: {method.FullName}");
+                }
+
+                foreach (var parameter in method.Parameters)
+                {
+                    if (!parameter.IsHiddenThisParameter)
+                    {
+                        parameter.Name = NumberUtils.Random.NextInt64().ToString();
+
+                        _renamedParameters++;
+                    }
+                    else
+                    {
+                        Terminal.Warn($"Found special this parameter in method: {method.FullName}");
+                    }
+                }
+            }
+        }
+        
+        Terminal.Info($"Renamed {_renamedTypes} types, {_renamedFields} fields, {_renamedProperties} properties, {_renamedEvents} events, {_renamedMethods} methods and {_renamedParameters} parameters");
+    }
+}
+
+
+================================================
+File: LoGiC.NET.v2/Utils/NumberUtils.cs
+================================================
+namespace LoGiC.NET.v2.Utils;
+
+public static class NumberUtils
+{
+    public static readonly Random Random = new();
+
+    public static int[] GetAddOperationFor(int total, int count, int lowerBound, int upperBound)
+    {
+        var result = new int[count];
+        var currentSum = 0;
+
+        for (var index = 0; index < count; index++)
+        {
+            var calc = total - currentSum - upperBound * (count - 1 - index);
+            var low = calc < lowerBound ? lowerBound : calc;
+            calc = total - currentSum - lowerBound * (count - 1 - index);
+            var high = (calc > upperBound ? upperBound : calc) + 1;
+
+            var value = Random.Next(low, high);
+            result[index] = value;
+            currentSum += value;
+        }
+
+        return result;
+    }
+}
+

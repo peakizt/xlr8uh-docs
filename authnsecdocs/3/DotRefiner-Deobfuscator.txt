@@ -1,0 +1,437 @@
+Directory structure:
+└── darkobb-dotrefiner-deobfuscator/
+    ├── README.md
+    ├── DotRefiner Deobfuscator.sln
+    └── DotRefiner Deobfuscator/
+        ├── App.config
+        ├── DotRefiner Deobfuscator.csproj
+        ├── NameStorage.cs
+        ├── Program.cs
+        ├── decryptor.cs
+        ├── storage.cs
+        └── Properties/
+            └── AssemblyInfo.cs
+
+================================================
+File: README.md
+================================================
+# DotRefiner (STATIC) Deobfuscator
+
+## How to use
+-Drag n drop
+
+## Note:
+-I was lazy to do some proper error handling so expect a bit of shit code
+
+-Ill try to keep it up to date whenever possible
+
+-Should i make a discord server?
+
+
+
+================================================
+File: DotRefiner Deobfuscator.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29020.237
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotRefiner Deobfuscator", "DotRefiner Deobfuscator\DotRefiner Deobfuscator.csproj", "{01393A90-3912-4B5F-9F39-501E3602058E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{01393A90-3912-4B5F-9F39-501E3602058E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01393A90-3912-4B5F-9F39-501E3602058E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01393A90-3912-4B5F-9F39-501E3602058E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01393A90-3912-4B5F-9F39-501E3602058E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {77769014-4386-4467-B060-A37A6726F257}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: DotRefiner Deobfuscator/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.5.2" />
+    </startup>
+</configuration>
+
+
+================================================
+File: DotRefiner Deobfuscator/DotRefiner Deobfuscator.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{01393A90-3912-4B5F-9F39-501E3602058E}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>DotRefiner_Deobfuscator</RootNamespace>
+    <AssemblyName>DotRefiner Deobfuscator</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib">
+      <HintPath>..\..\..\wadfuscator\Wadfuscator.Cli\bin\Release\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="decryptor.cs" />
+    <Compile Include="NameStorage.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="storage.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: DotRefiner Deobfuscator/NameStorage.cs
+================================================
+ï»¿namespace DotRefiner_Deobfuscator {
+    public class NameStorage {
+        public static string ReadString { get; set; }
+        public static string ReadSByte { get; set; }
+        public static string ReadInt { get; set; }
+        public static string ReadLong { get; set; }
+        public static string ReadFloat { get; set; }
+        public static string ReadDouble { get; set; }
+    }
+}
+
+/* Made by DarkObb */
+
+
+================================================
+File: DotRefiner Deobfuscator/Program.cs
+================================================
+ï»¿using System;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Collections.Generic;
+
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using dnlib.DotNet.Writer;
+
+namespace DotRefiner_Deobfuscator {
+    class Program {
+        public static ModuleDefMD module;
+        public static storage storage;
+        public static Dictionary<string, string> decshit = new Dictionary<string, string>();
+        public static string ResourceName;
+
+        static void Main(string[] args) {
+            module = ModuleDefMD.Load(args[0]);
+            var cctor = module.GlobalType.FindOrCreateStaticConstructor();
+            cctor = (MethodDef)cctor.Body.Instructions[0].Operand; //This is the string initilize method!
+
+            if (StringDecMethod(cctor)) {
+                GetStorageNames();
+                ResourceName = cctor.Body.Instructions[1].Operand.ToString();
+                storage = new storage(decryptor.DecryptIt(((EmbeddedResource)module.Resources.Find(ResourceName)).CreateReader().AsStream())); //Resource name is set to '0' by default!
+                for (var i = 4; i < cctor.Body.Instructions.Count; i++) {
+                    if (cctor.Body.Instructions[i].OpCode == OpCodes.Dup &&
+                       cctor.Body.Instructions[i + 1].OpCode == OpCodes.Call &&
+                       cctor.Body.Instructions[i + 2].OpCode == OpCodes.Stsfld) {
+
+                        string type = cctor.Body.Instructions[i + 1].Operand.ToString();
+                        type = new string(type.Remove(type.Length - 2).Reverse().Take(1).ToArray());
+                        decshit.Add(cctor.Body.Instructions[i + 2].Operand.ToString(), DecValue(type));
+                    }
+                }
+            }
+            else {
+                Console.WriteLine("Could not find string dec method!");
+                Thread.Sleep(3000);
+                Environment.Exit(0);
+            }
+
+            foreach (var type in module.GetTypes()) {
+                if (!type.HasMethods)
+                    continue;
+
+                foreach (var method in type.Methods) {
+                    if (!method.HasBody)
+                        continue;
+
+                    for (var i = 0; i < method.Body.Instructions.Count; i++) {
+                        if (method.Body.Instructions[i].OpCode == OpCodes.Ldsfld &&
+                            decshit.TryGetValue(method.Body.Instructions[i].Operand.ToString(), out string value)) {
+
+                            var opcode = GetOpCode(method.Body.Instructions[i].Operand.ToString());
+                            if (opcode == OpCodes.Nop) {
+                                Console.WriteLine("ERROR");
+                                Console.WriteLine(method.Body.Instructions[i].Operand.ToString()); //If this says anything, then u need to update this tool
+                                Console.ReadLine();
+                            }
+
+                            method.Body.Instructions[i].OpCode = opcode;
+                            switch (opcode.ToString()) {
+                                case "ldstr":    method.Body.Instructions[i].Operand = value; break;
+                                case "ldc.i4":   method.Body.Instructions[i].Operand = int.Parse(value); break;
+                                case "ldc.i4.s": method.Body.Instructions[i].Operand = sbyte.Parse(value); break;
+                                case "ldc.i8":   method.Body.Instructions[i].Operand = long.Parse(value); break;
+                                case "ldc.r4":   method.Body.Instructions[i].Operand = float.Parse(value); break;
+                                case "ldc.r8":   method.Body.Instructions[i].Operand = double.Parse(value); break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            CleanUp();
+            Console.WriteLine("Saving methods...");
+            Save(args[0], module);
+            Console.WriteLine("Saved!");
+        }
+
+        static void CleanUp() {
+            module.GlobalType.FindOrCreateStaticConstructor().Body.Instructions.RemoveAt(0);
+            module.Resources.Remove(module.Resources.Where(x => x.Name == ResourceName).FirstOrDefault());
+        }
+
+        static void GetStorageNames() {
+            foreach (var type in module.GetTypes()) {
+                if (!type.HasMethods)
+                    continue;
+
+                foreach (var method in type.Methods) {
+                    if (!method.HasBody)
+                        continue;
+
+                    for (var i = 0; i < method.Body.Instructions.Count; i++) {
+                        if (method.Body.Instructions[i].OpCode == OpCodes.Ldarg_0 &&
+                            method.Body.Instructions[i + 1].OpCode == OpCodes.Ldfld &&
+                            method.Body.Instructions[i + 1].Operand.ToString().Contains("System.IO.BinaryReader") &&
+                            method.Body.Instructions[i + 2].OpCode == OpCodes.Callvirt &&
+                            method.Body.Instructions[i + 2].Operand.ToString().Contains("System.IO.BinaryReader::Read") &&
+                            method.Body.Instructions[i + 3].OpCode == OpCodes.Ret &&
+                            method.Body.Instructions.Count == 4) {
+
+                            switch (method.Body.Instructions[i + 2].Operand.ToString()) {
+                                case "System.String System.IO.BinaryReader::ReadString()": NameStorage.ReadString = method.Name; break;
+                                case "System.SByte System.IO.BinaryReader::ReadSByte()":   NameStorage.ReadSByte  = method.Name; break;
+                                case "System.Int32 System.IO.BinaryReader::ReadInt32()":   NameStorage.ReadInt    = method.Name; break;
+                                case "System.Int64 System.IO.BinaryReader::ReadInt64()":   NameStorage.ReadLong   = method.Name; break;
+                                case "System.Single System.IO.BinaryReader::ReadSingle()": NameStorage.ReadFloat  = method.Name; break;
+                                case "System.Double System.IO.BinaryReader::ReadDouble()": NameStorage.ReadDouble = method.Name; break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        static OpCode GetOpCode(string type) {
+            if (type.Contains("String")) return OpCodes.Ldstr;
+            else if (type.Contains("Int32")) return OpCodes.Ldc_I4; //Int
+            else if (type.Contains("SByte")) return OpCodes.Ldc_I4_S;
+            else if (type.Contains("Int64")) return OpCodes.Ldc_I8; //Long
+            else if (type.Contains("Single")) return OpCodes.Ldc_R4; //Float
+            else if (type.Contains("Double")) return OpCodes.Ldc_R8;
+            return OpCodes.Nop;
+        }
+
+        static string DecValue(string type) {
+            if (type == NameStorage.ReadString)      return storage.GetString();
+            else if (type == NameStorage.ReadSByte)  return storage.GetSByte().ToString();
+            else if (type == NameStorage.ReadInt)    return storage.GetInt().ToString();
+            else if (type == NameStorage.ReadLong)   return storage.GetLong().ToString();
+            else if (type == NameStorage.ReadFloat)  return storage.GetFloat().ToString();
+            else if (type == NameStorage.ReadDouble) return storage.GetDouble().ToString();
+            return string.Empty;
+        }
+        
+        static bool StringDecMethod(MethodDef method) => (
+            method.Body.Instructions[0].OpCode == OpCodes.Call &&
+            method.Body.Instructions[0].Operand.ToString().Contains("System.Reflection.Assembly::GetExecutingAssembly") &&
+            method.Body.Instructions[1].OpCode == OpCodes.Ldstr &&
+            method.Body.Instructions[2].OpCode == OpCodes.Callvirt &&
+            method.Body.Instructions[2].Operand.ToString().Contains("System.Reflection.Assembly::GetManifestResourceStream") &&
+            method.Body.Instructions[3].OpCode == OpCodes.Call &&
+            method.Body.Instructions[4].OpCode == OpCodes.Newobj
+            );
+        
+        static void Save(string location, ModuleDefMD module) {
+
+            Console.WriteLine("saving module!");
+
+            var Writer = new NativeModuleWriterOptions(module, true) {
+                KeepExtraPEData = true,
+                KeepWin32Resources = true,
+                Logger = DummyLogger.NoThrowInstance //prevents errors from being thrown
+            };
+
+            Writer.MetadataOptions.Flags = MetadataFlags.PreserveAll | MetadataFlags.KeepOldMaxStack;
+            module.NativeWrite($"{Path.GetFileNameWithoutExtension(location)}-Dec{Path.GetExtension(location)}", Writer);
+
+        }
+    }
+}
+
+/* Made by DarkObb */
+
+
+================================================
+File: DotRefiner Deobfuscator/decryptor.cs
+================================================
+ï»¿using System.IO;
+using System.Security.Cryptography;
+
+namespace DotRefiner_Deobfuscator {
+    public static class decryptor {
+        public static byte[] aesDec(byte[] arrayy) {
+            byte[] result;
+
+            using (var rijndaelManaged = new RijndaelManaged()) {
+                rijndaelManaged.BlockSize = 128;
+                rijndaelManaged.Mode = CipherMode.CBC;
+                rijndaelManaged.GenerateKey();
+                rijndaelManaged.GenerateIV();
+
+                using (var memoryStream = new MemoryStream(arrayy)) {
+                    byte[] array = new byte[rijndaelManaged.Key.Length];
+                    byte[] array2 = new byte[rijndaelManaged.IV.Length];
+                    memoryStream.Read(array, 0, array.Length);
+                    memoryStream.Read(array2, 0, array2.Length);
+
+                    using (var cryptoTransform = rijndaelManaged.CreateDecryptor(array, array2)) {
+                        using (var cryptoStream = new CryptoStream(memoryStream, cryptoTransform, CryptoStreamMode.Read)) {
+                            byte[] array3 = new byte[memoryStream.Length - memoryStream.Position];
+                            cryptoStream.Read(array3, 0, array3.Length);
+                            result = array3;
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        public static byte[] DecryptIt(Stream stream) {
+            byte[] array = new byte[stream.Length];
+            stream.Read(array, 0, array.Length);
+            return aesDec(array);
+        }
+    }
+}
+
+/* Made by DarkObb */
+
+
+================================================
+File: DotRefiner Deobfuscator/storage.cs
+================================================
+ï»¿using System.IO;
+using System.Text;
+
+namespace DotRefiner_Deobfuscator {
+    internal class storage {
+        private readonly BinaryReader storingShit;
+        public storage(Stream arr) => storingShit = new BinaryReader(arr, Encoding.Unicode);
+        public storage(byte[] arr) : this(new MemoryStream(arr)) { }
+        public string GetString() => storingShit.ReadString();
+        public sbyte GetSByte() => storingShit.ReadSByte();
+        public int GetInt() => storingShit.ReadInt32();
+        public long GetLong() => storingShit.ReadInt64();
+        public float GetFloat() => storingShit.ReadSingle();
+        public double GetDouble() => storingShit.ReadDouble();      
+    }
+}
+
+/* Made by DarkObb */
+
+
+================================================
+File: DotRefiner Deobfuscator/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("DotRefiner Deobfuscator")]
+[assembly: AssemblyDescription("Made by DarkObb")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("DotRefiner Deobfuscator")]
+[assembly: AssemblyCopyright("Copyright Â©  2019")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Setting ComVisible to false makes the types in this assembly not visible
+// to COM components.  If you need to access a type in this assembly from
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("01393a90-3912-4b5f-9f39-501e3602058e")]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+

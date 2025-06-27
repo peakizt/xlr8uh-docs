@@ -1,0 +1,273 @@
+Directory structure:
+└── darkbullnull-.netreactor_6.3.0.0_only_strings/
+    ├── README.md
+    ├── App.config
+    ├── ConfuserDeobfuscator.csproj
+    ├── Program.cs
+    ├── Properties/
+    │   └── AssemblyInfo.cs
+    ├── StringDecrypt/
+    │   └── StringDecrypt.cs
+    └── libs/
+
+================================================
+File: README.md
+================================================
+# .NETReactor_6.3.0.0_Only_Strings
+Example deobfuscate .NET Reactor 6.3.0.0 strings(ONLY STRINGS)
+
+
+
+================================================
+File: App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.8" />
+    </startup>
+</configuration>
+
+
+================================================
+File: ConfuserDeobfuscator.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{E8DD307B-6358-4E18-84F1-8902C28C4A05}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>ConfuserDeobfuscator</RootNamespace>
+    <AssemblyName>ConfuserDeobfuscator</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib, Version=3.3.2.0, Culture=neutral, PublicKeyToken=50e96378b6e77999">
+      <HintPath>libs\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StringDecrypt\StringDecrypt.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: Program.cs
+================================================
+ï»¿using System;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Runtime;
+using System.Reflection.Emit;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using ConfuserDeobfuscator.StringDeobfuscating;
+using OpCodes = dnlib.DotNet.Emit.OpCodes;
+using TypeAttributes = dnlib.DotNet.TypeAttributes;
+using MethodAttributes = dnlib.DotNet.MethodAttributes;
+using MethodImplAttributes = dnlib.DotNet.MethodImplAttributes;
+using dnlib.DotNet.Writer;
+using dnlib;
+using OperandType = System.Reflection.Emit.OperandType;
+
+namespace ConfuserDeobfuscator
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.Title = "Test .NET Reactor 6.3.0.0 deobfuscator by Dark_Bull";
+            if (args.Length == 0)
+            {
+                Console.WriteLine("Drag and drop file");
+                Thread.Sleep(2000);
+                Environment.Exit(1);
+            }
+            string pathFile = args[0];
+            //string pathFile = "H:\\GitHub\\Madness.NET\\Madness.NET\\Madness.NET\\bin\\x86\\Debug\\MadnessNET_Secure\\MadnessNET.exe";
+            ModuleDef moduleDef = ModuleDefMD.Load(pathFile);
+            Assembly assemblyDef = Assembly.LoadFile(pathFile);
+            MethodInfo methodInfo = (MethodInfo)assemblyDef.EntryPoint;
+            StringDecrypt stringDecrypt = new StringDecrypt(ref moduleDef, ref methodInfo);
+            //var writerOptions = new dnlib.DotNet.Writer.ModuleWriterOptions(moduleDef);
+            //writerOptions.Logger = DummyLogger.NoThrowInstance;
+            moduleDef.Write(Path.GetDirectoryName(args[0]) + "\\" + Path.GetFileNameWithoutExtension(args[0]) + "_strCleaned" + Path.GetExtension(args[0]));
+            //moduleDef.Write(Path.GetDirectoryName(pathFile) + "\\" + Path.GetFileNameWithoutExtension(pathFile) + "_cleaned" + Path.GetExtension(pathFile));
+            Console.Write("OK!\n");
+
+        }
+    }
+}
+
+
+
+================================================
+File: Properties/AssemblyInfo.cs
+================================================
+﻿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// Общие сведения об этой сборке предоставляются следующим набором
+// набора атрибутов. Измените значения этих атрибутов для изменения сведений,
+// связанные с этой сборкой.
+[assembly: AssemblyTitle("ConfuserDeobfuscator")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("ConfuserDeobfuscator")]
+[assembly: AssemblyCopyright("Copyright ©  2020")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Установка значения False для параметра ComVisible делает типы в этой сборке невидимыми
+// для компонентов COM. Если необходимо обратиться к типу в этой сборке через
+// из модели COM задайте для атрибута ComVisible этого типа значение true.
+[assembly: ComVisible(false)]
+
+// Следующий GUID представляет идентификатор typelib, если этот проект доступен из модели COM
+[assembly: Guid("e8dd307b-6358-4e18-84f1-8902c28c4a05")]
+
+// Сведения о версии сборки состоят из указанных ниже четырех значений:
+//
+//      Основной номер версии
+//      Дополнительный номер версии
+//      Номер сборки
+//      Номер редакции
+//
+// Можно задать все значения или принять номера сборки и редакции по умолчанию 
+// используя "*", как показано ниже:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+
+================================================
+File: StringDecrypt/StringDecrypt.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace ConfuserDeobfuscator.StringDeobfuscating
+{
+    public class StringDecrypt
+    {
+        private ModuleDef moduleDef { get; }
+        private MethodInfo methodInfo { get; }
+        public StringDecrypt(ref ModuleDef moduleDef, ref MethodInfo methodInfo)
+        {
+            this.moduleDef = moduleDef;
+            this.methodInfo = methodInfo;
+            Decrypt();
+        }
+
+        void Decrypt()
+        {
+            foreach (var typeDef in moduleDef.Types)
+            {
+                foreach (var methodDef in typeDef.Methods)
+                {
+                    
+                    if (methodDef.Body == null) continue;
+                    for (int i = 0; i < methodDef.Body.Instructions.Count(); i++)
+                    {
+                        if (methodDef.Body.Instructions[i].IsLdcI4() &&
+                            methodDef.Body.Instructions[i + 1].OpCode.Name == "call")
+                        {
+                            dynamic operand_call = methodDef.Body.Instructions[i + 1].Operand;
+                            if (operand_call.ReturnType.TypeName == "String" && operand_call.Parameters[0].Type.TypeName == "Int32")
+                            {
+                                dynamic operand_ldc = methodDef.Body.Instructions[i].Operand;
+                                string decrypt_string = InvokeDecryptMethod(operand_ldc, operand_call.Module.Name, operand_call.DeclaringType2.Name, operand_call.Name.String);
+                                methodDef.Body.Instructions[i].OpCode = OpCodes.Nop;
+                                methodDef.Body.Instructions[i + 1] = new Instruction(OpCodes.Ldstr, decrypt_string);
+                                methodDef.Body.OptimizeBranches();
+                                methodDef.Body.SimplifyBranches();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+        string InvokeDecryptMethod(int seed, string moduleName, string typeName, string methodName)
+        {
+            string decryptedString;
+            var module = methodInfo.Module.Assembly.GetModule(moduleName);
+            foreach (var type in module.GetTypes())
+            {
+                if (type.Name == typeName)
+                {
+                    foreach (var methodType in type.GetRuntimeMethods())
+                    {
+                        if (methodType.Name == methodName)
+                        {
+                            decryptedString = (string)methodType.Invoke(null, new object[] { seed });
+                            return decryptedString;
+                        }
+                    }
+                }
+            }
+            return "NULL";
+        }
+    }
+}
+
+
+

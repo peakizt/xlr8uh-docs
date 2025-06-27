@@ -1,0 +1,290 @@
+Directory structure:
+└── obfuscators-2019-antiinvokedetection/
+    ├── README.md
+    ├── Anti Invoke Detection.sln
+    └── Anti Invoke Detection/
+        ├── Anti Invoke Detection.csproj
+        ├── App.config
+        ├── ConsoleShort.cs
+        ├── Program.cs
+        ├── Properties/
+        │   └── AssemblyInfo.cs
+        └── obj/
+            └── Debug/
+                ├── Anti Invoke Detection.csproj.FileListAbsolute.txt
+                └── DesignTimeResolveAssemblyReferencesInput.cache
+
+================================================
+File: README.md
+================================================
+# AntiInvokeDetection
+most string deobfuscators use Invoke to pick up the strings, however some obfuscators are using "GetCallingAssembly" to check if the method is being executed by another assembly
+<br />
+This tool, just replace "GetCallingAssembly" to "GetExecutingAssembly" for ignore the invoke detection!
+
+
+
+================================================
+File: Anti Invoke Detection.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Express 2012 for Windows Desktop
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Anti Invoke Detection", "Anti Invoke Detection\Anti Invoke Detection.csproj", "{8F62B71F-52F4-4DC3-8EE6-DF6EC2C3B0F8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8F62B71F-52F4-4DC3-8EE6-DF6EC2C3B0F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F62B71F-52F4-4DC3-8EE6-DF6EC2C3B0F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F62B71F-52F4-4DC3-8EE6-DF6EC2C3B0F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F62B71F-52F4-4DC3-8EE6-DF6EC2C3B0F8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: Anti Invoke Detection/Anti Invoke Detection.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{8F62B71F-52F4-4DC3-8EE6-DF6EC2C3B0F8}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Anti_Invoke_Detection</RootNamespace>
+    <AssemblyName>Anti Invoke Detection</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib">
+      <HintPath>..\..\..\de4dot v 3.1.41592\bin\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ConsoleShort.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
+
+
+================================================
+File: Anti Invoke Detection/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.5" />
+    </startup>
+</configuration>
+
+
+================================================
+File: Anti Invoke Detection/ConsoleShort.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Anti_Invoke_Detection
+{
+    public partial class ConsoleShort
+    {
+        public void WriteLine(string text, ConsoleColor color) { Console.ForegroundColor = color; Console.WriteLine(text); Console.ResetColor(); }
+        public void Space() { Console.WriteLine(""); }
+        public void Pause() { Console.ReadKey(); }
+    }
+}
+
+
+================================================
+File: Anti Invoke Detection/Program.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using dnlib.DotNet.Emit;
+using dnlib.DotNet;
+using System.Reflection;
+using dnlib.DotNet.Writer;
+
+namespace Anti_Invoke_Detection
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            ConsoleShort Console = new ConsoleShort();
+            if (asArgs(args))
+            {
+                try
+                {
+                    int count = 0;
+                    ModuleDefMD md = ModuleDefMD.Load(args[0]);
+                    foreach (TypeDef type in md.GetTypes())
+                    {
+                        if (!type.IsGlobalModuleType) continue;
+                        foreach (MethodDef method in type.Methods)
+                        {
+                            try
+                            {
+                                if (!method.HasBody && !method.Body.HasInstructions) continue;
+                                for (int i = 0; i < method.Body.Instructions.Count; i++)
+                                {
+                                    if (method.Body.Instructions[i].OpCode == OpCodes.Call && method.Body.Instructions[i].Operand.ToString().Contains("CallingAssembly"))
+                                    {
+                                        method.Body.Instructions[i].Operand = (method.Body.Instructions[i].Operand = md.Import(typeof(Assembly).GetMethod("GetExecutingAssembly")));
+                                        count++;
+                                    }
+                                }
+                            }
+                            catch { }
+                        }
+                    }
+                    Console.WriteLine("Invoke Detection replaced: " + count, ConsoleColor.Red);
+                    ModuleWriterOptions writerOptions = new ModuleWriterOptions(md);
+                    writerOptions.MetaDataOptions.Flags |= MetaDataFlags.PreserveAll;
+                    writerOptions.Logger = DummyLogger.NoThrowInstance;
+
+                    NativeModuleWriterOptions NativewriterOptions = new NativeModuleWriterOptions(md);
+                    NativewriterOptions.MetaDataOptions.Flags |= MetaDataFlags.PreserveAll;
+                    NativewriterOptions.Logger = DummyLogger.NoThrowInstance;
+                    if (md.IsILOnly)
+                        md.Write(args[0] + "_unpacked.exe", writerOptions);
+                    
+                    md.NativeWrite(args[0] + "_unpacked.exe", NativewriterOptions);
+                }
+                catch { Console.WriteLine("File isn't .net assembly valid! ", ConsoleColor.Red); }
+            }
+            else
+            {
+                Console.WriteLine("No Args Detected!", ConsoleColor.Red);
+            }
+            Console.Pause();
+        }
+        static bool asArgs(string[] args)
+        {
+            try
+            {
+                if (args[0] != "2xx1452851xx821x") { return true; } else { return false; }
+            }
+            catch { return false; }
+        }
+    }
+}
+
+
+
+================================================
+File: Anti Invoke Detection/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following 
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("Anti Invoke Detection")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("Anti Invoke Detection")]
+[assembly: AssemblyCopyright("Copyright Â©  2018")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Setting ComVisible to false makes the types in this assembly not visible 
+// to COM components.  If you need to access a type in this assembly from 
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("528dd057-4dfd-40c0-9c24-c91a9b2c7d8d")]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version 
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers 
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+
+================================================
+File: Anti Invoke Detection/obj/Debug/Anti Invoke Detection.csproj.FileListAbsolute.txt
+================================================
+C:\Users\pc conect\Desktop\Cracking\Projects\Anti Invoke Detection\Anti Invoke Detection\bin\Debug\Anti Invoke Detection.exe.config
+C:\Users\pc conect\Desktop\Cracking\Projects\Anti Invoke Detection\Anti Invoke Detection\bin\Debug\Anti Invoke Detection.exe
+C:\Users\pc conect\Desktop\Cracking\Projects\Anti Invoke Detection\Anti Invoke Detection\bin\Debug\Anti Invoke Detection.pdb
+C:\Users\pc conect\Desktop\Cracking\Projects\Anti Invoke Detection\Anti Invoke Detection\bin\Debug\dnlib.dll
+C:\Users\pc conect\Desktop\Cracking\Projects\Anti Invoke Detection\Anti Invoke Detection\bin\Debug\dnlib.pdb
+C:\Users\pc conect\Desktop\Cracking\Projects\Anti Invoke Detection\Anti Invoke Detection\obj\Debug\Anti Invoke Detection.exe
+C:\Users\pc conect\Desktop\Cracking\Projects\Anti Invoke Detection\Anti Invoke Detection\obj\Debug\Anti Invoke Detection.pdb
+
+
+
+================================================
+File: Anti Invoke Detection/obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache
+================================================
+[Non-text file]
+

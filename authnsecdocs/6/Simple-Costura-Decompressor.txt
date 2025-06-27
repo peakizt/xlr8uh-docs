@@ -1,0 +1,416 @@
+Directory structure:
+└── dr4k0nia-simple-costura-decompressor/
+    ├── README.md
+    ├── App.config
+    ├── Costura-Decompressor.csproj
+    ├── Costura-Decompressor.sln
+    ├── Extensions.cs
+    ├── Extractor.cs
+    ├── LICENSE.md
+    ├── Logger.cs
+    ├── Program.cs
+    └── packages.config
+
+================================================
+File: README.md
+================================================
+
+# Simple Costura Decompressor
+**Simple tool to extract and decompress embedded resources processed by Fody Costura**
+
+## Usage
+Using command line arguments:
+
+    Costura-Decompressor.exe file1.exe file.dll.compressed
+The tool supports executable files with costura processed resources and the compressed resources as single files which can be extracted using tools like dnSpy, ILSpy etc.
+
+Output looks like this:
+![example output](https://i.imgur.com/0bOrPqe.png)
+
+You can also just drag the file you want to decompress or extract and decompress resources from onto the executable.
+
+## Dependencies
+- AsmResolver
+- Colorful.Console
+
+
+
+================================================
+File: App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.7.2" />
+    </startup>
+</configuration>
+
+
+================================================
+File: Costura-Decompressor.csproj
+================================================
+ï»¿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net48</TargetFramework>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <LangVersion>9</LangVersion>
+    </PropertyGroup>
+
+  <PropertyGroup>
+    <ApplicationIcon>entp-icon-big.ico</ApplicationIcon>
+  </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="AsmResolver.DotNet" Version="4.7.1" />
+      <PackageReference Include="Colorful.Console" Version="1.2.11.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Properties" />
+    </ItemGroup>
+
+</Project>
+
+
+================================================
+File: Costura-Decompressor.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29230.47
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Costura-Decompressor", "Costura-Decompressor.csproj", "{C8DCF752-7D9D-480E-8585-4C46FF6AD861}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C8DCF752-7D9D-480E-8585-4C46FF6AD861}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8DCF752-7D9D-480E-8585-4C46FF6AD861}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8DCF752-7D9D-480E-8585-4C46FF6AD861}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8DCF752-7D9D-480E-8585-4C46FF6AD861}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A4DEA7D4-8931-4B0F-8D3B-74D6E99C5F43}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: Extensions.cs
+================================================
+ï»¿using System.IO;
+using System.IO.Compression;
+using AsmResolver.DotNet;
+using static Costura_Decompressor.Logger;
+
+namespace Costura_Decompressor
+{
+    public static class Extensions
+    {
+        private static byte[] DecompressResource(this Stream input)
+        {
+            using var output = new MemoryStream();
+            using var deflateStream = new DeflateStream(input, CompressionMode.Decompress);
+            deflateStream.CopyTo(output);
+
+            return output.ToArray();
+        }
+
+        public static string GetOutputPath(this ModuleDefinition module)
+        {
+            if (module.FilePath == null) return null;
+            if (module.Assembly == null) return null;
+            string name = Path.GetFileName(module.FilePath);
+            return Path.Combine(module.FilePath.Remove(module.FilePath.Length - name.Length),
+                @$"{module.Assembly.Name}-decompressed-resources\");
+        }
+
+        public static byte[] Decompress(this byte[] data)
+        {
+            using var input = new MemoryStream(data);
+            using var output = new MemoryStream();
+            using var deflateStream = new DeflateStream(input, CompressionMode.Decompress);
+            deflateStream.CopyTo(output);
+
+            return output.ToArray();
+        }
+
+        public static void ProcessCompressedFile(this string inputFile)
+        {
+            string outputFileName = inputFile.Replace("costura.", null);
+            outputFileName = outputFileName.Replace(".compressed", null);
+            using (var bufferStream = File.OpenRead(inputFile))
+                File.WriteAllBytes(outputFileName, bufferStream.DecompressResource());
+            Log($"Decompressed costura file: {inputFile}", LogType.Success);
+        }
+    }
+}
+
+
+================================================
+File: Extractor.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.IO;
+using AsmResolver.DotNet;
+
+namespace Costura_Decompressor
+{
+    public class ExtractorNew
+    {
+        private readonly ModuleDefinition _module;
+
+        private readonly string _outputPath;
+
+        public ExtractorNew(ModuleDefinition module)
+        {
+            _module = module;
+            _outputPath = module.GetOutputPath();
+        }
+
+        public void Run()
+        {
+            if (ExtractResources(out var resources))
+            {
+                SaveResources(resources);
+                return;
+            }
+
+            Logger.Error("Could not find or extract costura embedded resources");
+        }
+
+        private bool ExtractResources(out Dictionary<byte[], string> resources)
+        {
+            resources = new Dictionary<byte[], string>();
+
+            if (_module.Resources.Count == 0)
+                return false;
+
+            foreach (var resource in _module.Resources)
+            {
+                if (!resource.IsEmbedded)
+                    continue;
+
+                string name = resource.Name;
+
+                if (name.Length < 19)
+                    continue;
+
+                if (!name.StartsWith("costura.") || !name.EndsWith(".compressed"))
+                    continue;
+
+                // Strip costura. and .compressed from the resource name
+                name = name.Substring(8, name.LastIndexOf(".compressed") - 8);
+
+                byte[] data = resource.GetData();
+
+                if (data != null)
+                    resources.Add(data.Decompress(), name);
+
+                Logger.Success($"Extracted costura resource {name}");
+            }
+
+            return resources.Count != 0;
+        }
+
+        private void SaveResources(Dictionary<byte[], string> extractedResources)
+        {
+            if (!Directory.Exists(_outputPath))
+                Directory.CreateDirectory(_outputPath);
+
+            foreach (var entry in extractedResources)
+            {
+                string fullPath = Path.Combine(_outputPath, entry.Value);
+                File.WriteAllBytes(fullPath, entry.Key);
+            }
+
+            Logger.Info($"Saved {extractedResources.Count} extracted Resources to {_outputPath}");
+        }
+    }
+}
+
+
+================================================
+File: LICENSE.md
+================================================
+MIT License
+
+Copyright (c) 2022 drakonia
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+
+================================================
+File: Logger.cs
+================================================
+ï»¿using System;
+using System.Drawing;
+using Colorful;
+using Console = Colorful.Console;
+
+namespace Costura_Decompressor
+{
+    public static class Logger
+    {
+        public static void Log(string text, LogType type)
+        {
+            const string template = "{0} {1}";
+            switch (type)
+            {
+                case LogType.Success:
+                {
+                    Formatter[] success =
+                    {
+                        new Formatter("[>]", Color.Yellow),
+                        new Formatter(text, Color.White)
+                    };
+                    Console.WriteLineFormatted(template, Color.Gray, success);
+                    break;
+                }
+                case LogType.Info:
+                {
+                    Formatter[] info =
+                    {
+                        new Formatter("[i]", Color.DodgerBlue),
+                        new Formatter(text, Color.White)
+                    };
+                    Console.WriteLineFormatted(template, Color.Gray, info);
+                    break;
+                }
+                case LogType.Error:
+                {
+                    Formatter[] error =
+                    {
+                        new Formatter("[error]", Color.Red),
+                        new Formatter(text, Color.Crimson)
+                    };
+                    Console.WriteLineFormatted(template, Color.Gray, error);
+                    break;
+                }
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
+            }
+        }
+
+        public static void Success(string message) => Log(message, LogType.Success);
+
+        public static void Error(string message) => Log(message, LogType.Error);
+
+        public static void Info(string message) => Log(message, LogType.Info);
+
+
+        public enum LogType
+        {
+            Success = 0,
+            Info = 1,
+            Error = 3
+        }
+    }
+}
+
+
+================================================
+File: Program.cs
+================================================
+ï»¿using System;
+using System.IO;
+using AsmResolver.DotNet;
+using Console = Colorful.Console;
+
+namespace Costura_Decompressor
+{
+    internal static class Program
+    {
+        private static void Main(string[] args)
+        {
+            if (args.Length == 0)
+            {
+                Console.WriteLine("Usage: Costura-Decompressor.exe <file1.exe> <file2.dll.compressed> ...");
+                Console.ReadKey();
+                return;
+            }
+
+            foreach (string inputFile in args)
+            {
+                if (!File.Exists(inputFile))
+                {
+                    Logger.Error($"File not found: {inputFile}");
+                    continue;
+                }
+
+                //Check if the file is an executable
+                if (Path.GetExtension(inputFile) == ".exe" || Path.GetExtension(inputFile) == ".dll")
+                {
+                    ProcessExecutable(inputFile);
+                    continue;
+                }
+
+
+                if (inputFile.EndsWith(".compressed"))
+                {
+                    inputFile.ProcessCompressedFile();
+                    continue;
+                }
+
+                Logger.Error("Unsupported file extension, accepts \".exe\". \".dll\" or \".compressed\"");
+            }
+
+            Console.ReadKey();
+        }
+
+        private static void ProcessExecutable(string inputFile)
+        {
+            Logger.Info($"Processing executable: {Path.GetFileName(inputFile)}");
+            try
+            {
+                var module = ModuleDefinition.FromFile(inputFile);
+                var extractor = new ExtractorNew(module);
+                extractor.Run();
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e.Message);
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: packages.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<packages>
+  <package id="Colorful.Console" version="1.2.11" targetFramework="net472" />
+  <package id="dnlib" version="3.3.2" targetFramework="net472" />
+</packages>
+

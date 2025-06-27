@@ -1,0 +1,464 @@
+Directory structure:
+└── hussaryn-net-reactor-cflow-cleaner-6.7.0.0/
+    ├── README.md
+    ├── DNR 6.7 Cflow.sln
+    ├── LICENSE
+    ├── DNR 6.7 Cflow/
+    │   ├── DNR 6.7 Cflow.csproj
+    │   ├── Program.cs
+    │   ├── Core/
+    │   │   ├── CflowRemover.cs
+    │   │   ├── Context.cs
+    │   │   └── CtxOptions.cs
+    │   └── Utils/
+    │       ├── ILogger.cs
+    │       └── Logger.cs
+    └── Images/
+
+================================================
+File: README.md
+================================================
+# NET Reactor Cflow Cleaner 6.7.X.X  
+
+
+<p align="center">
+  <img src="https://github.com/Hussaryn/NET-Reactor-Cflow-Cleaner-6.7.0.0/blob/main/Images/img.png?raw=true" />
+</p>
+
+---
+
+## What is .NET Reactor?
+
+.NET Reactor is a powerful code protection and software licensing system for software written for the .NET Framework, and supports all languages that generate .NET assemblies. 
+
+## What is Control Flow?
+
+Control Flow Obfuscation converts the code inside your methods into spaghetti code, which whilst retaining the function of the code makes it extremely difficult for human eyes and decompilers to follow the program logic. Decompilers are not able to decompile the spaghetti code back to your original source code.
+
+---
+
+- String Decrypter for .NET Reactor 6.7.0.0: [Click me!](https://github.com/Hussaryn/NET-Reactor-String-Cleaner-6.7.0.0)
+
+### Before
+
+```C#
+public static void Main(string[] args)
+{
+    int num = 1;
+    for (;;)
+	{
+        int num2 = num;
+        do
+        {
+			switch (num2)
+			{
+				case 1:
+					Console.WriteLine("Hello, type anything");
+					num2 = 0;
+					if (<Module>{ae7ca312-4aae-4a50-8c02-68cd0f6a49a5}.m_ac846466e909461989ac23502fbfe894 == 0)
+					{
+						goto Block_2;
+					}
+					continue;
+				case 2:
+                    return;
+			}
+			Console.ReadKey();
+			num2 = 2;
+		}
+		while (<Module>{ae7ca312-4aae-4a50-8c02-68cd0f6a49a5}.m_d61b15f7b2a5404db656ec8afd85287e == 0);
+		Block_2:;
+	}
+}
+```
+### After
+```C#
+public static void Main(string[] args)
+{
+    Console.WriteLine("Hello, type anything.");
+    Console.ReadKey();
+}
+```
+---
+
+## References
+> https://github.com/de4dot/de4dot/tree/master/de4dot.blocks <br>
+> https://github.com/SychicBoy/.NetReactorCfCleaner
+
+## Credits
+
+- GitHub - [SychicBoy](https://github.com/SychicBoy)
+- GitHub - [de4dot](https://github.com/de4dot)
+
+[Back To The Top](#read-me-template)
+
+
+
+================================================
+File: DNR 6.7 Cflow.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DNR 6.7 Cflow", "DNR 6.7 Cflow\DNR 6.7 Cflow.csproj", "{F606B3A7-E390-442C-9BF4-8882C6AD4B19}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F606B3A7-E390-442C-9BF4-8882C6AD4B19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F606B3A7-E390-442C-9BF4-8882C6AD4B19}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F606B3A7-E390-442C-9BF4-8882C6AD4B19}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F606B3A7-E390-442C-9BF4-8882C6AD4B19}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: LICENSE
+================================================
+MIT License
+
+Copyright (c) 2021 hussaryn
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+
+================================================
+File: DNR 6.7 Cflow/DNR 6.7 Cflow.csproj
+================================================
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net5.0</TargetFramework>
+        <RootNamespace>DNR</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Colorful.Console" Version="1.2.15" />
+      <PackageReference Include="de4dot.blocks" Version="3.2.0" />
+      <PackageReference Include="dnlib" Version="3.3.2" />
+    </ItemGroup>
+
+</Project>
+
+
+
+================================================
+File: DNR 6.7 Cflow/Program.cs
+================================================
+ï»¿using System.Diagnostics;
+using System.Drawing;
+using Colorful;
+using DNR.Core;
+using DNR.Utils;
+
+namespace DNR
+{
+    internal static class Program
+    {
+        private static readonly string asciiArt = @"
+        _________                __                 
+        \_   ___ \  ____________/  |_  ____ ___  ___
+        /    \  \/ /  _ \_  __ \   __\/ __ \\  \/  /
+        \     \___(  <_> )  | \/|  | \  ___/ >    < 
+         \______  /\____/|__|   |__|  \___  >__/\_ \
+                \/                        \/      \/
+                   .NET Reactor 6.7.0.0 Cflow
+                 By https://github.com/Hussaryn
+                       Credits SychicBoy
+
+        ";
+        public static void Main(string[] args) {
+            Console.Title = "DNR 6.7.0.0 Cflow Cleaner";
+            Console.WriteLine(asciiArt, Color.IndianRed);
+
+            var logger = new Logger();
+            var stopwatch = Stopwatch.StartNew();
+            
+            if (args.Length < 1) {
+                logger.Warning("Usage: DNR 6.7 Cflow.exe <path>");
+                Console.ReadLine();
+                return;
+            }
+          
+            var options = new CtxOptions(args[0], logger);
+            var ctx = new Context(options);
+
+            // There is only that so we are just making simple call
+            CflowRemover.Execute(ctx);
+            ctx.Save();
+
+            logger.Success($"Cleaned {CflowRemover.FixedMethods} methods!");
+            logger.Success($"Saved in {ctx.Options.OutputPath}!");
+            
+            stopwatch.Stop();
+            logger.Success($"Finished all tasks in {stopwatch.Elapsed}");
+            Console.ReadKey();
+        }
+    }
+}
+
+
+================================================
+File: DNR 6.7 Cflow/Core/CflowRemover.cs
+================================================
+ï»¿using System.Linq;
+using de4dot.blocks;
+using de4dot.blocks.cflow;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace DNR.Core
+{
+    // Credits: https://github.com/SychicBoy/.NetReactorCfCleaner This is just my recoded updated version
+    internal static class CflowRemover
+    {
+        public static uint FixedMethods { get; private set; }
+
+        public static void Execute(Context ctx)
+        {
+            SimplifyArithmetic(ctx);
+
+            var CfDeob = new BlocksCflowDeobfuscator();
+
+            foreach (var TypeDef in ctx.Module.Types.ToArray())
+                foreach (var MethodDef in TypeDef.Methods.Where(x => x.HasBody && ContainsSwitch(x)).ToArray())
+                    try
+                    {
+                        var blocks = new Blocks(MethodDef);
+                        blocks.MethodBlocks.GetAllBlocks();
+                        blocks.RemoveDeadBlocks();
+                        blocks.RepartitionBlocks();
+                        blocks.UpdateBlocks();
+                        blocks.Method.Body.SimplifyBranches();
+                        blocks.Method.Body.OptimizeBranches();
+                        CfDeob.Initialize(blocks);
+                        CfDeob.Deobfuscate();
+                        blocks.RepartitionBlocks();
+                        blocks.GetCode(out
+                        var instructions, out
+                        var exceptionHandlers);
+                        DotNetUtils.RestoreBody(MethodDef, instructions, exceptionHandlers);
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+        }
+
+        private static void SimplifyArithmetic(Context ctx)
+        {
+            var logger = ctx.Options.Logger;
+
+            foreach (var type in ctx.Module.Types)
+                foreach (var method in type.Methods.Where(x => x.HasBody && x.Body.HasInstructions && x.Body.Instructions.Count >= 3))
+                {
+                    var Instructions = method.Body.Instructions;
+
+                    for (var i = 1; i < Instructions.Count; i++)
+                    {
+                        if (i + 1 >= Instructions.Count) continue;
+
+                        var prevInstr = Instructions[i - 1];
+                        var curInstr = Instructions[i];
+                        var nextInstr = Instructions[i + 1];
+
+                        // Too lazy to strip these two into one function, mess
+                        #region Ldsfld
+                        if (curInstr.OpCode == OpCodes.Brtrue &&
+                            nextInstr.OpCode == OpCodes.Pop && 
+                            prevInstr.OpCode == OpCodes.Ldsfld) {
+                            logger.Info($"Brtrue:  {method.FullName}");
+                            prevInstr.OpCode = OpCodes.Nop;
+                            curInstr.OpCode = OpCodes.Br_S;
+                            FixedMethods++;
+                        }
+                        else if (curInstr.OpCode == OpCodes.Brfalse && 
+                            nextInstr.OpCode == OpCodes.Pop &&
+                            prevInstr.OpCode == OpCodes.Ldsfld) {
+                            logger.Info($"Brfalse: {method.FullName}");
+                            prevInstr.OpCode = OpCodes.Nop;
+                            curInstr.OpCode = OpCodes.Br_S;
+                            FixedMethods++;
+                        }
+                        #endregion
+
+                        #region Call
+                        if (curInstr.OpCode == OpCodes.Brtrue && 
+                            nextInstr.OpCode == OpCodes.Pop &&
+                            prevInstr.OpCode == OpCodes.Call) {
+                            if (prevInstr.Operand.ToString().Contains("System.Boolean")) {
+                                logger.Info($"Call with Boolean: {method.FullName}");
+                                prevInstr.OpCode = OpCodes.Nop;
+                                curInstr.OpCode = OpCodes.Br_S;
+                            }
+                            else {
+                                logger.Info($"Call:  {method.FullName}");
+                                prevInstr.OpCode = OpCodes.Nop;
+                                curInstr.OpCode = OpCodes.Nop;
+                            }
+                        }
+                        else if (curInstr.OpCode == OpCodes.Brfalse && 
+                            nextInstr.OpCode == OpCodes.Pop &&
+                            prevInstr.OpCode == OpCodes.Call) {
+                             if (prevInstr.Operand.ToString().Contains("System.Boolean")) {
+                                logger.Info($"Call with Boolean: {method.FullName}");
+                                prevInstr.OpCode = OpCodes.Nop;
+                                curInstr.OpCode = OpCodes.Nop;
+                             }
+                             else {
+                                logger.Info($"Call: {method.FullName}");
+                                prevInstr.OpCode = OpCodes.Nop;
+                                curInstr.OpCode = OpCodes.Br_S;
+                             }
+                        }
+                        #endregion
+                    }
+                }
+        }
+
+        private static bool ContainsSwitch(MethodDef method) => method.Body.Instructions.Any(t => t.OpCode == OpCodes.Switch);
+    }
+}
+
+
+================================================
+File: DNR 6.7 Cflow/Core/Context.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Writer;
+
+namespace DNR.Core
+{
+    public class Context
+    {
+        public CtxOptions Options { get; }
+        public ModuleDefMD Module { get; }
+
+        public Context(CtxOptions ctxOptions)
+        {
+            Options = ctxOptions;
+            Module = ModuleDefMD.Load(Options.FilePath);
+        }
+
+        public void Save()
+        {
+            var writerOptions = new ModuleWriterOptions(Module) {
+                Logger = DummyLogger.NoThrowInstance,
+                MetadataOptions = {
+                    Flags = MetadataFlags.PreserveAll & MetadataFlags.KeepOldMaxStack
+                }
+            };
+
+            Module.Write(Options.OutputPath, writerOptions);
+        }
+    }
+}
+
+
+================================================
+File: DNR 6.7 Cflow/Core/CtxOptions.cs
+================================================
+ï»¿using System.IO;
+using DNR.Utils;
+
+namespace DNR.Core
+{
+    public class CtxOptions
+    {
+        public CtxOptions(string filePath, ILogger logger)
+        {
+            Logger = logger;
+            FilePath = filePath;
+            OutputPath = Path.Combine(Path.GetDirectoryName(filePath)!,
+                $"{Path.GetFileNameWithoutExtension(filePath)}-nocflow{Path.GetExtension(filePath)}");
+        }
+
+        public ILogger Logger { get; }
+        public string FilePath { get; }
+        public string OutputPath { get; }
+    }
+}
+
+
+================================================
+File: DNR 6.7 Cflow/Utils/ILogger.cs
+================================================
+ï»¿namespace DNR.Utils
+{
+    public interface ILogger
+    {
+        void Debug(string message);
+        void Info(string message);
+        void Warning(string message);
+        void Error(string message);
+        void Success(string message);
+    }
+}
+
+
+================================================
+File: DNR 6.7 Cflow/Utils/Logger.cs
+================================================
+ï»¿using System;
+using System.Diagnostics;
+using System.Drawing;
+using Colorful;
+using Console = Colorful.Console;
+
+namespace DNR.Utils
+{
+    internal class Logger : ILogger
+    {
+        public Logger() {
+            _sheet = new StyleSheet(Color.White);
+            _sheet.AddStyle("(?<=\\[)\\-(?=\\])", Color.DarkGray);
+            _sheet.AddStyle("(?<=\\[)\\*(?=\\])", Color.Cyan);
+            _sheet.AddStyle("(?<=\\[)\\!(?=\\])", Color.Orange);
+            _sheet.AddStyle("(?<=\\[)\\#(?=\\])", Color.Red);
+            _sheet.AddStyle("(?<=\\[)\\+(?=\\])", Color.Lime);
+            _sheet.AddStyle("(?<=^....)(.*)", Color.LightGray);
+        }
+
+        private readonly StyleSheet _sheet;
+        private void Log(string message) => 
+            Console.WriteLineStyled(message, _sheet);
+        public void Debug(string message) =>
+            Log($"[-] {message}");
+
+        public void Info(string message) =>
+            Log($"[*] {message}");
+
+        public void Warning(string message) =>
+            Log($"[!] {message}");
+
+        public void Error(string message) =>
+            Log($"[#] {message}");
+
+        public void Success(string message) =>
+            Log($"[+] {message}");
+    }
+}
+
+

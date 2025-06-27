@@ -1,0 +1,461 @@
+Directory structure:
+└── devt02-pointmutationremover/
+    ├── README.md
+    ├── IntptrPoint.sln
+    └── IntptrPoint/
+        ├── App.config
+        ├── IntptrPoint.csproj
+        ├── PointRemover.cs
+        ├── Program.cs
+        ├── Properties/
+        │   └── AssemblyInfo.cs
+        ├── bin/
+        │   └── Debug/
+        │       ├── IntptrPoint.exe.config
+        │       └── README.txt
+        └── obj/
+            └── Debug/
+                ├── DesignTimeResolveAssemblyReferencesInput.cache
+                ├── IntptrPoint.csproj.CopyComplete
+                ├── IntptrPoint.csproj.CoreCompileInputs.cache
+                ├── IntptrPoint.csproj.FileListAbsolute.txt
+                ├── IntptrPoint.csprojAssemblyReference.cache
+                ├── TemporaryGeneratedFile_036C0B5B-1481-4323-8D20-8F5ADCB23D92.cs
+                ├── TemporaryGeneratedFile_5937a670-0e60-4077-877b-f7221da3dda1.cs
+                └── TemporaryGeneratedFile_E7A71F73-0F8D-4B9B-B56E-8E70B10BC5D3.cs
+
+================================================
+File: README.md
+================================================
+# PointMutationRemover
+This remover removes 2d point mutations. It's very basic so there is a slight possibility of it not working with some. Just a warning, BIN/DEBUG is NOT UPDATED by me anymore! Head on over to releases.
+
+# Example of what it does
+**Original Code:**
+```csharp
+int test = new Point(123, 312).X
+Console.WriteLine(test);
+```
+
+**Final:**
+```csharp
+int test = 123;
+Console.WriteLine(test);
+```
+
+# How to use
+Drag and drop exe file protected with point mutations.
+Use de4dot to clean the file, then re-use the point remover.
+
+# Help?
+You could always open an issue and i will happily look into it. Or you could DM me (check my github homepage)
+
+
+
+================================================
+File: IntptrPoint.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.1082
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntptrPoint", "IntptrPoint\IntptrPoint.csproj", "{FBA88A3B-E232-4D85-A751-9C4BE5028602}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FBA88A3B-E232-4D85-A751-9C4BE5028602}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBA88A3B-E232-4D85-A751-9C4BE5028602}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBA88A3B-E232-4D85-A751-9C4BE5028602}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBA88A3B-E232-4D85-A751-9C4BE5028602}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8857822C-80C9-465C-BA6B-762E5DCA105B}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: IntptrPoint/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.6" />
+    </startup>
+</configuration>
+
+
+================================================
+File: IntptrPoint/IntptrPoint.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{FBA88A3B-E232-4D85-A751-9C4BE5028602}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>IntptrPoint</RootNamespace>
+    <AssemblyName>IntptrPoint</AssemblyName>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="de4dot.blocks">
+      <HintPath>..\..\ATTRIBUTE KILLER\de4dot.blocks.dll</HintPath>
+    </Reference>
+    <Reference Include="dnlib">
+      <HintPath>..\..\..\..\Desktop\REVERSE ENGINEERING and Roblox\Exploit Sources\NICHEAN\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="PointRemover.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: IntptrPoint/PointRemover.cs
+================================================
+using de4dot.blocks;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace IntptrPoint
+{
+    class PointRemover
+    {
+        public static int amount = 0;
+        public static void Clean()
+        {
+            foreach (TypeDef types in Program.module.GetTypes())
+            {
+                foreach (MethodDef method in types.Methods)
+                {
+                    if (!method.HasBody) continue;
+                        IList<Instruction> instr = method.Body.Instructions;
+                        for (int i = 0; i < instr.Count; i++)
+                        {
+                            // CODE: new Point(1676, 3352).Y 
+                            // A POINT MUTATION IN DNSPY LOOKS LIKE:
+
+                            //19  0047    ldc.i4    0x68C 
+                            //20  004C    ldc.i4    0xD18
+                            //21  0051    newobj    instance void [System.Drawing]System.Drawing.Point::.ctor(int32, int32)
+                            //22  0056    stloc.s   V_69(69)
+                            //23  0058    ldloca.s  V_69(69)
+                            //24  005A    call    instance int32[System.Drawing]System.Drawing.Point::get_Y()
+
+
+                            // 2 instructions before Point::.ctor (constructor) is X value, 1 instruction before is Y value
+
+                            // 3 instructions ahead is .Y /.X  get_X obviously means .X   get_Y obviously means .Y
+
+                            // Here, we will try getting point via instruction 21 (the newobj opcode). If this exists, it is possible to check if there is point mutation
+
+                            try
+                            {
+                                if (instr[i + 3].OpCode != OpCodes.Call || instr[i].OpCode != OpCodes.Newobj || !instr[i].Operand.ToString().Contains("Point::.ctor") || !instr[i + 3].Operand.ToString().Contains("::get_") || !instr[i + 1].OpCode.Name.StartsWith("stloc") || !instr[i + 2].OpCode.Name.StartsWith("ldloca")) continue;
+                            }
+                            catch
+                            {
+                                continue; // If instruction is 0, 1, or 2, this will stop the OutOfRangeExeption. (skip)
+                            }
+
+                            if (instr[i + 3].Operand.ToString().Contains("::get_X")) // IF .X
+                            {
+                                if (!instr[i - 1].OpCode.ToString().Contains("ldc.i4"))
+                                    continue; //Opcode has to be an LDCi4 instruction
+                                instr[i].OpCode = OpCodes.Nop; //removes newobj
+                                instr[i + 1].OpCode = OpCodes.Nop; // removes stloc
+                                instr[i + 2].OpCode = OpCodes.Nop; // removes ldloca
+                                instr[i + 3].OpCode = OpCodes.Nop; // removes .X
+                                instr[i - 1].OpCode = OpCodes.Nop; // Because it looks for .X, we can remove the Y Value stuff so only the X value remains
+
+                            }
+                            if (instr[i + 3].Operand.ToString().Contains("::get_Y"))
+                            {
+                                if (!instr[i - 2].OpCode.ToString().Contains("ldc.i4"))
+                                    continue;
+                                instr[i].OpCode = OpCodes.Nop;
+                                instr[i + 1].OpCode = OpCodes.Nop;
+                                instr[i + 2].OpCode = OpCodes.Nop;
+                                instr[i + 3].OpCode = OpCodes.Nop;
+                                instr[i - 2].OpCode = OpCodes.Nop;
+                            }
+                            amount++;
+                        }
+                }
+
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: IntptrPoint/Program.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Writer;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace IntptrPoint
+{
+    class Program
+    {
+        public static string Asmpath;
+        public static ModuleDefMD module;
+        public static Assembly asm;
+        static void Main(string[] args)
+        {
+            Console.Title = "Point Remover by OFF_LINE";
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("\n");
+            string lol = @" /$$$$$$$           /$$             /$$           /$$$$$$$$ /$$                              
+| $$__  $$         |__/            | $$          | $$_____/|__/                              
+| $$  \ $$ /$$$$$$  /$$ /$$$$$$$  /$$$$$$        | $$       /$$ /$$   /$$  /$$$$$$   /$$$$$$ 
+| $$$$$$$//$$__  $$| $$| $$__  $$|_  $$_/        | $$$$$   | $$|  $$ /$$/ /$$__  $$ /$$__  $$
+| $$____/| $$  \ $$| $$| $$  \ $$  | $$          | $$__/   | $$ \  $$$$/ | $$$$$$$$| $$  \__/
+| $$     | $$  | $$| $$| $$  | $$  | $$ /$$      | $$      | $$  >$$  $$ | $$_____/| $$      
+| $$     |  $$$$$$/| $$| $$  | $$  |  $$$$/      | $$      | $$ /$$/\  $$|  $$$$$$$| $$      
+|__/      \______/ |__/|__/  |__/   \___/        |__/      |__/|__/  \__/ \_______/|__/      
+                                                                                             
+                                                                                             
+                                                                                             ";
+            Console.WriteLine(lol);
+            string diretorio = args[0];
+            try
+            {
+                Program.module = ModuleDefMD.Load(diretorio, (ModuleCreationOptions) null);
+                Program.asm = Assembly.LoadFrom(diretorio);
+                Program.Asmpath = diretorio;
+            }
+
+            catch (Exception)
+            {
+                Console.WriteLine("Not .NET Assembly...");
+            }
+            string text = Path.GetDirectoryName(diretorio);
+            bool flag = !text.EndsWith("\\");
+            bool flag2 = flag;
+            if (flag2)
+            {
+                text += "\\";
+            }
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Successfully loaded assembly!");
+            Console.ForegroundColor = ConsoleColor.White;
+
+            try
+            {
+                IntptrPoint.PointRemover.Clean();
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine("Removing mutations!");
+
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("[!] Failed to remove. ORIGINAL EXCEPTION: " + ex.ToString());
+            }
+            string filename = string.Format("{0}{1}_Unpacked{2}", text, Path.GetFileNameWithoutExtension(diretorio), Path.GetExtension(diretorio));
+            ModuleWriterOptions writerOptions = new ModuleWriterOptions(Program.module);
+            writerOptions.MetaDataOptions.Flags |= MetaDataFlags.PreserveAll;
+            writerOptions.Logger = DummyLogger.NoThrowInstance;
+            NativeModuleWriterOptions NativewriterOptions = new NativeModuleWriterOptions(Program.module);
+            NativewriterOptions.MetaDataOptions.Flags |= MetaDataFlags.PreserveAll;
+            NativewriterOptions.Logger = DummyLogger.NoThrowInstance;
+            bool isILOnly = Program.module.IsILOnly;
+            if (isILOnly)
+            {
+                Program.module.Write(filename, writerOptions);
+            }
+            else
+            {
+                Program.module.NativeWrite(filename, NativewriterOptions);
+            }
+            Console.WriteLine("");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Successfully removed " + IntptrPoint.PointRemover.amount + " point mutations");
+            Console.ReadLine();
+        }
+    }
+}
+
+
+
+================================================
+File: IntptrPoint/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("IntptrPoint")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("IntptrPoint")]
+[assembly: AssemblyCopyright("Copyright Â©  2020")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Setting ComVisible to false makes the types in this assembly not visible
+// to COM components.  If you need to access a type in this assembly from
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("fba88a3b-e232-4d85-a751-9c4be5028602")]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+
+================================================
+File: IntptrPoint/bin/Debug/IntptrPoint.exe.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.6" />
+    </startup>
+</configuration>
+
+
+================================================
+File: IntptrPoint/bin/Debug/README.txt
+================================================
+no intptr (name throws you off lmfao)
+
+
+================================================
+File: IntptrPoint/obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache
+================================================
+[Non-text file]
+
+
+================================================
+File: IntptrPoint/obj/Debug/IntptrPoint.csproj.CopyComplete
+================================================
+
+
+
+================================================
+File: IntptrPoint/obj/Debug/IntptrPoint.csproj.CoreCompileInputs.cache
+================================================
+e1f3729598581eec2ff806a52d0a95a4b77ff0c9
+
+
+
+================================================
+File: IntptrPoint/obj/Debug/IntptrPoint.csproj.FileListAbsolute.txt
+================================================
+C:\Users\devli\source\repos\IntptrPoint\IntptrPoint\obj\Debug\IntptrPoint.csprojAssemblyReference.cache
+C:\Users\devli\source\repos\IntptrPoint\IntptrPoint\obj\Debug\IntptrPoint.csproj.CoreCompileInputs.cache
+C:\Users\devli\source\repos\IntptrPoint\IntptrPoint\bin\Debug\IntptrPoint.exe.config
+C:\Users\devli\source\repos\IntptrPoint\IntptrPoint\bin\Debug\IntptrPoint.exe
+C:\Users\devli\source\repos\IntptrPoint\IntptrPoint\bin\Debug\IntptrPoint.pdb
+C:\Users\devli\source\repos\IntptrPoint\IntptrPoint\bin\Debug\de4dot.blocks.dll
+C:\Users\devli\source\repos\IntptrPoint\IntptrPoint\bin\Debug\dnlib.dll
+C:\Users\devli\source\repos\IntptrPoint\IntptrPoint\obj\Debug\IntptrPoint.csproj.CopyComplete
+C:\Users\devli\source\repos\IntptrPoint\IntptrPoint\obj\Debug\IntptrPoint.exe
+C:\Users\devli\source\repos\IntptrPoint\IntptrPoint\obj\Debug\IntptrPoint.pdb
+
+
+
+================================================
+File: IntptrPoint/obj/Debug/IntptrPoint.csprojAssemblyReference.cache
+================================================
+[Non-text file]
+
+
+================================================
+File: IntptrPoint/obj/Debug/TemporaryGeneratedFile_036C0B5B-1481-4323-8D20-8F5ADCB23D92.cs
+================================================
+
+
+
+================================================
+File: IntptrPoint/obj/Debug/TemporaryGeneratedFile_5937a670-0e60-4077-877b-f7221da3dda1.cs
+================================================
+
+
+
+================================================
+File: IntptrPoint/obj/Debug/TemporaryGeneratedFile_E7A71F73-0F8D-4B9B-B56E-8E70B10BC5D3.cs
+================================================
+
+

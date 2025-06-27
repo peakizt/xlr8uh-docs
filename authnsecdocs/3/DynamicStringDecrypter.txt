@@ -1,0 +1,431 @@
+Directory structure:
+└── ribthegreat99orn0p-dynamicstringdecrypter/
+    ├── README.md
+    ├── LICENSE
+    └── DynamicStringDecrypter/
+        ├── DynamicStringDecrypter.csproj
+        ├── Extensions.cs
+        ├── Program.cs
+        └── bin/
+            └── Debug/
+                └── netcoreapp3.1/
+                    ├── DynamicStringDecrypter.deps.json
+                    ├── DynamicStringDecrypter.runtimeconfig.dev.json
+                    └── DynamicStringDecrypter.runtimeconfig.json
+
+================================================
+File: README.md
+================================================
+# DynamicStringDecrypter
+Decrypts strings dynamically, using https://github.com/Washi1337/AsmResolver
+
+I may add multiple valuetypes as well as stacktrace patching in the future to counter some tricks obfuscators use. This should not be that hard to implement feel free to learn!
+
+
+
+================================================
+File: LICENSE
+================================================
+MIT License
+
+Copyright (c) 2020 ribthegreat99OrN0P
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+
+================================================
+File: DynamicStringDecrypter/DynamicStringDecrypter.csproj
+================================================
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="AsmResolver.DotNet" Version="4.0.0-beta.2" />
+    </ItemGroup>
+
+</Project>
+
+
+
+================================================
+File: DynamicStringDecrypter/Extensions.cs
+================================================
+ï»¿using AsmResolver.DotNet;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+
+namespace DynamicStringDecrypter
+{
+    public static class Extensions
+    {
+        /// <summary>
+        /// Check to see if the current assembly contains the current supplied method.
+        /// </summary>
+        /// <param name="method"></param>
+        /// <param name="assembly"></param>
+        /// <returns></returns>
+        public static bool ExistsInAssembly(this MethodDefinition method, AssemblyDefinition assembly)
+        {
+            foreach (var module in assembly.Modules)
+            {
+                foreach (var type in module.GetAllTypes())
+                {
+                    //so it does not mistaken it as a system method
+                    if (type.Methods.Contains(method)) return true;
+                }
+            }
+            return false;
+        }
+        /// <summary>
+        /// Checks to see if the methods return type is a string and has greater than 0 parameters.
+        /// </summary>
+        /// <param name="method"></param>
+        /// <returns></returns>
+        public static bool HasValidSignature(this MethodDefinition method)
+        {
+            if (method.Signature.ReturnType.ElementType == ElementType.String && method.Parameters.Count != 0)
+                return true;
+            return false;
+        }
+
+    }
+}
+
+
+================================================
+File: DynamicStringDecrypter/Program.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using AsmResolver.DotNet;
+using AsmResolver.DotNet.Builder;
+using AsmResolver.DotNet.Code.Cil;
+using AsmResolver.PE.DotNet.Cil;
+
+namespace DynamicStringDecrypter
+{
+    class Program
+    {
+        private static AssemblyDefinition _Assembly { get; set; }
+        private static Assembly _AssemblyReflection { get; set; }
+        private static string _AssemblyPath { get; set; }
+        private static int _DecryptedCount { get; set; }
+        private static int _FailedCount { get; set; }
+        static void Main(string[] args)
+        {
+            //Support multiple decryption methods later (other value-types)
+            //Maybe change the second phase to find the method by getting the user to give us the mdtoken
+            Console.Title = "DynamicStringDecrypter - By N0P";
+            LoadAssembly(args[0]);
+            var decryptionMethod = GetDecryptionMethod();
+            if (decryptionMethod != null)
+            {
+                Console.WriteLine($"Found Decryption Method[{decryptionMethod.Name}]");
+                DecryptVariables(decryptionMethod);
+            }
+            else
+            {
+                Console.WriteLine("Failed to find decryption method! Please provide the method name:");
+                decryptionMethod = GetDecryptionMethodByName(Console.ReadLine());
+                if (decryptionMethod != null)
+                {
+                    Console.WriteLine($"Found Decryption Method[{decryptionMethod.Name}]");
+                    DecryptVariables(decryptionMethod);
+                }
+                else
+                {
+                    Console.WriteLine("Sorry looks like we yet again failed. Closing app");
+                }
+            }
+            Console.WriteLine($"[{_DecryptedCount}] Variables Sucessfully Decrypted");
+            Console.WriteLine($"[{_FailedCount}] Variables Unsuccessfully Decrypted");
+            
+            var imageBuilder = new ManagedPEImageBuilder();
+            var factory = new DotNetDirectoryFactory();
+            factory.MetadataBuilderFlags = MetadataBuilderFlags.PreserveAll;
+            factory.MethodBodySerializer = new CilMethodBodySerializer
+            {
+                ComputeMaxStackOnBuildOverride = false
+            };
+            imageBuilder.DotNetDirectoryFactory = factory;
+            
+            if(_AssemblyPath.Contains(".dll"))
+                _Assembly.ManifestModule.Write(Path.GetFileNameWithoutExtension(_AssemblyPath) + "-deob.dll", imageBuilder);
+            else
+                _Assembly.ManifestModule.Write(Path.GetFileNameWithoutExtension(_AssemblyPath) + "-deob.exe", imageBuilder);
+            Console.WriteLine("Done!");
+            Console.ReadKey();
+        }
+        
+        static void DecryptVariables(MethodDefinition decryptMethod)
+        {
+            foreach (var module in _Assembly.Modules)
+            {
+                foreach (var type in module.GetAllTypes())
+                {
+                    foreach (var method in type.Methods.Where(x => x.MethodBody != null))
+                    {
+                        for (var i = 0; i < method.CilMethodBody.Instructions.Count; i++)
+                        {
+                            if (method.CilMethodBody.Instructions[i].OpCode == CilOpCodes.Call)
+                            {
+                                if (method.CilMethodBody.Instructions[i].Operand is MethodDefinition definition &&
+                                    definition == decryptMethod)
+                                {
+                                    var listOfArgs = new List<object>();
+                                    var j = 1;
+                                    if (j <= decryptMethod.Parameters.Count())
+                                    {
+                                        listOfArgs.Add(method.CilMethodBody.Instructions[i - j].Operand);
+                                    }
+                                    else
+                                    {
+                                        for(j = 1; j < decryptMethod.Parameters.Count(); j++)
+                                            listOfArgs.Add(method.CilMethodBody.Instructions[i - j].Operand);
+                                    }
+                                    var resolvedMethod =
+                                        _AssemblyReflection.ManifestModule.ResolveMethod(decryptMethod.MetadataToken
+                                            .ToInt32());
+                                    try
+                                    {
+                                        var result = resolvedMethod.Invoke(null, listOfArgs.ToArray());
+                                        if (result != null)
+                                        {
+                                            method.CilMethodBody.Instructions[i].OpCode = CilOpCodes.Ldstr;
+                                            method.CilMethodBody.Instructions[i].Operand = result;
+                                            if (j <= decryptMethod.Parameters.Count())
+                                            {
+                                                method.CilMethodBody.Instructions[i - j].OpCode = CilOpCodes.Nop;
+                                            }
+                                            else
+                                            {
+                                                for(j = 1; j < decryptMethod.Parameters.Count(); j++)
+                                                    method.CilMethodBody.Instructions[i - j].OpCode = CilOpCodes.Nop;
+                                            }
+                                            _DecryptedCount++;
+                                        }
+                                    }
+                                    catch (Exception)
+                                    {
+                                        _FailedCount++;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        static MethodDefinition GetDecryptionMethod()
+        {
+            foreach (var module in _Assembly.Modules)
+            {
+                foreach (var type in module.GetAllTypes())
+                {
+                    foreach (var method in type.Methods.Where(x => x.MethodBody != null))
+                    {
+                        for (var i = 0; i < method.CilMethodBody.Instructions.Count; i++)
+                        {
+                            if (method.CilMethodBody.Instructions[i].OpCode == CilOpCodes.Call)
+                            {
+                                if (method.CilMethodBody.Instructions[i].Operand is MethodDefinition def &&
+                                    def.ExistsInAssembly(_Assembly) && def.HasValidSignature())
+                                {
+                                    return def;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        static MethodDefinition GetDecryptionMethodByName(string methodName)
+        {
+            foreach (var module in _Assembly.Modules)
+            {
+                foreach (var type in module.GetAllTypes())
+                {
+                    foreach (var method in type.Methods.Where(x => x.MethodBody != null))
+                    {
+                        if (method.Name == methodName)
+                        {
+                            return method;
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+        
+        static void LoadAssembly(string file)
+        {
+            try
+            {
+                _Assembly = AssemblyDefinition.FromFile(file);
+                _AssemblyReflection = Assembly.LoadFrom(file);
+                _AssemblyPath = file;
+                Console.WriteLine($"Loaded[{_Assembly.Name}]");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+    }
+}
+
+
+================================================
+File: DynamicStringDecrypter/bin/Debug/netcoreapp3.1/DynamicStringDecrypter.deps.json
+================================================
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v3.1",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v3.1": {
+      "DynamicStringDecrypter/1.0.0": {
+        "dependencies": {
+          "AsmResolver.DotNet": "4.0.0-beta.2"
+        },
+        "runtime": {
+          "DynamicStringDecrypter.dll": {}
+        }
+      },
+      "AsmResolver/4.0.0-beta.2": {
+        "runtime": {
+          "lib/netstandard2.0/AsmResolver.dll": {
+            "assemblyVersion": "4.0.0.0",
+            "fileVersion": "4.0.0.0"
+          }
+        }
+      },
+      "AsmResolver.DotNet/4.0.0-beta.2": {
+        "dependencies": {
+          "AsmResolver.PE": "4.0.0-beta.2"
+        },
+        "runtime": {
+          "lib/netstandard2.0/AsmResolver.DotNet.dll": {
+            "assemblyVersion": "4.0.0.0",
+            "fileVersion": "4.0.0.0"
+          }
+        }
+      },
+      "AsmResolver.PE/4.0.0-beta.2": {
+        "dependencies": {
+          "AsmResolver.PE.File": "4.0.0-beta.2"
+        },
+        "runtime": {
+          "lib/netstandard2.0/AsmResolver.PE.dll": {
+            "assemblyVersion": "4.0.0.0",
+            "fileVersion": "4.0.0.0"
+          }
+        }
+      },
+      "AsmResolver.PE.File/4.0.0-beta.2": {
+        "dependencies": {
+          "AsmResolver": "4.0.0-beta.2"
+        },
+        "runtime": {
+          "lib/netstandard2.0/AsmResolver.PE.File.dll": {
+            "assemblyVersion": "4.0.0.0",
+            "fileVersion": "4.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "DynamicStringDecrypter/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "AsmResolver/4.0.0-beta.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-V1dlEfUr5NdmMhrQ1fpb+wVO43c5tiQcHBg2/a+lqk7VFnkKkidF/QLioVGtG104e/3S1cbn4sbPSZYU1BhXQg==",
+      "path": "asmresolver/4.0.0-beta.2",
+      "hashPath": "asmresolver.4.0.0-beta.2.nupkg.sha512"
+    },
+    "AsmResolver.DotNet/4.0.0-beta.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-MqaEdWbaGNHCycP8WuVkmG2DndOi/imttETX8b/O6R49xuyjLSVKZkyTlJJ8RY012wHeNg13VmhDpu4feRvtPQ==",
+      "path": "asmresolver.dotnet/4.0.0-beta.2",
+      "hashPath": "asmresolver.dotnet.4.0.0-beta.2.nupkg.sha512"
+    },
+    "AsmResolver.PE/4.0.0-beta.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-s795w1PH/TWRhvCL80T3i8O3YaiFxPSnzjqYi1S9hqzQ2usBOx/82T9B1gB7Vts/kYIkTmLLFRKz+bdeWYqLFg==",
+      "path": "asmresolver.pe/4.0.0-beta.2",
+      "hashPath": "asmresolver.pe.4.0.0-beta.2.nupkg.sha512"
+    },
+    "AsmResolver.PE.File/4.0.0-beta.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-LNFKmwDOLSSwpOIe82pNQRBWy6ZpZTE3dP5/k2kvFWrI6BOTDhYEt17wRp3PcjXdF1Dwg9WkGiUae138mnOKCw==",
+      "path": "asmresolver.pe.file/4.0.0-beta.2",
+      "hashPath": "asmresolver.pe.file.4.0.0-beta.2.nupkg.sha512"
+    }
+  }
+}
+
+
+================================================
+File: DynamicStringDecrypter/bin/Debug/netcoreapp3.1/DynamicStringDecrypter.runtimeconfig.dev.json
+================================================
+{
+  "runtimeOptions": {
+    "additionalProbingPaths": [
+      "C:\\Users\\Luka's Laptop\\.dotnet\\store\\|arch|\\|tfm|",
+      "C:\\Users\\Luka's Laptop\\.nuget\\packages"
+    ]
+  }
+}
+
+
+================================================
+File: DynamicStringDecrypter/bin/Debug/netcoreapp3.1/DynamicStringDecrypter.runtimeconfig.json
+================================================
+{
+  "runtimeOptions": {
+    "tfm": "netcoreapp3.1",
+    "framework": {
+      "name": "Microsoft.NETCore.App",
+      "version": "3.1.0"
+    }
+  }
+}
+

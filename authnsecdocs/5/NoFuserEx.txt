@@ -1,0 +1,2683 @@
+Directory structure:
+└── codeshark-dev-nofuserex/
+    ├── README.md
+    ├── LICENSE
+    ├── NoFuserEx/
+    │   ├── NoFuserEx.sln
+    │   └── NoFuserEx/
+    │       ├── App.config
+    │       ├── AssemblyManager.cs
+    │       ├── Logger.cs
+    │       ├── NoFuserEx.csproj
+    │       ├── Options.cs
+    │       ├── Program.cs
+    │       ├── Utils.cs
+    │       ├── Deobfuscator/
+    │       │   ├── AssemblyCreator.cs
+    │       │   ├── DeobfuscatorManager.cs
+    │       │   ├── IDeobfuscator.cs
+    │       │   ├── MemberCloner.cs
+    │       │   ├── Utils.cs
+    │       │   └── Deobfuscators/
+    │       │       ├── AntiDebuggerDeobfuscator.cs
+    │       │       ├── AntiDumperDeobfuscator.cs
+    │       │       ├── AntiTamperDeobfuscator.cs
+    │       │       ├── CompressorDeobfuscator.cs
+    │       │       ├── ProxyDeobfuscator.cs
+    │       │       ├── ResourcesDeobfuscator.cs
+    │       │       └── Constants/
+    │       │           ├── ByteArrayDecrypter.cs
+    │       │           ├── CharArrayDecrypter.cs
+    │       │           ├── ConstantsDeobfuscator.cs
+    │       │           ├── DecrypterBase.cs
+    │       │           ├── DoubleArrayDecrypter.cs
+    │       │           ├── FloatArrayDecrypter.cs
+    │       │           ├── IntArrayDecrypter.cs
+    │       │           ├── LongArrayDecrypter.cs
+    │       │           ├── SByteArrayDecrypter.cs
+    │       │           ├── ShortArrayDecrypter.cs
+    │       │           ├── StringDecrypter.cs
+    │       │           ├── UIntArrayDecrypter.cs
+    │       │           ├── ULongArrayDecrypter.cs
+    │       │           └── UShortArrayDecrypter.cs
+    │       └── Properties/
+    │           └── AssemblyInfo.cs
+    └── dnlib/
+
+================================================
+File: README.md
+================================================
+# NoFuserEx
+NoFuserEx is an open-source deobfuscator for ConfuserEx.
+License: MIT.
+
+## Usage
+Just drag and drop any file(s) onto NoFuserEx.exe.
+
+## Supported protections
+* Compressor
+* Anti-tamper
+* Anti-dumper
+* Anti-debugger
+* Resources
+* Constants
+* Proxy calls
+* Working on more
+
+## Special thanks
+* 0xd4d - dnlib
+* yck1509 - some code
+* Alcatraz3222 - because yes :P
+
+
+
+================================================
+File: LICENSE
+================================================
+MIT License
+
+Copyright (c) 2016 CodeShark
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoFuserEx", "NoFuserEx\NoFuserEx.csproj", "{6E8B8F61-E5C3-4ABD-9B8A-8F4FA5777EBB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dnlib", "..\dnlib\src\dnlib.csproj", "{FDFC1237-143F-4919-8318-4926901F4639}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|Mixed Platforms = Debug|Mixed Platforms
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|Mixed Platforms = Release|Mixed Platforms
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6E8B8F61-E5C3-4ABD-9B8A-8F4FA5777EBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E8B8F61-E5C3-4ABD-9B8A-8F4FA5777EBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E8B8F61-E5C3-4ABD-9B8A-8F4FA5777EBB}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{6E8B8F61-E5C3-4ABD-9B8A-8F4FA5777EBB}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{6E8B8F61-E5C3-4ABD-9B8A-8F4FA5777EBB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6E8B8F61-E5C3-4ABD-9B8A-8F4FA5777EBB}.Debug|x86.Build.0 = Debug|Any CPU
+		{6E8B8F61-E5C3-4ABD-9B8A-8F4FA5777EBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E8B8F61-E5C3-4ABD-9B8A-8F4FA5777EBB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E8B8F61-E5C3-4ABD-9B8A-8F4FA5777EBB}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{6E8B8F61-E5C3-4ABD-9B8A-8F4FA5777EBB}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{6E8B8F61-E5C3-4ABD-9B8A-8F4FA5777EBB}.Release|x86.ActiveCfg = Release|Any CPU
+		{6E8B8F61-E5C3-4ABD-9B8A-8F4FA5777EBB}.Release|x86.Build.0 = Release|Any CPU
+		{FDFC1237-143F-4919-8318-4926901F4639}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDFC1237-143F-4919-8318-4926901F4639}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDFC1237-143F-4919-8318-4926901F4639}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{FDFC1237-143F-4919-8318-4926901F4639}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{FDFC1237-143F-4919-8318-4926901F4639}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FDFC1237-143F-4919-8318-4926901F4639}.Debug|x86.Build.0 = Debug|Any CPU
+		{FDFC1237-143F-4919-8318-4926901F4639}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDFC1237-143F-4919-8318-4926901F4639}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FDFC1237-143F-4919-8318-4926901F4639}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{FDFC1237-143F-4919-8318-4926901F4639}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{FDFC1237-143F-4919-8318-4926901F4639}.Release|x86.ActiveCfg = Release|Any CPU
+		{FDFC1237-143F-4919-8318-4926901F4639}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx/App.config
+================================================
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.0"/>
+    </startup>
+</configuration>
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx/AssemblyManager.cs
+================================================
+ï»¿using System;
+using System.Globalization;
+using System.IO;
+using dnlib.DotNet;
+using dnlib.DotNet.Writer;
+
+namespace NoFuserEx {
+    internal class AssemblyManager {
+        readonly string inputFile;
+        readonly string outputFile;
+
+        internal AssemblyManager(string inputFile) {
+            this.inputFile = inputFile;
+            outputFile =
+                $"{Path.GetDirectoryName(inputFile)}\\NoFuserEx_Output\\{Path.GetFileName(inputFile)}";
+            Logger.VeryVerbose($"Output assembly: {outputFile}.");
+
+            if (Utils.CreateDirectory(Path.GetDirectoryName(outputFile)))
+                Logger.VeryVerbose("Created output directory.");
+            else
+                Logger.Exception(new Exception("Error creating directory..."));
+        }
+
+        internal ModuleDefMD Module { get; set; }
+        internal ModuleWriterOptions ModuleWriterOptions { get; private set; }
+        internal NativeModuleWriterOptions NativeModuleWriterOptions { get; private set; }
+
+        void ShowAssemblyInfo() {
+            Logger.Info($"Module Name: {Module.Name}");
+            using (var stream = Module.MetaData.PEImage.CreateFullStream())
+                Logger.Info($"Module Size: {GetSize(stream.Length)}");
+            Logger.Info($"CLR Version: {Module.RuntimeVersion.Substring(0, 4)}");
+        }
+
+        static string GetSize(long size) {
+            string[] sizeType = { " B", " KB", " MB", " GB", " TB", " PB", " EB" };
+            if (size == 0)
+                return "0 B";
+            var bytes = Math.Abs(size);
+            var place = Convert.ToInt32(Math.Floor(Math.Log(bytes, 1024)));
+            var num = Math.Round(bytes / Math.Pow(1024, place), 1);
+            return (Math.Sign(size) * num).ToString(CultureInfo.InvariantCulture) + sizeType[place];
+        }
+
+        internal void LoadAssembly() {
+            try {
+                Logger.Verbose("Loading module...");
+                Module = ModuleDefMD.Load(inputFile);
+                ModuleWriterOptions = new ModuleWriterOptions(Module);
+                NativeModuleWriterOptions = new NativeModuleWriterOptions(Module);
+                ShowAssemblyInfo();
+            }
+            catch (Exception ex) {
+                Logger.Exception(ex);
+            }
+        }
+
+        internal void SaveAssembly() {
+            Logger.Verbose($"Module IsILOnly: {Module.IsILOnly}");
+            try {
+                if (Module.IsILOnly)
+                    Module.Write(outputFile);
+                else
+                    Module.NativeWrite(outputFile);
+                Logger.Info($"Saved successfully in {outputFile}");
+            }
+            catch (ModuleWriterException) {
+                Logger.Verbose("Trying with \"DummyLogger.NoThrowInstance\"...");
+                ModuleWriterOptions.Logger = DummyLogger.NoThrowInstance;
+                NativeModuleWriterOptions.Logger = DummyLogger.NoThrowInstance;
+
+                if (Module.IsILOnly)
+                    Module.Write(outputFile, ModuleWriterOptions);
+                else
+                    Module.NativeWrite(outputFile, NativeModuleWriterOptions);
+                Logger.Exclamation($"Saved with errors in {outputFile}");
+            }
+            catch (Exception ex) {
+                Logger.Error("Error saving assembly.");
+                Logger.Exception(ex);
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx/Logger.cs
+================================================
+ï»¿using System;
+using System.Linq;
+
+namespace NoFuserEx {
+    internal class Logger {
+        internal static void Information() {
+            Console.Title = "NoFuserEx v1.1";
+            Console.ForegroundColor = ConsoleColor.Red;
+            const string text = "_____   __     __________                         __________       ";
+            const string text1 = "___  | / /________  ____/___  _______________________  ____/___  __ ";
+            const string text2 = @"__   |/ /_  __ \_  /_   _  / / /_  ___/  _ \_  ___/_  __/  __  |/_/";
+            const string text3 = "_  /|  / / /_/ /  __/   / /_/ /_(__  )/  __/  /   _  /___  __>  <   ";
+            const string text4 = @"/_/ |_/  \____//_/      \__,_/ /____/ \___//_/    /_____/  /_/|_|   ";
+            const string text5 = "[ NoFuserEx - v1.1 ]";
+            const string text6 = "- By CodeShark -";
+            CenterWrite(text);
+            CenterWrite(text1);
+            CenterWrite(text2);
+            CenterWrite(text3);
+            CenterWrite(text4);
+            CenterWrite(text5);
+            CenterWrite(text6);
+            WriteLine(string.Empty);
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+
+        internal static void Help() {
+            WriteLine(@"
+For deobfuscate an assembly protected with any version of ConfuserEx (and some modded too) you just have to drag and drop the file in this .exe.
+
+Some options that you can use:
+* --force-deob for force the deobfuscation.
+* --dont-unpack for don't unpack the assembly.
+* --dont-tamper for don't remove anti-tamper.
+* --dont-constants for don't decrypt the constants.
+* --dont-cflow for don't deobfuscate the control flow.
+* --dont-proxy-calls for don't replace the proxy calls.
+* --dont-remove-junk-methods for don't remove the junk methods.
+* --dont-resources for don't decrypt the protected resources.
+* --dont-rename for don't rename the obfuscated names.
+* -v for verbose information.
+* -vv for very verbose information.
+
+If something doesn't work properly, you can notify me or fix it yourself.
+This is an open-source, if you paid for this, you got ripped off :P");
+            WriteLine(string.Empty);
+        }
+
+        internal static void CenterWrite(string text) {
+            Write(new string(' ', (Console.WindowWidth - text.Length) / 2));
+            WriteLine(text);
+        }
+
+        internal static void Info(string text) {
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Write("[~] ");
+            Console.ForegroundColor = ConsoleColor.White;
+            WriteLine(text);
+        }
+
+        internal static void Error(string text) {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Write("        [-] ");
+            Console.ForegroundColor = ConsoleColor.White;
+            WriteLine(text);
+        }
+
+        internal static void Exclamation(string text) {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Write("        [!] ");
+            Console.ForegroundColor = ConsoleColor.White;
+            WriteLine(text);
+        }
+
+        internal static void Success(string message) {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Write("        [+] ");
+            Console.ForegroundColor = ConsoleColor.White;
+            WriteLine(message);
+        }
+
+        internal static void Exception(Exception exception) {
+            WriteLine(string.Empty);
+            WriteLine($"Error message: {exception.Message}");
+            if (Options.Verbose)
+                WriteLine($"Error stack trace: {exception.StackTrace}");
+            WriteLine(string.Empty);
+            throw exception;
+        }
+
+        internal static void Verbose(string text) {
+            if (Options.Verbose)
+                WriteLine(text);
+        }
+
+        internal static void VeryVerbose(string text) {
+            if (Options.VeryVerbose)
+                Verbose(text);
+        }
+
+        internal static void Write(string text) {
+            Console.Write(text);
+        }
+
+        internal static void WriteLine(string text) {
+            Console.WriteLine(text);
+        }
+
+        internal static void Exit(bool info = true) {
+            const string exitMessage = "Press any key to exit...";
+            if (IsN00bUser()) {
+                if (info)
+                    Info(exitMessage);
+                else
+                    WriteLine(exitMessage);
+                Console.ReadKey(true);
+            }
+            Environment.Exit(0);
+        }
+
+        // Thanks to 0xd4d
+        static bool IsN00bUser() {
+            if (HasEnv("VisualStudioDir"))
+                return false;
+            if (HasEnv("SHELL"))
+                return false;
+            return HasEnv("windir") && !HasEnv("PROMPT");
+        }
+
+        static bool HasEnv(string name) {
+            return
+                Environment.GetEnvironmentVariables()
+                    .Keys.OfType<string>()
+                    .Any(env => string.Equals(env, name, StringComparison.OrdinalIgnoreCase));
+        }
+    }
+}
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx/NoFuserEx.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{6E8B8F61-E5C3-4ABD-9B8A-8F4FA5777EBB}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NoFuserEx</RootNamespace>
+    <AssemblyName>NoFuserEx</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>nofuserex icon.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyManager.cs" />
+    <Compile Include="Deobfuscator\AssemblyCreator.cs" />
+    <Compile Include="Deobfuscator\Deobfuscators\AntiDebuggerDeobfuscator.cs" />
+    <Compile Include="Deobfuscator\Deobfuscators\Constants\ByteArrayDecrypter.cs" />
+    <Compile Include="Deobfuscator\Deobfuscators\Constants\CharArrayDecrypter.cs" />
+    <Compile Include="Deobfuscator\Deobfuscators\Constants\ConstantsDeobfuscator.cs" />
+    <Compile Include="Deobfuscator\Deobfuscators\Constants\DecrypterBase.cs" />
+    <Compile Include="Deobfuscator\Deobfuscators\Constants\DoubleArrayDecrypter.cs" />
+    <Compile Include="Deobfuscator\Deobfuscators\Constants\FloatArrayDecrypter.cs" />
+    <Compile Include="Deobfuscator\Deobfuscators\Constants\IntArrayDecrypter.cs" />
+    <Compile Include="Deobfuscator\Deobfuscators\Constants\LongArrayDecrypter.cs" />
+    <Compile Include="Deobfuscator\Deobfuscators\Constants\SByteArrayDecrypter.cs" />
+    <Compile Include="Deobfuscator\Deobfuscators\Constants\ShortArrayDecrypter.cs" />
+    <Compile Include="Deobfuscator\Deobfuscators\Constants\StringDecrypter.cs" />
+    <Compile Include="Deobfuscator\Deobfuscators\Constants\UIntArrayDecrypter.cs" />
+    <Compile Include="Deobfuscator\Deobfuscators\Constants\ULongArrayDecrypter.cs" />
+    <Compile Include="Deobfuscator\Deobfuscators\Constants\UShortArrayDecrypter.cs" />
+    <Compile Include="Deobfuscator\Deobfuscators\ProxyDeobfuscator.cs" />
+    <Compile Include="Deobfuscator\Deobfuscators\ResourcesDeobfuscator.cs" />
+    <Compile Include="Deobfuscator\IDeobfuscator.cs" />
+    <Compile Include="Deobfuscator\DeobfuscatorManager.cs" />
+    <Compile Include="Deobfuscator\Deobfuscators\AntiDumperDeobfuscator.cs" />
+    <Compile Include="Deobfuscator\Deobfuscators\AntiTamperDeobfuscator.cs" />
+    <Compile Include="Deobfuscator\Deobfuscators\CompressorDeobfuscator.cs" />
+    <Compile Include="Deobfuscator\MemberCloner.cs" />
+    <Compile Include="Deobfuscator\Utils.cs" />
+    <Compile Include="Logger.cs" />
+    <Compile Include="Options.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\dnlib\src\dnlib.csproj">
+      <Project>{fdfc1237-143f-4919-8318-4926901f4639}</Project>
+      <Name>dnlib</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="nofuserex icon.ico" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
+
+
+================================================
+File: NoFuserEx/NoFuserEx/Options.cs
+================================================
+ï»¿namespace NoFuserEx {
+    internal class Options {
+        internal static bool ForceDeobfuscation;
+        internal static bool NoUnpack;
+        internal static bool NoTamper;
+        internal static bool NoConstants;
+        internal static bool NoControlFlow;
+        internal static bool NoProxyCalls;
+        internal static bool NoRemoveJunkMethods;
+        internal static bool NoResources;
+        internal static bool NoRename;
+        internal static bool Verbose;
+        internal static bool VeryVerbose;
+        
+        /* Unused at this moment
+        internal static void RestoreOptions() {
+            ForceDeobfuscation = false;
+            NoUnpack = false;
+            NoTamper = false;
+            NoConstants = false;
+            NoControlFlow = false;
+            NoProxyCalls = false;
+            NoRemoveJunkMethods = false;
+            NoResources = false;
+            NoRename = false;
+            Verbose = false;
+            VeryVerbose = false;
+        }*/
+    }
+}
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx/Program.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+
+namespace NoFuserEx {
+    class Program {
+        static void Main(string[] args) {
+            Logger.Information();
+
+            if (args.Length == 0) {
+                Logger.Help();
+                Logger.Exit(false);
+            }
+
+            var files = GetOptions(args);
+            foreach (var file in files) {
+                var stopWatch = new Stopwatch();
+                stopWatch.Start();
+
+                var assemblyManager = new AssemblyManager(file);
+                assemblyManager.LoadAssembly();
+
+                Logger.Info($"File queue: {files.IndexOf(file) + 1}/{files.Count}");
+                Logger.WriteLine(string.Empty);
+
+                var deobfuscator = new Deobfuscator.DeobfuscatorManager(assemblyManager);
+                deobfuscator.Start();
+                assemblyManager.SaveAssembly();
+
+                stopWatch.Stop();
+                Logger.Info(
+                    $"Elapsed time: {stopWatch.Elapsed.Minutes}:{stopWatch.Elapsed.Seconds}:{stopWatch.Elapsed.Milliseconds}");
+                Logger.WriteLine(string.Empty);
+            }
+
+            Logger.Exit();
+        }
+
+        static List<string> GetOptions(IEnumerable<string> args) {
+            var files = new List<string>();
+            Logger.Verbose("Checking options...");
+            foreach (var arg in args) {
+                switch (arg) {
+                    case "--force-deob":
+                        Logger.VeryVerbose("Force deobfuscation option detected.");
+                        Options.ForceDeobfuscation = true;
+                        break;
+                    case "--dont-unpack":
+                        Logger.VeryVerbose("Don't unpack module option detected.");
+                        Options.NoUnpack = true;
+                        break;
+                    case "--dont-tamper":
+                        Logger.VeryVerbose("Don't decrypt anti-tampering option detected.");
+                        Options.NoTamper = true;
+                        break;
+                    case "--dont-constants":
+                        Logger.VeryVerbose("Don't decrypt constants option detected.");
+                        Options.NoConstants = true;
+                        break;
+                    case "--dont-cflow":
+                        Logger.VeryVerbose("Don't deobfuscate control flow option detected.");
+                        Options.NoControlFlow = true;
+                        break;
+                    case "--dont-proxy-calls":
+                        Logger.VeryVerbose("Don't fix proxy calls option detected.");
+                        Options.NoProxyCalls = true;
+                        break;
+                    case "--dont-remove-junk-methods":
+                        Logger.VeryVerbose("Don't remove junk methods option detected.");
+                        Options.NoRemoveJunkMethods = true;
+                        break;
+                    case "--dont-resources":
+                        Logger.VeryVerbose("Don't decrypt resouces option detected.");
+                        Options.NoResources = true;
+                        break;
+                    case "--dont-rename":
+                        Logger.VeryVerbose("Don't rename option detected.");
+                        Options.NoRename = true;
+                        break;
+                    case "-v":
+                        Options.Verbose = true;
+                        break;
+                    case "-vv":
+                        Options.Verbose = true;
+                        Options.VeryVerbose = true;
+                        break;
+                    default:
+                        if (!File.Exists(arg))
+                            break;
+                        var extension = Path.GetExtension(arg);
+                        switch (extension) {
+                            case ".exe":
+                            case ".dll":
+                            case ".netmodule":
+                                Logger.VeryVerbose($"Extension file: {extension}");
+                                files.Add(arg);
+                                break;
+                            default:
+                                throw new Exception("Invalid file extension!");
+                        }
+                        break;
+                }
+            }
+            return files;
+        }
+    }
+}
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx/Utils.cs
+================================================
+ï»¿using System;
+using System.IO;
+
+namespace NoFuserEx {
+    internal static class Utils {
+        internal static bool CreateDirectory(string directory) {
+            if (Directory.Exists(directory))
+                return true;
+            try {
+                Directory.CreateDirectory(directory);
+                return true;
+            }
+            catch (Exception ex){
+                Logger.Exception(ex);
+            }
+            return false;
+        }
+    }
+}
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx/Deobfuscator/AssemblyCreator.cs
+================================================
+ï»¿using System;
+using System.IO;
+using System.Reflection;
+using dnlib.DotNet;
+using dnlib.DotNet.Writer;
+
+namespace NoFuserEx.Deobfuscator {
+    class AssemblyCreator {
+        readonly TypeDef typeDef;
+        readonly MethodDef methodDef;
+        int methodToInvoke;
+
+        internal AssemblyCreator(TypeDef typeDef, MethodDef methodDef) {
+            Logger.Verbose($"Cloning type {typeDef.Name}");
+            this.typeDef = MemberCloner.CloneTypeDef(typeDef);
+            this.methodDef = methodDef;
+        }
+
+        internal object Invoke(object[] parameters) {
+            var assemblyDef = new AssemblyDefUser("NoFuserExAssembly");
+            Logger.Verbose($"Assembly created: {assemblyDef.Name}");
+            var moduleDef = new ModuleDefUser("NoFuserExModule");
+            Logger.Verbose($"Module created: {moduleDef.Name}");
+            assemblyDef.Modules.Add(moduleDef);
+            Logger.VeryVerbose("Module added to the assembly.");
+
+            moduleDef.Types.Add(typeDef);
+            Logger.VeryVerbose("Type injected to module.");
+
+            foreach (var type in moduleDef.GetTypes()) {
+                foreach (var method in type.Methods) {
+                    if (method.DeclaringType.Name != methodDef.DeclaringType.Name)
+                        continue;
+                    if (method.Name != methodDef.Name)
+                        continue;
+                    methodToInvoke = method.MDToken.ToInt32();
+                    Logger.VeryVerbose($"Token found: {methodToInvoke}");
+                }
+            }
+            
+            if (methodToInvoke == 0)
+                Logger.Exception(new Exception("Error searching the token."));
+
+            using (var stream = new MemoryStream()) {
+                assemblyDef.Write(stream, new ModuleWriterOptions { Logger = DummyLogger.NoThrowInstance });
+                Logger.VeryVerbose("Assembly writed.");
+
+                var assembly = Assembly.Load(stream.ToArray());
+                Logger.VeryVerbose("Created assembly loaded.");
+
+                var module = assembly.ManifestModule;
+                var method = module.ResolveMethod(methodToInvoke);
+                Logger.VeryVerbose($"Method to invoke: {method.Name}");
+
+                if (method.IsStatic)
+                    return method.Invoke(null, parameters);
+
+                Logger.Verbose("Method is not static, creating instance...");
+                var instance = Activator.CreateInstance(method.DeclaringType);
+                return method.Invoke(instance, parameters);
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx/Deobfuscator/DeobfuscatorManager.cs
+================================================
+ï»¿using System.Collections.Generic;
+using dnlib.DotNet;
+using NoFuserEx.Deobfuscator.Deobfuscators;
+using NoFuserEx.Deobfuscator.Deobfuscators.Constants;
+
+namespace NoFuserEx.Deobfuscator {
+    internal class DeobfuscatorManager {
+        readonly AssemblyManager assemblyManager;
+
+        readonly List<IDeobfuscator> deobfuscators;
+
+        internal DeobfuscatorManager(AssemblyManager assemblyManager) {
+            this.assemblyManager = assemblyManager;
+            deobfuscators = new List<IDeobfuscator>();
+        }
+
+        void SelectDeobfuscators() {
+            Logger.Verbose("Adding deobfuscators...");
+
+            if (!Options.NoUnpack) {
+                deobfuscators.Add(new CompressorDeobfuscator());
+                Logger.VeryVerbose("Added compressor deobfuscator.");
+            }
+            
+            if (!Options.NoTamper) {
+                deobfuscators.Add(new AntiTamperDeobfuscator());
+                Logger.VeryVerbose("Added anti-tamper deobfuscator.");
+            }
+
+            if (!Options.NoResources) {
+                deobfuscators.Add(new ResourcesDeobfuscator());
+                Logger.VeryVerbose("Added resources deobfuscator.");
+            }
+
+            if (!Options.NoConstants) {
+                deobfuscators.Add(new ConstantsDeobfuscator());
+                Logger.VeryVerbose("Added constants deobfuscator.");
+            }
+
+            if (!Options.NoProxyCalls) {
+                deobfuscators.Add(new ProxyDeobfuscator());
+                Logger.VeryVerbose("Added proxy deobfuscator.");
+            }
+
+            deobfuscators.Add(new AntiDumperDeobfuscator());
+            Logger.VeryVerbose("Added anti-dumper deobfuscator.");
+
+            deobfuscators.Add(new AntiDebuggerDeobfuscator());
+            Logger.VeryVerbose("Added anti-debugger deobfuscator.");
+        }
+
+        internal void Start() {
+            SelectDeobfuscators();
+            DetectConfuserVersion();
+
+            foreach (var deobfuscator in deobfuscators) {
+                var deobfuscated = deobfuscator.Deobfuscate(assemblyManager);
+                if (deobfuscated)
+                    deobfuscator.Log();
+            }
+            Logger.WriteLine(string.Empty);
+        }
+
+        void DetectConfuserVersion() {
+            Logger.Verbose("Detecting ConfuserEx version...");
+            var versions = new List<string>();
+            var module = assemblyManager.Module;
+            foreach (var attribute in module.CustomAttributes) {
+                if (attribute.TypeFullName != "ConfusedByAttribute")
+                    continue;
+                foreach (var argument in attribute.ConstructorArguments) {
+                    if (argument.Type.ElementType != ElementType.String)
+                        continue;
+                    var value = argument.Value.ToString();
+                    if (!value.Contains("ConfuserEx"))
+                        continue;
+                    Logger.Info($"Detected: {value}");
+                    versions.Add(value);
+                }
+            }
+
+            if (versions.Count >= 1)
+                return;
+            if (Options.ForceDeobfuscation) {
+                Logger.Info("Forced deobfuscation.");
+                return;
+            }
+
+            Logger.Exclamation("ConfuserEx doesn't detected. Use de4dot.");
+            Logger.Exit();
+        }
+    }
+}
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx/Deobfuscator/IDeobfuscator.cs
+================================================
+ï»¿namespace NoFuserEx.Deobfuscator {
+    internal interface IDeobfuscator {
+        void Log();
+        bool Deobfuscate(AssemblyManager assemblyManager);
+    }
+}
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx/Deobfuscator/MemberCloner.cs
+================================================
+ï»¿/*
+ Thanks to yck1509
+ */
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace NoFuserEx.Deobfuscator {
+    class MemberCloner {
+        internal static TypeDef CloneTypeDef(TypeDef originalType) {
+            var importer = new Importer(originalType.Module, ImporterOptions.TryToUseTypeDefs);
+            var newType = Clone(originalType);
+            Copy(originalType, newType, importer, true);
+            return newType;
+        }
+
+        static TypeDefUser Clone(TypeDef originalType) {
+            var ret = new TypeDefUser(originalType.Namespace, originalType.Name) { Attributes = originalType.Attributes };
+
+            if (originalType.ClassLayout != null)
+                ret.ClassLayout = new ClassLayoutUser(originalType.ClassLayout.PackingSize, originalType.ClassSize);
+
+            foreach (var genericParam in originalType.GenericParameters)
+                ret.GenericParameters.Add(new GenericParamUser(genericParam.Number, genericParam.Flags, "-"));
+
+            foreach (var nestedType in originalType.NestedTypes)
+                ret.NestedTypes.Add(Clone(nestedType));
+
+            foreach (var method in originalType.Methods)
+                ret.Methods.Add(Clone(method));
+
+            foreach (var field in originalType.Fields)
+                ret.Fields.Add(Clone(field));
+
+            return ret;
+        }
+
+        static MethodDefUser Clone(MethodDef originalMethod) {
+            var ret = new MethodDefUser(originalMethod.Name, null, originalMethod.ImplAttributes, originalMethod.Attributes);
+
+            foreach (var genericParam in originalMethod.GenericParameters)
+                ret.GenericParameters.Add(new GenericParamUser(genericParam.Number, genericParam.Flags, "-"));
+
+            return ret;
+        }
+
+        static FieldDefUser Clone(FieldDef originalField) {
+            return new FieldDefUser(originalField.Name, null, originalField.Attributes);
+        }
+
+        static void Copy(TypeDef originalType, TypeDef newType, Importer ctx, bool copySelf) {
+            if (copySelf)
+                CopyTypeDef(originalType, newType, ctx);
+
+            foreach (var nestedType in originalType.NestedTypes)
+                Copy(nestedType, newType, ctx, true);
+
+            foreach (var method in originalType.Methods) {
+                CopyMethodDef(method, newType, ctx);
+            }
+
+            foreach (var field in originalType.Fields)
+                CopyFieldDef(field, newType, ctx);
+        }
+
+        static void CopyTypeDef(TypeDef originalType, TypeDef newType, Importer ctx) {
+            newType.BaseType = (ITypeDefOrRef)ctx.Import(originalType.BaseType);
+            foreach (var iface in originalType.Interfaces)
+                newType.Interfaces.Add(new InterfaceImplUser((ITypeDefOrRef)ctx.Import(iface.Interface)));
+        }
+
+        static void CopyMethodDef(MethodDef originalMethod, TypeDef newType, Importer ctx) {
+            var newMethod = newType.FindMethod(originalMethod.Name);
+
+            // I don't know why but if declaring type is a nested type the dnlib can't found them. :/
+            // Then we go to do it manually 
+            if (newMethod == null) {
+                foreach (var type in newType.GetTypes()) {
+                    foreach (var method in type.Methods) {
+                        if (method.Name == originalMethod.Name)
+                            newMethod = method;
+                    }
+                }
+            }
+
+            if (newMethod == null)
+                Logger.Exception(new Exception($"Error cloning the method: {originalMethod.Name}"));
+
+            newMethod.Signature = ctx.Import(originalMethod.Signature);
+            newMethod.Parameters.UpdateParameterTypes();
+
+            if (originalMethod.ImplMap != null)
+                newMethod.ImplMap = new ImplMapUser(new ModuleRefUser(originalMethod.Module, originalMethod.ImplMap.Module.Name), originalMethod.ImplMap.Name, originalMethod.ImplMap.Attributes);
+
+            foreach (var ca in originalMethod.CustomAttributes)
+                newMethod.CustomAttributes.Add(new CustomAttribute((ICustomAttributeType)ctx.Import(ca.Constructor)));
+
+            if (!originalMethod.HasBody) return;
+            newMethod.Body = new CilBody(originalMethod.Body.InitLocals, new List<Instruction>(),
+                new List<ExceptionHandler>(), new List<Local>()) { MaxStack = originalMethod.Body.MaxStack };
+
+            var bodyMap = new Dictionary<object, object>();
+
+            foreach (var local in originalMethod.Body.Variables) {
+                var newLocal = new Local(ctx.Import(local.Type));
+                newMethod.Body.Variables.Add(newLocal);
+                newLocal.Name = local.Name;
+                newLocal.PdbAttributes = local.PdbAttributes;
+
+                bodyMap[local] = newLocal;
+            }
+
+            foreach (var instr in originalMethod.Body.Instructions) {
+                var newInstr = new Instruction(instr.OpCode, instr.Operand) { SequencePoint = instr.SequencePoint };
+
+                if (newInstr.Operand is IType)
+                    newInstr.Operand = ctx.Import((IType)newInstr.Operand);
+
+                else if (newInstr.Operand is IMethod)
+                    newInstr.Operand = ctx.Import((IMethod)newInstr.Operand);
+
+                else if (newInstr.Operand is IField)
+                    newInstr.Operand = ctx.Import((IField)newInstr.Operand);
+
+                newMethod.Body.Instructions.Add(newInstr);
+                bodyMap[instr] = newInstr;
+            }
+
+            foreach (var instr in newMethod.Body.Instructions) {
+                if (instr.Operand != null && bodyMap.ContainsKey(instr.Operand))
+                    instr.Operand = bodyMap[instr.Operand];
+
+                else if (instr.Operand is Instruction[])
+                    instr.Operand = ((Instruction[])instr.Operand).Select(target => (Instruction)bodyMap[target]).ToArray();
+            }
+
+            foreach (var eh in originalMethod.Body.ExceptionHandlers)
+                newMethod.Body.ExceptionHandlers.Add(new ExceptionHandler(eh.HandlerType) {
+                    CatchType = eh.CatchType == null ? null : (ITypeDefOrRef)ctx.Import(eh.CatchType),
+                    TryStart = (Instruction)bodyMap[eh.TryStart],
+                    TryEnd = (Instruction)bodyMap[eh.TryEnd],
+                    HandlerStart = (Instruction)bodyMap[eh.HandlerStart],
+                    HandlerEnd = (Instruction)bodyMap[eh.HandlerEnd],
+                    FilterStart = eh.FilterStart == null ? null : (Instruction)bodyMap[eh.FilterStart]
+                });
+
+            newMethod.Body.SimplifyMacros(newMethod.Parameters);
+        }
+
+        static void CopyFieldDef(FieldDef originalField, TypeDef newType, Importer ctx) {
+            var newField = newType.FindField(originalField.Name);
+
+            // I don't know why but if declaring type is a nested type the dnlib can't found them. :/
+            // Then we go to do it manually 
+            // Equals methods
+            if (newField == null) {
+                foreach (var type in newType.GetTypes()) {
+                    foreach (var field in type.Fields) {
+                        if (field.Name == originalField.Name)
+                            newField = field;
+                    }
+                }
+            }
+
+            newField.Signature = ctx.Import(originalField.Signature);
+        }
+    }
+}
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx/Deobfuscator/Utils.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace NoFuserEx.Deobfuscator {
+    internal static class Utils {
+        internal static int FindInstructionsNumber(this MethodDef method, OpCode opCode, object operand) {
+            var num = 0;
+            foreach (var instruction in method.Body.Instructions) {
+                if (instruction.OpCode != opCode)
+                    continue;
+                if (operand is int) {
+                    var value = instruction.GetLdcI4Value();
+                    if (value == (int)operand)
+                        num++;
+                }
+                else if (operand is string) {
+                    var value = instruction.Operand.ToString();
+                    if (value.Contains(operand.ToString()))
+                        num++;
+                }
+            }
+            return num;
+        }
+    }
+}
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx/Deobfuscator/Deobfuscators/AntiDebuggerDeobfuscator.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace NoFuserEx.Deobfuscator.Deobfuscators {
+    class AntiDebuggerDeobfuscator : IDeobfuscator {
+        public void Log() {
+            Logger.Success("Removed:       Anti-debugger protection.");
+        }
+
+        public bool Deobfuscate(AssemblyManager assemblyManager) {
+            var instructions = assemblyManager.Module.GlobalType.FindStaticConstructor().Body.Instructions;
+
+            foreach (var instruction in instructions) {
+                if (instruction.OpCode != OpCodes.Call)
+                    continue;
+
+                var debuggerMethod = instruction.Operand as MethodDef;
+                if (debuggerMethod == null)
+                    continue;
+                if (!debuggerMethod.DeclaringType.IsGlobalModuleType)
+                    continue;
+
+                if (debuggerMethod.FindInstructionsNumber(OpCodes.Ldstr, "ENABLE_PROFILING") != 1)
+                    continue;
+                if (debuggerMethod.FindInstructionsNumber(OpCodes.Ldstr, "GetEnvironmentVariable") != 1)
+                    continue;
+                if (debuggerMethod.FindInstructionsNumber(OpCodes.Ldstr, "COR") != 1)
+                    continue;
+
+                if (debuggerMethod.FindInstructionsNumber(OpCodes.Call, "System.Environment::FailFast(System.String)") != 1)
+                    continue;
+
+                instruction.OpCode = OpCodes.Nop;
+                instruction.Operand = null;
+                return true;
+            }
+            return false;
+        }
+    }
+}
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx/Deobfuscator/Deobfuscators/AntiDumperDeobfuscator.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace NoFuserEx.Deobfuscator.Deobfuscators {
+    internal class AntiDumperDeobfuscator : IDeobfuscator {
+        public void Log() {
+            Logger.Success("Removed:       Anti-dumper protection.");
+        }
+
+        public bool Deobfuscate(AssemblyManager assemblyManager) {
+            var instructions = assemblyManager.Module.GlobalType.FindStaticConstructor().Body.Instructions;
+            foreach (var instr in instructions) {
+                if (instr.OpCode != OpCodes.Call)
+                    continue;
+
+                var dumperMethod = instr.Operand as MethodDef;
+                if (dumperMethod == null)
+                    continue;
+                if (!dumperMethod.DeclaringType.IsGlobalModuleType)
+                    continue;
+
+                const MethodAttributes attributes = MethodAttributes.Assembly | MethodAttributes.Static |
+                                                    MethodAttributes.HideBySig;
+                if (dumperMethod.Attributes != attributes)
+                    continue;
+                if (dumperMethod.CodeType != MethodImplAttributes.IL)
+                    continue;
+
+                if (dumperMethod.ReturnType.ElementType != ElementType.Void)
+                    continue;
+
+                // Anti-dumper method have 14 calls to VirtualProtect
+                if (dumperMethod.FindInstructionsNumber(OpCodes.Call, "(System.Byte*,System.Int32,System.UInt32,System.UInt32&)") != 14)
+                    continue;
+                instr.OpCode = OpCodes.Nop;
+                instr.Operand = null;
+                Logger.Verbose("Anti-dumper call was removed from .cctor.");
+                return true;
+            }
+            return false;
+        }
+    }
+}
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx/Deobfuscator/Deobfuscators/AntiTamperDeobfuscator.cs
+================================================
+ï»¿using System;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using MethodAttributes = dnlib.DotNet.MethodAttributes;
+using MethodImplAttributes = dnlib.DotNet.MethodImplAttributes;
+
+namespace NoFuserEx.Deobfuscator.Deobfuscators {
+    internal class AntiTamperDeobfuscator : IDeobfuscator {
+        public void Log() {
+            Logger.Success("Removed:       Anti-tamper protection.");
+        }
+
+        public bool Deobfuscate(AssemblyManager assemblyManager) {
+            var module = assemblyManager.Module;
+
+            var isTampered = IsTampered(module);
+            if (isTampered == null)
+                Logger.Exception(new Exception("Oh oh.. I can't check if the assembly has anti-tamper protection."));
+
+            if (!(bool)isTampered)
+                return false;
+
+            using (var stream = module.MetaData.PEImage.CreateFullStream()) {
+                var moduleArray = new byte[stream.Length];
+                stream.Read(moduleArray, 0, moduleArray.Length);
+                var assembly = Assembly.Load(moduleArray);
+                var cctor =
+                    assembly.ManifestModule.ResolveMethod(module.GlobalType.FindStaticConstructor().MDToken.ToInt32());
+
+                Logger.Verbose("Decrypting methods....");
+                // Thanks alot to Alcatraz3222 for help me in load cctor without invoke :P
+                RuntimeHelpers.PrepareMethod(cctor.MethodHandle);
+
+                var hinstance = Marshal.GetHINSTANCE(assembly.ManifestModule);
+                var tableDecrypted = new byte[stream.Length];
+                Marshal.Copy(hinstance, tableDecrypted, 0, tableDecrypted.Length);
+
+                var entryPoint = assemblyManager.Module.EntryPoint;
+
+                uint realEntryPoint = 0;
+                if (entryPoint != null)
+                    realEntryPoint = assemblyManager.Module.EntryPoint.MDToken.Rid;
+
+                assemblyManager.Module = ModuleDefMD.Load(tableDecrypted);
+                Logger.Verbose("Have been decrypted all methods.");
+
+                if (realEntryPoint != 0)
+                    assemblyManager.Module.EntryPoint = assemblyManager.Module.ResolveMethod(realEntryPoint);
+
+
+                RemoveCall(assemblyManager.Module.GlobalType.FindStaticConstructor());
+            }
+
+            return true;
+        }
+
+        static bool? IsTampered(ModuleDefMD module) {
+            var sections = module.MetaData.PEImage.ImageSectionHeaders;
+
+            if (sections.Count == 3) {
+                Logger.Verbose("Anti-tamper not detected.");
+                return false;
+            }
+
+            foreach (var section in sections) {
+                switch (section.DisplayName) {
+                    case ".text":
+                    case ".rsrc":
+                    case ".reloc":
+                        continue;
+                    default:
+                        Logger.Verbose($"Anti-tamper detected in section: {section.DisplayName}.");
+                        return true;
+                }
+            }
+            return null;
+        }
+
+        static void RemoveCall(MethodDef method) {
+            var instructions = method.Body.Instructions;
+            foreach (var instr in instructions) {
+                if (instr.OpCode != OpCodes.Call)
+                    continue;
+
+                var tamperMethod = instr.Operand as MethodDef;
+                if (tamperMethod == null)
+                    continue;
+                if (!tamperMethod.DeclaringType.IsGlobalModuleType)
+                    continue;
+
+                const MethodAttributes attributes = MethodAttributes.Assembly | MethodAttributes.Static |
+                                                    MethodAttributes.HideBySig;
+                if (tamperMethod.Attributes != attributes)
+                    continue;
+                if (tamperMethod.CodeType != MethodImplAttributes.IL)
+                    continue;
+
+                if (tamperMethod.ReturnType.ElementType != ElementType.Void)
+                    continue;
+
+                // The decrypter method just have 1 call to VirtualProtect
+                if (tamperMethod.FindInstructionsNumber(OpCodes.Call, "(System.IntPtr,System.UInt32,System.UInt32,System.UInt32&)") != 1)
+                    continue;
+                instr.OpCode = OpCodes.Nop;
+                instr.Operand = null;
+                Logger.Verbose("Anti-tamper decrypter call was removed from .cctor.");
+                return;
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx/Deobfuscator/Deobfuscators/CompressorDeobfuscator.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using dnlib.DotNet.Writer;
+
+namespace NoFuserEx.Deobfuscator.Deobfuscators {
+    internal class CompressorDeobfuscator : IDeobfuscator {
+        readonly List<string> ModuleNames = new List<string>();
+
+        string moduleName;
+
+        public void Log() {
+            Logger.Success($"Unpacked:      Module \"{moduleName}\".");
+        }
+
+        void PosibleModules() {
+            // Add here all posible modules if you found a modded ConfuserEx
+            var modules = new[] {
+                "koi",
+                "netmodule"
+            };
+            ModuleNames.AddRange(modules);
+        }
+
+        public bool Deobfuscate(AssemblyManager assemblyManager) {
+            PosibleModules();
+
+            var module = assemblyManager.Module;
+
+            if (!IsPacked(module))
+                return false;
+
+            var resources = module.Resources;
+
+            var newEntryPoint = ResolveEntryPoint(assemblyManager.Module);
+            if (newEntryPoint == 0)
+                Logger.Exception(
+                    new Exception(
+                        "Error searching entry point token, maybe the file is protected.\nOpen the NoFuserEx.exe without arguments for see all help."));
+
+            ModifyMethod(module.EntryPoint);
+
+            using (var stream = new MemoryStream()) {
+                module.Write(stream, new ModuleWriterOptions { Logger = DummyLogger.NoThrowInstance });
+                var asm = Assembly.Load(stream.ToArray());
+                var method = asm.ManifestModule.ResolveMethod(module.EntryPoint.MDToken.ToInt32());
+                var moduleDecrypted = (byte[])method.Invoke(null, new object[1]);
+                assemblyManager.Module = ModuleDefMD.Load(moduleDecrypted);
+                Logger.Verbose($"Module decrypted: {assemblyManager.Module.Name}.");
+            }
+
+            Logger.Verbose("Adding resources to new module...");
+            foreach (var resource in resources) {
+                assemblyManager.Module.Resources.Add(resource);
+                Logger.VeryVerbose($"Resource \"{resource.Name}\" added to new module.");
+            }
+
+            Logger.Verbose("Setting new entry point...");
+            assemblyManager.Module.EntryPoint = assemblyManager.Module.ResolveMethod(new MDToken(newEntryPoint).Rid);
+
+            return true;
+        }
+
+        bool IsPacked(ModuleDefMD module) {
+            // Thanks to 0xd4d https://github.com/0xd4d/dnlib/issues/72
+            for (uint rid = 1; rid <= module.MetaData.TablesStream.FileTable.Rows; rid++) {
+                var row = module.TablesStream.ReadFileRow(rid);
+                var name = module.StringsStream.ReadNoNull(row.Name);
+                if (!ModuleNames.Contains(name)) continue;
+                moduleName = name;
+                Logger.Verbose($"Is packed with ConfuserEx, module packed: {name}.");
+                return true;
+            }
+            Logger.Verbose("Compressor not detected.");
+            return false;
+        }
+
+        static uint ResolveEntryPoint(ModuleDefMD module) {
+            Logger.Verbose("Resolving entry point of module encrypted...");
+            var instructions = module.EntryPoint.Body.Instructions;
+
+            for (var i = 0; i < instructions.Count; i++) {
+                if (instructions[i].OpCode != OpCodes.Callvirt)
+                    continue;
+
+                var operand = instructions[i].Operand.ToString();
+                if (!operand.Contains("System.Reflection.Module::ResolveSignature(System.Int32)"))
+                    continue;
+
+                for (var ii = i; ii >= 0; ii--) {
+                    if (!instructions[ii].IsLdcI4())
+                        continue;
+                    var signatureToken = (uint)instructions[ii].GetLdcI4Value();
+                    var signature = module.ReadBlob(signatureToken);
+                    var entryPoint = (uint)(signature[0] | signature[1] << 8 | signature[2] << 16 | signature[3] << 24);
+                    Logger.Verbose($"Entry point of module decrypted: {entryPoint}");
+                    return entryPoint;
+                }
+            }
+            Logger.Exception(new Exception("Error resolving entry point."));
+            return 0;
+        }
+
+        static void ModifyMethod(MethodDef method) {
+            var corLib = method.Module.Import(typeof(byte[]));
+
+            method.ReturnType = corLib.ToTypeSig();
+
+            var instructions = method.Body.Instructions;
+            for (var i = 0; i < instructions.Count; i++) {
+                if (instructions[i].OpCode != OpCodes.Call)
+                    continue;
+
+                var operand = instructions[i].Operand.ToString();
+                if (!operand.Contains("System.Runtime.InteropServices.GCHandle::get_Target()"))
+                    continue;
+
+                instructions.Insert(i + 1, Instruction.Create(OpCodes.Castclass, corLib));
+                instructions.Insert(i + 2, Instruction.Create(OpCodes.Ret));
+            }
+            Logger.Verbose($"Method \"{method.Name}\" adjusted to invoke.");
+        }
+    }
+}
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx/Deobfuscator/Deobfuscators/ProxyDeobfuscator.cs
+================================================
+ï»¿using System.Collections.Generic;
+using System.Linq;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace NoFuserEx.Deobfuscator.Deobfuscators {
+    internal class ProxyDeobfuscator : IDeobfuscator {
+        readonly List<MethodDef> junkMethods = new List<MethodDef>();
+        int proxyFixed;
+        int removedJunkMethods;
+
+        public void Log() {
+            Logger.Success($"Fixed:         {proxyFixed} proxy(s).");
+            if (removedJunkMethods > 0)
+                Logger.Success($"Removed:       {removedJunkMethods} junk method(s).");
+        }
+
+        public bool Deobfuscate(AssemblyManager assemblyManager) {
+            foreach (var typeDef in assemblyManager.Module.GetTypes())
+                foreach (var methodDef in typeDef.Methods) {
+                    if (!methodDef.HasBody)
+                        continue;
+
+                    var instructions = methodDef.Body.Instructions;
+                    foreach (var instruction in instructions) {
+                        if (!instruction.OpCode.Equals(OpCodes.Call))
+                            continue;
+
+                        var operandAsMethodDef = instruction.Operand as MethodDef;
+                        if (operandAsMethodDef == null)
+                            continue;
+
+                        const MethodAttributes attributes = MethodAttributes.PrivateScope | MethodAttributes.Static;
+                        if (operandAsMethodDef.Attributes != attributes)
+                            continue;
+                        if (operandAsMethodDef.DeclaringType != typeDef)
+                            continue;
+
+                        OpCode opCodeProxy;
+                        var operandProxy = GetProxyValues(operandAsMethodDef, out opCodeProxy);
+                        if (opCodeProxy == null || operandProxy == null)
+                            continue;
+                        instruction.OpCode = opCodeProxy;
+                        instruction.Operand = operandProxy;
+                        proxyFixed++;
+                        if (!junkMethods.Contains(operandAsMethodDef))
+                            junkMethods.Add(operandAsMethodDef);
+                    }
+                }
+            if (proxyFixed == 0)
+                return false;
+
+            if (!Options.NoRemoveJunkMethods)
+                RemoveJunkMethods();
+
+            return true;
+        }
+
+        static object GetProxyValues(MethodDef method, out OpCode opCode) {
+            var instructions = method.Body.Instructions.ToArray();
+            var validInstruction = instructions.Length - 2;
+            opCode = null;
+            if (!(instructions[validInstruction].OpCode.Equals(OpCodes.Newobj) ||
+                instructions[validInstruction].OpCode.Equals(OpCodes.Call) ||
+                instructions[validInstruction].OpCode.Equals(OpCodes.Callvirt)))
+                return null;
+            if (instructions[validInstruction + 1].OpCode.Code != Code.Ret)
+                return null;
+            if (instructions.Length != method.Parameters.Count + 2)
+                return null;
+            opCode = instructions[validInstruction].OpCode;
+            return instructions[validInstruction].Operand;
+        }
+
+        void RemoveJunkMethods() {
+            for (var i = 0; i < junkMethods.Count; i++) {
+                junkMethods[i].DeclaringType.Remove(junkMethods[i]);
+                removedJunkMethods++;
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx/Deobfuscator/Deobfuscators/ResourcesDeobfuscator.cs
+================================================
+ï»¿using System.IO;
+using System.Linq;
+using System.Reflection;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using dnlib.DotNet.Writer;
+using FieldAttributes = dnlib.DotNet.FieldAttributes;
+using MethodAttributes = dnlib.DotNet.MethodAttributes;
+
+namespace NoFuserEx.Deobfuscator.Deobfuscators {
+    internal class ResourcesDeobfuscator : IDeobfuscator {
+        int resourcesDecrypted;
+        int totalResources;
+
+        public void Log() {
+            Logger.Success($"Decrypted:     {resourcesDecrypted}/{totalResources} resource(s).");
+        }
+
+        public bool Deobfuscate(AssemblyManager assemblyManager) {
+            var module = assemblyManager.Module;
+
+            var decrypterMethod = GetDecrypterMethod(module);
+            if (decrypterMethod == null)
+                return false;
+            var cctor = module.GlobalType.FindStaticConstructor();
+            foreach (var instr in cctor.Body.Instructions) {
+                if (instr.OpCode != OpCodes.Call || instr.Operand as MethodDef != decrypterMethod)
+                    continue;
+                instr.OpCode = OpCodes.Nop;
+                instr.Operand = null;
+            }
+
+            ModifyMethod(decrypterMethod);
+
+            using (var stream = new MemoryStream()) {
+                module.Write(stream, new ModuleWriterOptions { Logger = DummyLogger.NoThrowInstance });
+                var asm = Assembly.Load(stream.ToArray());
+                var method = asm.ManifestModule.ResolveMethod(decrypterMethod.MDToken.ToInt32());
+                var moduleDecrypted = (byte[])method.Invoke(null, null);
+                var resources = ModuleDefMD.Load(moduleDecrypted).Resources;
+
+                totalResources = module.Resources.Count;
+
+                foreach (var resource in resources) {
+                    if (!module.Resources.Remove(module.Resources.Find(resource.Name)))
+                        continue;
+                    module.Resources.Add(resource);
+                    resourcesDecrypted++;
+                }
+
+                RemoveMethod(decrypterMethod);
+            }
+
+            return totalResources > 0;
+        }
+
+        static MethodDef GetDecrypterMethod(ModuleDef module) {
+            var cctor = module.GlobalType.FindStaticConstructor();
+            var instructions = cctor.Body.Instructions;
+            foreach (var instruction in instructions) {
+                if (instruction.OpCode != OpCodes.Call)
+                    continue;
+
+                var initializeMethod = instruction.Operand as MethodDef;
+                if (initializeMethod == null)
+                    continue;
+                if (!initializeMethod.DeclaringType.IsGlobalModuleType)
+                    continue;
+
+                const MethodAttributes attributes =
+                    MethodAttributes.Assembly | MethodAttributes.Static | MethodAttributes.HideBySig;
+                if (initializeMethod.Attributes != attributes)
+                    continue;
+
+                if (initializeMethod.ReturnType.ElementType != ElementType.Void)
+                    continue;
+                if (initializeMethod.HasParamDefs)
+                    continue;
+
+                if (initializeMethod.FindInstructionsNumber(OpCodes.Call,
+                        "System.Runtime.CompilerServices.RuntimeHelpers::InitializeArray(System.Array,System.RuntimeFieldHandle)") != 1)
+                    continue;
+
+                var field = FindAssemblyField(module);
+                var operand = (from instr in initializeMethod.Body.Instructions
+                               where instr.OpCode == OpCodes.Stsfld
+                               let fieldArray = instr.Operand as FieldDef
+                               where fieldArray != null
+                               where field == fieldArray
+                               select instr.Operand.ToString()).FirstOrDefault();
+
+                if (initializeMethod.FindInstructionsNumber(OpCodes.Stsfld, operand) != 1)
+                    continue;
+
+                return initializeMethod;
+            }
+            return null;
+        }
+
+        static FieldDef FindAssemblyField(ModuleDef module) {
+            foreach (var field in module.GlobalType.Fields) {
+                const FieldAttributes attributes = FieldAttributes.Assembly | FieldAttributes.Static;
+                if (field.Attributes != attributes)
+                    continue;
+                if (!field.DeclaringType.IsGlobalModuleType)
+                    continue;
+                if (field.FieldType.ElementType != ElementType.Class)
+                    continue;
+                if (field.FieldType.FullName != "System.Reflection.Assembly")
+                    continue;
+
+                return field;
+            }
+            return null;
+        }
+
+        static void ModifyMethod(MethodDef method) {
+            var corLib = method.Module.Import(typeof(byte[]));
+
+            method.ReturnType = corLib.ToTypeSig();
+
+            var instructions = method.Body.Instructions;
+            foreach (var instruction in instructions) {
+                if (instruction.OpCode != OpCodes.Call)
+                    continue;
+
+                var operand = instruction.Operand.ToString();
+                if (!operand.Contains("System.Reflection.Assembly::Load(System.Byte[])"))
+                    continue;
+                
+                instruction.OpCode = OpCodes.Ret;
+                instruction.Operand = null;
+            }
+            Logger.Verbose($"Method \"{method.Name}\" adjusted to invoke.");
+        }
+
+        static void RemoveMethod(MethodDef method) {
+            var body = new CilBody {
+                Instructions = { Instruction.Create(OpCodes.Ldnull), Instruction.Create(OpCodes.Ret) }
+            };
+            method.Body = body;
+        }
+    }
+}
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx/Deobfuscator/Deobfuscators/Constants/ByteArrayDecrypter.cs
+================================================
+ï»¿using System.Collections.Generic;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace NoFuserEx.Deobfuscator.Deobfuscators.Constants {
+    class ByteArrayDecrypter : DecrypterBase {
+        readonly MethodDef decrypterMethod;
+        readonly MethodDef method;
+        readonly int index;
+
+        internal ByteArrayDecrypter(MethodDef method, MethodDef decrypterMethod, int index) {
+            this.method = method;
+            this.decrypterMethod = decrypterMethod;
+            this.index = index;
+        }
+
+        internal override bool Decrypt() {
+            var instructions = method.Body.Instructions;
+            var valueDecrypter = GetValueDecrypter(instructions, index);
+            var result = MethodInvoker<byte[]>(decrypterMethod,
+                (uint)valueDecrypter.GetLdcI4Value());
+            if (result == null)
+                return false;
+
+            Logger.VeryVerbose($"Byte array decrypted: {result.Length} bytes.");
+
+            valueDecrypter.OpCode = OpCodes.Nop;
+            valueDecrypter.Operand = null;
+            var decrypterInstruction = instructions[index];
+            var local = CreateArray(method, index, result);
+            decrypterInstruction.OpCode = OpCodes.Ldloc;
+            decrypterInstruction.Operand = local;
+            return true;
+        }
+
+        static Local CreateArray(MethodDef method, int index, IList<byte> array) {
+            var corLib = method.Module.ImportAsTypeSig(typeof(byte[]));
+            var local = method.Body.Variables.Add(new Local(corLib));
+            var instructions = method.Body.Instructions;
+
+            var list = new List<Instruction> {
+                Instruction.CreateLdcI4(array.Count),
+                Instruction.Create(OpCodes.Newarr, method.Module.CorLibTypes.Byte),
+                Instruction.Create(OpCodes.Stloc, local)
+            };
+            for (var i = 0; i < array.Count; i++) {
+                list.Add(Instruction.Create(OpCodes.Ldloc, local));
+                list.Add(Instruction.CreateLdcI4(i));
+                list.Add(Instruction.CreateLdcI4(array[i]));
+                list.Add(Instruction.Create(OpCodes.Stelem_I1));
+            }
+
+            for (var i = 0; i < list.Count; i++) {
+                instructions.Insert(index + i, list[i]);
+            }
+            return local;
+        }
+    }
+}
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx/Deobfuscator/Deobfuscators/Constants/CharArrayDecrypter.cs
+================================================
+ï»¿using System.Collections.Generic;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace NoFuserEx.Deobfuscator.Deobfuscators.Constants {
+    class CharArrayDecrypter : DecrypterBase {
+        readonly MethodDef decrypterMethod;
+        readonly MethodDef method;
+        readonly int index;
+
+        internal CharArrayDecrypter(MethodDef method, MethodDef decrypterMethod, int index) {
+            this.method = method;
+            this.decrypterMethod = decrypterMethod;
+            this.index = index;
+        }
+
+        internal override bool Decrypt() {
+            var instructions = method.Body.Instructions;
+            var valueDecrypter = GetValueDecrypter(instructions, index);
+            var result = MethodInvoker<char[]>(decrypterMethod,
+                (uint)valueDecrypter.GetLdcI4Value());
+            if (result == null)
+                return false;
+
+            Logger.VeryVerbose($"Char array decrypted: {result.Length} chars.");
+
+            valueDecrypter.OpCode = OpCodes.Nop;
+            valueDecrypter.Operand = null;
+            var decrypterInstruction = instructions[index];
+            var local = CreateArray(method, index, result);
+            decrypterInstruction.OpCode = OpCodes.Ldloc;
+            decrypterInstruction.Operand = local;
+            return true;
+        }
+
+        static Local CreateArray(MethodDef method, int index, IList<char> array) {
+            var corLib = method.Module.ImportAsTypeSig(typeof(char[]));
+            var local = method.Body.Variables.Add(new Local(corLib));
+            var instructions = method.Body.Instructions;
+
+            var list = new List<Instruction> {
+                Instruction.CreateLdcI4(array.Count),
+                Instruction.Create(OpCodes.Newarr, method.Module.CorLibTypes.Char),
+                Instruction.Create(OpCodes.Stloc, local)
+            };
+            for (var i = 0; i < array.Count; i++) {
+                list.Add(Instruction.Create(OpCodes.Ldloc, local));
+                list.Add(Instruction.CreateLdcI4(i));
+                list.Add(Instruction.CreateLdcI4(array[i]));
+                list.Add(Instruction.Create(OpCodes.Stelem_I1));
+            }
+
+            for (var i = 0; i < list.Count; i++) {
+                instructions.Insert(index + i, list[i]);
+            }
+            return local;
+        }
+    }
+}
+
+
+================================================
+File: NoFuserEx/NoFuserEx/Deobfuscator/Deobfuscators/Constants/ConstantsDeobfuscator.cs
+================================================
+ï»¿using System.Collections.Generic;
+using System.Linq;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using MethodAttributes = dnlib.DotNet.MethodAttributes;
+
+namespace NoFuserEx.Deobfuscator.Deobfuscators.Constants {
+    internal class ConstantsDeobfuscator : IDeobfuscator {
+        readonly List<MethodDef> decrypterMethods = new List<MethodDef>();
+        int decryptedConstants;
+        int detectedConstants;
+
+        public void Log() {
+            Logger.Success($"Decrypted:     {decryptedConstants}/{detectedConstants} constant(s).");
+        }
+
+        void FindDecrypterMethods(ModuleDef module) {
+            foreach (var method in module.GlobalType.Methods) {
+                const MethodAttributes attributes =
+                    MethodAttributes.Assembly | MethodAttributes.Static | MethodAttributes.HideBySig;
+                if (method.Attributes != attributes)
+                    continue;
+
+                if (method.GenericParameters.Count != 1)
+                    continue;
+                if (method.Parameters.Count != 1)
+                    continue;
+                if (method.Parameters[0].Type.ElementType != ElementType.U4)
+                    continue;
+                if (method.FindInstructionsNumber(OpCodes.Call,
+                        "System.Buffer::BlockCopy(System.Array,System.Int32,System.Array,System.Int32,System.Int32)") != 2)
+                    continue;
+                if (method.FindInstructionsNumber(OpCodes.Call,
+                        "System.Array::CreateInstance(System.Type,System.Int32)") != 1)
+                    continue;
+                if (method.FindInstructionsNumber(OpCodes.Callvirt,
+                        "System.Text.Encoding::GetString(System.Byte[],System.Int32,System.Int32)") != 1)
+                    continue;
+
+                decrypterMethods.Add(method);
+                Logger.Verbose($"Constant decrypter method detected: {method.FullName}.");
+            }
+            Logger.Verbose($"Decrypter methods detected: {decrypterMethods.Count}.");
+        }
+
+        public bool Deobfuscate(AssemblyManager assemblyManager) {
+            var module = assemblyManager.Module;
+            FindDecrypterMethods(module);
+
+            if (decrypterMethods.Count == 0) {
+                Logger.Verbose("Constants protection not detected.");
+                return false;
+            }
+
+            foreach (var type in module.GetTypes()) {
+                foreach (var method in type.Methods) {
+                    if (!method.HasBody)
+                        continue;
+
+                    var instructions = method.Body.Instructions;
+                    for (var i = 0; i < instructions.Count; i++) {
+                        if (instructions[i].OpCode != OpCodes.Call)
+                            continue;
+
+                        var decrypterMethod = (instructions[i].Operand as MethodSpec).ResolveMethodDef();
+                        if (decrypterMethod == null)
+                            continue;
+
+                        if (!decrypterMethod.DeclaringType.IsGlobalModuleType)
+                            continue;
+                        if (!decrypterMethods.Contains(decrypterMethod))
+                            continue;
+                        detectedConstants++;
+
+                        DecrypterBase decrypter = null;
+                        if (instructions[i].Operand.ToString().Contains("System.String"))
+                            decrypter = new StringDecrypter(method, decrypterMethod, i);
+
+                        // I know that this is a shit but for now I not found another way :(
+                        else if (instructions[i].Operand.ToString().Contains("System.Byte[]"))
+                            decrypter = new ByteArrayDecrypter(method, decrypterMethod, i);
+                        else if (instructions[i].Operand.ToString().Contains("System.SByte[]"))
+                            decrypter = new SByteArrayDecrypter(method, decrypterMethod, i);
+                        else if (instructions[i].Operand.ToString().Contains("System.Char[]"))
+                            decrypter = new CharArrayDecrypter(method, decrypterMethod, i);
+                        else if (instructions[i].Operand.ToString().Contains("System.Int16[]"))
+                            decrypter = new ShortArrayDecrypter(method, decrypterMethod, i);
+                        else if (instructions[i].Operand.ToString().Contains("System.UInt16[]"))
+                            decrypter = new UShortArrayDecrypter(method, decrypterMethod, i);
+                        else if (instructions[i].Operand.ToString().Contains("System.Int32[]"))
+                            decrypter = new IntArrayDecrypter(method, decrypterMethod, i);
+                        else if (instructions[i].Operand.ToString().Contains("System.UInt32[]"))
+                            decrypter = new UIntArrayDecrypter(method, decrypterMethod, i);
+                        else if (instructions[i].Operand.ToString().Contains("System.Int64[]"))
+                            decrypter = new LongArrayDecrypter(method, decrypterMethod, i);
+                        else if (instructions[i].Operand.ToString().Contains("System.UInt64[]"))
+                            decrypter = new ULongArrayDecrypter(method, decrypterMethod, i);
+                        else if (instructions[i].Operand.ToString().Contains("System.Single[]"))
+                            decrypter = new FloatArrayDecrypter(method, decrypterMethod, i);
+                        else if (instructions[i].Operand.ToString().Contains("System.Double[]"))
+                            decrypter = new DoubleArrayDecrypter(method, decrypterMethod, i);
+
+                        if (decrypter != null && decrypter.Decrypt())
+                            Logger.Verbose($"Constants decrypted: {decryptedConstants++}");
+
+                    }
+                }
+            }
+            if (detectedConstants == decryptedConstants)
+                RemoveInitializeCall(module);
+
+            return detectedConstants > 0;
+        }
+
+        void RemoveInitializeCall(ModuleDef module) {
+            var cctor = module.GlobalType.FindStaticConstructor();
+            var instructions = cctor.Body.Instructions;
+            foreach (var instruction in instructions) {
+                if (instruction.OpCode != OpCodes.Call)
+                    continue;
+
+                var initializeMethod = instruction.Operand as MethodDef;
+                if (initializeMethod == null)
+                    continue;
+                if (!initializeMethod.DeclaringType.IsGlobalModuleType)
+                    continue;
+
+                const MethodAttributes attributes =
+                    MethodAttributes.Assembly | MethodAttributes.Static | MethodAttributes.HideBySig;
+                if (initializeMethod.Attributes != attributes)
+                    continue;
+
+                if (initializeMethod.ReturnType.ElementType != ElementType.Void)
+                    continue;
+                if (initializeMethod.HasParamDefs)
+                    continue;
+
+                if (initializeMethod.FindInstructionsNumber(OpCodes.Call,
+                        "System.Runtime.CompilerServices.RuntimeHelpers::InitializeArray(System.Array,System.RuntimeFieldHandle)") != 1)
+                    continue;
+
+                var field = FindArrayField(module);
+                var operand = (from instr in initializeMethod.Body.Instructions
+                    where instr.OpCode == OpCodes.Stsfld
+                    let fieldArray = instr.Operand as FieldDef
+                    where fieldArray != null
+                    where field == fieldArray
+                    select instr.Operand.ToString()).FirstOrDefault();
+                
+                if (initializeMethod.FindInstructionsNumber(OpCodes.Stsfld, operand) != 1)
+                    continue;
+
+                instruction.OpCode = OpCodes.Nop;
+                instruction.Operand = null;
+                Logger.Verbose("Removed constans initialize call.");
+            }
+        }
+
+        static FieldDef FindArrayField(ModuleDef module) {
+            foreach (var field in module.GlobalType.Fields) {
+                const FieldAttributes attributes = FieldAttributes.Assembly | FieldAttributes.Static;
+                if (field.Attributes != attributes)
+                    continue;
+                if (!field.DeclaringType.IsGlobalModuleType)
+                    continue;
+                if (field.FieldType.ElementType != ElementType.SZArray)
+                    continue;
+                if (field.FieldType.FullName != "System.Byte[]")
+                    continue;
+
+                return field;
+            }
+            return null;
+        }
+    }
+}
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx/Deobfuscator/Deobfuscators/Constants/DecrypterBase.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using dnlib.DotNet.Writer;
+
+namespace NoFuserEx.Deobfuscator.Deobfuscators.Constants {
+    abstract class DecrypterBase {
+        internal abstract bool Decrypt();
+
+        static Assembly assembly;
+        protected T MethodInvoker<T>(MethodDef decrypterMethod, uint value) {
+            if (assembly == null)
+                LoadAssembly(decrypterMethod.Module);
+            if (assembly.ManifestModule.ScopeName != decrypterMethod.Module.FullName)
+                LoadAssembly(decrypterMethod.Module);
+
+            if (assembly == null)
+                Logger.Exception(new Exception("Error loading assembly."));
+
+            var method = (MethodInfo)assembly.ManifestModule.ResolveMethod(decrypterMethod.MDToken.ToInt32());
+
+            var result = method.MakeGenericMethod(typeof(T)).Invoke(null, new object[] { value });
+            return (T)result;
+        }
+
+        static void LoadAssembly(ModuleDef module) {
+            using (var stream = new MemoryStream()) {
+                module.Write(stream, new ModuleWriterOptions { Logger = DummyLogger.NoThrowInstance });
+                assembly = Assembly.Load(stream.ToArray());
+                if (assembly == null)
+                    Logger.Exception(new Exception("Error loading assembly for invoke the constants."));
+            }
+        }
+
+        protected static Instruction GetValueDecrypter(IList<Instruction> instructions, int index) {
+            for (var i = index; i >= 0; i--) {
+                if (!instructions[i].IsLdcI4())
+                    continue;
+                return instructions[i];
+            }
+            return null;
+        }
+    }
+}
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx/Deobfuscator/Deobfuscators/Constants/DoubleArrayDecrypter.cs
+================================================
+ï»¿using System.Collections.Generic;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace NoFuserEx.Deobfuscator.Deobfuscators.Constants {
+    class DoubleArrayDecrypter : DecrypterBase {
+        readonly MethodDef decrypterMethod;
+        readonly MethodDef method;
+        readonly int index;
+
+        internal DoubleArrayDecrypter(MethodDef method, MethodDef decrypterMethod, int index) {
+            this.method = method;
+            this.decrypterMethod = decrypterMethod;
+            this.index = index;
+        }
+
+        internal override bool Decrypt() {
+            var instructions = method.Body.Instructions;
+            var valueDecrypter = GetValueDecrypter(instructions, index);
+            var result = MethodInvoker<double[]>(decrypterMethod,
+                (uint)valueDecrypter.GetLdcI4Value());
+            if (result == null)
+                return false;
+
+            Logger.VeryVerbose($"Double array decrypted: {result.Length} doubles.");
+
+            valueDecrypter.OpCode = OpCodes.Nop;
+            valueDecrypter.Operand = null;
+            var decrypterInstruction = instructions[index];
+            var local = CreateArray(method, index, result);
+            decrypterInstruction.OpCode = OpCodes.Ldloc;
+            decrypterInstruction.Operand = local;
+            return true;
+        }
+
+        static Local CreateArray(MethodDef method, int index, IList<double> array) {
+            var corLib = method.Module.ImportAsTypeSig(typeof(double[]));
+            var local = method.Body.Variables.Add(new Local(corLib));
+            var instructions = method.Body.Instructions;
+
+            var list = new List<Instruction> {
+                Instruction.CreateLdcI4(array.Count),
+                Instruction.Create(OpCodes.Newarr, method.Module.CorLibTypes.Double),
+                Instruction.Create(OpCodes.Stloc, local)
+            };
+            for (var i = 0; i < array.Count; i++) {
+                list.Add(Instruction.Create(OpCodes.Ldloc, local));
+                list.Add(Instruction.CreateLdcI4(i));
+                list.Add(Instruction.Create(OpCodes.Ldc_R8, array[i]));
+                list.Add(Instruction.Create(OpCodes.Stelem_R8));
+            }
+
+            for (var i = 0; i < list.Count; i++) {
+                instructions.Insert(index + i, list[i]);
+            }
+            return local;
+        }
+    }
+}
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx/Deobfuscator/Deobfuscators/Constants/FloatArrayDecrypter.cs
+================================================
+ï»¿using System.Collections.Generic;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace NoFuserEx.Deobfuscator.Deobfuscators.Constants {
+    class FloatArrayDecrypter : DecrypterBase {
+        readonly MethodDef decrypterMethod;
+        readonly MethodDef method;
+        readonly int index;
+
+        internal FloatArrayDecrypter(MethodDef method, MethodDef decrypterMethod, int index) {
+            this.method = method;
+            this.decrypterMethod = decrypterMethod;
+            this.index = index;
+        }
+
+        internal override bool Decrypt() {
+            var instructions = method.Body.Instructions;
+            var valueDecrypter = GetValueDecrypter(instructions, index);
+            var result = MethodInvoker<float[]>(decrypterMethod,
+                (uint)valueDecrypter.GetLdcI4Value());
+            if (result == null)
+                return false;
+
+            Logger.VeryVerbose($"Float array decrypted: {result.Length} floats.");
+
+            valueDecrypter.OpCode = OpCodes.Nop;
+            valueDecrypter.Operand = null;
+            var decrypterInstruction = instructions[index];
+            var local = CreateArray(method, index, result);
+            decrypterInstruction.OpCode = OpCodes.Ldloc;
+            decrypterInstruction.Operand = local;
+            return true;
+        }
+
+        static Local CreateArray(MethodDef method, int index, IList<float> array) {
+            var corLib = method.Module.ImportAsTypeSig(typeof(float[]));
+            var local = method.Body.Variables.Add(new Local(corLib));
+            var instructions = method.Body.Instructions;
+
+            var list = new List<Instruction> {
+                Instruction.CreateLdcI4(array.Count),
+                Instruction.Create(OpCodes.Newarr, method.Module.CorLibTypes.Single),
+                Instruction.Create(OpCodes.Stloc, local)
+            };
+            for (var i = 0; i < array.Count; i++) {
+                list.Add(Instruction.Create(OpCodes.Ldloc, local));
+                list.Add(Instruction.CreateLdcI4(i));
+                list.Add(Instruction.Create(OpCodes.Ldc_R4, array[i]));
+                list.Add(Instruction.Create(OpCodes.Stelem_R4));
+            }
+
+            for (var i = 0; i < list.Count; i++) {
+                instructions.Insert(index + i, list[i]);
+            }
+            return local;
+        }
+    }
+}
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx/Deobfuscator/Deobfuscators/Constants/IntArrayDecrypter.cs
+================================================
+ï»¿using System.Collections.Generic;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace NoFuserEx.Deobfuscator.Deobfuscators.Constants {
+    class IntArrayDecrypter : DecrypterBase {
+        readonly MethodDef decrypterMethod;
+        readonly MethodDef method;
+        readonly int index;
+
+        internal IntArrayDecrypter(MethodDef method, MethodDef decrypterMethod, int index) {
+            this.method = method;
+            this.decrypterMethod = decrypterMethod;
+            this.index = index;
+        }
+
+        internal override bool Decrypt() {
+            var instructions = method.Body.Instructions;
+            var valueDecrypter = GetValueDecrypter(instructions, index);
+            var result = MethodInvoker<int[]>(decrypterMethod,
+                (uint)valueDecrypter.GetLdcI4Value());
+            if (result == null)
+                return false;
+
+            Logger.VeryVerbose($"Int array decrypted: {result.Length} ints.");
+
+            valueDecrypter.OpCode = OpCodes.Nop;
+            valueDecrypter.Operand = null;
+            var decrypterInstruction = instructions[index];
+            var local = CreateArray(method, index, result);
+            decrypterInstruction.OpCode = OpCodes.Ldloc;
+            decrypterInstruction.Operand = local;
+            return true;
+        }
+
+        static Local CreateArray(MethodDef method, int index, IList<int> array) {
+            var corLib = method.Module.ImportAsTypeSig(typeof(int[]));
+            var local = method.Body.Variables.Add(new Local(corLib));
+            var instructions = method.Body.Instructions;
+
+            var list = new List<Instruction> {
+                Instruction.CreateLdcI4(array.Count),
+                Instruction.Create(OpCodes.Newarr, method.Module.CorLibTypes.Int32),
+                Instruction.Create(OpCodes.Stloc, local)
+            };
+            for (var i = 0; i < array.Count; i++) {
+                list.Add(Instruction.Create(OpCodes.Ldloc, local));
+                list.Add(Instruction.CreateLdcI4(i));
+                list.Add(Instruction.CreateLdcI4(array[i]));
+                list.Add(Instruction.Create(OpCodes.Stelem_I4));
+            }
+
+            for (var i = 0; i < list.Count; i++) {
+                instructions.Insert(index + i, list[i]);
+            }
+            return local;
+        }
+    }
+}
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx/Deobfuscator/Deobfuscators/Constants/LongArrayDecrypter.cs
+================================================
+ï»¿using System.Collections.Generic;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace NoFuserEx.Deobfuscator.Deobfuscators.Constants {
+    class LongArrayDecrypter : DecrypterBase {
+        readonly MethodDef decrypterMethod;
+        readonly MethodDef method;
+        readonly int index;
+
+        internal LongArrayDecrypter(MethodDef method, MethodDef decrypterMethod, int index) {
+            this.method = method;
+            this.decrypterMethod = decrypterMethod;
+            this.index = index;
+        }
+
+        internal override bool Decrypt() {
+            var instructions = method.Body.Instructions;
+            var valueDecrypter = GetValueDecrypter(instructions, index);
+            var result = MethodInvoker<long[]>(decrypterMethod,
+                (uint)valueDecrypter.GetLdcI4Value());
+            if (result == null)
+                return false;
+
+            Logger.VeryVerbose($"Long array decrypted: {result.Length} longs.");
+
+            valueDecrypter.OpCode = OpCodes.Nop;
+            valueDecrypter.Operand = null;
+            var decrypterInstruction = instructions[index];
+            var local = CreateArray(method, index, result);
+            decrypterInstruction.OpCode = OpCodes.Ldloc;
+            decrypterInstruction.Operand = local;
+            return true;
+        }
+
+        static Local CreateArray(MethodDef method, int index, IList<long> array) {
+            var corLib = method.Module.ImportAsTypeSig(typeof(long[]));
+            var local = method.Body.Variables.Add(new Local(corLib));
+            var instructions = method.Body.Instructions;
+
+            var list = new List<Instruction> {
+                Instruction.CreateLdcI4(array.Count),
+                Instruction.Create(OpCodes.Newarr, method.Module.CorLibTypes.Int64),
+                Instruction.Create(OpCodes.Stloc, local)
+            };
+            for (var i = 0; i < array.Count; i++) {
+                list.Add(Instruction.Create(OpCodes.Ldloc, local));
+                list.Add(Instruction.CreateLdcI4(i));
+                list.Add(Instruction.Create(OpCodes.Ldc_I8, array[i]));
+                list.Add(Instruction.Create(OpCodes.Stelem_I8));
+            }
+
+            for (var i = 0; i < list.Count; i++) {
+                instructions.Insert(index + i, list[i]);
+            }
+            return local;
+        }
+    }
+}
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx/Deobfuscator/Deobfuscators/Constants/SByteArrayDecrypter.cs
+================================================
+ï»¿using System.Collections.Generic;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace NoFuserEx.Deobfuscator.Deobfuscators.Constants {
+    class SByteArrayDecrypter : DecrypterBase {
+        readonly MethodDef decrypterMethod;
+        readonly MethodDef method;
+        readonly int index;
+
+        internal SByteArrayDecrypter(MethodDef method, MethodDef decrypterMethod, int index) {
+            this.method = method;
+            this.decrypterMethod = decrypterMethod;
+            this.index = index;
+        }
+
+        internal override bool Decrypt() {
+            var instructions = method.Body.Instructions;
+            var valueDecrypter = GetValueDecrypter(instructions, index);
+            var result = MethodInvoker<sbyte[]>(decrypterMethod,
+                (uint)valueDecrypter.GetLdcI4Value());
+            if (result == null)
+                return false;
+
+            Logger.VeryVerbose($"SByte array decrypted: {result.Length} sbytes.");
+
+            valueDecrypter.OpCode = OpCodes.Nop;
+            valueDecrypter.Operand = null;
+            var decrypterInstruction = instructions[index];
+            var local = CreateArray(method, index, result);
+            decrypterInstruction.OpCode = OpCodes.Ldloc;
+            decrypterInstruction.Operand = local;
+            return true;
+        }
+
+        static Local CreateArray(MethodDef method, int index, IList<sbyte> array) {
+            var corLib = method.Module.ImportAsTypeSig(typeof(sbyte[]));
+            var local = method.Body.Variables.Add(new Local(corLib));
+            var instructions = method.Body.Instructions;
+
+            var list = new List<Instruction> {
+                Instruction.CreateLdcI4(array.Count),
+                Instruction.Create(OpCodes.Newarr, method.Module.CorLibTypes.SByte),
+                Instruction.Create(OpCodes.Stloc, local)
+            };
+            for (var i = 0; i < array.Count; i++) {
+                list.Add(Instruction.Create(OpCodes.Ldloc, local));
+                list.Add(Instruction.CreateLdcI4(i));
+                list.Add(Instruction.CreateLdcI4(array[i]));
+                list.Add(Instruction.Create(OpCodes.Stelem_I1));
+            }
+
+            for (var i = 0; i < list.Count; i++) {
+                instructions.Insert(index + i, list[i]);
+            }
+            return local;
+        }
+    }
+}
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx/Deobfuscator/Deobfuscators/Constants/ShortArrayDecrypter.cs
+================================================
+ï»¿using System.Collections.Generic;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace NoFuserEx.Deobfuscator.Deobfuscators.Constants {
+    class ShortArrayDecrypter : DecrypterBase {
+        readonly MethodDef decrypterMethod;
+        readonly MethodDef method;
+        readonly int index;
+
+        internal ShortArrayDecrypter(MethodDef method, MethodDef decrypterMethod, int index) {
+            this.method = method;
+            this.decrypterMethod = decrypterMethod;
+            this.index = index;
+        }
+
+        internal override bool Decrypt() {
+            var instructions = method.Body.Instructions;
+            var valueDecrypter = GetValueDecrypter(instructions, index);
+            var result = MethodInvoker<short[]>(decrypterMethod,
+                (uint)valueDecrypter.GetLdcI4Value());
+            if (result == null)
+                return false;
+
+            Logger.VeryVerbose($"Short array decrypted: {result.Length} shorts.");
+
+            valueDecrypter.OpCode = OpCodes.Nop;
+            valueDecrypter.Operand = null;
+            var decrypterInstruction = instructions[index];
+            var local = CreateArray(method, index, result);
+            decrypterInstruction.OpCode = OpCodes.Ldloc;
+            decrypterInstruction.Operand = local;
+            return true;
+        }
+
+        static Local CreateArray(MethodDef method, int index, IList<short> array) {
+            var corLib = method.Module.ImportAsTypeSig(typeof(short[]));
+            var local = method.Body.Variables.Add(new Local(corLib));
+            var instructions = method.Body.Instructions;
+
+            var list = new List<Instruction> {
+                Instruction.CreateLdcI4(array.Count),
+                Instruction.Create(OpCodes.Newarr, method.Module.CorLibTypes.Int16),
+                Instruction.Create(OpCodes.Stloc, local)
+            };
+            for (var i = 0; i < array.Count; i++) {
+                list.Add(Instruction.Create(OpCodes.Ldloc, local));
+                list.Add(Instruction.CreateLdcI4(i));
+                list.Add(Instruction.CreateLdcI4(array[i]));
+                list.Add(Instruction.Create(OpCodes.Stelem_I2));
+            }
+
+            for (var i = 0; i < list.Count; i++) {
+                instructions.Insert(index + i, list[i]);
+            }
+            return local;
+        }
+    }
+}
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx/Deobfuscator/Deobfuscators/Constants/StringDecrypter.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace NoFuserEx.Deobfuscator.Deobfuscators.Constants {
+    class StringDecrypter : DecrypterBase {
+        readonly MethodDef method;
+        readonly MethodDef decrypterMethod;
+        readonly int index;
+        internal StringDecrypter(MethodDef method, MethodDef decrypterMethod, int index) {
+            this.method = method;
+            this.decrypterMethod = decrypterMethod;
+            this.index = index;
+        }
+
+        internal override bool Decrypt() {
+            var instructions = method.Body.Instructions;
+            var valueDecrypter = GetValueDecrypter(instructions, index);
+            var result = MethodInvoker<string>(decrypterMethod, (uint)valueDecrypter.GetLdcI4Value());
+
+            if (result == null)
+                return false;
+
+            Logger.VeryVerbose($"String decrypted: {result}");
+
+            valueDecrypter.OpCode = OpCodes.Nop;
+            valueDecrypter.Operand = null;
+            instructions[index].OpCode = OpCodes.Ldstr;
+            instructions[index].Operand = result;
+            return true;
+        }
+    }
+}
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx/Deobfuscator/Deobfuscators/Constants/UIntArrayDecrypter.cs
+================================================
+ï»¿using System.Collections.Generic;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace NoFuserEx.Deobfuscator.Deobfuscators.Constants {
+    class UIntArrayDecrypter : DecrypterBase {
+        readonly MethodDef decrypterMethod;
+        readonly MethodDef method;
+        readonly int index;
+
+        internal UIntArrayDecrypter(MethodDef method, MethodDef decrypterMethod, int index) {
+            this.method = method;
+            this.decrypterMethod = decrypterMethod;
+            this.index = index;
+        }
+
+        internal override bool Decrypt() {
+            var instructions = method.Body.Instructions;
+            var valueDecrypter = GetValueDecrypter(instructions, index);
+            var result = MethodInvoker<uint[]>(decrypterMethod,
+                (uint)valueDecrypter.GetLdcI4Value());
+            if (result == null)
+                return false;
+
+            Logger.VeryVerbose($"UInt array decrypted: {result.Length} uints.");
+
+            valueDecrypter.OpCode = OpCodes.Nop;
+            valueDecrypter.Operand = null;
+            var decrypterInstruction = instructions[index];
+            var local = CreateArray(method, index, result);
+            decrypterInstruction.OpCode = OpCodes.Ldloc;
+            decrypterInstruction.Operand = local;
+            return true;
+        }
+
+        static Local CreateArray(MethodDef method, int index, IList<uint> array) {
+            var corLib = method.Module.ImportAsTypeSig(typeof(uint[]));
+            var local = method.Body.Variables.Add(new Local(corLib));
+            var instructions = method.Body.Instructions;
+
+            var list = new List<Instruction> {
+                Instruction.CreateLdcI4(array.Count),
+                Instruction.Create(OpCodes.Newarr, method.Module.CorLibTypes.UInt32),
+                Instruction.Create(OpCodes.Stloc, local)
+            };
+            for (var i = 0; i < array.Count; i++) {
+                list.Add(Instruction.Create(OpCodes.Ldloc, local));
+                list.Add(Instruction.CreateLdcI4(i));
+                list.Add(Instruction.CreateLdcI4((int)array[i]));
+                list.Add(Instruction.Create(OpCodes.Stelem_I4));
+            }
+
+            for (var i = 0; i < list.Count; i++) {
+                instructions.Insert(index + i, list[i]);
+            }
+            return local;
+        }
+    }
+}
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx/Deobfuscator/Deobfuscators/Constants/ULongArrayDecrypter.cs
+================================================
+ï»¿using System.Collections.Generic;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace NoFuserEx.Deobfuscator.Deobfuscators.Constants {
+    class ULongArrayDecrypter : DecrypterBase {
+        readonly MethodDef decrypterMethod;
+        readonly MethodDef method;
+        readonly int index;
+
+        internal ULongArrayDecrypter(MethodDef method, MethodDef decrypterMethod, int index) {
+            this.method = method;
+            this.decrypterMethod = decrypterMethod;
+            this.index = index;
+        }
+
+        internal override bool Decrypt() {
+            var instructions = method.Body.Instructions;
+            var valueDecrypter = GetValueDecrypter(instructions, index);
+            var result = MethodInvoker<ulong[]>(decrypterMethod,
+                (uint)valueDecrypter.GetLdcI4Value());
+            if (result == null)
+                return false;
+
+            Logger.VeryVerbose($"ULong array decrypted: {result.Length} ulongs.");
+
+            valueDecrypter.OpCode = OpCodes.Nop;
+            valueDecrypter.Operand = null;
+            var decrypterInstruction = instructions[index];
+            var local = CreateArray(method, index, result);
+            decrypterInstruction.OpCode = OpCodes.Ldloc;
+            decrypterInstruction.Operand = local;
+            return true;
+        }
+
+        static Local CreateArray(MethodDef method, int index, IList<ulong> array) {
+            var corLib = method.Module.ImportAsTypeSig(typeof(ulong[]));
+            var local = method.Body.Variables.Add(new Local(corLib));
+            var instructions = method.Body.Instructions;
+
+            var list = new List<Instruction> {
+                Instruction.CreateLdcI4(array.Count),
+                Instruction.Create(OpCodes.Newarr, method.Module.CorLibTypes.UInt64),
+                Instruction.Create(OpCodes.Stloc, local)
+            };
+            for (var i = 0; i < array.Count; i++) {
+                list.Add(Instruction.Create(OpCodes.Ldloc, local));
+                list.Add(Instruction.CreateLdcI4(i));
+                list.Add(Instruction.Create(OpCodes.Ldc_I8, array[i]));
+                list.Add(Instruction.Create(OpCodes.Stelem_I8));
+            }
+
+            for (var i = 0; i < list.Count; i++) {
+                instructions.Insert(index + i, list[i]);
+            }
+            return local;
+        }
+    }
+}
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx/Deobfuscator/Deobfuscators/Constants/UShortArrayDecrypter.cs
+================================================
+ï»¿using System.Collections.Generic;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace NoFuserEx.Deobfuscator.Deobfuscators.Constants {
+    class UShortArrayDecrypter : DecrypterBase {
+        readonly MethodDef decrypterMethod;
+        readonly MethodDef method;
+        readonly int index;
+
+        internal UShortArrayDecrypter(MethodDef method, MethodDef decrypterMethod, int index) {
+            this.method = method;
+            this.decrypterMethod = decrypterMethod;
+            this.index = index;
+        }
+
+        internal override bool Decrypt() {
+            var instructions = method.Body.Instructions;
+            var valueDecrypter = GetValueDecrypter(instructions, index);
+            var result = MethodInvoker<ushort[]>(decrypterMethod,
+                (uint)valueDecrypter.GetLdcI4Value());
+            if (result == null)
+                return false;
+
+            Logger.VeryVerbose($"UShort array decrypted: {result.Length} ushorts.");
+
+            valueDecrypter.OpCode = OpCodes.Nop;
+            valueDecrypter.Operand = null;
+            var decrypterInstruction = instructions[index];
+            var local = CreateArray(method, index, result);
+            decrypterInstruction.OpCode = OpCodes.Ldloc;
+            decrypterInstruction.Operand = local;
+            return true;
+        }
+
+        static Local CreateArray(MethodDef method, int index, IList<ushort> array) {
+            var corLib = method.Module.ImportAsTypeSig(typeof(ushort[]));
+            var local = method.Body.Variables.Add(new Local(corLib));
+            var instructions = method.Body.Instructions;
+
+            var list = new List<Instruction> {
+                Instruction.CreateLdcI4(array.Count),
+                Instruction.Create(OpCodes.Newarr, method.Module.CorLibTypes.UInt16),
+                Instruction.Create(OpCodes.Stloc, local)
+            };
+            for (var i = 0; i < array.Count; i++) {
+                list.Add(Instruction.Create(OpCodes.Ldloc, local));
+                list.Add(Instruction.CreateLdcI4(i));
+                list.Add(Instruction.CreateLdcI4(array[i]));
+                list.Add(Instruction.Create(OpCodes.Stelem_I2));
+            }
+
+            for (var i = 0; i < list.Count; i++) {
+                instructions.Insert(index + i, list[i]);
+            }
+            return local;
+        }
+    }
+}
+
+
+
+================================================
+File: NoFuserEx/NoFuserEx/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.InteropServices;
+
+// La informaciÃ³n general de un ensamblado se controla mediante el siguiente 
+// conjunto de atributos. Cambie estos valores de atributo para modificar la informaciÃ³n
+// asociada con un ensamblado.
+[assembly: AssemblyTitle("NoFuserEx")]
+[assembly: AssemblyDescription("ConfuserEx deobfuscator")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("NoFuserEx")]
+[assembly: AssemblyCopyright("Copyright Â© CodeShark 2016")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Si establece ComVisible en false, los tipos de este ensamblado no estarÃ¡n visibles 
+// para los componentes COM.  Si necesita obtener acceso a un tipo de este ensamblado desde 
+// COM, establezca el atributo ComVisible en true en este tipo.
+[assembly: ComVisible(false)]
+
+// El siguiente GUID sirve como id. de typelib si este proyecto se expone a COM.
+[assembly: Guid("6e8b8f61-e5c3-4abd-9b8a-8f4fa5777ebb")]
+
+// La informaciÃ³n de versiÃ³n de un ensamblado consta de los cuatro valores siguientes:
+//
+//      VersiÃ³n principal
+//      VersiÃ³n secundaria 
+//      NÃºmero de compilaciÃ³n
+//      RevisiÃ³n
+//
+// Puede especificar todos los valores o usar los valores predeterminados de nÃºmero de compilaciÃ³n y de revisiÃ³n 
+// mediante el carÃ¡cter '*', como se muestra a continuaciÃ³n:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.1.0")]
+[assembly: AssemblyFileVersion("1.1.0")]
+
+
+

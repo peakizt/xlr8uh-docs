@@ -1,0 +1,1121 @@
+Directory structure:
+└── xenocoderce-basicproxyobfucator/
+    ├── README.md
+    ├── ProxyCalld.rar
+    ├── ProxyCalld.sln
+    ├── ProxyCalld/
+    │   ├── InjectHelper.cs
+    │   ├── Program.cs
+    │   ├── ProxyCalld.csproj
+    │   ├── app.config
+    │   ├── Properties/
+    │   │   └── AssemblyInfo.cs
+    │   ├── bin/
+    │   │   └── Debug/
+    │   │       └── ProxyCalld.exe.config
+    │   └── obj/
+    │       └── Debug/
+    │           ├── DesignTimeResolveAssemblyReferencesInput.cache
+    │           ├── ProxyCalld.csproj.CopyComplete
+    │           ├── ProxyCalld.csproj.CoreCompileInputs.cache
+    │           ├── ProxyCalld.csproj.FileListAbsolute.txt
+    │           └── ProxyCalld.csprojAssemblyReference.cache
+    └── ProxyTest/
+        ├── Program.cs
+        ├── ProxyTest.csproj
+        ├── Properties/
+        │   └── AssemblyInfo.cs
+        ├── bin/
+        │   └── Debug/
+        └── obj/
+            └── Debug/
+                ├── DesignTimeResolveAssemblyReferencesInput.cache
+                ├── ProxyTest.csproj.CoreCompileInputs.cache
+                ├── ProxyTest.csproj.FileListAbsolute.txt
+                └── ProxyTest.csprojAssemblyReference.cache
+
+================================================
+File: README.md
+================================================
+# BasicProxyObfucator
+a very basic proxy obfuscator based on dnlib
+
+![](https://i.imgur.com/h3vHlEe.png)
+
+![](https://i.imgur.com/p9Q0z9N.png)
+
+Basic. Do not cover some exception with virtual method and so on.
+
+
+
+
+================================================
+File: ProxyCalld.rar
+================================================
+[Non-text file]
+
+
+================================================
+File: ProxyCalld.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2035
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProxyCalld", "ProxyCalld\ProxyCalld.csproj", "{460E54D6-4EB5-4323-AA58-132E69AD3A02}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProxyTest", "ProxyTest\ProxyTest.csproj", "{90C2B6A4-D203-405B-B140-0645B39EAF7B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{460E54D6-4EB5-4323-AA58-132E69AD3A02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{460E54D6-4EB5-4323-AA58-132E69AD3A02}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{460E54D6-4EB5-4323-AA58-132E69AD3A02}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{460E54D6-4EB5-4323-AA58-132E69AD3A02}.Release|Any CPU.Build.0 = Release|Any CPU
+		{90C2B6A4-D203-405B-B140-0645B39EAF7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{90C2B6A4-D203-405B-B140-0645B39EAF7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{90C2B6A4-D203-405B-B140-0645B39EAF7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{90C2B6A4-D203-405B-B140-0645B39EAF7B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C62A0735-4703-42F6-9146-810089EEEDB3}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: ProxyCalld/InjectHelper.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace ProxyCalld
+{
+    /// <summary>
+    ///     Provides methods to inject a <see cref="TypeDef" /> into another module.
+    /// </summary>
+    public static class InjectHelper
+    {
+        /// <summary>
+        ///     Clones the specified origin TypeDef.
+        /// </summary>
+        /// <param name="origin">The origin TypeDef.</param>
+        /// <returns>The cloned TypeDef.</returns>
+        static TypeDefUser Clone(TypeDef origin)
+        {
+            var ret = new TypeDefUser(origin.Namespace, origin.Name);
+            ret.Attributes = origin.Attributes;
+
+            if (origin.ClassLayout != null)
+                ret.ClassLayout = new ClassLayoutUser(origin.ClassLayout.PackingSize, origin.ClassSize);
+
+            foreach (GenericParam genericParam in origin.GenericParameters)
+                ret.GenericParameters.Add(new GenericParamUser(genericParam.Number, genericParam.Flags, "-"));
+
+            return ret;
+        }
+
+        /// <summary>
+        ///     Clones the specified origin MethodDef.
+        /// </summary>
+        /// <param name="origin">The origin MethodDef.</param>
+        /// <returns>The cloned MethodDef.</returns>
+        public static MethodDefUser Clone(MethodDef origin)
+        {
+            var ret = new MethodDefUser(origin.Name, null, origin.ImplAttributes, origin.Attributes);
+
+            foreach (GenericParam genericParam in origin.GenericParameters)
+                ret.GenericParameters.Add(new GenericParamUser(genericParam.Number, genericParam.Flags, "-"));
+
+            return ret;
+        }
+
+        /// <summary>
+        ///     Clones the specified origin FieldDef.
+        /// </summary>
+        /// <param name="origin">The origin FieldDef.</param>
+        /// <returns>The cloned FieldDef.</returns>
+        static FieldDefUser Clone(FieldDef origin)
+        {
+            var ret = new FieldDefUser(origin.Name, null, origin.Attributes);
+            return ret;
+        }
+
+        /// <summary>
+        ///     Populates the context mappings.
+        /// </summary>
+        /// <param name="typeDef">The origin TypeDef.</param>
+        /// <param name="ctx">The injection context.</param>
+        /// <returns>The new TypeDef.</returns>
+        static TypeDef PopulateContext(TypeDef typeDef, InjectContext ctx)
+        {
+            TypeDef ret;
+            IDnlibDef existing;
+            if (!ctx.Map.TryGetValue(typeDef, out existing))
+            {
+                ret = Clone(typeDef);
+                ctx.Map[typeDef] = ret;
+            }
+            else
+                ret = (TypeDef)existing;
+
+            foreach (TypeDef nestedType in typeDef.NestedTypes)
+                ret.NestedTypes.Add(PopulateContext(nestedType, ctx));
+
+            foreach (MethodDef method in typeDef.Methods)
+                ret.Methods.Add((MethodDef)(ctx.Map[method] = Clone(method)));
+
+            foreach (FieldDef field in typeDef.Fields)
+                ret.Fields.Add((FieldDef)(ctx.Map[field] = Clone(field)));
+
+            return ret;
+        }
+
+        /// <summary>
+        ///     Copies the information from the origin type to injected type.
+        /// </summary>
+        /// <param name="typeDef">The origin TypeDef.</param>
+        /// <param name="ctx">The injection context.</param>
+        static void CopyTypeDef(TypeDef typeDef, InjectContext ctx)
+        {
+            var newTypeDef = (TypeDef)ctx.Map[typeDef];
+
+            newTypeDef.BaseType = (ITypeDefOrRef)ctx.Importer.Import(typeDef.BaseType);
+
+            foreach (InterfaceImpl iface in typeDef.Interfaces)
+                newTypeDef.Interfaces.Add(new InterfaceImplUser((ITypeDefOrRef)ctx.Importer.Import(iface.Interface)));
+        }
+
+        /// <summary>
+        ///     Copies the information from the origin method to injected method.
+        /// </summary>
+        /// <param name="methodDef">The origin MethodDef.</param>
+        /// <param name="ctx">The injection context.</param>
+        static void CopyMethodDef(MethodDef methodDef, InjectContext ctx)
+        {
+            var newMethodDef = (MethodDef)ctx.Map[methodDef];
+
+            newMethodDef.Signature = ctx.Importer.Import(methodDef.Signature);
+            newMethodDef.Parameters.UpdateParameterTypes();
+
+            if (methodDef.ImplMap != null)
+                newMethodDef.ImplMap = new ImplMapUser(new ModuleRefUser(ctx.TargetModule, methodDef.ImplMap.Module.Name), methodDef.ImplMap.Name, methodDef.ImplMap.Attributes);
+
+            foreach (CustomAttribute ca in methodDef.CustomAttributes)
+                newMethodDef.CustomAttributes.Add(new CustomAttribute((ICustomAttributeType)ctx.Importer.Import(ca.Constructor)));
+
+            if (methodDef.HasBody)
+            {
+                newMethodDef.Body = new CilBody(methodDef.Body.InitLocals, new List<Instruction>(), new List<ExceptionHandler>(), new List<Local>());
+                newMethodDef.Body.MaxStack = methodDef.Body.MaxStack;
+
+                var bodyMap = new Dictionary<object, object>();
+
+                foreach (Local local in methodDef.Body.Variables)
+                {
+                    var newLocal = new Local(ctx.Importer.Import(local.Type));
+                    newMethodDef.Body.Variables.Add(newLocal);
+                    newLocal.Name = local.Name;
+                    newLocal.PdbAttributes = local.PdbAttributes;
+
+                    bodyMap[local] = newLocal;
+                }
+
+                foreach (Instruction instr in methodDef.Body.Instructions)
+                {
+                    var newInstr = new Instruction(instr.OpCode, instr.Operand);
+                    newInstr.SequencePoint = instr.SequencePoint;
+
+                    if (newInstr.Operand is IType)
+                        newInstr.Operand = ctx.Importer.Import((IType)newInstr.Operand);
+
+                    else if (newInstr.Operand is IMethod)
+                        newInstr.Operand = ctx.Importer.Import((IMethod)newInstr.Operand);
+
+                    else if (newInstr.Operand is IField)
+                        newInstr.Operand = ctx.Importer.Import((IField)newInstr.Operand);
+
+                    newMethodDef.Body.Instructions.Add(newInstr);
+                    bodyMap[instr] = newInstr;
+                }
+
+                foreach (Instruction instr in newMethodDef.Body.Instructions)
+                {
+                    if (instr.Operand != null && bodyMap.ContainsKey(instr.Operand))
+                        instr.Operand = bodyMap[instr.Operand];
+
+                    else if (instr.Operand is Instruction[])
+                        instr.Operand = ((Instruction[])instr.Operand).Select(target => (Instruction)bodyMap[target]).ToArray();
+                }
+
+                foreach (ExceptionHandler eh in methodDef.Body.ExceptionHandlers)
+                    newMethodDef.Body.ExceptionHandlers.Add(new ExceptionHandler(eh.HandlerType)
+                    {
+                        CatchType = eh.CatchType == null ? null : (ITypeDefOrRef)ctx.Importer.Import(eh.CatchType),
+                        TryStart = (Instruction)bodyMap[eh.TryStart],
+                        TryEnd = (Instruction)bodyMap[eh.TryEnd],
+                        HandlerStart = (Instruction)bodyMap[eh.HandlerStart],
+                        HandlerEnd = (Instruction)bodyMap[eh.HandlerEnd],
+                        FilterStart = eh.FilterStart == null ? null : (Instruction)bodyMap[eh.FilterStart]
+                    });
+
+                newMethodDef.Body.SimplifyMacros(newMethodDef.Parameters);
+            }
+        }
+
+        /// <summary>
+        ///     Copies the information from the origin field to injected field.
+        /// </summary>
+        /// <param name="fieldDef">The origin FieldDef.</param>
+        /// <param name="ctx">The injection context.</param>
+        static void CopyFieldDef(FieldDef fieldDef, InjectContext ctx)
+        {
+            var newFieldDef = (FieldDef)ctx.Map[fieldDef];
+
+            newFieldDef.Signature = ctx.Importer.Import(fieldDef.Signature);
+        }
+
+        /// <summary>
+        ///     Copies the information to the injected definitions.
+        /// </summary>
+        /// <param name="typeDef">The origin TypeDef.</param>
+        /// <param name="ctx">The injection context.</param>
+        /// <param name="copySelf">if set to <c>true</c>, copy information of <paramref name="typeDef" />.</param>
+        static void Copy(TypeDef typeDef, InjectContext ctx, bool copySelf)
+        {
+            if (copySelf)
+                CopyTypeDef(typeDef, ctx);
+
+            foreach (TypeDef nestedType in typeDef.NestedTypes)
+                Copy(nestedType, ctx, true);
+
+            foreach (MethodDef method in typeDef.Methods)
+                CopyMethodDef(method, ctx);
+
+            foreach (FieldDef field in typeDef.Fields)
+                CopyFieldDef(field, ctx);
+        }
+
+        /// <summary>
+        ///     Injects the specified TypeDef to another module.
+        /// </summary>
+        /// <param name="typeDef">The source TypeDef.</param>
+        /// <param name="target">The target module.</param>
+        /// <returns>The injected TypeDef.</returns>
+        public static TypeDef Inject(TypeDef typeDef, ModuleDef target)
+        {
+            var ctx = new InjectContext(typeDef.Module, target);
+            PopulateContext(typeDef, ctx);
+            Copy(typeDef, ctx, true);
+            return (TypeDef)ctx.Map[typeDef];
+        }
+
+        /// <summary>
+        ///     Injects the specified MethodDef to another module.
+        /// </summary>
+        /// <param name="methodDef">The source MethodDef.</param>
+        /// <param name="target">The target module.</param>
+        /// <returns>The injected MethodDef.</returns>
+        public static MethodDef Inject(MethodDef methodDef, ModuleDef target)
+        {
+            var ctx = new InjectContext(methodDef.Module, target);
+            ctx.Map[methodDef] = Clone(methodDef);
+            CopyMethodDef(methodDef, ctx);
+            return (MethodDef)ctx.Map[methodDef];
+        }
+
+        /// <summary>
+        ///     Injects the members of specified TypeDef to another module.
+        /// </summary>
+        /// <param name="typeDef">The source TypeDef.</param>
+        /// <param name="newType">The new type.</param>
+        /// <param name="target">The target module.</param>
+        /// <returns>Injected members.</returns>
+        public static IEnumerable<IDnlibDef> Inject(TypeDef typeDef, TypeDef newType, ModuleDef target)
+        {
+            var ctx = new InjectContext(typeDef.Module, target);
+            ctx.Map[typeDef] = newType;
+            PopulateContext(typeDef, ctx);
+            Copy(typeDef, ctx, false);
+            return ctx.Map.Values.Except(new[] { newType });
+        }
+
+        /// <summary>
+        ///     Context of the injection process.
+        /// </summary>
+        class InjectContext : ImportResolver
+        {
+            /// <summary>
+            ///     The mapping of origin definitions to injected definitions.
+            /// </summary>
+            public readonly Dictionary<IDnlibDef, IDnlibDef> Map = new Dictionary<IDnlibDef, IDnlibDef>();
+
+            /// <summary>
+            ///     The module which source type originated from.
+            /// </summary>
+            public readonly ModuleDef OriginModule;
+
+            /// <summary>
+            ///     The module which source type is being injected to.
+            /// </summary>
+            public readonly ModuleDef TargetModule;
+
+            /// <summary>
+            ///     The importer.
+            /// </summary>
+            readonly Importer importer;
+
+            /// <summary>
+            ///     Initializes a new instance of the <see cref="InjectContext" /> class.
+            /// </summary>
+            /// <param name="module">The origin module.</param>
+            /// <param name="target">The target module.</param>
+            public InjectContext(ModuleDef module, ModuleDef target)
+            {
+                OriginModule = module;
+                TargetModule = target;
+                importer = new Importer(target, ImporterOptions.TryToUseTypeDefs);
+                importer.Resolver = this;
+            }
+
+            /// <summary>
+            ///     Gets the importer.
+            /// </summary>
+            /// <value>The importer.</value>
+            public Importer Importer
+            {
+                get { return importer; }
+            }
+
+            /// <inheritdoc />
+            public override TypeDef Resolve(TypeDef typeDef)
+            {
+                if (Map.ContainsKey(typeDef))
+                    return (TypeDef)Map[typeDef];
+                return null;
+            }
+
+            /// <inheritdoc />
+            public override MethodDef Resolve(MethodDef methodDef)
+            {
+                if (Map.ContainsKey(methodDef))
+                    return (MethodDef)Map[methodDef];
+                return null;
+            }
+
+            /// <inheritdoc />
+            public override FieldDef Resolve(FieldDef fieldDef)
+            {
+                if (Map.ContainsKey(fieldDef))
+                    return (FieldDef)Map[fieldDef];
+                return null;
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: ProxyCalld/Program.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Security.Cryptography;
+using System.Text;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using dnlib.DotNet.Writer;
+
+namespace ProxyCalld
+{
+    class Program
+    {
+        /// <summary>
+        /// A list to store proxy method to prevent infinite loop
+        /// </summary>
+        public static List<MethodDef> proxyMethod = new List<MethodDef>();
+
+        /// <summary>
+        /// Save deobfuqcated file to disk
+        /// </summary>
+        static void savefile(ModuleDefMD mod)
+        {
+            string text2 = Path.GetDirectoryName(mod.Location);
+
+            if (!text2.EndsWith("\\")) text2 += "\\";
+
+            string path = text2 + Path.GetFileNameWithoutExtension(mod.Location) + "_deobfuscated" +
+                          Path.GetExtension(mod.Location);
+            var opts = new ModuleWriterOptions(mod);
+            opts.Logger = DummyLogger.NoThrowInstance;
+            mod.Write(path, opts);
+            Console.WriteLine($"[!] File saved : {path}");
+        }
+
+        /// <summary>
+        /// Entry point of protector
+        /// </summary>
+        /// <param name="args"></param>
+        static void Main(string[] args)
+        {
+            //Proxy intensity
+            int intensity = 2;
+
+            if (args.Length < 0)
+            {
+                Console.WriteLine("Input file missing");
+                return;
+            }
+
+            ModuleDefMD mod = ModuleDefMD.Load(args[0]);
+            Console.WriteLine($"[!] File loaded : {mod.Location}");
+
+            Console.WriteLine($"     [+] starting CloningMethod protection with intensity {intensity}...");
+            CloneMethods(mod, intensity);
+           
+            Console.WriteLine("[!] Saving file...");
+            savefile(mod);
+
+            Console.ReadKey();
+        }
+
+        /// <summary>
+        /// Proxy Call protection
+        /// 
+        /// -Grab MethodDef
+        /// -Copy MethodDef in MethodDef.Types
+        /// -Replace Call to the other created Method
+        /// </summary>
+        static void CloneMethods(ModuleDefMD mod, int intensity = 1)
+        {
+            for (int o = 0; o < intensity; o++)
+            {
+                foreach (var t in mod.Types)
+                {
+
+                    if (t.IsGlobalModuleType) continue;
+
+                    int mCount = t.Methods.Count;
+                    for (int i = 0; i < mCount; i++)
+                    {
+                        var m = t.Methods[i];
+
+                        if (!m.HasBody) continue;
+                        var inst = m.Body.Instructions;
+
+                        for (int z = 0; z < inst.Count; z++)
+                        {
+                            if (inst[z].OpCode == OpCodes.Call)
+                            {
+
+                                try
+                                {
+                                    MethodDef targetMetod = inst[z].Operand as MethodDef;
+
+                                    /* Un comment that if you dont want to proxy methodproxy*/
+
+                                    //if method is a proxy method
+                                    //if (proxyMethod.Contains(targetMetod))
+                                    //{
+                                    //    //Console.WriteLine($"        [-] Method is a proxyMethod : {inst[z]}");
+                                    //    continue;
+                                    //}
+
+                                    //if method is internal
+                                    if (!targetMetod.FullName.Contains(mod.Assembly.Name))
+                                    {
+                                        //Console.WriteLine($"        [-] Method is external : {inst[z]}");
+                                        continue;
+                                    }
+
+                                    //if param != 0 
+                                    if (targetMetod.Parameters.Count == 0)
+                                    {
+                                        //Console.WriteLine($"        [-] Method has no parameters : {inst[z]}");
+                                        continue;
+                                    }
+
+                                    //if param > 4 (simple Ldarg opcode) 
+                                    if (targetMetod.Parameters.Count > 4)
+                                    {
+                                        //Console.WriteLine($"        [-] Method has too many parameters : {inst[z]}");
+                                        continue;
+                                    }
+
+                                    //clone method
+                                    Console.WriteLine($"        [+] Found method to clone : {inst[z]}");
+                                    Console.WriteLine($"        [+] Cloning method...");
+                                    MethodDef newMeth = targetMetod.copyMethod(mod);
+                                    TypeDef typeOfMethod = targetMetod.DeclaringType;
+                                    typeOfMethod.Methods.Add(newMeth);
+                                    Console.WriteLine($"        [+] Method cloned to : {newMeth.Name}");
+                                    proxyMethod.Add(newMeth);
+
+                                    //replace method with call with param and signatures
+                                    Console.WriteLine($"        [+] Editing original method...");
+                                    Console.WriteLine($"            [+] Import method Attributes...");
+                                    Clonesignature(targetMetod, newMeth);
+                                    Console.WriteLine($"            [+] Fix call conventions...");
+                                    /*
+                                    nop 
+                                    ldarg.0
+                                    ldarg.1
+                                    call
+                                    ret
+                                      */
+                                    CilBody body = new CilBody();
+                                    body.Instructions.Add(OpCodes.Nop.ToInstruction());
+                                    for (int x = 0; x < targetMetod.Parameters.Count; x++)
+                                    {
+                                        //for future references, you will need it
+                                        var typeofParam = targetMetod.Parameters[x];
+
+                                        switch (x)
+                                        {
+                                            case 0:
+                                                body.Instructions.Add(OpCodes.Ldarg_0.ToInstruction());
+                                                break;
+                                            case 1:
+                                                body.Instructions.Add(OpCodes.Ldarg_1.ToInstruction());
+                                                break;
+                                            case 2:
+                                                body.Instructions.Add(OpCodes.Ldarg_2.ToInstruction());
+                                                break;
+                                            case 3:
+                                                body.Instructions.Add(OpCodes.Ldarg_3.ToInstruction());
+                                                break;
+                                        }
+                                    }
+                                    body.Instructions.Add(Instruction.Create(OpCodes.Call, newMeth));
+                                    body.Instructions.Add(OpCodes.Ret.ToInstruction());
+
+                                    targetMetod.Body = body;
+                                    Console.WriteLine($"        [+] Original method edited !");
+
+
+
+                                }
+                                catch (Exception ex)
+                                {
+                                    //Console.WriteLine($"        [-] Operand is not a MethodDef : {inst[z]}");
+                                    //Console.WriteLine(ex.ToString());
+                                    continue;
+                                }
+
+                            }
+                        }
+
+                    }
+
+                }
+            }
+            
+        }
+
+        public static MethodDef Clonesignature(MethodDef from, MethodDef to)
+        {
+            to.Attributes = from.Attributes;
+
+            if (from.IsHideBySig)
+                to.IsHideBySig = true;
+
+            return to;
+        }
+
+        
+    }
+
+    static class extension
+    {
+        /// <summary>
+        ///     Context of the injection process.
+        /// </summary>
+        class InjectContext : ImportResolver
+        {
+            /// <summary>
+            ///     The mapping of origin definitions to injected definitions.
+            /// </summary>
+            public readonly Dictionary<IDnlibDef, IDnlibDef> Map = new Dictionary<IDnlibDef, IDnlibDef>();
+
+            /// <summary>
+            ///     The module which source type originated from.
+            /// </summary>
+            public readonly ModuleDef OriginModule;
+
+            /// <summary>
+            ///     The module which source type is being injected to.
+            /// </summary>
+            public readonly ModuleDef TargetModule;
+
+            /// <summary>
+            ///     The importer.
+            /// </summary>
+            readonly Importer importer;
+
+            /// <summary>
+            ///     Initializes a new instance of the <see cref="InjectContext" /> class.
+            /// </summary>
+            /// <param name="module">The origin module.</param>
+            /// <param name="target">The target module.</param>
+            public InjectContext(ModuleDef module, ModuleDef target)
+            {
+                OriginModule = module;
+                TargetModule = target;
+                importer = new Importer(target, ImporterOptions.TryToUseTypeDefs);
+                importer.Resolver = this;
+            }
+
+            /// <summary>
+            ///     Gets the importer.
+            /// </summary>
+            /// <value>The importer.</value>
+            public Importer Importer
+            {
+                get { return importer; }
+            }
+
+            /// <inheritdoc />
+            public override TypeDef Resolve(TypeDef typeDef)
+            {
+                if (Map.ContainsKey(typeDef))
+                    return (TypeDef)Map[typeDef];
+                return null;
+            }
+
+            /// <inheritdoc />
+            public override MethodDef Resolve(MethodDef methodDef)
+            {
+                if (Map.ContainsKey(methodDef))
+                    return (MethodDef)Map[methodDef];
+                return null;
+            }
+
+            /// <inheritdoc />
+            public override FieldDef Resolve(FieldDef fieldDef)
+            {
+                if (Map.ContainsKey(fieldDef))
+                    return (FieldDef)Map[fieldDef];
+                return null;
+            }
+        }
+
+        public static MethodDef copyMethod(this MethodDef originMethod, ModuleDefMD mod)
+        {
+            InjectContext ctx = new InjectContext(mod, mod);
+
+            MethodDefUser newMethodDef = new MethodDefUser
+            {
+                Signature = ctx.Importer.Import(originMethod.Signature)
+            };
+
+            newMethodDef.Name = Guid.NewGuid().ToString().Replace("-", string.Empty);
+
+            newMethodDef.Parameters.UpdateParameterTypes();
+
+            if (originMethod.ImplMap != null)
+                newMethodDef.ImplMap = new ImplMapUser(new ModuleRefUser(ctx.TargetModule, originMethod.ImplMap.Module.Name), originMethod.ImplMap.Name, originMethod.ImplMap.Attributes);
+
+            foreach (CustomAttribute ca in originMethod.CustomAttributes)
+                newMethodDef.CustomAttributes.Add(new CustomAttribute((ICustomAttributeType)ctx.Importer.Import(ca.Constructor)));
+
+            if (originMethod.HasBody)
+            {
+                newMethodDef.Body = new CilBody(originMethod.Body.InitLocals, new List<Instruction>(), new List<ExceptionHandler>(), new List<Local>());
+                newMethodDef.Body.MaxStack = originMethod.Body.MaxStack;
+
+                var bodyMap = new Dictionary<object, object>();
+
+                foreach (Local local in originMethod.Body.Variables)
+                {
+                    var newLocal = new Local(ctx.Importer.Import(local.Type));
+                    newMethodDef.Body.Variables.Add(newLocal);
+                    newLocal.Name = local.Name;
+                    newLocal.PdbAttributes = local.PdbAttributes;
+
+                    bodyMap[local] = newLocal;
+                }
+
+                foreach (Instruction instr in originMethod.Body.Instructions)
+                {
+                    var newInstr = new Instruction(instr.OpCode, instr.Operand);
+                    newInstr.SequencePoint = instr.SequencePoint;
+
+                    if (newInstr.Operand is IType)
+                        newInstr.Operand = ctx.Importer.Import((IType)newInstr.Operand);
+
+                    else if (newInstr.Operand is IMethod)
+                        newInstr.Operand = ctx.Importer.Import((IMethod)newInstr.Operand);
+
+                    else if (newInstr.Operand is IField)
+                        newInstr.Operand = ctx.Importer.Import((IField)newInstr.Operand);
+
+                    newMethodDef.Body.Instructions.Add(newInstr);
+                    bodyMap[instr] = newInstr;
+                }
+
+                foreach (Instruction instr in newMethodDef.Body.Instructions)
+                {
+                    if (instr.Operand != null && bodyMap.ContainsKey(instr.Operand))
+                        instr.Operand = bodyMap[instr.Operand];
+
+                    else if (instr.Operand is Instruction[])
+                        instr.Operand = ((Instruction[])instr.Operand).Select(target => (Instruction)bodyMap[target]).ToArray();
+                }
+
+                foreach (ExceptionHandler eh in originMethod.Body.ExceptionHandlers)
+                    newMethodDef.Body.ExceptionHandlers.Add(new ExceptionHandler(eh.HandlerType)
+                    {
+                        CatchType = eh.CatchType == null ? null : (ITypeDefOrRef)ctx.Importer.Import(eh.CatchType),
+                        TryStart = (Instruction)bodyMap[eh.TryStart],
+                        TryEnd = (Instruction)bodyMap[eh.TryEnd],
+                        HandlerStart = (Instruction)bodyMap[eh.HandlerStart],
+                        HandlerEnd = (Instruction)bodyMap[eh.HandlerEnd],
+                        FilterStart = eh.FilterStart == null ? null : (Instruction)bodyMap[eh.FilterStart]
+                    });
+
+                newMethodDef.Body.SimplifyMacros(newMethodDef.Parameters);
+            }
+
+            return newMethodDef;
+        }
+    }
+}
+
+
+
+================================================
+File: ProxyCalld/ProxyCalld.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{460E54D6-4EB5-4323-AA58-132E69AD3A02}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>ProxyCalld</RootNamespace>
+    <AssemblyName>ProxyCalld</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib">
+      <HintPath>..\..\..\..\Desktop\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="InjectHelper.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: ProxyCalld/app.config
+================================================
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+<startup><supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.0"/></startup></configuration>
+
+
+
+================================================
+File: ProxyCalld/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// Les informations gÃ©nÃ©rales relatives Ã  un assembly dÃ©pendent de
+// l'ensemble d'attributs suivant. Changez les valeurs de ces attributs pour modifier les informations
+// associÃ©es Ã  un assembly.
+[assembly: AssemblyTitle("ProxyCalld")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("ProxyCalld")]
+[assembly: AssemblyCopyright("Copyright Â©  2018")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// L'affectation de la valeur false Ã  ComVisible rend les types invisibles dans cet assembly
+// aux composants COM. Si vous devez accÃ©der Ã  un type dans cet assembly Ã  partir de
+// COM, affectez la valeur true Ã  l'attribut ComVisible sur ce type.
+[assembly: ComVisible(false)]
+
+// Le GUID suivant est pour l'ID de la typelib si ce projet est exposÃ© Ã  COM
+[assembly: Guid("460e54d6-4eb5-4323-aa58-132e69ad3a02")]
+
+// Les informations de version pour un assembly se composent des quatre valeurs suivantesÂ :
+//
+//      Version principale
+//      Version secondaire
+//      NumÃ©ro de build
+//      RÃ©vision
+//
+// Vous pouvez spÃ©cifier toutes les valeurs ou indiquer les numÃ©ros de build et de rÃ©vision par dÃ©faut
+// en utilisant '*', comme indiquÃ© ci-dessousÂ :
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+
+================================================
+File: ProxyCalld/bin/Debug/ProxyCalld.exe.config
+================================================
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+<startup><supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.0"/></startup></configuration>
+
+
+
+================================================
+File: ProxyCalld/obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache
+================================================
+[Non-text file]
+
+
+================================================
+File: ProxyCalld/obj/Debug/ProxyCalld.csproj.CopyComplete
+================================================
+
+
+
+================================================
+File: ProxyCalld/obj/Debug/ProxyCalld.csproj.CoreCompileInputs.cache
+================================================
+37a2add9dd6cee0cb4106159690ac3b6b8d97763
+
+
+
+================================================
+File: ProxyCalld/obj/Debug/ProxyCalld.csproj.FileListAbsolute.txt
+================================================
+C:\Users\xenocode\source\repos\ProxyCalld\ProxyCalld\bin\Debug\ProxyCalld.exe.config
+C:\Users\xenocode\source\repos\ProxyCalld\ProxyCalld\bin\Debug\ProxyCalld.exe
+C:\Users\xenocode\source\repos\ProxyCalld\ProxyCalld\bin\Debug\ProxyCalld.pdb
+C:\Users\xenocode\source\repos\ProxyCalld\ProxyCalld\bin\Debug\dnlib.dll
+C:\Users\xenocode\source\repos\ProxyCalld\ProxyCalld\obj\Debug\ProxyCalld.csprojAssemblyReference.cache
+C:\Users\xenocode\source\repos\ProxyCalld\ProxyCalld\obj\Debug\ProxyCalld.csproj.CoreCompileInputs.cache
+C:\Users\xenocode\source\repos\ProxyCalld\ProxyCalld\obj\Debug\ProxyCalld.csproj.CopyComplete
+C:\Users\xenocode\source\repos\ProxyCalld\ProxyCalld\obj\Debug\ProxyCalld.exe
+C:\Users\xenocode\source\repos\ProxyCalld\ProxyCalld\obj\Debug\ProxyCalld.pdb
+
+
+
+================================================
+File: ProxyCalld/obj/Debug/ProxyCalld.csprojAssemblyReference.cache
+================================================
+[Non-text file]
+
+
+================================================
+File: ProxyTest/Program.cs
+================================================
+ï»¿using System;
+using System.Diagnostics;
+using System.IO;
+using System.Reflection;
+using System.Security.Cryptography;
+using System.Text;
+
+
+namespace ProxyTest
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Hello world. Proxy method test o/");
+            Console.WriteLine(Add(1336, 1) + Sub(123456, 1234) + cout("all"));
+
+            Console.ReadKey();
+        }
+
+        static int Add(int a, int b)
+        {
+            return a + b;
+        }
+
+        static int Sub(int a, int b)
+        {
+            return a + b;
+        }
+
+        static string cout(string str)
+        {
+            return "world" + str + "hello"; 
+        }
+    }
+}
+
+
+
+================================================
+File: ProxyTest/ProxyTest.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{90C2B6A4-D203-405B-B140-0645B39EAF7B}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>ProxyTest</RootNamespace>
+    <AssemblyName>ProxyTest</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: ProxyTest/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// Les informations gÃ©nÃ©rales relatives Ã  un assembly dÃ©pendent de
+// l'ensemble d'attributs suivant. Changez les valeurs de ces attributs pour modifier les informations
+// associÃ©es Ã  un assembly.
+[assembly: AssemblyTitle("ProxyTest")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("ProxyTest")]
+[assembly: AssemblyCopyright("Copyright Â©  2018")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// L'affectation de la valeur false Ã  ComVisible rend les types invisibles dans cet assembly
+// aux composants COM. Si vous devez accÃ©der Ã  un type dans cet assembly Ã  partir de
+// COM, affectez la valeur true Ã  l'attribut ComVisible sur ce type.
+[assembly: ComVisible(false)]
+
+// Le GUID suivant est pour l'ID de la typelib si ce projet est exposÃ© Ã  COM
+[assembly: Guid("90c2b6a4-d203-405b-b140-0645b39eaf7b")]
+
+// Les informations de version pour un assembly se composent des quatre valeurs suivantesÂ :
+//
+//      Version principale
+//      Version secondaire
+//      NumÃ©ro de build
+//      RÃ©vision
+//
+// Vous pouvez spÃ©cifier toutes les valeurs ou indiquer les numÃ©ros de build et de rÃ©vision par dÃ©faut
+// en utilisant '*', comme indiquÃ© ci-dessousÂ :
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+
+
+================================================
+File: ProxyTest/obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache
+================================================
+[Non-text file]
+
+
+================================================
+File: ProxyTest/obj/Debug/ProxyTest.csproj.CoreCompileInputs.cache
+================================================
+4d8c2363a3bb8ebb9f499894921f41e7b206e3f4
+
+
+
+================================================
+File: ProxyTest/obj/Debug/ProxyTest.csproj.FileListAbsolute.txt
+================================================
+C:\Users\xenocode\source\repos\ProxyCalld\ProxyTest\bin\Debug\ProxyTest.exe
+C:\Users\xenocode\source\repos\ProxyCalld\ProxyTest\bin\Debug\ProxyTest.pdb
+C:\Users\xenocode\source\repos\ProxyCalld\ProxyTest\obj\Debug\ProxyTest.csprojAssemblyReference.cache
+C:\Users\xenocode\source\repos\ProxyCalld\ProxyTest\obj\Debug\ProxyTest.csproj.CoreCompileInputs.cache
+C:\Users\xenocode\source\repos\ProxyCalld\ProxyTest\obj\Debug\ProxyTest.exe
+C:\Users\xenocode\source\repos\ProxyCalld\ProxyTest\obj\Debug\ProxyTest.pdb
+
+
+
+================================================
+File: ProxyTest/obj/Debug/ProxyTest.csprojAssemblyReference.cache
+================================================
+[Non-text file]
+

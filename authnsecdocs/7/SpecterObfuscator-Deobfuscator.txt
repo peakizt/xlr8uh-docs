@@ -1,0 +1,373 @@
+Directory structure:
+└── xenocoderce-specterobfuscator-deobfuscator/
+    ├── README.md
+    └── SpecterDeobfuscator/
+        ├── SpecterDeobfuscator.sln
+        └── SpecterDeobfuscator/
+            ├── Program.cs
+            ├── SpecterDeobfuscator.csproj
+            ├── Properties/
+            │   └── AssemblyInfo.cs
+            ├── bin/
+            │   └── Debug/
+            └── obj/
+                └── Debug/
+                    ├── SpecterDeobfuscator.csproj.CopyComplete
+                    └── SpecterDeobfuscator.csproj.FileListAbsolute.txt
+
+================================================
+File: README.md
+================================================
+# SpecterObfuscator-Deobfuscator
+a deobfuscator for https://github.com/NepErwin/SpecterObfuscator
+
+
+![](https://i.imgur.com/9UePfh1.png)
+
+# Supported Features
+
+Current version supports : 
+
+- Constant Mutation
+- Constant Encoding
+
+
+Once applied, pass the deobfuscated file into [de4dot](https://ci.appveyor.com/project/0xd4d/de4dot/branch/master/artifacts)
+
+
+
+================================================
+File: SpecterDeobfuscator/SpecterDeobfuscator.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2035
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpecterDeobfuscator", "SpecterDeobfuscator\SpecterDeobfuscator.csproj", "{FC1D3C62-0437-4392-916F-6716AF5608CB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FC1D3C62-0437-4392-916F-6716AF5608CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC1D3C62-0437-4392-916F-6716AF5608CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC1D3C62-0437-4392-916F-6716AF5608CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC1D3C62-0437-4392-916F-6716AF5608CB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {71DE84DE-9B07-4A43-9E31-2CF183C6A47E}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: SpecterDeobfuscator/SpecterDeobfuscator/Program.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using dnlib.DotNet.Writer;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+
+namespace SpecterDeobfuscator
+{
+    class Program
+    {
+        public static ModuleDefMD mod = null;
+
+        /// <summary>
+        /// Save deobfuqcated file to disk
+        /// </summary>
+        static void savefile(ModuleDefMD mod)
+        {
+            string text2 = Path.GetDirectoryName(mod.Location);
+
+            if (!text2.EndsWith("\\")) text2 += "\\";
+
+            string path = text2 + Path.GetFileNameWithoutExtension(mod.Location) + "_deobfuscated" +
+                          Path.GetExtension(mod.Location);
+            var opts = new ModuleWriterOptions(mod);
+            opts.Logger = DummyLogger.NoThrowInstance;
+            mod.Write(path, opts);
+            Console.WriteLine($"[!] File saved : {path}");
+        }
+
+        static void Main(string[] args)
+        {
+            if (args.Length < 0)
+            {
+                Console.WriteLine("Input file missing");
+                return;
+            }
+
+            mod = ModuleDefMD.Load(args[0]);
+            Console.WriteLine($"[!] File loaded : {mod.Location}");
+            Console.WriteLine("[+] starting ConstantDemutation...");
+            Console.WriteLine("     [+] grabbing Fields value");
+            Deobfuscator.GrabFieldValues(mod);
+            if(Deobfuscator.proxyInt != null)
+            {
+                Deobfuscator.ReplaceProxyInt(mod);
+            }
+            else
+            {
+                Console.WriteLine("     [-] could not find Fields value ! Aborting");
+            }
+            Console.WriteLine("[+] starting ConstantDecoding...");
+            Console.WriteLine("     [+] Decoding integers using static method");
+            Deobfuscator.DecodingInt(mod);
+            savefile(mod);
+            Console.ReadKey();
+        }
+
+
+    }
+
+    class Deobfuscator
+    {
+
+        public static Dictionary<FieldDef, int> proxyInt = new Dictionary<FieldDef, int>();
+        
+        /// <summary>
+        /// Grab proxy Int field value for constant demutation
+        /// </summary>
+        public static void GrabFieldValues(ModuleDefMD mod)
+        {
+
+            MethodDef modulector = mod.GlobalType.FindStaticConstructor();
+
+            var inst = modulector.Body.Instructions;
+
+            for (int i = 0; i < inst.Count; i++)
+            {
+                if (inst[i].IsLdcI4() && inst[i+1].OpCode == OpCodes.Stsfld)
+                {
+                    int value = inst[i].GetLdcI4Value();
+                    FieldDef field = inst[i + 1].GetOperand() as FieldDef;
+
+                    proxyInt.Add(field, value);
+                    Console.WriteLine($"        [+] Grabbed Field {field.Name} with value {value}");
+
+                }
+            }
+            Console.WriteLine("---");
+        }
+
+        /// <summary>
+        /// Replace proxy int field with original value
+        /// </summary>
+        public static void ReplaceProxyInt(ModuleDefMD mod)
+        {
+            foreach (var t in mod.Types)
+            {
+                if (t.IsGlobalModuleType) continue;
+
+                foreach (var m in t.Methods)
+                {
+                    if (!m.HasBody) continue;
+
+                    var inst = m.Body.Instructions;
+
+                    for (int i = 0; i < inst.Count; i++)
+                   
+                    if (inst[i].OpCode == OpCodes.Ldsfld)
+                    {
+                        FieldDef field = inst[i].GetOperand() as FieldDef;
+                        int value;
+                        if (proxyInt.TryGetValue(field, out value))
+                        {
+                            inst[i] = Instruction.CreateLdcI4(value);
+                            Console.WriteLine($"        [+] Removed proxyInt {field.Name} to {value} in method : {m.Name}");
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Decode integer staticaly
+        /// </summary>
+        public static void DecodingInt(ModuleDefMD mod)
+        {
+
+            MethodDef decodeMethod = mod.GlobalType.FindMethod("DecodeNum");
+
+            if (decodeMethod == null) {
+                Console.WriteLine($"        [-] Could not find decoding method. Aborting."); return;
+            }
+
+            foreach (var t in mod.Types)
+            {
+                if (t.IsGlobalModuleType) continue;
+
+                foreach (var m in t.Methods)
+                {
+                    if (!m.HasBody) continue;
+
+                    var inst = m.Body.Instructions;
+
+                    for (int i = 0; i < inst.Count; i++)
+
+                        if (inst[i].OpCode == OpCodes.Call)
+                        {
+                            if (inst[i].Operand.ToString().Contains(decodeMethod.Name))
+                            {
+                                int param1 = inst[i - 2].GetLdcI4Value();
+                                int param2 = inst[i - 1].GetLdcI4Value();
+                                int decodedInt = DecodeNum(param1, param2);
+
+                                Instruction NOP = Instruction.Create(OpCodes.Nop);
+                                
+                                inst[i - 1] = NOP;
+                                inst[i - 2] = NOP;
+
+                                inst[i] = Instruction.CreateLdcI4(decodedInt);
+                                Console.WriteLine($"        [+] Decoded Int with value {decodedInt} in method : {m.Name}");
+                            }
+                        }
+                }
+            }            
+        }
+
+        public static int DecodeNum(int A_0, int A_1)
+        {
+            int datetime;
+            int timespan;
+
+            unsafe
+            {
+                datetime = sizeof(DateTime);
+                timespan = sizeof(TimeSpan);
+            }
+
+            int num = datetime - timespan;
+            int num2 = A_0 + num;
+            return A_0 ^ A_1;
+        }
+    }
+}
+
+
+================================================
+File: SpecterDeobfuscator/SpecterDeobfuscator/SpecterDeobfuscator.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{FC1D3C62-0437-4392-916F-6716AF5608CB}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>SpecterDeobfuscator</RootNamespace>
+    <AssemblyName>SpecterDeobfuscator</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib">
+      <HintPath>..\..\..\..\..\Desktop\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: SpecterDeobfuscator/SpecterDeobfuscator/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// Les informations gÃ©nÃ©rales relatives Ã  un assembly dÃ©pendent de
+// l'ensemble d'attributs suivant. Changez les valeurs de ces attributs pour modifier les informations
+// associÃ©es Ã  un assembly.
+[assembly: AssemblyTitle("SpecterDeobfuscator")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("SpecterDeobfuscator")]
+[assembly: AssemblyCopyright("Copyright Â©  2018")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// L'affectation de la valeur false Ã  ComVisible rend les types invisibles dans cet assembly
+// aux composants COM. Si vous devez accÃ©der Ã  un type dans cet assembly Ã  partir de
+// COM, affectez la valeur true Ã  l'attribut ComVisible sur ce type.
+[assembly: ComVisible(false)]
+
+// Le GUID suivant est pour l'ID de la typelib si ce projet est exposÃ© Ã  COM
+[assembly: Guid("fc1d3c62-0437-4392-916f-6716af5608cb")]
+
+// Les informations de version pour un assembly se composent des quatre valeurs suivantesÂ :
+//
+//      Version principale
+//      Version secondaire
+//      NumÃ©ro de build
+//      RÃ©vision
+//
+// Vous pouvez spÃ©cifier toutes les valeurs ou indiquer les numÃ©ros de build et de rÃ©vision par dÃ©faut
+// en utilisant '*', comme indiquÃ© ci-dessousÂ :
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+
+
+================================================
+File: SpecterDeobfuscator/SpecterDeobfuscator/obj/Debug/SpecterDeobfuscator.csproj.CopyComplete
+================================================
+
+
+
+================================================
+File: SpecterDeobfuscator/SpecterDeobfuscator/obj/Debug/SpecterDeobfuscator.csproj.FileListAbsolute.txt
+================================================
+C:\Users\xenocode\source\repos\SpecterObfuscator-Deobfuscator\SpecterDeobfuscator\SpecterDeobfuscator\bin\Debug\SpecterDeobfuscator.exe
+C:\Users\xenocode\source\repos\SpecterObfuscator-Deobfuscator\SpecterDeobfuscator\SpecterDeobfuscator\bin\Debug\SpecterDeobfuscator.pdb
+C:\Users\xenocode\source\repos\SpecterObfuscator-Deobfuscator\SpecterDeobfuscator\SpecterDeobfuscator\bin\Debug\dnlib.dll
+C:\Users\xenocode\source\repos\SpecterObfuscator-Deobfuscator\SpecterDeobfuscator\SpecterDeobfuscator\obj\Debug\SpecterDeobfuscator.csprojAssemblyReference.cache
+C:\Users\xenocode\source\repos\SpecterObfuscator-Deobfuscator\SpecterDeobfuscator\SpecterDeobfuscator\obj\Debug\SpecterDeobfuscator.csproj.CoreCompileInputs.cache
+C:\Users\xenocode\source\repos\SpecterObfuscator-Deobfuscator\SpecterDeobfuscator\SpecterDeobfuscator\obj\Debug\SpecterDeobfuscator.csproj.CopyComplete
+C:\Users\xenocode\source\repos\SpecterObfuscator-Deobfuscator\SpecterDeobfuscator\SpecterDeobfuscator\obj\Debug\SpecterDeobfuscator.exe
+C:\Users\xenocode\source\repos\SpecterObfuscator-Deobfuscator\SpecterDeobfuscator\SpecterDeobfuscator\obj\Debug\SpecterDeobfuscator.pdb
+
+

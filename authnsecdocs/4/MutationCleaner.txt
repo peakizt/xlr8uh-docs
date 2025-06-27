@@ -1,0 +1,525 @@
+Directory structure:
+└── miso-xyz-mutationcleaner/
+    ├── README.md
+    ├── App.config
+    ├── IntptrPoint.csproj
+    ├── PointRemover.cs
+    ├── Program.cs
+    └── Properties/
+        └── AssemblyInfo.cs
+
+================================================
+File: README.md
+================================================
+# PointMutationRemover
+This remover removes 2d point mutations. It's very basic so there is a slight possibility of it not working with some. Just a warning, BIN/DEBUG is NOT UPDATED by me anymore! Head on over to releases if you really want the new stuff m8
+
+# Mod Improvements
+<pre>
+- Can now clean TimeSpan Mutations
+- Solve simple math calculations
+- Improvements on CUI
+</pre>
+
+# How to use
+Drag & Drop to remove Point & TimeSpan Mutations
+
+# Code Examples
+**Point Mutation Example:**
+```csharp
+// Before
+int test = new Point(123, 312).X
+Console.WriteLine(test);
+
+// After
+int test = 123;
+Console.WriteLine(test);
+```
+
+**TimeSpan Mutation Example:**
+```csharp
+// Before
+this.button2.Size = new Size((int)new TimeSpan(0xF, 0x30, 0xB40, 0xC).TotalDays + 1, 0x13 + (((int)new TimeSpan(0x1C5, 0x30, 0xB40, 0xC).TotalDays < 0x418) ? 1 : 0));
+
+// After
+this.button2.Size = new Size(0x13 + 1, 0x13 + ((0x1C9 < 0x418) ? 1 : 0));
+```
+
+**Simple Math Solver Example:**
+
+PS: It does not support variable-based calculations
+```csharp
+// Before
+this.ProgressBar1.Value = 8 + 9
+this.ProgressBar2.Value = 8 - 9
+this.ProgressBar3.Value = 8 * 9
+this.ProgressBar4.Value = 8 ^ 9
+
+// After
+this.ProgressBar1.Value = 17
+this.ProgressBar2.Value = -1
+this.ProgressBar3.Value = 72
+this.ProgressBar4.Value = 1
+```
+
+# Screenshot
+![app](https://i.imgur.com/1CnH9MV.png)
+
+(v1.0 screenshot)
+
+![app](https://i.imgur.com/8PIdh3O.png)
+
+# Credits
+- <a href="https://github.com/DevT02">DevT02</a> - Original App Author
+- <a href="https://github.com/bobRE12">bobRE12</a> - dmed a CrackMe
+- 0xd4d (now wtfsck) - <a href="https://github.com/0xd4d/dnlib">dnlib</a>
+
+
+
+================================================
+File: App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.6" />
+    </startup>
+</configuration>
+
+
+================================================
+File: IntptrPoint.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ApplicationIcon>ax_chara.ico</ApplicationIcon>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{FBA88A3B-E232-4D85-A751-9C4BE5028602}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>IntptrPoint</RootNamespace>
+    <AssemblyName>IntptrPoint</AssemblyName>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="de4dot.blocks">
+      <HintPath>..\..\ATTRIBUTE KILLER\de4dot.blocks.dll</HintPath>
+    </Reference>
+    <Reference Include="dnlib">
+      <HintPath>..\..\..\..\Desktop\REVERSE ENGINEERING and Roblox\Exploit Sources\NICHEAN\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="PointRemover.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ax_chara.ico" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: PointRemover.cs
+================================================
+using de4dot.blocks;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace IntptrPoint
+{
+    class PointRemover
+    {
+        public static int amount = 0;
+        public static int mathFixed = 0;
+        public static int timeSpanCleaned = 0;
+
+        public static void Clean()
+        {
+            foreach (TypeDef types in Program.module.GetTypes())
+            {
+                foreach (MethodDef method in types.Methods)
+                {
+                    if (!method.HasBody) continue;
+                    for (int x = 0; x < method.Body.Instructions.Count; x++)
+                    {
+                        Instruction inst = method.Body.Instructions[x];
+                        //int baseIndex = method.Body.Instructions.IndexOf(inst);
+                        if (inst.OpCode.Equals(OpCodes.Xor) || inst.OpCode.Equals(OpCodes.Mul) || inst.OpCode.Equals(OpCodes.Add) || inst.OpCode.Equals(OpCodes.Sub))
+                        {
+                            if (method.Body.Instructions[x - 1].OpCode.Equals(OpCodes.Ldc_I4) && method.Body.Instructions[x - 2].OpCode.Equals(OpCodes.Ldc_I4))
+                            {
+                                int endCalc = -1;
+                                int typeCalc = -1;
+                                switch (inst.OpCode.ToString())
+                                {
+                                    case "xor":
+                                        typeCalc = 0;
+                                        endCalc = int.Parse(method.Body.Instructions[x - 2].Operand.ToString()) ^ int.Parse(method.Body.Instructions[x - 1].Operand.ToString());
+                                        break;
+                                    case "mul":
+                                        typeCalc = 1;
+                                        endCalc = int.Parse(method.Body.Instructions[x - 2].Operand.ToString()) * int.Parse(method.Body.Instructions[x - 1].Operand.ToString());
+                                        break;
+                                    case "add":
+                                        typeCalc = 2;
+                                        endCalc = int.Parse(method.Body.Instructions[x - 2].Operand.ToString()) + int.Parse(method.Body.Instructions[x - 1].Operand.ToString());
+                                        break;
+                                    case "sub":
+                                        typeCalc = 3;
+                                        endCalc = int.Parse(method.Body.Instructions[x - 2].Operand.ToString()) - int.Parse(method.Body.Instructions[x - 1].Operand.ToString());
+                                        break;
+                                }
+                                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                                switch (typeCalc)
+                                {
+                                    case 0:
+                                        Console.WriteLine(" Calculation fixed '" + method.Body.Instructions[x - 2].Operand.ToString() + " ^ " + method.Body.Instructions[x - 1].Operand.ToString() + "' -> '" + endCalc + "'!");
+                                        break;
+                                    case 1:
+                                        Console.WriteLine(" Calculation fixed '" + method.Body.Instructions[x - 2].Operand.ToString() + " * " + method.Body.Instructions[x - 1].Operand.ToString() + "' -> '" + endCalc + "'!");
+                                        break;
+                                    case 2:
+                                        Console.WriteLine(" Calculation fixed '" + method.Body.Instructions[x - 2].Operand.ToString() + " + " + method.Body.Instructions[x - 1].Operand.ToString() + "' -> '" + endCalc + "'!");
+                                        break;
+                                    case 3:
+                                        Console.WriteLine(" Calculation fixed '" + method.Body.Instructions[x - 2].Operand.ToString() + " - " + method.Body.Instructions[x - 1].Operand.ToString() + "' -> '" + endCalc + "'!");
+                                        break;
+                                }
+                                Instruction calculated = new Instruction(OpCodes.Ldc_I4, endCalc);
+                                method.Body.Instructions.RemoveAt(x - 2);
+                                method.Body.Instructions.RemoveAt(x - 2);
+                                method.Body.Instructions.RemoveAt(x - 2);
+                                method.Body.Instructions.Insert(x - 2, OpCodes.Ldc_I4.ToInstruction(endCalc));
+                                mathFixed++;
+                            }
+                        }
+                        if (inst.Operand == null) { continue; }
+                        if (inst.OpCode.Equals(OpCodes.Newobj))
+                        {
+                            if (inst.Operand.ToString().Contains("TimeSpan"))
+                            {
+                                int days, hours, minutes, seconds;
+                                days = method.Body.Instructions[x - 4].GetLdcI4Value();
+                                hours = method.Body.Instructions[x - 3].GetLdcI4Value();
+                                minutes = method.Body.Instructions[x - 2].GetLdcI4Value();
+                                seconds = method.Body.Instructions[x - 1].GetLdcI4Value();
+                                TimeSpan ts = new TimeSpan(days, hours, minutes, seconds);
+                                string getTsValFunc = method.Body.Instructions[x + 3].Operand.ToString();
+                                int getTsIndex = x + 3;
+                                int endVar = -1;
+                                switch (getTsValFunc.Split(':')[2].Replace("()", null).ToLower().Replace("get_total", null))
+                                {
+                                    case "days":
+                                        endVar = Convert.ToInt32(ts.TotalDays);
+                                        break;
+                                    case "hours":
+                                        endVar = Convert.ToInt32(ts.TotalHours);
+                                        break;
+                                    case "minutes":
+                                        endVar = Convert.ToInt32(ts.TotalMinutes);
+                                        break;
+                                    case "milliseconds":
+                                        endVar = Convert.ToInt32(ts.TotalMilliseconds);
+                                        break;
+                                    case "seconds":
+                                        endVar = Convert.ToInt32(ts.TotalSeconds);
+                                        break;
+                                }
+                                for (int x_ = 0; x_ < method.Body.Instructions.Count; x_++)
+                                {
+                                    method.Body.Instructions.RemoveAt(x - 4);
+                                    if (method.Body.Instructions[x - 4].OpCode.Equals(OpCodes.Call))
+                                    {
+                                        method.Body.Instructions.RemoveAt(x - 4);
+                                        break;
+                                    }
+                                }
+                                method.Body.Instructions.Insert(x - 4, new Instruction(OpCodes.Ldc_I4, endVar));
+                                Console.ForegroundColor = ConsoleColor.DarkGreen;
+                                Console.WriteLine(" TimeSpan Mutation Removed at IL_" + int.Parse(inst.Offset.ToString("X"), System.Globalization.NumberStyles.HexNumber) + "!");
+                                timeSpanCleaned++;
+                            }
+                        }
+                    }
+                    IList<Instruction> instr = method.Body.Instructions;
+                    for (int i = 0; i < instr.Count; i++)
+                    {
+                        // CODE: new Point(1676, 3352).Y 
+                        // A POINT MUTATION IN DNSPY LOOKS LIKE:
+
+                        //19  0047    ldc.i4    0x68C 
+                        //20  004C    ldc.i4    0xD18
+                        //21  0051    newobj    instance void [System.Drawing]System.Drawing.Point::.ctor(int32, int32)
+                        //22  0056    stloc.s   V_69(69)
+                        //23  0058    ldloca.s  V_69(69)
+                        //24  005A    call    instance int32[System.Drawing]System.Drawing.Point::get_Y()
+
+
+                        // 2 instructions before Point::.ctor (constructor) is X value, 1 instruction before is Y value
+
+                        // 3 instructions ahead is .Y /.X  get_X obviously means .X   get_Y obviously means .Y
+
+                        // Here, we will try getting point via instruction 21 (the newobj opcode). If this exists, it is possible to check if there is point mutation
+
+                        try
+                        {
+                            if (instr[i + 3].OpCode != OpCodes.Call || instr[i].OpCode != OpCodes.Newobj || !instr[i].Operand.ToString().Contains("Point::.ctor") || !instr[i + 3].Operand.ToString().Contains("::get_") || !instr[i + 1].OpCode.Name.StartsWith("stloc") || !instr[i + 2].OpCode.Name.StartsWith("ldloca")) continue;
+                        }
+                        catch
+                        {
+                            continue; // If instruction is 0, 1, or 2, this will stop the OutOfRangeExeption. (skip)
+                        }
+                        if (instr[i + 3].Operand.ToString().Contains("::get_X")) // IF .X
+                        {
+                            if (!instr[i - 1].OpCode.ToString().Contains("ldc.i4"))
+                                continue; //Opcode has to be an LDCi4 instruction
+                            instr[i].OpCode = OpCodes.Nop; //removes newobj
+                            instr[i + 1].OpCode = OpCodes.Nop; // removes stloc
+                            instr[i + 2].OpCode = OpCodes.Nop; // removes ldloca
+                            instr[i + 3].OpCode = OpCodes.Nop; // removes .X
+                            instr[i - 1].OpCode = OpCodes.Nop; // Because looks for .X, we can remove the Y Value shit so only X value remains
+
+                        }
+                        if (instr[i + 3].Operand.ToString().Contains("::get_Y"))
+                        {
+                            if (!instr[i - 2].OpCode.ToString().Contains("ldc.i4"))
+                                continue;
+                            instr[i].OpCode = OpCodes.Nop;
+                            instr[i + 1].OpCode = OpCodes.Nop;
+                            instr[i + 2].OpCode = OpCodes.Nop;
+                            instr[i + 3].OpCode = OpCodes.Nop;
+                            instr[i - 2].OpCode = OpCodes.Nop;
+                        }
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine(" Removed Point at IL_" + int.Parse(instr[i + 3].Offset.ToString("X"), System.Globalization.NumberStyles.HexNumber) + "!");
+                        amount++;
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: Program.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Writer;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace IntptrPoint
+{
+    class Program
+    {
+        public static string Asmpath;
+        public static ModuleDefMD module;
+        public static Assembly asm;
+        static void Main(string[] args)
+        {
+            Console.Title = "Point Remover by OFF_LINE";
+            Console.ForegroundColor = ConsoleColor.White;
+            string lol = @"  _____      _       _     _____                                    
+ |  __ \    (_)     | |   |  __ \                                   
+ | |__) |__  _ _ __ | |_  | |__) |___ _ __ ___   _____   _____ _ __ 
+ |  ___/ _ \| | '_ \| __| |  _  // _ \ '_ ` _ \ / _ \ \ / / _ \ '__|
+ | |  | (_) | | | | | |_  | | \ \  __/ | | | | | (_) \ V /  __/ |   
+ |_|   \___/|_|_| |_|\__| |_|  \_\___|_| |_| |_|\___/ \_/ \___|_|   
+                                                                    ";
+            Console.WriteLine(lol);
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(" Original Application by OFF_LINE");
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.Magenta;
+            Console.WriteLine(" Mod by misonothx");
+            Console.ForegroundColor = ConsoleColor.DarkMagenta;
+            Console.WriteLine("  |- TimeSpan Cleaner");
+            Console.WriteLine("  |- Simple Math Cleaner");
+            Console.WriteLine("  |- CUI Changes & fixes");
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.White;
+            try
+            {
+                Program.module = ModuleDefMD.Load(args[0], (ModuleCreationOptions) null);
+            }
+            catch (Exception)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(" [!] Not a .NET Assembly");
+                Console.ResetColor();
+                Console.WriteLine("Press any key to exit...");
+                Console.ReadKey();
+                System.Environment.Exit(0);
+            }
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine(" Successfully loaded assembly!");
+            try
+            {
+                Console.WriteLine();
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine(" Now cleaning...");
+                Console.WriteLine();
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(" Failed to clean. (" + ex.Message + ")");
+            }
+            IntptrPoint.PointRemover.Clean();
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine(" Removed " + IntptrPoint.PointRemover.mathFixed + " Math calculations");
+            Console.WriteLine(" Removed " + PointRemover.timeSpanCleaned + " TimeSpan mutations");
+            Console.WriteLine(" Removed " + IntptrPoint.PointRemover.amount + " Point mutations");
+            Console.WriteLine();
+            ModuleWriterOptions writerOptions = new ModuleWriterOptions(Program.module);
+            writerOptions.MetaDataOptions.Flags |= MetaDataFlags.PreserveAll;
+            writerOptions.Logger = DummyLogger.NoThrowInstance;
+            NativeModuleWriterOptions NativewriterOptions = new NativeModuleWriterOptions(Program.module);
+            NativewriterOptions.MetaDataOptions.Flags |= MetaDataFlags.PreserveAll;
+            NativewriterOptions.Logger = DummyLogger.NoThrowInstance;
+            bool isILOnly = Program.module.IsILOnly;
+            if (isILOnly)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine(" Now saving " + Path.GetFileNameWithoutExtension(args[0]) + "-IL" + Path.GetExtension(args[0]) + " (IL)...");
+                try
+                {
+                    Program.module.Write(Path.GetFileNameWithoutExtension(args[0]) + "-IL" + Path.GetExtension(args[0]), writerOptions);
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine(" (IL) '" + Path.GetFileNameWithoutExtension(args[0]) + "-IL" + Path.GetExtension(args[0]) + "' successfully saved!");
+                    Console.ResetColor();
+                    Console.WriteLine(" Press any key to exit...");
+                    Console.ReadKey();
+                }
+                catch (Exception ex)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine(" [!] Failed to save '" + Path.GetFileNameWithoutExtension(args[0]) + "-IL" + Path.GetExtension(args[0]) + "' (IL)");
+                    Console.ResetColor();
+                    Console.WriteLine(" Press any key to exit...");
+                    Console.ReadKey();
+                    System.Environment.Exit(0);
+                }
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine(" Now saving '" + Path.GetFileNameWithoutExtension(args[0]) + "-Native" + Path.GetExtension(args[0]) + "' (Native)...");
+                try
+                {
+                    Program.module.NativeWrite(Path.GetFileNameWithoutExtension(args[0]) + "-Native" + Path.GetExtension(args[0]), NativewriterOptions);
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine(" (Native) '" + Path.GetFileNameWithoutExtension(args[0]) + "-Native" + Path.GetExtension(args[0]) + "' successfully saved!");
+                    Console.ResetColor();
+                    Console.WriteLine(" Press any key to exit...");
+                    Console.ReadKey();
+                }
+                catch (Exception ex)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine(" [!] Failed to save (Native) application");
+                    Console.ResetColor();
+                    Console.WriteLine(" Press any key to exit...");
+                    Console.ReadKey();
+                    System.Environment.Exit(0);
+                }
+            }
+        }
+    }
+}
+
+
+================================================
+File: Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("IntptrPoint")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("IntptrPoint")]
+[assembly: AssemblyCopyright("Copyright Â©  2020")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Setting ComVisible to false makes the types in this assembly not visible
+// to COM components.  If you need to access a type in this assembly from
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("fba88a3b-e232-4d85-a751-9c4be5028602")]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+

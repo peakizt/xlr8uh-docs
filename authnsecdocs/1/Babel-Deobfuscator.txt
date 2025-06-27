@@ -1,0 +1,1911 @@
+Directory structure:
+└── melanie-leb-babel-deobfuscator/
+    ├── README.md
+    ├── AntiTamper.cs
+    ├── BabelDeobfuscator.csproj
+    ├── BabelDeobfuscator.sln
+    ├── LICENSE
+    ├── Program.cs
+    ├── BabelVMRestore/
+    │   └── SuperDynamicReader.cs
+    ├── Constants/
+    │   ├── Ints.cs
+    │   └── Strings.cs
+    ├── ControlFlow/
+    │   └── De4Dot.cs
+    ├── MethodEncryption/
+    │   ├── DecryptionMethods.cs
+    │   ├── EncryptedMethodDetails.cs
+    │   └── VMDecryptor.cs
+    ├── Properties/
+    │   └── AssemblyInfo.cs
+    ├── ProxyCalls/
+    │   └── Delegates.cs
+    └── dll/
+
+================================================
+File: README.md
+================================================
+# Babel-Deobfuscator
+
+Babel-Deobfuscator is an open-source deobfuscator for Babel Obfuscator.
+
+## Usage
+
+Open BabelDeobfuscator.exe and enter the name of the executable you wish to deobfuscate
+```
+Name of Executable to Unpack :
+UnpackMe.exe
+Babel Unpacker running..
+Unpack Complete !
+```
+
+## Thanks To 
+[0xd4d - for dnlib & de4dot](https://github.com/0xd4d)
+
+
+
+================================================
+File: AntiTamper.cs
+================================================
+ï»¿using System;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace BabelDeobfuscator.Protections
+{
+	internal class AntiTamper
+	{
+		public static void AntiTamp(ModuleDefMD module)
+		{
+			foreach (TypeDef typeDef in module.GetTypes())
+			{
+				foreach (MethodDef methodDef in typeDef.Methods)
+				{
+					bool flag = !methodDef.HasBody;
+					bool flag2 = !flag;
+					if (flag2)
+					{
+						bool flag3 = methodDef.Body.Instructions.Count != 3;
+						bool flag4 = !flag3;
+						if (flag4)
+						{
+							bool flag5 = methodDef.Body.Instructions[0].OpCode != OpCodes.Ldnull;
+							bool flag6 = !flag5;
+							if (flag6)
+							{
+								bool flag7 = methodDef.Body.Instructions[1].OpCode != OpCodes.Call;
+								bool flag8 = !flag7;
+								if (flag8)
+								{
+									bool flag9 = methodDef.Body.Instructions[2].OpCode != OpCodes.Ret;
+									bool flag10 = !flag9;
+									if (flag10)
+									{
+										bool flag11 = !methodDef.Body.Instructions[1].Operand.ToString().Contains("FailFast");
+										bool flag12 = !flag11;
+										if (flag12)
+										{
+											methodDef.Body.Instructions[0].OpCode = OpCodes.Nop;
+											methodDef.Body.Instructions[1].OpCode = OpCodes.Nop;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+
+
+================================================
+File: BabelDeobfuscator.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
+    <ProjectGuid>{721F99BF-66D0-478F-A72C-F2F6F4C21C18}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>BabelDeobfuscator</RootNamespace>
+    <AssemblyName>BabelDeobfuscator</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <StartupObject>BabelDeobfuscator.Program</StartupObject>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="de4dot.blocks, Version=3.1.41592.3405, Culture=neutral, PublicKeyToken=d3f3ed1e47f67fc6, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>dll\de4dot.blocks.dll</HintPath>
+    </Reference>
+    <Reference Include="dnlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=50e96378b6e77999, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>dll\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BabelVMRestore\SuperDynamicReader.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="AntiTamper.cs" />
+    <Compile Include="Constants\Ints.cs" />
+    <Compile Include="Constants\Strings.cs" />
+    <Compile Include="ControlFlow\De4Dot.cs" />
+    <Compile Include="MethodEncryption\DecryptionMethods.cs" />
+    <Compile Include="MethodEncryption\EncryptedMethodDetails.cs" />
+    <Compile Include="MethodEncryption\VMDecryptor.cs" />
+    <Compile Include="ProxyCalls\Delegates.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: BabelDeobfuscator.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BabelDeobfuscator", "BabelDeobfuscator.csproj", "{721F99BF-66D0-478F-A72C-F2F6F4C21C18}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{721F99BF-66D0-478F-A72C-F2F6F4C21C18}.Debug|x64.ActiveCfg = Debug|x64
+		{721F99BF-66D0-478F-A72C-F2F6F4C21C18}.Debug|x64.Build.0 = Debug|x64
+		{721F99BF-66D0-478F-A72C-F2F6F4C21C18}.Release|x64.ActiveCfg = Release|x64
+		{721F99BF-66D0-478F-A72C-F2F6F4C21C18}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9F41A17B-99B5-450C-B259-457444A59817}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: LICENSE
+================================================
+MIT License
+
+Copyright (c) 2020 Melanie-LEB
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+
+================================================
+File: Program.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using BabelDeobfuscator.Protections;
+using BabelDeobfuscator.Protections.Constants;
+using BabelDeobfuscator.Protections.ControlFlow;
+using BabelDeobfuscator.Protections.MethodEncryption;
+using BabelDeobfuscator.Protections.ProxyCalls;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using dnlib.DotNet.Writer;
+
+namespace BabelDeobfuscator
+{
+	internal class Program
+	{
+		private static void Main(string[] args)
+		{
+			Console.WriteLine("Name of Executable to Unpack : ");
+			var path = Console.ReadLine();
+			if (path == string.Empty)
+				return;
+			if (path != null && path.StartsWith("\"") && path[path.Length - 1] == '"')
+				path = path.Substring(1, path.Length - 2);
+
+			if (!File.Exists(path))
+			{
+				Console.ForegroundColor = ConsoleColor.Red;
+				Console.WriteLine("[!] File not found");
+				Console.WriteLine("[!] Press key to exit...");
+				Console.Read();
+				return;
+			}
+			Console.WriteLine("Babel Unpacker running..");
+			ModuleDefMD moduleDefMD = ModuleDefMD.Load(path);
+			AssemblyResolver assemblyResolver = new AssemblyResolver();
+			ModuleContext moduleContext = new ModuleContext(assemblyResolver);
+			assemblyResolver.DefaultModuleContext = moduleContext;
+			assemblyResolver.EnableTypeDefCache = true;
+			moduleDefMD.Location = path;
+			List<AssemblyRef> list = moduleDefMD.GetAssemblyRefs().ToList<AssemblyRef>();
+			moduleDefMD.Context = moduleContext;
+			foreach (AssemblyRef assemblyRef in list)
+			{
+				if (assemblyRef != null)
+				{
+					AssemblyDef assemblyDef = assemblyResolver.Resolve(assemblyRef.FullName, moduleDefMD);
+					moduleDefMD.Context.AssemblyResolver.AddToCache(assemblyDef);
+				}
+			}
+			Program.asm = Assembly.LoadFrom(path);
+			De4Dot.Cflow(moduleDefMD);
+			VMDecryptor.run(moduleDefMD, Program.asm);
+			Delegates.CleanDelegates(moduleDefMD);
+			Ints.CleanInts(moduleDefMD);
+			Ints.CleanFloats(moduleDefMD);
+			Ints.CleanDouble(moduleDefMD);
+			Strings.CleanStringMethodOne(moduleDefMD);
+			Strings.CleanStringMethodTwo(moduleDefMD);
+			De4Dot.Cflow(moduleDefMD);
+			Ints.CleanInts(moduleDefMD);
+			Ints.CleanFloats(moduleDefMD);
+			Ints.CleanDouble(moduleDefMD);
+			Strings.CleanStringMethodOne(moduleDefMD);
+			Strings.CleanStringMethodTwo(moduleDefMD);
+			De4Dot.Cflow(moduleDefMD);
+			AntiTamper.AntiTamp(moduleDefMD);
+			Console.ForegroundColor = ConsoleColor.Green;
+			Console.WriteLine("Unpack Complete !");
+			moduleDefMD.Write("cleaned_" + path, new ModuleWriterOptions(moduleDefMD));
+		}
+		public static Assembly asm;
+	}
+}
+
+
+
+================================================
+File: BabelVMRestore/SuperDynamicReader.cs
+================================================
+ï»¿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using System.Reflection.Emit;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using dnlib.DotNet.MD;
+using dnlib.IO;
+
+namespace Babel_Full_Unpacker.BabelVMRestore.Core
+{
+	public class SuperDynamicReader : MethodBodyReaderBase, ISignatureReaderHelper
+	{
+		public SuperDynamicReader(ModuleDef module, object obj) : this(module, obj, default(GenericParamContext))
+		{
+		}
+		public SuperDynamicReader(ModuleDef module, object obj, GenericParamContext gpContext)
+		{
+			this.module = module;
+			this.importer = new Importer(module, ImporterOptions.TryToUseDefs, gpContext);
+			this.gpContext = gpContext;
+			bool flag = obj == null;
+			bool flag2 = flag;
+			if (flag2)
+			{
+				throw new ArgumentNullException("obj");
+			}
+			Delegate @delegate = obj as Delegate;
+			bool flag3 = @delegate != null;
+			bool flag4 = flag3;
+			if (flag4)
+			{
+				obj = @delegate.Method;
+				bool flag5 = obj == null;
+				bool flag6 = flag5;
+				if (flag6)
+				{
+					throw new Exception("Delegate.Method == null");
+				}
+			}
+			bool flag7 = obj.GetType().ToString() == "System.Reflection.Emit.DynamicMethod+RTDynamicMethod";
+			bool flag8 = flag7;
+			if (flag8)
+			{
+				obj = (SuperDynamicReader.rtdmOwnerFieldInfo.Read(obj) as DynamicMethod);
+				bool flag9 = obj == null;
+				bool flag10 = flag9;
+				if (flag10)
+				{
+					throw new Exception("RTDynamicMethod.m_owner is null or invalid");
+				}
+			}
+			bool flag11 = obj is DynamicMethod;
+			bool flag12 = flag11;
+			if (flag12)
+			{
+				object obj2 = obj;
+				obj = SuperDynamicReader.dmResolverFieldInfo.Read(obj);
+				bool flag13 = obj == null;
+				bool flag14 = flag13;
+				if (flag14)
+				{
+					obj = obj2;
+					obj = SuperDynamicReader.methodDynamicInfo.Read(obj);
+					bool flag15 = obj == null;
+					bool flag16 = flag15;
+					if (flag16)
+					{
+						throw new Exception("No resolver found");
+					}
+					this.SecondOption(obj);
+					return;
+				}
+			}
+			bool flag17 = obj.GetType().ToString() != "System.Reflection.Emit.DynamicResolver";
+			bool flag18 = flag17;
+			if (flag18)
+			{
+				throw new Exception("Couldn't find DynamicResolver");
+			}
+			byte[] array = SuperDynamicReader.rslvCodeFieldInfo.Read(obj) as byte[];
+			bool flag19 = array == null;
+			bool flag20 = flag19;
+			if (flag20)
+			{
+				throw new Exception("No code");
+			}
+			this.codeSize = array.Length;
+			MethodBase methodBase = SuperDynamicReader.rslvMethodFieldInfo.Read(obj) as MethodBase;
+			bool flag21 = methodBase == null;
+			bool flag22 = flag21;
+			if (flag22)
+			{
+				throw new Exception("No method");
+			}
+			this.maxStack = (int)SuperDynamicReader.rslvMaxStackFieldInfo.Read(obj);
+			object obj3 = SuperDynamicReader.rslvDynamicScopeFieldInfo.Read(obj);
+			bool flag23 = obj3 == null;
+			bool flag24 = flag23;
+			if (flag24)
+			{
+				throw new Exception("No scope");
+			}
+			IList list = SuperDynamicReader.scopeTokensFieldInfo.Read(obj3) as IList;
+			bool flag25 = list == null;
+			bool flag26 = flag25;
+			if (flag26)
+			{
+				throw new Exception("No tokens");
+			}
+			this.tokens = new List<object>(list.Count);
+			for (int i = 0; i < list.Count; i++)
+			{
+				this.tokens.Add(list[i]);
+			}
+			this.ehInfos = (IList<object>)SuperDynamicReader.rslvExceptionsFieldInfo.Read(obj);
+			this.ehHeader = (SuperDynamicReader.rslvExceptionHeaderFieldInfo.Read(obj) as byte[]);
+			this.UpdateLocals(SuperDynamicReader.rslvLocalsFieldInfo.Read(obj) as byte[]);
+			this.reader = MemoryImageStream.Create(array);
+			this.method = this.CreateMethodDef(methodBase);
+			this.parameters = this.method.Parameters;
+		}
+		public static T GetFieldValue<T>(object obj, string fieldName)
+		{
+			bool flag = obj == null;
+			bool flag2 = flag;
+			if (flag2)
+			{
+				throw new ArgumentNullException("obj");
+			}
+			FieldInfo field = obj.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+			bool flag3 = field == null;
+			bool flag4 = flag3;
+			if (flag4)
+			{
+				throw new ArgumentException("fieldName", "No such field was found.");
+			}
+			bool flag5 = !typeof(T).IsAssignableFrom(field.FieldType);
+			bool flag6 = flag5;
+			if (flag6)
+			{
+				throw new InvalidOperationException("Field type and requested type are not compatible.");
+			}
+			return (T)((object)field.GetValue(obj));
+		}
+		private void SecondOption(object obj)
+		{
+			byte[] fieldValue = SuperDynamicReader.GetFieldValue<byte[]>(obj, "m_code");
+			bool flag = fieldValue == null;
+			bool flag2 = flag;
+			if (flag2)
+			{
+				throw new Exception("No code");
+			}
+			this.codeSize = fieldValue.Length;
+			MethodBase fieldValue2 = SuperDynamicReader.GetFieldValue<MethodBase>(obj, "m_method");
+			bool flag3 = fieldValue2 == null;
+			bool flag4 = flag3;
+			if (flag4)
+			{
+				throw new Exception("No method");
+			}
+			this.maxStack = SuperDynamicReader.GetFieldValue<int>(obj, "m_maxStackSize");
+			object fieldValue3 = SuperDynamicReader.GetFieldValue<object>(obj, "m_scope");
+			bool flag5 = fieldValue3 == null;
+			bool flag6 = flag5;
+			if (flag6)
+			{
+				throw new Exception("No scope");
+			}
+			IList fieldValue4 = SuperDynamicReader.GetFieldValue<IList>(fieldValue3, "m_tokens");
+			bool flag7 = fieldValue4 == null;
+			bool flag8 = flag7;
+			if (flag8)
+			{
+				throw new Exception("No tokens");
+			}
+			this.tokens = new List<object>(fieldValue4.Count);
+			for (int i = 0; i < fieldValue4.Count; i++)
+			{
+				this.tokens.Add(fieldValue4[i]);
+			}
+			this.ehHeader = SuperDynamicReader.GetFieldValue<byte[]>(obj, "m_exceptions");
+			this.UpdateLocals(SuperDynamicReader.GetFieldValue<byte[]>(obj, "m_localSignature"));
+			this.reader = MemoryImageStream.Create(fieldValue);
+			this.method = this.CreateMethodDef(fieldValue2);
+			this.parameters = this.method.Parameters;
+		}
+		private static List<SuperDynamicReader.ExceptionInfo> CreateExceptionInfos(IList<object> ehInfos)
+		{
+			bool flag = ehInfos == null;
+			bool flag2 = flag;
+			List<SuperDynamicReader.ExceptionInfo> result;
+			if (flag2)
+			{
+				result = new List<SuperDynamicReader.ExceptionInfo>();
+			}
+			else
+			{
+				List<SuperDynamicReader.ExceptionInfo> list = new List<SuperDynamicReader.ExceptionInfo>(ehInfos.Count);
+				foreach (object instance in ehInfos)
+				{
+					SuperDynamicReader.ExceptionInfo item = new SuperDynamicReader.ExceptionInfo
+					{
+						CatchAddr = (int[])SuperDynamicReader.ehCatchAddrFieldInfo.Read(instance),
+						CatchClass = (Type[])SuperDynamicReader.ehCatchClassFieldInfo.Read(instance),
+						CatchEndAddr = (int[])SuperDynamicReader.ehCatchEndAddrFieldInfo.Read(instance),
+						CurrentCatch = (int)SuperDynamicReader.ehCurrentCatchFieldInfo.Read(instance),
+						Type = (int[])SuperDynamicReader.ehTypeFieldInfo.Read(instance),
+						StartAddr = (int)SuperDynamicReader.ehStartAddrFieldInfo.Read(instance),
+						EndAddr = (int)SuperDynamicReader.ehEndAddrFieldInfo.Read(instance),
+						EndFinally = (int)SuperDynamicReader.ehEndFinallyFieldInfo.Read(instance)
+					};
+					list.Add(item);
+				}
+				result = list;
+			}
+			return result;
+		}
+		private void UpdateLocals(byte[] localsSig)
+		{
+			bool flag = localsSig == null || localsSig.Length == 0;
+			bool flag2 = !flag;
+			if (flag2)
+			{
+				LocalSig localSig = SignatureReader.ReadSig(this, this.module.CorLibTypes, localsSig, this.gpContext) as LocalSig;
+				bool flag3 = localSig == null;
+				bool flag4 = !flag3;
+				if (flag4)
+				{
+					foreach (TypeSig typeSig in localSig.Locals)
+					{
+						this.locals.Add(new Local(typeSig));
+					}
+				}
+			}
+		}
+		private MethodDef CreateMethodDef(MethodBase delMethod)
+		{
+			bool flag = true;
+			MethodDefUser methodDefUser = new MethodDefUser();
+			TypeSig returnType = this.GetReturnType(delMethod);
+			List<TypeSig> parameters = this.GetParameters(delMethod);
+			bool flag2 = flag;
+			bool flag3 = flag2;
+			if (flag3)
+			{
+				methodDefUser.Signature = MethodSig.CreateStatic(returnType, parameters.ToArray());
+			}
+			else
+			{
+				methodDefUser.Signature = MethodSig.CreateInstance(returnType, parameters.ToArray());
+			}
+			methodDefUser.Parameters.UpdateParameterTypes();
+			methodDefUser.ImplAttributes = dnlib.DotNet.MethodImplAttributes.IL;
+			methodDefUser.Attributes = dnlib.DotNet.MethodAttributes.PrivateScope;
+			bool flag4 = flag;
+			bool flag5 = flag4;
+			if (flag5)
+			{
+				methodDefUser.Attributes |= dnlib.DotNet.MethodAttributes.Static;
+			}
+			return this.module.UpdateRowId<MethodDefUser>(methodDefUser);
+		}
+		private TypeSig GetReturnType(MethodBase mb)
+		{
+			MethodInfo methodInfo = mb as MethodInfo;
+			bool flag = methodInfo != null;
+			bool flag2 = flag;
+			TypeSig result;
+			if (flag2)
+			{
+				result = this.importer.ImportAsTypeSig(methodInfo.ReturnType);
+			}
+			else
+			{
+				result = this.module.CorLibTypes.Void;
+			}
+			return result;
+		}
+		private List<TypeSig> GetParameters(MethodBase delMethod)
+		{
+			List<TypeSig> list = new List<TypeSig>();
+			foreach (ParameterInfo parameterInfo in delMethod.GetParameters())
+			{
+				list.Add(this.importer.ImportAsTypeSig(parameterInfo.ParameterType));
+			}
+			return list;
+		}
+		public bool Read()
+		{
+			base.ReadInstructionsNumBytes((uint)this.codeSize);
+			this.CreateExceptionHandlers();
+			return true;
+		}
+		private void CreateExceptionHandlers()
+		{
+			bool flag = this.ehHeader != null && this.ehHeader.Length != 0;
+			bool flag2 = flag;
+			if (flag2)
+			{
+				BinaryReader binaryReader = new BinaryReader(new MemoryStream(this.ehHeader));
+				byte b = binaryReader.ReadByte();
+				bool flag3 = (b & 64) == 0;
+				bool flag4 = flag3;
+				if (flag4)
+				{
+					int num = (int)((ushort)((binaryReader.ReadByte() - 2) / 12));
+					binaryReader.ReadInt16();
+					for (int i = 0; i < num; i++)
+					{
+						dnlib.DotNet.Emit.ExceptionHandler exceptionHandler = new dnlib.DotNet.Emit.ExceptionHandler();
+						exceptionHandler.HandlerType = (ExceptionHandlerType)binaryReader.ReadInt16();
+						int num2 = (int)binaryReader.ReadUInt16();
+						exceptionHandler.TryStart = base.GetInstructionThrow((uint)num2);
+						exceptionHandler.TryEnd = base.GetInstruction((uint)((int)binaryReader.ReadSByte() + num2));
+						num2 = (int)binaryReader.ReadUInt16();
+						exceptionHandler.HandlerStart = base.GetInstructionThrow((uint)num2);
+						exceptionHandler.HandlerEnd = base.GetInstruction((uint)((int)binaryReader.ReadSByte() + num2));
+						bool flag5 = exceptionHandler.HandlerType == ExceptionHandlerType.Catch;
+						bool flag6 = flag5;
+						if (flag6)
+						{
+							exceptionHandler.CatchType = (this.ReadToken(binaryReader.ReadUInt32()) as ITypeDefOrRef);
+						}
+						else
+						{
+							bool flag7 = exceptionHandler.HandlerType == ExceptionHandlerType.Filter;
+							bool flag8 = flag7;
+							if (flag8)
+							{
+								exceptionHandler.FilterStart = base.GetInstruction(binaryReader.ReadUInt32());
+							}
+							else
+							{
+								binaryReader.ReadUInt32();
+							}
+						}
+						this.exceptionHandlers.Add(exceptionHandler);
+					}
+				}
+				else
+				{
+					Stream baseStream = binaryReader.BaseStream;
+					long position = baseStream.Position;
+					baseStream.Position = position - 1L;
+					int num3 = (int)((ushort)(((binaryReader.ReadUInt32() >> 8) - 4U) / 24U));
+					for (int j = 0; j < num3; j++)
+					{
+						dnlib.DotNet.Emit.ExceptionHandler exceptionHandler2 = new dnlib.DotNet.Emit.ExceptionHandler();
+						exceptionHandler2.HandlerType = (ExceptionHandlerType)binaryReader.ReadInt32();
+						int num4 = binaryReader.ReadInt32();
+						exceptionHandler2.TryStart = base.GetInstructionThrow((uint)num4);
+						exceptionHandler2.TryEnd = base.GetInstruction((uint)(binaryReader.ReadInt32() + num4));
+						num4 = binaryReader.ReadInt32();
+						exceptionHandler2.HandlerStart = base.GetInstructionThrow((uint)num4);
+						exceptionHandler2.HandlerEnd = base.GetInstruction((uint)(binaryReader.ReadInt32() + num4));
+						bool flag9 = exceptionHandler2.HandlerType == ExceptionHandlerType.Catch;
+						bool flag10 = flag9;
+						if (flag10)
+						{
+							exceptionHandler2.CatchType = (this.ReadToken(binaryReader.ReadUInt32()) as ITypeDefOrRef);
+						}
+						else
+						{
+							bool flag11 = exceptionHandler2.HandlerType == ExceptionHandlerType.Filter;
+							bool flag12 = flag11;
+							if (flag12)
+							{
+								exceptionHandler2.FilterStart = base.GetInstruction(binaryReader.ReadUInt32());
+							}
+							else
+							{
+								binaryReader.ReadUInt32();
+							}
+						}
+						this.exceptionHandlers.Add(exceptionHandler2);
+					}
+				}
+			}
+			else
+			{
+				bool flag13 = this.ehInfos != null;
+				bool flag14 = flag13;
+				if (flag14)
+				{
+					foreach (SuperDynamicReader.ExceptionInfo exceptionInfo in SuperDynamicReader.CreateExceptionInfos(this.ehInfos))
+					{
+						Instruction instructionThrow = base.GetInstructionThrow((uint)exceptionInfo.StartAddr);
+						Instruction instruction = base.GetInstruction((uint)exceptionInfo.EndAddr);
+						Instruction instruction2 = (exceptionInfo.EndFinally < 0) ? null : base.GetInstruction((uint)exceptionInfo.EndFinally);
+						for (int k = 0; k < exceptionInfo.CurrentCatch; k++)
+						{
+							dnlib.DotNet.Emit.ExceptionHandler exceptionHandler3 = new dnlib.DotNet.Emit.ExceptionHandler();
+							exceptionHandler3.HandlerType = (ExceptionHandlerType)exceptionInfo.Type[k];
+							exceptionHandler3.TryStart = instructionThrow;
+							exceptionHandler3.TryEnd = ((exceptionHandler3.HandlerType == ExceptionHandlerType.Finally) ? instruction2 : instruction);
+							exceptionHandler3.FilterStart = null;
+							exceptionHandler3.HandlerStart = base.GetInstructionThrow((uint)exceptionInfo.CatchAddr[k]);
+							exceptionHandler3.HandlerEnd = base.GetInstruction((uint)exceptionInfo.CatchEndAddr[k]);
+							exceptionHandler3.CatchType = this.importer.Import(exceptionInfo.CatchClass[k]);
+							this.exceptionHandlers.Add(exceptionHandler3);
+						}
+					}
+				}
+			}
+		}
+		public MethodDef GetMethod()
+		{
+			bool initLocals = true;
+			CilBody cilBody = new CilBody(initLocals, this.instructions, this.exceptionHandlers, this.locals);
+			cilBody.MaxStack = (ushort)Math.Min(this.maxStack, 65535);
+			this.instructions = null;
+			this.exceptionHandlers = null;
+			this.locals = null;
+			this.method.Body = cilBody;
+			return this.method;
+		}
+		protected override IField ReadInlineField(Instruction instr)
+		{
+			return this.ReadToken(this.reader.ReadUInt32()) as IField;
+		}
+		protected override IMethod ReadInlineMethod(Instruction instr)
+		{
+			return this.ReadToken(this.reader.ReadUInt32()) as IMethod;
+		}
+		protected override MethodSig ReadInlineSig(Instruction instr)
+		{
+			return this.ReadToken(this.reader.ReadUInt32()) as MethodSig;
+		}
+		protected override string ReadInlineString(Instruction instr)
+		{
+			return (this.ReadToken(this.reader.ReadUInt32()) as string) ?? string.Empty;
+		}
+		protected override ITokenOperand ReadInlineTok(Instruction instr)
+		{
+			return this.ReadToken(this.reader.ReadUInt32()) as ITokenOperand;
+		}
+		protected override ITypeDefOrRef ReadInlineType(Instruction instr)
+		{
+			return this.ReadToken(this.reader.ReadUInt32()) as ITypeDefOrRef;
+		}
+		private object ReadToken(uint token)
+		{
+			uint num = token & 16777215U;
+			uint num2 = token >> 24;
+			bool flag = num2 <= 10U;
+			if (flag)
+			{
+				switch (num2)
+				{
+				case 2U:
+					return this.ImportType(num);
+				case 3U:
+				case 5U:
+					goto IL_A6;
+				case 4U:
+					return this.ImportField(num);
+				case 6U:
+					break;
+				default:
+				{
+					bool flag2 = num2 != 10U;
+					if (flag2)
+					{
+						goto IL_A6;
+					}
+					break;
+				}
+				}
+				return this.ImportMethod(num);
+			}
+			bool flag3 = num2 == 17U;
+			if (flag3)
+			{
+				return this.ImportSignature(num);
+			}
+			bool flag4 = num2 == 112U;
+			if (flag4)
+			{
+				return this.Resolve(num) as string;
+			}
+			IL_A6:
+			return null;
+		}
+		private IMethod ImportMethod(uint rid)
+		{
+			object obj = this.Resolve(rid);
+			bool flag = obj == null;
+			bool flag2 = flag;
+			IMethod result;
+			if (flag2)
+			{
+				result = null;
+			}
+			else
+			{
+				bool flag3 = obj is RuntimeMethodHandle;
+				bool flag4 = flag3;
+				if (flag4)
+				{
+					result = this.importer.Import(MethodBase.GetMethodFromHandle((RuntimeMethodHandle)obj));
+				}
+				else
+				{
+					bool flag5 = obj.GetType().ToString() == "System.Reflection.Emit.GenericMethodInfo";
+					bool flag6 = flag5;
+					if (flag6)
+					{
+						RuntimeTypeHandle declaringType = (RuntimeTypeHandle)SuperDynamicReader.gmiContextFieldInfo.Read(obj);
+						MethodBase methodFromHandle = MethodBase.GetMethodFromHandle((RuntimeMethodHandle)SuperDynamicReader.gmiMethodHandleFieldInfo.Read(obj), declaringType);
+						result = this.importer.Import(methodFromHandle);
+					}
+					else
+					{
+						bool flag7 = obj.GetType().ToString() == "System.Reflection.Emit.VarArgMethod";
+						bool flag8 = flag7;
+						if (flag8)
+						{
+							MethodInfo varArgMethod = this.GetVarArgMethod(obj);
+							bool flag9 = !(varArgMethod is DynamicMethod);
+							bool flag10 = flag9;
+							if (flag10)
+							{
+								return this.importer.Import(varArgMethod);
+							}
+							obj = varArgMethod;
+						}
+						DynamicMethod left = obj as DynamicMethod;
+						bool flag11 = left != null;
+						bool flag12 = flag11;
+						if (flag12)
+						{
+							throw new Exception("DynamicMethod calls another DynamicMethod");
+						}
+						result = null;
+					}
+				}
+			}
+			return result;
+		}
+		private MethodInfo GetVarArgMethod(object obj)
+		{
+			bool flag = SuperDynamicReader.vamDynamicMethodFieldInfo.Exists(obj);
+			bool flag2 = flag;
+			MethodInfo result;
+			if (flag2)
+			{
+				MethodInfo methodInfo = SuperDynamicReader.vamMethodFieldInfo.Read(obj) as MethodInfo;
+				DynamicMethod dynamicMethod = SuperDynamicReader.vamDynamicMethodFieldInfo.Read(obj) as DynamicMethod;
+				result = (dynamicMethod ?? methodInfo);
+			}
+			else
+			{
+				result = (SuperDynamicReader.vamMethodFieldInfo.Read(obj) as MethodInfo);
+			}
+			return result;
+		}
+		private IField ImportField(uint rid)
+		{
+			object obj = this.Resolve(rid);
+			bool flag = obj == null;
+			bool flag2 = flag;
+			IField result;
+			if (flag2)
+			{
+				result = null;
+			}
+			else
+			{
+				bool flag3 = obj is RuntimeFieldHandle;
+				bool flag4 = flag3;
+				if (flag4)
+				{
+					result = this.importer.Import(FieldInfo.GetFieldFromHandle((RuntimeFieldHandle)obj));
+				}
+				else
+				{
+					bool flag5 = obj.GetType().ToString() == "System.Reflection.Emit.GenericFieldInfo";
+					bool flag6 = flag5;
+					if (flag6)
+					{
+						RuntimeTypeHandle declaringType = (RuntimeTypeHandle)SuperDynamicReader.gfiContextFieldInfo.Read(obj);
+						FieldInfo fieldFromHandle = FieldInfo.GetFieldFromHandle((RuntimeFieldHandle)SuperDynamicReader.gfiFieldHandleFieldInfo.Read(obj), declaringType);
+						result = this.importer.Import(fieldFromHandle);
+					}
+					else
+					{
+						result = null;
+					}
+				}
+			}
+			return result;
+		}
+		private ITypeDefOrRef ImportType(uint rid)
+		{
+			object obj = this.Resolve(rid);
+			bool flag = obj is RuntimeTypeHandle;
+			bool flag2 = flag;
+			ITypeDefOrRef result;
+			if (flag2)
+			{
+				result = this.importer.Import(Type.GetTypeFromHandle((RuntimeTypeHandle)obj));
+			}
+			else
+			{
+				result = null;
+			}
+			return result;
+		}
+		private CallingConventionSig ImportSignature(uint rid)
+		{
+			byte[] array = this.Resolve(rid) as byte[];
+			bool flag = array == null;
+			bool flag2 = flag;
+			CallingConventionSig result;
+			if (flag2)
+			{
+				result = null;
+			}
+			else
+			{
+				result = SignatureReader.ReadSig(this, this.module.CorLibTypes, array, this.gpContext);
+			}
+			return result;
+		}
+		private object Resolve(uint index)
+		{
+			bool flag = index >= (uint)this.tokens.Count;
+			bool flag2 = flag;
+			object result;
+			if (flag2)
+			{
+				result = null;
+			}
+			else
+			{
+				result = this.tokens[(int)index];
+			}
+			return result;
+		}
+		ITypeDefOrRef ISignatureReaderHelper.ResolveTypeDefOrRef(uint codedToken, GenericParamContext gpContext)
+		{
+			uint token;
+			bool flag = !CodedToken.TypeDefOrRef.Decode(codedToken, out token);
+			bool flag2 = flag;
+			ITypeDefOrRef result;
+			if (flag2)
+			{
+				result = null;
+			}
+			else
+			{
+				uint rid = MDToken.ToRID(token);
+				Table table = MDToken.ToTable(token);
+				bool flag3 = table - Table.TypeRef > 1 && table != Table.TypeSpec;
+				if (flag3)
+				{
+					result = null;
+				}
+				else
+				{
+					result = this.ImportType(rid);
+				}
+			}
+			return result;
+		}
+		TypeSig ISignatureReaderHelper.ConvertRTInternalAddress(IntPtr address)
+		{
+			return this.importer.ImportAsTypeSig(MethodTableToTypeConverter.Convert(address));
+		}
+		private static readonly SuperDynamicReader.ReflectionFieldInfo rtdmOwnerFieldInfo = new SuperDynamicReader.ReflectionFieldInfo("m_owner");
+		private static readonly SuperDynamicReader.ReflectionFieldInfo dmResolverFieldInfo = new SuperDynamicReader.ReflectionFieldInfo("m_resolver");
+		private static readonly SuperDynamicReader.ReflectionFieldInfo rslvCodeFieldInfo = new SuperDynamicReader.ReflectionFieldInfo("m_code");
+		private static readonly SuperDynamicReader.ReflectionFieldInfo rslvDynamicScopeFieldInfo = new SuperDynamicReader.ReflectionFieldInfo("m_scope");
+		private static readonly SuperDynamicReader.ReflectionFieldInfo rslvMethodFieldInfo = new SuperDynamicReader.ReflectionFieldInfo("m_method");
+		private static readonly SuperDynamicReader.ReflectionFieldInfo rslvLocalsFieldInfo = new SuperDynamicReader.ReflectionFieldInfo("m_localSignature");
+		private static readonly SuperDynamicReader.ReflectionFieldInfo rslvMaxStackFieldInfo = new SuperDynamicReader.ReflectionFieldInfo("m_stackSize");
+		private static readonly SuperDynamicReader.ReflectionFieldInfo rslvExceptionsFieldInfo = new SuperDynamicReader.ReflectionFieldInfo("m_exceptions");
+		private static readonly SuperDynamicReader.ReflectionFieldInfo rslvExceptionHeaderFieldInfo = new SuperDynamicReader.ReflectionFieldInfo("m_exceptionHeader");
+		private static readonly SuperDynamicReader.ReflectionFieldInfo scopeTokensFieldInfo = new SuperDynamicReader.ReflectionFieldInfo("m_tokens");
+		private static readonly SuperDynamicReader.ReflectionFieldInfo gfiFieldHandleFieldInfo = new SuperDynamicReader.ReflectionFieldInfo("m_field", "m_fieldHandle");
+		private static readonly SuperDynamicReader.ReflectionFieldInfo gfiContextFieldInfo = new SuperDynamicReader.ReflectionFieldInfo("m_context");
+		private static readonly SuperDynamicReader.ReflectionFieldInfo gmiMethodHandleFieldInfo = new SuperDynamicReader.ReflectionFieldInfo("m_method", "m_methodHandle");
+		private static readonly SuperDynamicReader.ReflectionFieldInfo gmiContextFieldInfo = new SuperDynamicReader.ReflectionFieldInfo("m_context");
+		private static readonly SuperDynamicReader.ReflectionFieldInfo ehCatchAddrFieldInfo = new SuperDynamicReader.ReflectionFieldInfo("m_catchAddr");
+		private static readonly SuperDynamicReader.ReflectionFieldInfo ehCatchClassFieldInfo = new SuperDynamicReader.ReflectionFieldInfo("m_catchClass");
+		private static readonly SuperDynamicReader.ReflectionFieldInfo ehCatchEndAddrFieldInfo = new SuperDynamicReader.ReflectionFieldInfo("m_catchEndAddr");
+		private static readonly SuperDynamicReader.ReflectionFieldInfo ehCurrentCatchFieldInfo = new SuperDynamicReader.ReflectionFieldInfo("m_currentCatch");
+		private static readonly SuperDynamicReader.ReflectionFieldInfo ehTypeFieldInfo = new SuperDynamicReader.ReflectionFieldInfo("m_type");
+		private static readonly SuperDynamicReader.ReflectionFieldInfo ehStartAddrFieldInfo = new SuperDynamicReader.ReflectionFieldInfo("m_startAddr");
+		private static readonly SuperDynamicReader.ReflectionFieldInfo ehEndAddrFieldInfo = new SuperDynamicReader.ReflectionFieldInfo("m_endAddr");
+		private static readonly SuperDynamicReader.ReflectionFieldInfo ehEndFinallyFieldInfo = new SuperDynamicReader.ReflectionFieldInfo("m_endFinally");
+		private static readonly SuperDynamicReader.ReflectionFieldInfo vamMethodFieldInfo = new SuperDynamicReader.ReflectionFieldInfo("m_method");
+		private static readonly SuperDynamicReader.ReflectionFieldInfo vamDynamicMethodFieldInfo = new SuperDynamicReader.ReflectionFieldInfo("m_dynamicMethod");
+		private static readonly SuperDynamicReader.ReflectionFieldInfo methodDynamicInfo = new SuperDynamicReader.ReflectionFieldInfo("m_DynamicILInfo");
+		private ModuleDef module;
+		private Importer importer;
+		private GenericParamContext gpContext;
+		private MethodDef method;
+		private int codeSize;
+		private int maxStack;
+		private List<object> tokens;
+		private IList<object> ehInfos;
+		private byte[] ehHeader;
+		private class ReflectionFieldInfo
+		{
+			public ReflectionFieldInfo(string fieldName)
+			{
+				this.fieldName1 = fieldName;
+			}
+			public ReflectionFieldInfo(string fieldName1, string fieldName2)
+			{
+				this.fieldName1 = fieldName1;
+				this.fieldName2 = fieldName2;
+			}
+			public object Read(object instance)
+			{
+				bool flag = this.fieldInfo == null;
+				bool flag2 = flag;
+				if (flag2)
+				{
+					this.InitializeField(instance.GetType());
+				}
+				bool flag3 = this.fieldInfo == null;
+				bool flag4 = flag3;
+				if (flag4)
+				{
+					throw new Exception(string.Format("Couldn't find field '{0}' or '{1}'", this.fieldName1, this.fieldName2));
+				}
+				return this.fieldInfo.GetValue(instance);
+			}
+			public object Read(object instance, Type type)
+			{
+				bool flag = this.fieldInfo == null;
+				bool flag2 = flag;
+				if (flag2)
+				{
+					this.InitializeField(type);
+				}
+				bool flag3 = this.fieldInfo == null;
+				bool flag4 = flag3;
+				if (flag4)
+				{
+					throw new Exception(string.Format("Couldn't find field '{0}' or '{1}'", this.fieldName1, this.fieldName2));
+				}
+				return this.fieldInfo.GetValue(instance);
+			}
+			public bool Exists(object instance)
+			{
+				this.InitializeField(instance.GetType());
+				return this.fieldInfo != null;
+			}
+			private void InitializeField(Type type)
+			{
+				bool flag = this.fieldInfo != null;
+				bool flag2 = !flag;
+				if (flag2)
+				{
+					BindingFlags bindingAttr = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+					this.fieldInfo = type.GetField(this.fieldName1, bindingAttr);
+					bool flag3 = this.fieldInfo == null && this.fieldName2 != null;
+					bool flag4 = flag3;
+					if (flag4)
+					{
+						this.fieldInfo = type.GetField(this.fieldName2, bindingAttr);
+					}
+				}
+			}
+			private FieldInfo fieldInfo;
+			private readonly string fieldName1;
+			private readonly string fieldName2;
+		}
+		private class ExceptionInfo
+		{
+			public int[] CatchAddr;
+			public Type[] CatchClass;
+			public int[] CatchEndAddr;
+			public int CurrentCatch;
+			public int[] Type;
+			public int StartAddr;
+			public int EndAddr;
+			public int EndFinally;
+		}
+	}
+}
+
+
+
+================================================
+File: Constants/Ints.cs
+================================================
+ï»¿using System;
+using System.Reflection;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace BabelDeobfuscator.Protections.Constants
+{
+	internal class Ints
+	{
+		public static void CleanInts(ModuleDefMD module)
+		{
+			foreach (TypeDef typeDef in module.GetTypes())
+			{
+				foreach (MethodDef methodDef in typeDef.Methods)
+				{
+					bool flag = !methodDef.HasBody;
+					bool flag2 = !flag;
+					if (flag2)
+					{
+						for (int i = 0; i < methodDef.Body.Instructions.Count; i++)
+						{
+							bool flag3 = methodDef.Body.Instructions[i].OpCode == OpCodes.Call && methodDef.Body.Instructions[i].Operand is MethodDef;
+							bool flag4 = flag3;
+							if (flag4)
+							{
+								MethodDef methodDef2 = methodDef.Body.Instructions[i].Operand as MethodDef;
+								bool flag5 = methodDef2.ReturnType == module.CorLibTypes.Int32 && methodDef2.Parameters.Count == 1 && methodDef2.Parameters[0].Type == module.CorLibTypes.Int32;
+								bool flag6 = flag5;
+								if (flag6)
+								{
+									bool flag7 = methodDef.Body.Instructions[i - 1].IsLdcI4();
+									bool flag8 = flag7;
+									if (flag8)
+									{
+										MethodBase methodBase = Program.asm.ManifestModule.ResolveMethod(methodDef2.MDToken.ToInt32());
+										int ldcI4Value = methodDef.Body.Instructions[i - 1].GetLdcI4Value();
+										object obj = methodBase.Invoke(null, new object[]
+										{
+											ldcI4Value
+										});
+										bool flag9 = obj == null;
+										bool flag10 = flag9;
+										if (flag10)
+										{
+										}
+										methodDef.Body.Instructions[i].OpCode = OpCodes.Nop;
+										methodDef.Body.Instructions[i - 1].OpCode = OpCodes.Ldc_I4;
+										methodDef.Body.Instructions[i - 1].Operand = obj;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		public static void CleanFloats(ModuleDefMD module)
+		{
+			foreach (TypeDef typeDef in module.GetTypes())
+			{
+				foreach (MethodDef methodDef in typeDef.Methods)
+				{
+					bool flag = !methodDef.HasBody;
+					bool flag2 = !flag;
+					if (flag2)
+					{
+						for (int i = 0; i < methodDef.Body.Instructions.Count; i++)
+						{
+							bool flag3 = methodDef.Body.Instructions[i].OpCode == OpCodes.Call && methodDef.Body.Instructions[i].Operand is MethodDef;
+							bool flag4 = flag3;
+							if (flag4)
+							{
+								MethodDef methodDef2 = methodDef.Body.Instructions[i].Operand as MethodDef;
+								bool flag5 = methodDef2.ReturnType == module.CorLibTypes.Single && methodDef2.Parameters.Count == 1 && methodDef2.Parameters[0].Type == module.CorLibTypes.Int32;
+								bool flag6 = flag5;
+								if (flag6)
+								{
+									bool flag7 = methodDef.Body.Instructions[i - 1].IsLdcI4();
+									bool flag8 = flag7;
+									if (flag8)
+									{
+										MethodBase methodBase = Program.asm.ManifestModule.ResolveMethod(methodDef2.MDToken.ToInt32());
+										int ldcI4Value = methodDef.Body.Instructions[i - 1].GetLdcI4Value();
+										object obj = methodBase.Invoke(null, new object[]
+										{
+											ldcI4Value
+										});
+										bool flag9 = obj == null;
+										bool flag10 = flag9;
+										if (flag10)
+										{
+										}
+										methodDef.Body.Instructions[i].OpCode = OpCodes.Nop;
+										methodDef.Body.Instructions[i - 1].OpCode = OpCodes.Ldc_R4;
+										methodDef.Body.Instructions[i - 1].Operand = obj;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		public static void CleanDouble(ModuleDefMD module)
+		{
+			foreach (TypeDef typeDef in module.GetTypes())
+			{
+				foreach (MethodDef methodDef in typeDef.Methods)
+				{
+					bool flag = !methodDef.HasBody;
+					bool flag2 = !flag;
+					if (flag2)
+					{
+						for (int i = 0; i < methodDef.Body.Instructions.Count; i++)
+						{
+							bool flag3 = methodDef.Body.Instructions[i].OpCode == OpCodes.Call && methodDef.Body.Instructions[i].Operand is MethodDef;
+							bool flag4 = flag3;
+							if (flag4)
+							{
+								MethodDef methodDef2 = methodDef.Body.Instructions[i].Operand as MethodDef;
+								bool flag5 = methodDef2.ReturnType == module.CorLibTypes.Double && methodDef2.Parameters.Count == 1 && methodDef2.Parameters[0].Type == module.CorLibTypes.Int32;
+								bool flag6 = flag5;
+								if (flag6)
+								{
+									bool flag7 = methodDef.Body.Instructions[i - 1].IsLdcI4();
+									bool flag8 = flag7;
+									if (flag8)
+									{
+										MethodBase methodBase = Program.asm.ManifestModule.ResolveMethod(methodDef2.MDToken.ToInt32());
+										int ldcI4Value = methodDef.Body.Instructions[i - 1].GetLdcI4Value();
+										object obj = methodBase.Invoke(null, new object[]
+										{
+											ldcI4Value
+										});
+										bool flag9 = obj == null;
+										bool flag10 = flag9;
+										if (flag10)
+										{
+										}
+										methodDef.Body.Instructions[i].OpCode = OpCodes.Nop;
+										methodDef.Body.Instructions[i - 1].OpCode = OpCodes.Ldc_R8;
+										methodDef.Body.Instructions[i - 1].Operand = obj;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+
+
+================================================
+File: Constants/Strings.cs
+================================================
+ï»¿using System;
+using System.Reflection;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace BabelDeobfuscator.Protections.Constants
+{
+	internal class Strings
+	{
+		public static void CleanStringMethodOne(ModuleDefMD module)
+		{
+			foreach (TypeDef typeDef in module.GetTypes())
+			{
+				foreach (MethodDef methodDef in typeDef.Methods)
+				{
+					bool flag = !methodDef.HasBody;
+					bool flag2 = !flag;
+					if (flag2)
+					{
+						for (int i = 0; i < methodDef.Body.Instructions.Count; i++)
+						{
+							bool flag3 = methodDef.Body.Instructions[i].OpCode == OpCodes.Call && methodDef.Body.Instructions[i].Operand is MethodDef;
+							bool flag4 = flag3;
+							if (flag4)
+							{
+								MethodDef methodDef2 = methodDef.Body.Instructions[i].Operand as MethodDef;
+								bool flag5 = methodDef2.ReturnType == module.CorLibTypes.String && methodDef2.Parameters.Count == 1 && methodDef2.Parameters[0].Type == module.CorLibTypes.Int32;
+								bool flag6 = flag5;
+								if (flag6)
+								{
+									bool flag7 = methodDef.Body.Instructions[i - 1].IsLdcI4();
+									bool flag8 = flag7;
+									if (flag8)
+									{
+										MethodBase methodBase = Program.asm.ManifestModule.ResolveMethod(methodDef2.MDToken.ToInt32());
+										int ldcI4Value = methodDef.Body.Instructions[i - 1].GetLdcI4Value();
+										object obj = methodBase.Invoke(null, new object[]
+										{
+											ldcI4Value
+										});
+										bool flag9 = obj == null;
+										bool flag10 = flag9;
+										if (flag10)
+										{
+										}
+										methodDef.Body.Instructions[i].OpCode = OpCodes.Nop;
+										methodDef.Body.Instructions[i - 1].OpCode = OpCodes.Ldstr;
+										methodDef.Body.Instructions[i - 1].Operand = obj;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		public static void CleanStringMethodTwo(ModuleDefMD module)
+		{
+			foreach (TypeDef typeDef in module.GetTypes())
+			{
+				foreach (MethodDef methodDef in typeDef.Methods)
+				{
+					bool flag = !methodDef.HasBody;
+					bool flag2 = !flag;
+					if (flag2)
+					{
+						bool flag3 = methodDef.MDToken.ToInt32() == 100666352;
+						if (flag3)
+						{
+						}
+						for (int i = 0; i < methodDef.Body.Instructions.Count; i++)
+						{
+							bool flag4 = methodDef.Body.Instructions[i].OpCode == OpCodes.Call && methodDef.Body.Instructions[i].Operand is IMethod;
+							bool flag5 = flag4;
+							if (flag5)
+							{
+								IMethod method = methodDef.Body.Instructions[i].Operand as IMethod;
+								MethodDef methodDef2 = method.ResolveMethodDef();
+								bool flag6 = methodDef2.ReturnType == module.CorLibTypes.String && methodDef2.Parameters.Count == 2 && methodDef2.Parameters[0].Type == module.CorLibTypes.String && methodDef2.Parameters[1].Type == module.CorLibTypes.Int32;
+								bool flag7 = flag6;
+								if (flag7)
+								{
+									bool flag8 = methodDef.Body.Instructions[i - 1].IsLdcI4();
+									bool flag9 = flag8;
+									if (flag9)
+									{
+										bool flag10 = methodDef.Body.Instructions[i - 2].OpCode == OpCodes.Ldstr;
+										if (flag10)
+										{
+											MethodBase methodBase = Program.asm.ManifestModule.ResolveMethod(methodDef2.MDToken.ToInt32());
+											int ldcI4Value = methodDef.Body.Instructions[i - 1].GetLdcI4Value();
+											string text = methodDef.Body.Instructions[i - 2].Operand.ToString();
+											object obj = methodBase.Invoke(null, new object[]
+											{
+												text,
+												ldcI4Value
+											});
+											bool flag11 = obj == null;
+											bool flag12 = flag11;
+											if (flag12)
+											{
+											}
+											methodDef.Body.Instructions[i].OpCode = OpCodes.Nop;
+											methodDef.Body.Instructions[i - 1].OpCode = OpCodes.Ldstr;
+											methodDef.Body.Instructions[i - 1].Operand = obj;
+											methodDef.Body.Instructions[i - 2].OpCode = OpCodes.Nop;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+
+
+================================================
+File: ControlFlow/De4Dot.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using de4dot.blocks;
+using de4dot.blocks.cflow;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace BabelDeobfuscator.Protections.ControlFlow
+{
+	internal class De4Dot
+	{
+		public static void Cflow(ModuleDefMD asm)
+		{
+			foreach (TypeDef typeDef in asm.GetTypes())
+			{
+				foreach (MethodDef methodDef in typeDef.Methods)
+				{
+					bool flag = !methodDef.HasBody;
+					bool flag2 = !flag;
+					if (flag2)
+					{
+						try
+						{
+							De4Dot.DeobfuscateCflow2(methodDef);
+						}
+						catch
+						{
+						}
+					}
+				}
+			}
+		}
+		public static void CflowE(ModuleDefMD asm)
+		{
+			foreach (TypeDef typeDef in asm.GetTypes())
+			{
+				foreach (MethodDef methodDef in typeDef.Methods)
+				{
+					bool flag = !methodDef.HasBody;
+					bool flag2 = !flag;
+					if (flag2)
+					{
+						bool flag3 = methodDef != asm.EntryPoint;
+						bool flag4 = !flag3;
+						if (flag4)
+						{
+							De4Dot.Expermient(methodDef);
+						}
+					}
+				}
+			}
+		}
+		public static void DeobfuscateCflow2(MethodDef meth)
+		{
+			for (int i = 0; i < 1; i++)
+			{
+				Blocks blocks = new Blocks(meth);
+				De4Dot.CfDeob.Initialize(blocks);
+				De4Dot.CfDeob.Deobfuscate();
+				blocks.RepartitionBlocks();
+				IList<Instruction> instructions;
+				IList<ExceptionHandler> exceptionHandlers;
+				blocks.GetCode(out instructions, out exceptionHandlers);
+				DotNetUtils.RestoreBody(meth, instructions, exceptionHandlers);
+			}
+		}
+		public static void Expermient(MethodDef meth)
+		{
+			for (int i = 0; i < 1; i++)
+			{
+				Blocks blocks = new Blocks(meth);
+				List<Block> allBlocks = blocks.MethodBlocks.GetAllBlocks();
+				De4Dot.CfDeob.Initialize(blocks);
+				De4Dot.CfDeob.Deobfuscate();
+				blocks.RepartitionBlocks();
+				IList<Instruction> instructions;
+				IList<ExceptionHandler> exceptionHandlers;
+				blocks.GetCode(out instructions, out exceptionHandlers);
+				DotNetUtils.RestoreBody(meth, instructions, exceptionHandlers);
+			}
+		}
+		private static readonly BlocksCflowDeobfuscator CfDeob = new BlocksCflowDeobfuscator();
+	}
+}
+
+
+
+================================================
+File: MethodEncryption/DecryptionMethods.cs
+================================================
+ï»¿using System;
+using dnlib.DotNet;
+
+namespace BabelDeobfuscator.Protections.MethodEncryption
+{
+	public class DecryptionMethods
+	{
+		public MethodDef fifthMethod;
+		public MethodDef fourthMethod;
+		public FieldDef initalField;
+		public MethodDef initalmethod;
+		public ITypeDefOrRef initalType;
+		public MethodDef secondMethod;
+		public MethodDef thirdMethod;
+	}
+}
+
+
+
+================================================
+File: MethodEncryption/EncryptedMethodDetails.cs
+================================================
+ï»¿using System;
+using dnlib.DotNet;
+
+namespace BabelDeobfuscator.Protections.MethodEncryption
+{
+	public class EncryptedMethodDetails
+	{
+		public EncryptedMethodDetails(MethodDef origMethod, int EncryptedValue)
+		{
+			this.method = origMethod;
+			this.encryptedValue = EncryptedValue;
+		}
+		public int encryptedValue;
+		public MethodDef method;
+	}
+}
+
+
+
+================================================
+File: MethodEncryption/VMDecryptor.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using Babel_Full_Unpacker.BabelVMRestore.Core;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace BabelDeobfuscator.Protections.MethodEncryption
+{
+	internal class VMDecryptor
+	{
+		public static void run(ModuleDefMD module, Assembly asm)
+		{
+			VMDecryptor.FindEncryptedMethods(module);
+			bool flag = VMDecryptor.allEncMethods.Count != 0;
+			bool flag2 = flag;
+			if (flag2)
+			{
+				DecryptionMethods dec = VMDecryptor.setUpDecryptionRoutine(VMDecryptor.allEncMethods[0].method);
+				VMDecryptor.DecryptMethods(dec, asm, module);
+			}
+		}
+		public static void DecryptMethods(DecryptionMethods dec, Assembly asm, ModuleDefMD module)
+		{
+			Module manifestModule = asm.ManifestModule;
+			foreach (EncryptedMethodDetails encryptedMethodDetails in VMDecryptor.allEncMethods)
+			{
+				try
+				{
+					int encryptedValue = encryptedMethodDetails.encryptedValue;
+					MethodBase methodBase = manifestModule.ResolveMethod(dec.thirdMethod.MDToken.ToInt32());
+					object obj = Activator.CreateInstance(methodBase.DeclaringType);
+					object obj2 = methodBase.Invoke(obj, new object[]
+					{
+						encryptedValue
+					});
+					Type type = manifestModule.ResolveType(dec.initalField.FieldType.ToTypeDefOrRef().MDToken.ToInt32());
+					object obj3 = Activator.CreateInstance(type);
+					FieldInfo fieldInfo = obj3.GetType().GetFields()[0];
+					BindingFlags bindingAttr = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+					FieldInfo field = obj3.GetType().GetField(fieldInfo.Name, bindingAttr);
+					object value = field.GetValue(obj3);
+					MethodBase methodBase2 = manifestModule.ResolveMethod(dec.fifthMethod.MDToken.ToInt32());
+					TypeDef typeDef = dec.initalType as TypeDef;
+					MethodDef methodDef = dec.fifthMethod.DeclaringType.FindConstructors().ToArray<MethodDef>()[0];
+					ConstructorInfo constructorInfo = (ConstructorInfo)manifestModule.ResolveMethod(methodDef.MDToken.ToInt32());
+					object obj4 = constructorInfo.Invoke(new object[]
+					{
+						value
+					});
+					object obj5 = methodBase2.Invoke(obj4, new object[]
+					{
+						obj2
+					});
+					SuperDynamicReader superDynamicReader = new SuperDynamicReader(module, obj5);
+					superDynamicReader.Read();
+					superDynamicReader.RestoreMethod(encryptedMethodDetails.method);
+				}
+				catch
+				{
+					Console.WriteLine(encryptedMethodDetails.method.FullName + " Failed to decrypt");
+				}
+			}
+		}
+		public static DecryptionMethods setUpDecryptionRoutine(MethodDef methods)
+		{
+			DecryptionMethods decryptionMethods = new DecryptionMethods();
+			MethodDef methodDef = methods.Body.Instructions[methods.Body.Instructions.Count - 3].Operand as MethodDef;
+			for (int i = 0; i < methodDef.Body.Instructions.Count; i++)
+			{
+				bool flag = methodDef.Body.Instructions[i].OpCode == OpCodes.Callvirt;
+				bool flag2 = flag;
+				if (flag2)
+				{
+					decryptionMethods.initalmethod = (methodDef.Body.Instructions[i].Operand as MethodDef);
+					break;
+				}
+			}
+			for (int j = 0; j < decryptionMethods.initalmethod.Body.Instructions.Count; j++)
+			{
+				bool flag3 = decryptionMethods.initalmethod.Body.Instructions[j].OpCode == OpCodes.Call && decryptionMethods.initalmethod.Body.Instructions[j].Operand is MethodDef;
+				bool flag4 = flag3;
+				if (flag4)
+				{
+					MethodDef methodDef2 = decryptionMethods.initalmethod.Body.Instructions[j].Operand as MethodDef;
+					bool flag5 = methodDef2.Parameters.Count == 2 && methodDef2.HasReturnType;
+					bool flag6 = flag5;
+					if (flag6)
+					{
+						decryptionMethods.secondMethod = methodDef2;
+					}
+					break;
+				}
+			}
+			for (int k = 0; k < decryptionMethods.secondMethod.Body.Instructions.Count; k++)
+			{
+				bool flag7 = decryptionMethods.secondMethod.Body.Instructions[k].OpCode == OpCodes.Callvirt && decryptionMethods.secondMethod.Body.Instructions[k].Operand is MethodDef;
+				bool flag8 = flag7;
+				if (flag8)
+				{
+					MethodDef methodDef3 = decryptionMethods.secondMethod.Body.Instructions[k].Operand as MethodDef;
+					bool flag9 = methodDef3.Parameters.Count == 2 && methodDef3.HasReturnType;
+					bool flag10 = flag9;
+					if (flag10)
+					{
+						decryptionMethods.thirdMethod = methodDef3;
+					}
+				}
+				bool flag11 = decryptionMethods.secondMethod.Body.Instructions[k].OpCode == OpCodes.Ldfld && decryptionMethods.secondMethod.Body.Instructions[k].Operand is FieldDef && decryptionMethods.secondMethod.Body.Instructions[k + 2].OpCode == OpCodes.Call && decryptionMethods.secondMethod.Body.Instructions[k + 2].Operand is MethodDef;
+				bool flag12 = flag11;
+				if (flag12)
+				{
+					MethodDef methodDef4 = decryptionMethods.secondMethod.Body.Instructions[k + 2].Operand as MethodDef;
+					bool flag13 = methodDef4.Parameters.Count == 2 && methodDef4.HasReturnType;
+					bool flag14 = flag13;
+					if (flag14)
+					{
+						decryptionMethods.fourthMethod = methodDef4;
+					}
+					decryptionMethods.initalField = (FieldDef)decryptionMethods.secondMethod.Body.Instructions[k].Operand;
+					break;
+				}
+			}
+			decryptionMethods.initalType = (methods.Module.ResolveToken(33554456) as ITypeDefOrRef);
+			for (int l = 0; l < decryptionMethods.fourthMethod.Body.Instructions.Count; l++)
+			{
+				bool flag15 = decryptionMethods.fourthMethod.Body.Instructions[l].IsLdloc() && decryptionMethods.fourthMethod.Body.Instructions[l + 1].IsLdarg() && decryptionMethods.fourthMethod.Body.Instructions[l + 2].OpCode == OpCodes.Callvirt && decryptionMethods.fourthMethod.Body.Instructions[l + 3].IsStloc();
+				bool flag16 = flag15;
+				if (flag16)
+				{
+					MethodDef methodDef5 = decryptionMethods.fourthMethod.Body.Instructions[l + 2].Operand as MethodDef;
+					bool flag17 = methodDef5.Parameters.Count == 2 && methodDef5.HasReturnType;
+					bool flag18 = flag17;
+					if (flag18)
+					{
+						decryptionMethods.fifthMethod = methodDef5;
+					}
+					break;
+				}
+			}
+			return decryptionMethods;
+		}
+		public static ITypeDefOrRef finder(LocalList locals)
+		{
+			foreach (Local local in locals)
+			{
+				bool flag = local.Type.ElementType == ElementType.Class;
+				bool flag2 = flag;
+				if (flag2)
+				{
+					return local.Type.ToTypeDefOrRef();
+				}
+			}
+			return null;
+		}
+		public static void FindEncryptedMethods(ModuleDefMD module)
+		{
+			foreach (TypeDef typeDef in module.GetTypes())
+			{
+				foreach (MethodDef methodDef in typeDef.Methods)
+				{
+					bool flag = methodDef.MDToken.ToInt32() == 100663440;
+					bool flag2 = flag;
+					if (flag2)
+					{
+					}
+					bool flag3 = !methodDef.HasBody;
+					bool flag4 = !flag3;
+					if (flag4)
+					{
+						bool flag5 = methodDef.Body.Instructions.Count > 70;
+						bool flag6 = !flag5;
+						if (flag6)
+						{
+							bool flag7 = !methodDef.Body.Instructions[0].IsLdcI4();
+							bool flag8 = !flag7;
+							if (flag8)
+							{
+								bool flag9 = methodDef.Body.Instructions.Count < 3;
+								bool flag10 = !flag9;
+								if (flag10)
+								{
+									bool flag11 = methodDef.Body.Instructions[methodDef.Body.Instructions.Count - 3].OpCode != OpCodes.Call;
+									bool flag12 = !flag11;
+									if (flag12)
+									{
+										bool flag13 = !VMDecryptor.checkMethod(methodDef);
+										bool flag14 = !flag13;
+										if (flag14)
+										{
+											int ldcI4Value = methodDef.Body.Instructions[0].GetLdcI4Value();
+											EncryptedMethodDetails item = new EncryptedMethodDetails(methodDef, ldcI4Value);
+											VMDecryptor.allEncMethods.Add(item);
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		private static bool checkMethod(MethodDef methods)
+		{
+			for (int i = 0; i < methods.Body.Instructions.Count; i++)
+			{
+				bool flag = methods.Body.Instructions[i].OpCode == OpCodes.Call && methods.Body.Instructions[i].Operand is MethodDef;
+				bool flag2 = flag;
+				if (flag2)
+				{
+					MethodDef methodDef = (MethodDef)methods.Body.Instructions[i].Operand;
+					bool flag3 = methodDef.ReturnType.FullName.Contains("Int32");
+					bool result;
+					if (flag3)
+					{
+						result = false;
+					}
+					else
+					{
+						bool flag4 = methodDef.Body.Instructions.Count == 41 || methodDef.Body.Instructions.Count == 40;
+						bool flag5 = flag4;
+						if (!flag5)
+						{
+							goto IL_C7;
+						}
+						result = true;
+					}
+					return result;
+				}
+				IL_C7:;
+			}
+			return false;
+		}
+		public static List<EncryptedMethodDetails> allEncMethods = new List<EncryptedMethodDetails>();
+	}
+}
+
+
+
+================================================
+File: Properties/AssemblyInfo.cs
+================================================
+ï»¿using System;
+using System.Diagnostics;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
+
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyTitle("BabelDeobfuscator")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("BabelDeobfuscator")]
+[assembly: AssemblyCopyright("Copyright Â©  2018")]
+[assembly: AssemblyTrademark("")]
+[assembly: ComVisible(false)]
+[assembly: Guid("f4ff3745-a9d9-4f16-8d43-61f1a18462a9")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+
+================================================
+File: ProxyCalls/Delegates.cs
+================================================
+ï»¿using System;
+using System.Linq;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace BabelDeobfuscator.Protections.ProxyCalls
+{
+	internal class Delegates
+	{
+		public static void CleanDelegates(ModuleDefMD module)
+		{
+			foreach (TypeDef typeDef in module.GetTypes())
+			{
+				foreach (MethodDef methodDef in typeDef.Methods)
+				{
+					bool flag = !methodDef.HasBody;
+					bool flag2 = !flag;
+					if (flag2)
+					{
+						for (int i = 0; i < methodDef.Body.Instructions.Count; i++)
+						{
+							bool flag3 = methodDef.Body.Instructions[i].OpCode == OpCodes.Call && methodDef.Body.Instructions[i].Operand is MethodDef;
+							bool flag4 = flag3;
+							if (flag4)
+							{
+								MethodDef methodDef2 = methodDef.Body.Instructions[i].Operand as MethodDef;
+								bool isDelegate = methodDef2.DeclaringType.IsDelegate;
+								bool flag5 = isDelegate;
+								if (flag5)
+								{
+									bool flag6 = !methodDef2.FullName.Contains("::Invoke");
+									bool flag7 = flag6;
+									if (flag7)
+									{
+										MethodDef methodDef3 = methodDef2.DeclaringType.FindConstructors().ToArray<MethodDef>()[1];
+										bool flag8 = methodDef3.Body.Instructions.Count == 5;
+										bool flag9 = flag8;
+										if (flag9)
+										{
+											MethodDef methodDef4 = methodDef3.Body.Instructions[3].Operand as MethodDef;
+											int ldcI4Value = methodDef3.Body.Instructions[0].GetLdcI4Value();
+											int ldcI4Value2 = methodDef3.Body.Instructions[1].GetLdcI4Value();
+											int ldcI4Value3 = methodDef3.Body.Instructions[2].GetLdcI4Value();
+											Program.asm.ManifestModule.ResolveMethod(methodDef4.MDToken.ToInt32()).Invoke(null, new object[]
+											{
+												ldcI4Value,
+												ldcI4Value2,
+												ldcI4Value3
+											});
+											FieldDef fieldDef = methodDef2.DeclaringType.Fields.First<FieldDef>();
+											Delegate @delegate = (Delegate)Program.asm.ManifestModule.ResolveField(fieldDef.MDToken.ToInt32()).GetValue(null);
+											bool flag10 = @delegate.Method.ReturnTypeCustomAttributes.ToString().Contains("DynamicMethod");
+											bool flag11 = flag10;
+											if (flag11)
+											{
+												DynamicMethodBodyReader dynamicMethodBodyReader = new DynamicMethodBodyReader(module, @delegate);
+												dynamicMethodBodyReader.Read();
+												int count = dynamicMethodBodyReader.Instructions.Count;
+												methodDef.Body.Instructions[i].OpCode = dynamicMethodBodyReader.Instructions[count - 2].OpCode;
+												methodDef.Body.Instructions[i].Operand = dynamicMethodBodyReader.Instructions[count - 2].Operand;
+											}
+											else
+											{
+												IMethod operand = module.Import(@delegate.Method);
+												methodDef.Body.Instructions[i].OpCode = OpCodes.Call;
+												methodDef.Body.Instructions[i].Operand = operand;
+											}
+										}
+										else
+										{
+											bool flag12 = methodDef3.Body.Instructions.Count == 6;
+											bool flag13 = flag12;
+											if (flag13)
+											{
+												MethodDef methodDef5 = methodDef3.Body.Instructions[4].Operand as MethodDef;
+												int ldcI4Value4 = methodDef3.Body.Instructions[0].GetLdcI4Value();
+												int ldcI4Value5 = methodDef3.Body.Instructions[1].GetLdcI4Value();
+												int ldcI4Value6 = methodDef3.Body.Instructions[2].GetLdcI4Value();
+												int ldcI4Value7 = methodDef3.Body.Instructions[3].GetLdcI4Value();
+												Program.asm.ManifestModule.ResolveMethod(methodDef5.MDToken.ToInt32()).Invoke(null, new object[]
+												{
+													ldcI4Value4,
+													ldcI4Value5,
+													ldcI4Value6,
+													ldcI4Value7
+												});
+												FieldDef fieldDef2 = methodDef2.DeclaringType.Fields.First<FieldDef>();
+												Delegate delegate2 = (Delegate)Program.asm.ManifestModule.ResolveField(fieldDef2.MDToken.ToInt32()).GetValue(null);
+												bool flag14 = delegate2.Method.ReturnTypeCustomAttributes.ToString().Contains("DynamicMethod");
+												bool flag15 = flag14;
+												if (flag15)
+												{
+													DynamicMethodBodyReader dynamicMethodBodyReader2 = new DynamicMethodBodyReader(module, delegate2);
+													dynamicMethodBodyReader2.Read();
+													int count2 = dynamicMethodBodyReader2.Instructions.Count;
+													methodDef.Body.Instructions[i].OpCode = dynamicMethodBodyReader2.Instructions[count2 - 2].OpCode;
+													methodDef.Body.Instructions[i].Operand = dynamicMethodBodyReader2.Instructions[count2 - 2].Operand;
+												}
+												else
+												{
+													IMethod operand2 = module.Import(delegate2.Method);
+													methodDef.Body.Instructions[i].OpCode = OpCodes.Call;
+													methodDef.Body.Instructions[i].Operand = operand2;
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+
+

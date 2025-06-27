@@ -1,0 +1,1076 @@
+Directory structure:
+└── congviet-memevmdevirt/
+    ├── README.md
+    ├── LICENSE
+    ├── MemeVM Devirt.sln
+    ├── Dependencies/
+    └── MemeVM Devirt/
+        ├── App.config
+        ├── Context.cs
+        ├── Logger.cs
+        ├── MemeVM Devirt.csproj
+        ├── Program.cs
+        ├── Properties/
+        │   └── AssemblyInfo.cs
+        ├── Protections/
+        │   ├── AnalyseMethod.cs
+        │   ├── AnalyseResources.cs
+        │   ├── InitialiseReplace.cs
+        │   ├── InitiliseMethod.cs
+        │   ├── Stores.cs
+        │   ├── VM.cs
+        │   └── VMInstructions/
+        │       ├── VMInstructions.cs
+        │       └── VMOpCode.cs
+        ├── bin/
+        │   └── Debug/
+        │       └── MemeVM Devirt.exe.config
+        └── obj/
+            └── Debug/
+                ├── DesignTimeResolveAssemblyReferencesInput.cache
+                ├── MemeVM Devirt.csproj.CopyComplete
+                ├── MemeVM Devirt.csproj.CoreCompileInputs.cache
+                ├── MemeVM Devirt.csproj.FileListAbsolute.txt
+                └── MemeVM Devirt.csprojAssemblyReference.cache
+
+================================================
+File: README.md
+================================================
+<h1 class="code-line" data-line-start=0 data-line-end=1 ><a id="MemeVM_0"></a>MemeVM</h1>
+<p class="has-line-data" data-line-start="2" data-line-end="3">Hello today I offer you a small project on which I worked on recently and which consists of devitualizing MemeVM which this vm has been done by xsilence, of course this is in no way for the purpose of veangeance or anything, but for educational purposes.</p>
+<h1 class="code-line" data-line-start=5 data-line-end=6 ><a id="How_To_Use_5"></a>How To Use</h1>
+<ul>
+<li class="has-line-data" data-line-start="7" data-line-end="8">Add dnlib dll to the dependance</li>
+<li class="has-line-data" data-line-start="8" data-line-end="9">Build the exe</li>
+<li class="has-line-data" data-line-start="10" data-line-end="12">Drag and drop exe directly on the console or use cmd</li>
+</ul>
+<pre><code class="has-line-data" data-line-start="13" data-line-end="15">Sample in CMD :  Exe_Patch_Of_MemeDevirt Exe_Patch_To_EXE
+</code></pre>
+<p class="has-line-data" data-line-start="15" data-line-end="17"><img src="https://zupimages.net/up/20/22/ukuy.jpg" alt="Picture Sample"><br>
+<img src="https://sendeyo.com/up/d/d85708e43d" alt="Giff Sample"></p>
+<h1 class="code-line" data-line-start=0 data-line-end=1 ><a id="Working_example_0"></a>Working example</h1>
+<p class="has-line-data" data-line-start="2" data-line-end="4"><img src="https://zupimages.net/up/20/22/xq2n.jpg" alt="Image description"><br>
+-Iâ€™m going to debug this method manually to get Instructions</p>
+<p class="has-line-data" data-line-start="6" data-line-end="8"><img src="https://zupimages.net/up/20/22/1we8.jpg" alt="Image description"><br>
+-Here are the store instructions for this method</p>
+<p class="has-line-data" data-line-start="10" data-line-end="13"><img src="https://zupimages.net/up/20/22/41bm.jpg" alt="Image description"><br>
+-And here are the instructions to compare with the original virtualised method,<br>
+and which are replaced, it displays that the method is fucked because the virtualization doesnâ€™t take into account the instructions, but they are translated correctly with respect to the image above, which is the original list of instructions.</p>
+<h2 class="code-line" data-line-start=18 data-line-end=20 ><a id="License_18"></a>License</h2>
+<p class="has-line-data" data-line-start="21" data-line-end="22">MIT</p>
+
+
+
+================================================
+File: LICENSE
+================================================
+MIT License
+
+Copyright (c) 2020 Sir-_-MaGeLanD
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+
+================================================
+File: MemeVM Devirt.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30011.22
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MemeVM Devirt", "MemeVM Devirt\MemeVM Devirt.csproj", "{2AEFEAE1-4D36-472A-A995-3D1F1C1AEC8E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2AEFEAE1-4D36-472A-A995-3D1F1C1AEC8E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AEFEAE1-4D36-472A-A995-3D1F1C1AEC8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2AEFEAE1-4D36-472A-A995-3D1F1C1AEC8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2AEFEAE1-4D36-472A-A995-3D1F1C1AEC8E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FE1EAE98-6276-45D8-8F56-CA21535FC458}
+	EndGlobalSection
+EndGlobal
+
+
+
+
+================================================
+File: MemeVM Devirt/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.8" />
+    </startup>
+</configuration>
+
+
+================================================
+File: MemeVM Devirt/Context.cs
+================================================
+﻿using dnlib.DotNet;
+using dnlib.DotNet.Writer;
+using System;
+using System.IO;
+using System.IO.Compression;
+using static Logger;
+
+public static class Context
+{
+    public static ModuleDefMD module = null;
+    public static string FileName = null;
+    public static void LoadModule(string filename)
+    {
+        try
+        {
+            FileName = filename;
+            byte[] data = File.ReadAllBytes(filename);
+            ModuleContext modCtx = ModuleDef.CreateModuleContext();
+            module = ModuleDefMD.Load(data, modCtx);
+            Write("Module Loaded : " + module.Name, TypeMessage.Info);
+            foreach (AssemblyRef dependance in module.GetAssemblyRefs())
+            {
+                Write($"Dependance : {dependance.Name}", TypeMessage.Info);
+            }
+        }
+        catch
+        {
+            Write("Error for Loade Module", TypeMessage.Error);
+        }
+    }
+    public static void SaveModule()
+    {
+        try
+        {
+            string filename = string.Concat(new string[] { Path.GetDirectoryName(FileName), "\\", Path.GetFileNameWithoutExtension(FileName), "_Devirt", Path.GetExtension(FileName) });
+            if (module.IsILOnly)
+            {
+                ModuleWriterOptions writer = new ModuleWriterOptions(module);
+                writer.MetaDataOptions.Flags = MetaDataFlags.PreserveAll;
+                writer.MetaDataLogger = DummyLogger.NoThrowInstance;
+                module.Write(filename, writer);
+            }
+            else
+            {
+                NativeModuleWriterOptions writer = new NativeModuleWriterOptions(module);
+                writer.MetaDataOptions.Flags = MetaDataFlags.PreserveAll;
+                writer.MetaDataLogger = DummyLogger.NoThrowInstance;
+                module.NativeWrite(filename, writer);
+            }
+            Write("File Devirt and Saved : " + filename, TypeMessage.Done);
+        }
+        catch (ModuleWriterException ex)
+        {
+            Write("Fail to save current module\n" + ex.ToString(), TypeMessage.Error);
+        }
+        Console.ReadLine();
+    }
+    public static byte[] Compress(byte[] data)
+    {
+        MemoryStream output = new MemoryStream();
+        using (DeflateStream dstream = new DeflateStream(output, CompressionLevel.Optimal))
+        {
+            dstream.Write(data, 0, data.Length);
+        }
+        return output.ToArray();
+    }
+    public static byte[] GetCurrentModule(ModuleDefMD module)
+    {
+        MemoryStream memorystream = new MemoryStream();
+        if (module.IsILOnly)
+        {
+            ModuleWriterOptions writer = new ModuleWriterOptions(module);
+            writer.MetaDataOptions.Flags = MetaDataFlags.PreserveAll;
+            writer.MetaDataLogger = DummyLogger.NoThrowInstance;
+            module.Write(memorystream, writer);
+        }
+        else
+        {
+            NativeModuleWriterOptions writer = new NativeModuleWriterOptions(module);
+            writer.MetaDataOptions.Flags = MetaDataFlags.PreserveAll;
+            writer.MetaDataLogger = DummyLogger.NoThrowInstance;
+            module.NativeWrite(memorystream, writer);
+        }
+        byte[] ByteArray = new byte[memorystream.Length];
+        memorystream.Position = 0;
+        memorystream.Read(ByteArray, 0, (int)memorystream.Length);
+        return ByteArray;
+    }
+    public static void Welcome()
+    {
+        Console.Title = "MemeVM Devirt Console 1.0";
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine(@"Made By Sir-_-MaGeLanD#7358");
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine(@"                         __          __  _                                  _______    ");
+        Console.WriteLine(@"                         \ \        / / | |                                |__   __|   ");
+        Console.WriteLine(@"                          \ \  /\  / /__| | ___ ___  _ __ ___   ___           | | ___  ");
+        Console.WriteLine(@"                           \ \/  \/ / _ \ |/ __/ _ \| '_ ` _ \ / _ \          | |/ _ \ ");
+        Console.WriteLine(@"                            \  /\  /  __/ | (_| (_) | | | | | |  __/          | | (_) |");
+        Console.WriteLine(@"                             \/  \/ \___|_|\___\___/|_| |_| |_|\___|          |_|\___/ ");
+        Console.WriteLine(@"███    ███ ███████ ███    ███ ███████ ██    ██ ███    ███ ");
+        Console.WriteLine(@"████  ████ ██      ████  ████ ██      ██    ██ ████  ████ ");
+        Console.WriteLine(@"██ ████ ██ █████   ██ ████ ██ █████   ██    ██ ██ ████ ██ ");
+        Console.WriteLine(@"██  ██  ██ ██      ██  ██  ██ ██       ██  ██  ██  ██  ██ ");
+        Console.WriteLine(@"██      ██ ███████ ██      ██ ███████   ████   ██      ██ "); 
+        Console.WriteLine(Environment.NewLine);
+        Console.WriteLine(Environment.NewLine);
+        Console.WriteLine(Environment.NewLine);
+    }
+}
+
+
+
+================================================
+File: MemeVM Devirt/Logger.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+public static class Logger
+{
+    public static void Write(string message, TypeMessage type)
+    {
+        switch (type)
+        {
+            case TypeMessage.Debug:
+                Console.ForegroundColor = ConsoleColor.Blue;
+                Console.WriteLine($"{DateTime.Now} [Debug] {message}");
+                Console.ForegroundColor = ConsoleColor.White;
+                break;
+            case TypeMessage.Done:
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"{DateTime.Now} [+] : {message}");
+                Console.ForegroundColor = ConsoleColor.White;
+                break;
+            case TypeMessage.Error:
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"{DateTime.Now} [!] : {message}");
+                Console.ForegroundColor = ConsoleColor.White;
+                break;
+            case TypeMessage.Info:
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"{DateTime.Now} [-] : {message}");
+                Console.ForegroundColor = ConsoleColor.White;
+                break;
+        }
+    }
+}
+public enum TypeMessage
+{
+    Error,
+    Done,
+    Debug,
+    Info,
+}
+
+
+
+================================================
+File: MemeVM Devirt/MemeVM Devirt.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{2AEFEAE1-4D36-472A-A995-3D1F1C1AEC8E}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>MemeVMDevirt</RootNamespace>
+    <AssemblyName>MemeVM Devirt</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>virus.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib">
+      <HintPath>..\Dependencies\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Context.cs" />
+    <Compile Include="Logger.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Protections\AnalyseResources.cs" />
+    <Compile Include="Protections\InitialiseReplace.cs" />
+    <Compile Include="Protections\InitiliseMethod.cs" />
+    <Compile Include="Protections\AnalyseMethod.cs" />
+    <Compile Include="Protections\Stores.cs" />
+    <Compile Include="Protections\VM.cs" />
+    <Compile Include="Protections\VMInstructions\VMInstructions.cs" />
+    <Compile Include="Protections\VMInstructions\VMOpCode.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="virus.ico" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: MemeVM Devirt/Program.cs
+================================================
+ï»¿using MemeVMDevirt.Protections;
+using System;
+using static Context;
+using static Logger;
+
+namespace NETPacker
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            if (args.Length == 0)
+            {
+                Welcome();
+                Write($"Please drag and drop your file\n\n", TypeMessage.Debug);
+                LoadModule(Console.ReadLine());
+                VM.Execute();
+                SaveModule();
+            }
+            else if (args.Length == 1)
+            {
+                Welcome();
+                LoadModule(args[0]);
+                VM.Execute();
+                SaveModule();
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM Devirt/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// Les informations gÃ©nÃ©rales relatives Ã  un assembly dÃ©pendent de
+// l'ensemble d'attributs suivant. Changez les valeurs de ces attributs pour modifier les informations
+// associÃ©es Ã  un assembly.
+[assembly: AssemblyTitle("MemeVM Devirt")]
+[assembly: AssemblyDescription("MemeVM Devirt Made By Sir-_-MaGeLanD")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("Sir-_-MaGeLanD")]
+[assembly: AssemblyProduct("MemeVM Devirt")]
+[assembly: AssemblyCopyright("Copyright  Sir-_-MaGeLanD Â©  2020")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// L'affectation de la valeur false Ã  ComVisible rend les types invisibles dans cet assembly
+// aux composants COM. Si vous devez accÃ©der Ã  un type dans cet assembly Ã  partir de
+// COM, affectez la valeur true Ã  l'attribut ComVisible sur ce type.
+[assembly: ComVisible(false)]
+
+// Le GUID suivant est pour l'ID de la typelib si ce projet est exposÃ© Ã  COM
+[assembly: Guid("2aefeae1-4d36-472a-a995-3d1f1c1aec8e")]
+
+// Les informations de version pour un assembly se composent des quatre valeurs suivantes :
+//
+//      Version principale
+//      Version secondaire
+//      NumÃ©ro de build
+//      RÃ©vision
+//
+// Vous pouvez spÃ©cifier toutes les valeurs ou indiquer les numÃ©ros de build et de rÃ©vision par dÃ©faut
+// en utilisant '*', comme indiquÃ© ci-dessousÂ :
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+
+================================================
+File: MemeVM Devirt/Protections/AnalyseMethod.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System.Collections.Generic;
+using System.Linq;
+using static Context;
+
+namespace MemeVMDevirt.Protections
+{
+    public static class AnalyseMethod
+    {
+        public static void AnalysePhase()
+        {
+			foreach (TypeDef type in (from x in module.Types where x.HasMethods select x).ToArray())
+			{
+				foreach (MethodDef method in (from x in type.Methods where x.HasBody && x.Body.HasInstructions select x).ToArray())
+				{
+					IList<Instruction> Instr = method.Body.Instructions;
+					if (Instr[0].OpCode == OpCodes.Ldtoken && Instr[1].IsLdcI4() && Instr[Instr.Count - 3].OpCode == OpCodes.Call && Instr[Instr.Count - 3].Operand.ToString().Contains("Run"))
+					{
+						Stores.MethodVirt.Add(method, Instr[1].GetLdcI4Value());
+					}
+				}
+			}
+		}
+    }
+}
+
+
+
+================================================
+File: MemeVM Devirt/Protections/AnalyseResources.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.IO;
+using System.Linq;
+using static Context;
+
+
+namespace MemeVMDevirt.Protections
+{
+    public static class AnalyseResources
+    {
+        public static void InitialiseResources()
+        {
+            EmbeddedResource resource = (from x in module.Resources where x.IsPrivate && x.ResourceType == ResourceType.Embedded select x).First() as EmbeddedResource;
+            Stores.Resources_Virt = resource.Data.CreateStream();
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM Devirt/Protections/InitialiseReplace.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using MemeVMDevirt.Protections.VMInstructions;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+using static Context;
+
+namespace MemeVMDevirt.Protections
+{
+    public static class InitialiseReplace
+    {
+		public static List<Instruction> _method;
+		public static MethodDef _current;
+		public static void ReplacePhase()
+        {
+            foreach (var methodvirt in Stores.MethodVirt)
+            {
+				_current = methodvirt.Key;
+				_method = new List<Instruction>();
+				methodvirt.Key.Body.Instructions.Clear();
+				foreach(VMInstruction instruction in Stores._methods[methodvirt.Value])
+				{
+					_method.Add(Reconvert(instruction, instruction.Code));
+				}
+				foreach (Instruction instruction in _method)
+				{
+					methodvirt.Key.Body.Instructions.Add(instruction);
+				}
+			}
+        }
+		public static Instruction Reconvert(VMInstruction _instruction, VMOpCode vMOpCode)
+		{
+			switch (vMOpCode)
+			{
+				case VMOpCode.Add: return Add(_instruction);
+				case VMOpCode.Call: return Call(_instruction);
+				case VMOpCode.Cgt: return Cgt(_instruction);
+				case VMOpCode.Clt: return Clt(_instruction);
+				case VMOpCode.Cmp: return Cmp(_instruction);
+				case VMOpCode.Dup: return Dup(_instruction);
+				case VMOpCode.Int32: return Ldc_I4(_instruction);
+				case VMOpCode.Jf: return Brfalse(_instruction);
+				case VMOpCode.Jmp: return Br(_instruction);
+				case VMOpCode.Jt: return Brtrue(_instruction);
+				case VMOpCode.Ldarg: return Ldarg(_instruction);
+				case VMOpCode.Ldfld: return Ldfld(_instruction);
+				case VMOpCode.Ldloc: return Ldloc(_instruction);
+				case VMOpCode.Int64: return Ldc_I8(_instruction);
+				case VMOpCode.Newarr: return NewArray(_instruction);
+				case VMOpCode.Null: return Null(_instruction);
+				case VMOpCode.Pop: return Pop(_instruction);
+				case VMOpCode.Ret: return Ret(_instruction);
+				case VMOpCode.Stfld: return Stfld(_instruction);
+				case VMOpCode.Stloc: return Stloc(_instruction);
+				case VMOpCode.String: return Ldstr(_instruction);
+
+
+				default:
+					throw new Exception($"OpCode : {vMOpCode} Not Supported");
+			}
+		}
+		public static Assembly GetReference(short index)
+		{
+			KeyValuePair<string, Assembly> keyValuePair = Stores._references.ElementAt((int)index);
+			bool flag = keyValuePair.Value == null;
+			if (flag)
+			{
+				Stores._references[keyValuePair.Key] = AppDomain.CurrentDomain.Load(new AssemblyName(keyValuePair.Key));
+			}
+			return Stores._references[keyValuePair.Key];
+		}
+		public static Instruction Brfalse(VMInstruction instruction)
+		{
+			return Instruction.Create(OpCodes.Brfalse, _method[(int)instruction.Operand]);
+		}
+		public static Instruction Brtrue(VMInstruction instruction)
+		{
+			return Instruction.Create(OpCodes.Brtrue, _method[(int)instruction.Operand]);
+		}
+		public static Instruction Br(VMInstruction instruction)
+		{
+			return Instruction.Create(OpCodes.Br, _method[(int)instruction.Operand]);
+		}
+		public static Instruction Dup(VMInstruction instruction)
+		{
+			return Instruction.Create(OpCodes.Dup);
+		}
+		public static Instruction Rem(VMInstruction instruction)
+		{
+			return Instruction.Create(OpCodes.Rem);
+		}
+		public static Instruction Pop(VMInstruction instruction)
+		{
+			return Instruction.Create(OpCodes.Pop);
+		}
+		public static Instruction Ret(VMInstruction instruction)
+		{
+			return Instruction.Create(OpCodes.Ret);
+		}
+		public static Instruction Starg(VMInstruction instruction)
+		{
+			return Instruction.Create(OpCodes.Starg, (byte)instruction.Operand);
+		}
+		public static Instruction Cgt(VMInstruction instruction)
+		{
+			return Instruction.Create(OpCodes.Cgt);
+		}
+		public static Instruction Cmp(VMInstruction instruction)
+		{
+			return Instruction.Create(OpCodes.Ceq);
+		}
+		public static Instruction Clt(VMInstruction instruction)
+		{
+			return Instruction.Create(OpCodes.Clt);
+		}
+		public static Instruction Add(VMInstruction instruction)
+		{
+			return Instruction.Create(OpCodes.Add);
+		}
+		public static Instruction Div(VMInstruction instruction)
+		{
+			return Instruction.Create(OpCodes.Div);
+		}
+		public static Instruction Sub(VMInstruction instruction)
+		{
+			return Instruction.Create(OpCodes.Sub);
+		}
+		public static Instruction Mul(VMInstruction instruction)
+		{
+			return Instruction.Create(OpCodes.Mul);
+		}
+		public static Instruction Null(VMInstruction instruction)
+		{
+			return Instruction.Create(OpCodes.Ldnull);
+		}
+		public static Instruction Ldc_R8(VMInstruction instruction)
+		{
+			return Instruction.Create(OpCodes.Ldc_R8, (double)instruction.Operand);
+		}
+		public static Instruction Ldstr(VMInstruction instruction)
+		{
+			return Instruction.Create(OpCodes.Ldstr, (string)instruction.Operand);
+		}
+		public static Instruction Ldc_R4(VMInstruction instruction)
+		{
+			return Instruction.Create(OpCodes.Ldc_R4, (float)instruction.Operand);
+		}
+		public static Instruction Ldc_I8(VMInstruction instruction)
+		{
+			return Instruction.Create(OpCodes.Ldc_I8, (long)instruction.Operand);
+		}
+		public static Instruction Ldc_I4(VMInstruction instruction)
+		{
+			return Instruction.Create(OpCodes.Ldc_I4, (int)instruction.Operand);
+		}
+		public static Instruction Call(VMInstruction instruction)
+		{
+			Tuple<short, int, bool> tuple_Call = (Tuple<short, int, bool>)instruction.Operand;
+			Assembly reference_Call = GetReference(tuple_Call.Item1);
+			MethodInfo method_call = reference_Call.ManifestModule.ResolveMethod(tuple_Call.Item2) as MethodInfo;
+			return Instruction.Create(OpCodes.Call, module.Import(method_call));
+		}
+		public static Instruction NewArray(VMInstruction instruction)
+		{
+			Tuple<short, int, bool> tuple_Newarr = (Tuple<short, int, bool>)instruction.Operand;
+			Assembly reference_Newarr = GetReference(tuple_Newarr.Item1);
+			TypeInfo elementType = reference_Newarr.ManifestModule.ResolveType(tuple_Newarr.Item2) as TypeInfo;
+			return Instruction.Create(OpCodes.Newarr, module.Import(elementType));
+		}
+		public static Instruction Ldloc(VMInstruction instruction)
+		{
+			short num = (short)instruction.Operand;
+			Local locals = _current.Body.Variables[num];
+			return new Instruction(OpCodes.Ldloc, locals);
+		}
+		public static Instruction Stloc(VMInstruction instruction)
+		{
+			object num = instruction.Operand;//i know than is not that but i'm lazy
+			Local locals = _current.Body.Variables.Add(new Local(module.Import(num.GetType()).ToTypeSig()));
+			return new Instruction(OpCodes.Stloc, locals);
+		}
+		public static Instruction Ldarg(VMInstruction instruction)
+		{
+			short num = (short)instruction.Operand;
+			switch (num)
+			{
+				case 0:
+					return new Instruction(OpCodes.Ldarg_0);
+				case 1:
+					return new Instruction(OpCodes.Ldarg_1);
+				case 2:
+					return new Instruction(OpCodes.Ldarg_2);
+				case 3:
+					return new Instruction(OpCodes.Ldarg_3);
+				default:
+					return new Instruction(OpCodes.Ldarg_S, num);
+			}
+		}
+		public static Instruction Ldfld(VMInstruction instruction)
+		{
+			Tuple<short, int, bool> tuple_Stfld = (Tuple<short, int, bool>)instruction.Operand;
+			Assembly reference_Stfld = GetReference(tuple_Stfld.Item1);
+			FieldInfo field_Stfld = reference_Stfld.ManifestModule.ResolveField(tuple_Stfld.Item2);
+			return Instruction.Create(OpCodes.Ldfld, module.Import(field_Stfld));
+		}
+		public static Instruction Stfld(VMInstruction instruction)
+		{
+			Tuple<short, int, bool> tuple_Stfld = (Tuple<short, int, bool>)instruction.Operand;
+			Assembly reference_Stfld = GetReference(tuple_Stfld.Item1);
+			FieldInfo field_Stfld = reference_Stfld.ManifestModule.ResolveField(tuple_Stfld.Item2);
+			return Instruction.Create(OpCodes.Stfld, module.Import(field_Stfld));
+		}
+	}
+}
+
+
+
+================================================
+File: MemeVM Devirt/Protections/InitiliseMethod.cs
+================================================
+ï»¿using MemeVMDevirt.Protections.VMInstructions;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
+using System.Text;
+
+namespace MemeVMDevirt.Protections
+{
+	public static class InitiliseMethod
+	{
+		public static void InitiliaseMethodage()
+		{
+			using (DeflateStream deflateStream = new DeflateStream(Stores.Resources_Virt, CompressionMode.Decompress))
+			{
+				using (BinaryReader binaryReader = new BinaryReader(deflateStream))
+				{
+					int num = binaryReader.ReadInt32();
+					for (int i = 0; i < num; i++)
+					{
+						int count = binaryReader.ReadInt32();
+						Stores._references.Add(Encoding.UTF8.GetString(binaryReader.ReadBytes(count)), null);
+					}
+					int num2 = binaryReader.ReadInt32();
+					for (int j = 0; j < num2; j++)
+					{
+						int num3 = binaryReader.ReadInt32();
+						List<VMInstruction> list = new List<VMInstruction>();
+						for (int k = 0; k < num3; k++)
+						{
+							VMOpCode code = (VMOpCode)binaryReader.ReadByte();
+							list.Add(Map(code, binaryReader));
+						}
+						Stores._methods.Add(list);
+					}
+				}
+			}
+		}
+		public static VMInstruction Map(VMOpCode vMOpCode, BinaryReader binaryReader)
+		{
+			switch (vMOpCode)
+			{
+				case VMOpCode.Add: return Add(binaryReader);
+				case VMOpCode.Call: return Call(binaryReader);
+				case VMOpCode.Cgt: return Cgt(binaryReader);
+				case VMOpCode.Clt: return Clt(binaryReader);
+				case VMOpCode.Cmp: return Cmp(binaryReader);
+				case VMOpCode.Dup: return Dup(binaryReader);
+				case VMOpCode.Int32: return Int32(binaryReader);
+				case VMOpCode.Jf: return Jf(binaryReader);
+				case VMOpCode.Jmp: return Jmp(binaryReader);
+				case VMOpCode.Jt: return Jt(binaryReader);
+				case VMOpCode.Ldarg: return Ldarg(binaryReader);
+				case VMOpCode.Ldfld: return Ldfld(binaryReader);
+				case VMOpCode.Ldloc: return Ldloc(binaryReader);
+				case VMOpCode.Int64: return Int64(binaryReader);
+				case VMOpCode.Newarr: return NewArray(binaryReader);
+				case VMOpCode.Null: return Null(binaryReader);
+				case VMOpCode.Pop: return Pop(binaryReader);
+				case VMOpCode.Ret: return Ret(binaryReader);
+				case VMOpCode.Stfld: return Stfld(binaryReader);
+				case VMOpCode.Stloc: return Stloc(binaryReader);
+				case VMOpCode.String: return Ldstr(binaryReader);
+
+
+				default:
+					throw new Exception($"OpCode : {vMOpCode} Not Supported");
+			}
+		}
+		public static VMInstruction Add(BinaryReader binaryReader)
+		{
+			return new VMInstruction(VMOpCode.Add);
+		}
+		public static VMInstruction Call(BinaryReader binaryReader)
+		{
+			return new VMInstruction(VMOpCode.Call, new Tuple<short, int, bool>(binaryReader.ReadInt16(), binaryReader.ReadInt32(), binaryReader.ReadBoolean()));
+		}
+		public static VMInstruction Cgt(BinaryReader binaryReader)
+		{
+			return new VMInstruction(VMOpCode.Cgt, null);
+		}
+		public static VMInstruction Clt(BinaryReader binaryReader)
+		{
+			return new VMInstruction(VMOpCode.Clt, null);
+		}
+		public static VMInstruction Cmp(BinaryReader binaryReader)
+		{
+			return new VMInstruction(VMOpCode.Cmp, null);
+		}
+		public static VMInstruction Dup(BinaryReader binaryReader)
+		{
+			return new VMInstruction(VMOpCode.Dup, null);
+		}
+		public static VMInstruction Pop(BinaryReader binaryReader)
+		{
+			return new VMInstruction(VMOpCode.Pop, null);
+		}
+		public static VMInstruction Ret(BinaryReader binaryReader)
+		{
+			return new VMInstruction(VMOpCode.Ret, null);
+		}
+		public static VMInstruction Null(BinaryReader binaryReader)
+		{
+			return new VMInstruction(VMOpCode.Null, null);
+		}
+		public static VMInstruction Int32(BinaryReader binaryReader)
+		{
+			return new VMInstruction(VMOpCode.Int32, binaryReader.ReadInt32());
+		}
+		public static VMInstruction Jf(BinaryReader binaryReader)
+		{
+			return new VMInstruction(VMOpCode.Jf, binaryReader.ReadInt32());
+		}
+		public static VMInstruction Jmp(BinaryReader binaryReader)
+		{
+			return new VMInstruction(VMOpCode.Jmp, binaryReader.ReadInt32());
+		}
+		public static VMInstruction Jt(BinaryReader binaryReader)
+		{
+			return new VMInstruction(VMOpCode.Jt, binaryReader.ReadInt32());
+		}
+		public static VMInstruction Ldarg(BinaryReader binaryReader)
+		{
+			return new VMInstruction(VMOpCode.Ldarg, binaryReader.ReadInt16());
+		}
+		public static VMInstruction Ldfld(BinaryReader binaryReader)
+		{
+			return new VMInstruction(VMOpCode.Ldfld, new Tuple<short, int>(binaryReader.ReadInt16(), binaryReader.ReadInt32()));
+		}
+		public static VMInstruction Stfld(BinaryReader binaryReader)
+		{
+			return new VMInstruction(VMOpCode.Stfld, new Tuple<short, int>(binaryReader.ReadInt16(), binaryReader.ReadInt32()));
+		}
+		public static VMInstruction Ldloc(BinaryReader binaryReader)
+		{
+			return new VMInstruction(VMOpCode.Ldloc, binaryReader.ReadInt16());
+		}
+		public static VMInstruction Stloc(BinaryReader binaryReader)
+		{
+			return new VMInstruction(VMOpCode.Stloc, binaryReader.ReadInt16());
+		}
+		public static VMInstruction Int64(BinaryReader binaryReader)
+		{
+			return new VMInstruction(VMOpCode.Int64, binaryReader.ReadInt64());
+		}
+		public static VMInstruction Ldstr(BinaryReader binaryReader)
+		{
+			int count = binaryReader.ReadInt32();
+			return new VMInstruction(VMOpCode.String, Encoding.UTF8.GetString(binaryReader.ReadBytes(count)));
+		}
+		public static VMInstruction NewArray(BinaryReader binaryReader)
+		{
+			return new VMInstruction(VMOpCode.Newarr, new Tuple<short, int>(binaryReader.ReadInt16(), binaryReader.ReadInt32()));
+		}
+	}
+}
+
+
+
+================================================
+File: MemeVM Devirt/Protections/Stores.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using MemeVMDevirt.Protections.VMInstructions;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace MemeVMDevirt.Protections
+{
+    public static class Stores
+    {
+        public static Stream Resources_Virt;
+        public static Dictionary<MethodDef, int> MethodVirt = new Dictionary<MethodDef, int>();
+        public static Dictionary<string, Assembly> _references = new Dictionary<string, Assembly>();
+        public static List<List<VMInstruction>> _methods = new List<List<VMInstruction>>();
+    }
+}
+
+
+
+================================================
+File: MemeVM Devirt/Protections/VM.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace MemeVMDevirt.Protections
+{
+    public static class VM
+    {
+        public static void Execute()
+        {
+            AnalyseMethod.AnalysePhase();
+            AnalyseResources.InitialiseResources();
+            InitiliseMethod.InitiliaseMethodage();
+            InitialiseReplace.ReplacePhase();
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM Devirt/Protections/VMInstructions/VMInstructions.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace MemeVMDevirt.Protections.VMInstructions
+{
+	public struct VMInstruction
+	{
+		internal VMInstruction(VMOpCode code, object op = null)
+		{
+			this.Code = code;
+			this.Operand = op;
+		}
+		internal VMOpCode Code;
+		internal object Operand;
+	}
+}
+
+
+
+================================================
+File: MemeVM Devirt/Protections/VMInstructions/VMOpCode.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace MemeVMDevirt.Protections.VMInstructions
+{
+	public enum VMOpCode : byte
+	{
+		Int32,
+		Int64,
+		Float,
+		Double,
+		String,
+		Null,
+		Add,
+		Sub,
+		Mul,
+		Div,
+		Rem,
+		Dup,
+		Pop,
+		Jmp,
+		Jt,
+		Jf,
+		Je,
+		Jne,
+		Jge,
+		Jgt,
+		Jle,
+		Jlt,
+		Cmp,
+		Cgt,
+		Clt,
+		Newarr,
+		Ldarg,
+		Ldloc,
+		Ldfld,
+		Ldelem,
+		Starg,
+		Stloc,
+		Stfld,
+		Stelem,
+		Call,
+		Ret,
+	}
+}
+
+
+
+================================================
+File: MemeVM Devirt/bin/Debug/MemeVM Devirt.exe.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.8" />
+    </startup>
+</configuration>
+
+
+================================================
+File: MemeVM Devirt/obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache
+================================================
+[Non-text file]
+
+
+================================================
+File: MemeVM Devirt/obj/Debug/MemeVM Devirt.csproj.CopyComplete
+================================================
+
+
+
+================================================
+File: MemeVM Devirt/obj/Debug/MemeVM Devirt.csproj.CoreCompileInputs.cache
+================================================
+eeb4ae1ad2d0bfbbf2c6e73eb352184d2f55285b
+
+
+
+================================================
+File: MemeVM Devirt/obj/Debug/MemeVM Devirt.csproj.FileListAbsolute.txt
+================================================
+C:\Users\VirtualMachine\Documents\GitHub\MemeVMDevirt\MemeVM Devirt\obj\Debug\MemeVM Devirt.csprojAssemblyReference.cache
+C:\Users\VirtualMachine\Documents\GitHub\MemeVMDevirt\MemeVM Devirt\obj\Debug\MemeVM Devirt.csproj.CoreCompileInputs.cache
+C:\Users\VirtualMachine\Documents\GitHub\MemeVMDevirt\MemeVM Devirt\bin\Debug\MemeVM Devirt.exe.config
+C:\Users\VirtualMachine\Documents\GitHub\MemeVMDevirt\MemeVM Devirt\bin\Debug\MemeVM Devirt.exe
+C:\Users\VirtualMachine\Documents\GitHub\MemeVMDevirt\MemeVM Devirt\bin\Debug\MemeVM Devirt.pdb
+C:\Users\VirtualMachine\Documents\GitHub\MemeVMDevirt\MemeVM Devirt\bin\Debug\dnlib.dll
+C:\Users\VirtualMachine\Documents\GitHub\MemeVMDevirt\MemeVM Devirt\obj\Debug\MemeVM Devirt.csproj.CopyComplete
+C:\Users\VirtualMachine\Documents\GitHub\MemeVMDevirt\MemeVM Devirt\obj\Debug\MemeVM Devirt.exe
+C:\Users\VirtualMachine\Documents\GitHub\MemeVMDevirt\MemeVM Devirt\obj\Debug\MemeVM Devirt.pdb
+
+
+
+================================================
+File: MemeVM Devirt/obj/Debug/MemeVM Devirt.csprojAssemblyReference.cache
+================================================
+[Non-text file]
+

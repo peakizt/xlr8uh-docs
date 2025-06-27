@@ -1,0 +1,2603 @@
+Directory structure:
+└── tobitofatitonulled-memevm/
+    ├── README.md
+    ├── MemeVM.sln
+    ├── MemeVM/
+    │   ├── Context.cs
+    │   ├── InjectPhase.cs
+    │   ├── MemeVM.csproj
+    │   ├── VirtualizatonPhase.cs
+    │   ├── Properties/
+    │   │   └── AssemblyInfo.cs
+    │   └── Translation/
+    │       ├── Dispatcher.cs
+    │       ├── IHandler.cs
+    │       ├── VMBody.cs
+    │       ├── VMInstruction.cs
+    │       ├── VMOpCode.cs
+    │       ├── Handlers/
+    │       │   ├── Add.cs
+    │       │   ├── Branching.cs
+    │       │   ├── Call.cs
+    │       │   ├── Comparisons.cs
+    │       │   ├── Dup.cs
+    │       │   ├── Int.cs
+    │       │   ├── Ldarg.cs
+    │       │   ├── Ldelem.cs
+    │       │   ├── Ldfld.cs
+    │       │   ├── Ldloc.cs
+    │       │   ├── Ldnull.cs
+    │       │   ├── Ldstr.cs
+    │       │   ├── Long.cs
+    │       │   ├── Newarr.cs
+    │       │   ├── Pop.cs
+    │       │   ├── Ret.cs
+    │       │   ├── Starg.cs
+    │       │   ├── Stfld.cs
+    │       │   ├── Stloc.cs
+    │       │   └── Useless.cs
+    │       └── Helpers/
+    │           ├── Map.cs
+    │           ├── Offset.cs
+    │           ├── Offsets.cs
+    │           └── TokenGetter.cs
+    ├── MemeVM.Confuser/
+    │   ├── App.config
+    │   ├── MemeVM.Confuser.csproj
+    │   ├── MemeVMProtection.cs
+    │   ├── Program.cs
+    │   └── Properties/
+    │       └── AssemblyInfo.cs
+    └── MemeVM.Runtime/
+        ├── Body.cs
+        ├── Dispatcher.cs
+        ├── Entry.cs
+        ├── IHandler.cs
+        ├── Instruction.cs
+        ├── MemeVM.Runtime.csproj
+        ├── NoMoreStackItem.cs
+        ├── OpCode.cs
+        ├── Engine/
+        │   ├── LocalStorage.cs
+        │   ├── Stack.cs
+        │   ├── VM.cs
+        │   └── VMState.cs
+        ├── Handlers/
+        │   ├── Add.cs
+        │   ├── Call.cs
+        │   ├── Cgt.cs
+        │   ├── Clt.cs
+        │   ├── Cmp.cs
+        │   ├── Dup.cs
+        │   ├── Int.cs
+        │   ├── Jf.cs
+        │   ├── Jmp.cs
+        │   ├── Jt.cs
+        │   ├── Ldarg.cs
+        │   ├── Ldfld.cs
+        │   ├── Ldloc.cs
+        │   ├── Long.cs
+        │   ├── Newarr.cs
+        │   ├── Null.cs
+        │   ├── Pop.cs
+        │   ├── Ret.cs
+        │   ├── Stfld.cs
+        │   ├── Stloc.cs
+        │   └── String.cs
+        ├── Helpers/
+        │   └── Map.cs
+        └── Properties/
+            └── AssemblyInfo.cs
+
+================================================
+File: README.md
+================================================
+# MemeVM
+A small virtualizer for .NET which works together with ConfuserEx
+
+## Wtf is this???!
+
+This projects takes your existing .NET MSIL code and "translates" it to instructions only our virtual machine will understand.
+
+## Limitations
+
+- Can be slow
+- Lots of unimplemented OpCodes
+- Branching is buggy
+- No support for typed references
+- No support for pointers
+
+# Note
+
+This is not meant to be used as a serious layer of Obfuscation, it was just an experiment.
+Feel free to commit if you have any improvements
+
+
+
+================================================
+File: MemeVM.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.572
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MemeVM.Confuser", "MemeVM.Confuser\MemeVM.Confuser.csproj", "{77B2C83B-CA34-4738-9384-C52F0121647C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MemeVM", "MemeVM\MemeVM.csproj", "{EF18F7F2-1F03-481C-98F9-4A18A2F12C11}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MemeVM.Runtime", "MemeVM.Runtime\MemeVM.Runtime.csproj", "{14D5D12E-9A32-4516-904E-DF3393626317}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{77B2C83B-CA34-4738-9384-C52F0121647C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77B2C83B-CA34-4738-9384-C52F0121647C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77B2C83B-CA34-4738-9384-C52F0121647C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77B2C83B-CA34-4738-9384-C52F0121647C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF18F7F2-1F03-481C-98F9-4A18A2F12C11}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF18F7F2-1F03-481C-98F9-4A18A2F12C11}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF18F7F2-1F03-481C-98F9-4A18A2F12C11}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF18F7F2-1F03-481C-98F9-4A18A2F12C11}.Release|Any CPU.Build.0 = Release|Any CPU
+		{14D5D12E-9A32-4516-904E-DF3393626317}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14D5D12E-9A32-4516-904E-DF3393626317}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14D5D12E-9A32-4516-904E-DF3393626317}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14D5D12E-9A32-4516-904E-DF3393626317}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {29EFAB72-200E-43AA-B91F-043CE66650CC}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: MemeVM/Context.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using dnlib.DotNet;
+using MemeVM.Translation;
+
+namespace MemeVM {
+    static class Context {
+        internal static IMethod Entry;
+        internal static ModuleDef RuntimeModule;
+        internal static readonly Random Random = new Random();
+        internal static readonly Dictionary<ModuleDef, VMBody> Bodies = new Dictionary<ModuleDef, VMBody>();
+    }
+}
+
+
+
+================================================
+File: MemeVM/InjectPhase.cs
+================================================
+ï»¿using System;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using Confuser.Core;
+using dnlib.DotNet;
+
+namespace MemeVM {
+    public class InjectPhase : ProtectionPhase {
+        public InjectPhase(ConfuserComponent parent) : base(parent) { }
+        public override string Name => "MemeVM.Injection";
+        public override ProtectionTargets Targets => ProtectionTargets.Methods;
+
+        protected override void Execute(ConfuserContext context, ProtectionParameters parameters) {
+            if (!parameters.Targets.Any())
+                return;
+
+            var current = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? throw new InvalidOperationException();
+            var runtimePath = Path.Combine(current, "MemeVM.Runtime.dll");
+            var newPath = Path.Combine(context.OutputDirectory, "MemeVM.Runtime.dll");
+
+            var cliPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Confuser.CLI.exe");
+            
+            Directory.CreateDirectory(Path.GetDirectoryName(newPath));
+            File.Copy(runtimePath, newPath, true);
+
+            context.Logger.Info("Protecting VM runtime...");
+            var info = new ProcessStartInfo {
+                FileName = cliPath,
+                Arguments = "-n -o " + context.OutputDirectory + " " + newPath,
+                CreateNoWindow = true,
+                UseShellExecute = false,
+                WindowStyle = ProcessWindowStyle.Hidden
+            };
+            Process.Start(info)?.WaitForExit();
+
+            Context.RuntimeModule = ModuleDefMD.Load(newPath);
+            Context.Entry = Context.RuntimeModule.Types.Single(t => t.IsPublic).Methods[0];
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM/MemeVM.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{EF18F7F2-1F03-481C-98F9-4A18A2F12C11}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MemeVM</RootNamespace>
+    <AssemblyName>MemeVM</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Confuser.Core">
+      <HintPath>..\Confuser.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="dnlib">
+      <HintPath>..\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Context.cs" />
+    <Compile Include="InjectPhase.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Translation\Dispatcher.cs" />
+    <Compile Include="Translation\Handlers\Add.cs" />
+    <Compile Include="Translation\Handlers\Branching.cs" />
+    <Compile Include="Translation\Handlers\Call.cs" />
+    <Compile Include="Translation\Handlers\Comparisons.cs" />
+    <Compile Include="Translation\Handlers\Dup.cs" />
+    <Compile Include="Translation\Handlers\Int.cs" />
+    <Compile Include="Translation\Handlers\Ldarg.cs" />
+    <Compile Include="Translation\Handlers\Ldelem.cs" />
+    <Compile Include="Translation\Handlers\Ldfld.cs" />
+    <Compile Include="Translation\Handlers\Ldloc.cs" />
+    <Compile Include="Translation\Handlers\Ldnull.cs" />
+    <Compile Include="Translation\Handlers\Ldstr.cs" />
+    <Compile Include="Translation\Handlers\Long.cs" />
+    <Compile Include="Translation\Handlers\Newarr.cs" />
+    <Compile Include="Translation\Handlers\Pop.cs" />
+    <Compile Include="Translation\Handlers\Ret.cs" />
+    <Compile Include="Translation\Handlers\Starg.cs" />
+    <Compile Include="Translation\Handlers\Stloc.cs" />
+    <Compile Include="Translation\Handlers\Stfld.cs" />
+    <Compile Include="Translation\Handlers\Useless.cs" />
+    <Compile Include="Translation\Helpers\Map.cs" />
+    <Compile Include="Translation\Helpers\TokenGetter.cs" />
+    <Compile Include="Translation\IHandler.cs" />
+    <Compile Include="Translation\Helpers\Offset.cs" />
+    <Compile Include="Translation\Helpers\Offsets.cs" />
+    <Compile Include="Translation\VMBody.cs" />
+    <Compile Include="Translation\VMInstruction.cs" />
+    <Compile Include="Translation\VMOpCode.cs" />
+    <Compile Include="VirtualizatonPhase.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: MemeVM/VirtualizatonPhase.cs
+================================================
+ï»¿using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using Confuser.Core;
+using Confuser.Core.Services;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using dnlib.DotNet.Writer;
+using MemeVM.Translation;
+using MemeVM.Translation.Helpers;
+
+namespace MemeVM {
+    public class VirtualizatonPhase : ProtectionPhase {
+        public VirtualizatonPhase(ConfuserComponent parent) : base(parent) { }
+        public override string Name => "MemeVM.Virtualization";
+        public override ProtectionTargets Targets => ProtectionTargets.Methods;
+
+        protected override void Execute(ConfuserContext context, ProtectionParameters parameters) {
+            if (!parameters.Targets.Any())
+                return;
+
+            context.CurrentModuleWriterListener.OnWriterEvent += InsertVMBodies;
+
+            // ReSharper disable once PossibleInvalidCastExceptionInForeachLoop
+            foreach (MethodDef method in parameters.Targets.WithProgress(context.Logger)) {
+                if (!method.HasBody || method.DeclaringType.IsGlobalModuleType || method.Body.HasExceptionHandlers)
+                    continue;
+
+                var module = method.Module;
+                
+                if (!Context.Bodies.ContainsKey(module))
+                    Context.Bodies.Add(module, new VMBody());
+
+                var translated = Dispatcher.TranslateMethod(Context.Bodies[module], method);
+                if (translated == null)
+                    continue;
+                
+                Context.Bodies[module].Translated.Add(method, translated);
+                Context.Bodies[module].MethodToIndex.Add(method, Context.Bodies[module].Translated.Count - 1);
+                context.CheckCancellation();
+            }
+
+            foreach (var pair in Context.Bodies) {
+                if (pair.Value.Translated.Count < 1)
+                    continue;
+
+                var target = pair.Key.Import(Context.Entry);
+                foreach (var translated in pair.Value.Translated.WithProgress(context.Logger)) {
+                    var method = translated.Key;
+                    method.Body = new CilBody { MaxStack = 1 };
+                    var body = method.Body.Instructions;
+
+                    body.Add(OpCodes.Ldtoken.ToInstruction(method.DeclaringType));
+                    body.Add(OpCodes.Ldc_I4.ToInstruction(pair.Value.MethodToIndex[method]));
+
+                    AddParameters(method);
+
+                    var genericType = method.ReturnType == method.Module.CorLibTypes.Void ? target.DeclaringType.ToTypeSig() : method.ReturnType;
+                    var sig = new MethodSpecUser((MemberRef)target, new GenericInstMethodSig(genericType));
+                    body.Add(OpCodes.Call.ToInstruction(sig));
+
+                    if (method.ReturnType == method.Module.CorLibTypes.Void)
+                        body.Add(OpCodes.Pop.ToInstruction());
+
+                    body.Add(OpCodes.Ret.ToInstruction());
+                    context.CheckCancellation();
+                }
+            }
+
+            Context.RuntimeModule.Dispose();
+        }
+
+        static void InsertVMBodies(object sender, ModuleWriterListenerEventArgs e) {
+            var writer = (ModuleWriterBase)sender;
+            if (e.WriterEvent != ModuleWriterEvent.MDMemberDefRidsAllocated)
+                return;
+
+            TokenGetter.Writer = writer;
+
+            var body = Context.Bodies[writer.Module];
+            var data = body.Serialize();
+            writer.Module.Resources.Add(new EmbeddedResource(" ", Compress(data)));
+        }
+
+        static byte[] Compress(byte[] array) {
+            using (var ms = new MemoryStream()) {
+                using (var def = new DeflateStream(ms, CompressionLevel.Optimal)) {
+                    def.Write(array, 0, array.Length);
+                }
+
+                return ms.ToArray();
+            }
+        }
+
+        static void AddParameters(MethodDef method) {
+            if (method.Parameters.Count == 0) {
+                method.Body.Instructions.Add(OpCodes.Ldnull.ToInstruction());
+                return;
+            }
+
+            method.Body.Instructions.Add(OpCodes.Ldc_I4.ToInstruction(method.Parameters.Count));
+            method.Body.Instructions.Add(OpCodes.Newarr.ToInstruction(method.Module.CorLibTypes.Object));
+            method.Body.Instructions.Add(OpCodes.Dup.ToInstruction());
+
+            for (var i = 0; i < method.Parameters.Count; i++) {
+                method.Body.Instructions.Add(OpCodes.Ldc_I4.ToInstruction(i));
+                method.Body.Instructions.Add(OpCodes.Ldarg.ToInstruction(method.Parameters[i]));
+
+                var cor = method.Module.CorLibTypes;
+                var param = method.Parameters[i];
+                if (!param.IsHiddenThisParameter) {
+                    if (param.Type != cor.String && param.Type != cor.Object && param.Type != cor.TypedReference) {
+                        var spec = new TypeSpecUser(param.Type);
+                        method.Body.Instructions.Add(new Instruction(OpCodes.Box, spec));
+                    }
+                }
+
+                method.Body.Instructions.Add(OpCodes.Stelem_Ref.ToInstruction());
+                method.Body.Instructions.Add(OpCodes.Dup.ToInstruction());
+            }
+
+            method.Body.Instructions.Remove(method.Body.Instructions.Last());
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("MemeVM")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("MemeVM")]
+[assembly: AssemblyCopyright("Copyright Â© xsilent007  2019")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Setting ComVisible to false makes the types in this assembly not visible
+// to COM components.  If you need to access a type in this assembly from
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("ef18f7f2-1f03-481c-98f9-4a18a2f12c11")]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+
+================================================
+File: MemeVM/Translation/Dispatcher.cs
+================================================
+ï»¿using System.Collections.Generic;
+using dnlib.DotNet;
+using MemeVM.Translation.Helpers;
+
+namespace MemeVM.Translation {
+    static class Dispatcher {
+        internal static List<VMInstruction> TranslateMethod(VMBody body, MethodDef method) {
+            var list = new List<VMInstruction>();
+
+            for (var i = 0; i < method.Body.Instructions.Count; i++) {
+                var translator = Map.Lookup(method.Body.Instructions[i].OpCode);
+                if (translator == null)
+                    return null;
+
+                var res = translator.Translate(body, method, i, body.OffsetHelper, out var good);
+                if (res.OpCode != VMOpCode.UNUSED) list.Add(res);
+                if (!good)
+                    return null;
+            }
+
+            //TODO: Exception handlers
+
+            return list;
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM/Translation/IHandler.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using MemeVM.Translation.Helpers;
+
+namespace MemeVM.Translation {
+    interface IHandler {
+        OpCode[] Translates { get; }
+        VMOpCode Output { get; }
+        VMInstruction Translate(VMBody body, MethodDef method, int index, Offsets helper, out bool success);
+        byte[] Serialize(VMBody body, VMInstruction instruction, Offsets helper);
+    }
+}
+
+
+
+================================================
+File: MemeVM/Translation/VMBody.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Text;
+using dnlib.DotNet;
+using MemeVM.Translation.Helpers;
+
+namespace MemeVM.Translation {
+    class VMBody {
+        internal VMBody() {
+            References = new List<string>();
+            MethodToIndex = new Dictionary<MethodDef, int>();
+            Translated = new Dictionary<MethodDef, List<VMInstruction>>();
+            OffsetHelper = new Offsets();
+        }
+
+        internal List<string> References;
+        internal Dictionary<MethodDef, int> MethodToIndex;
+        internal Dictionary<MethodDef, List<VMInstruction>> Translated;
+        internal Offsets OffsetHelper;
+
+        internal byte[] Serialize() {
+            var arr = new List<byte>();
+
+            var rCount = References.Count;
+            arr.AddRange(BitConverter.GetBytes(rCount));
+            foreach (var reference in References) {
+                arr.AddRange(BitConverter.GetBytes(reference.Length));
+                arr.AddRange(Encoding.UTF8.GetBytes(reference));
+            }
+
+            var mCount = Translated.Count;
+            arr.AddRange(BitConverter.GetBytes(mCount));
+            foreach (var method in Translated.Values) {
+                arr.AddRange(BitConverter.GetBytes(method.Count));
+                foreach (var instruction in method) {
+                    arr.AddRange(Map.Lookup(instruction.OpCode).Serialize(this, instruction, OffsetHelper));
+                }
+            }
+
+            return arr.ToArray();
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM/Translation/VMInstruction.cs
+================================================
+ï»¿namespace MemeVM.Translation {
+    struct VMInstruction {
+        internal VMInstruction(VMOpCode code, object op = null) {
+            OpCode = code;
+            Operand = op;
+        }
+
+        internal VMOpCode OpCode;
+        internal object Operand;
+    }
+}
+
+
+
+================================================
+File: MemeVM/Translation/VMOpCode.cs
+================================================
+ï»¿namespace MemeVM.Translation {
+    enum VMOpCode : byte {
+        Int32,
+        Int64,
+        Float,
+        Double,
+        String,
+        Null,
+
+        Add,
+        Sub,
+        Mul,
+        Div,
+        Rem,
+
+        Dup,
+        Pop,
+
+        Jmp,
+        Jt,
+        Jf,
+        Je,
+        Jne,
+        Jge,
+        Jgt,
+        Jle,
+        Jlt,
+
+        Cmp,
+        Cgt,
+        Clt,
+
+        Newarr,
+
+        Ldarg,
+        Ldloc,
+        Ldfld,
+        Ldelem,
+
+        Starg,
+        Stloc,
+        Stfld,
+        Stelem,
+
+        Call,
+
+        Ret,
+
+        //DONT CHANGE
+        UNUSED
+    }
+}
+
+
+
+================================================
+File: MemeVM/Translation/Handlers/Add.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using MemeVM.Translation.Helpers;
+
+namespace MemeVM.Translation.Handlers {
+    class Add : IHandler {
+        public OpCode[] Translates => new[] { OpCodes.Add, OpCodes.Add_Ovf, OpCodes.Add_Ovf_Un };
+        public VMOpCode Output => VMOpCode.Add;
+        public VMInstruction Translate(VMBody body, MethodDef method, int index, Offsets helper, out bool success) {
+            success = true;
+            return new VMInstruction(VMOpCode.Add);
+        }
+
+        public byte[] Serialize(VMBody body, VMInstruction instruction, Offsets helper) {
+            return new[] { (byte)VMOpCode.Add };
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM/Translation/Handlers/Branching.cs
+================================================
+ï»¿using System;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using MemeVM.Translation.Helpers;
+
+namespace MemeVM.Translation.Handlers {
+    class Br : IHandler {
+        public OpCode[] Translates => new[] { OpCodes.Br };
+        public VMOpCode Output => VMOpCode.Jmp;
+        public VMInstruction Translate(VMBody body, MethodDef method, int index, Offsets helper, out bool success) {
+            var operand = method.Body.Instructions.IndexOf((Instruction)method.Body.Instructions[index].Operand);
+            success = true;
+            return new VMInstruction(VMOpCode.Jmp, operand);
+        }
+
+        public byte[] Serialize(VMBody body, VMInstruction instruction, Offsets helper) {
+            var buf = new byte[5];
+            buf[0] = (byte)VMOpCode.Jmp;
+            Array.Copy(BitConverter.GetBytes(helper.Get((int)instruction.Operand)), 0, buf, 1, 4);
+            return buf;
+        }
+    }
+
+    class Brtrue : IHandler {
+        public OpCode[] Translates => new[] { OpCodes.Brtrue };
+        public VMOpCode Output => VMOpCode.Jt;
+        public VMInstruction Translate(VMBody body, MethodDef method, int index, Offsets helper, out bool success) {
+            var operand = method.Body.Instructions.IndexOf((Instruction)method.Body.Instructions[index].Operand);
+            success = true;
+            return new VMInstruction(VMOpCode.Jt, operand);
+        }
+
+        public byte[] Serialize(VMBody body, VMInstruction instruction, Offsets helper) {
+            var buf = new byte[5];
+            buf[0] = (byte)VMOpCode.Jt;
+            Array.Copy(BitConverter.GetBytes(helper.Get((int)instruction.Operand)), 0, buf, 1, 4);
+            return buf;
+        }
+    }
+
+    class Brfalse : IHandler {
+        public OpCode[] Translates => new[] { OpCodes.Brfalse };
+        public VMOpCode Output => VMOpCode.Jf;
+        public VMInstruction Translate(VMBody body, MethodDef method, int index, Offsets helper, out bool success) {
+            var operand = method.Body.Instructions.IndexOf((Instruction)method.Body.Instructions[index].Operand);
+            success = true;
+            return new VMInstruction(VMOpCode.Jf, operand);
+        }
+
+        public byte[] Serialize(VMBody body, VMInstruction instruction, Offsets helper) {
+            var buf = new byte[5];
+            buf[0] = (byte)VMOpCode.Jf;
+            Array.Copy(BitConverter.GetBytes(helper.Get((int)instruction.Operand)), 0, buf, 1, 4);
+            return buf;
+        }
+    }
+
+    class Beq : IHandler {
+        public OpCode[] Translates => new[] { OpCodes.Beq };
+        public VMOpCode Output => VMOpCode.Je;
+        public VMInstruction Translate(VMBody body, MethodDef method, int index, Offsets helper, out bool success) {
+            success = true;
+            return new VMInstruction(VMOpCode.Je, method.Body.Instructions.IndexOf(method.Body.Instructions[index]));
+        }
+
+        public byte[] Serialize(VMBody body, VMInstruction instruction, Offsets helper) {
+            var buf = new byte[5];
+            buf[0] = (byte)VMOpCode.Je;
+            Array.Copy(BitConverter.GetBytes(helper.Get((int)instruction.Operand)), 0, buf, 1, 4);
+            return buf;
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM/Translation/Handlers/Call.cs
+================================================
+ï»¿using System;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using MemeVM.Translation.Helpers;
+
+namespace MemeVM.Translation.Handlers {
+    //TODO: Generic methods...
+    class Call : IHandler {
+        public OpCode[] Translates => new[] { OpCodes.Call, OpCodes.Callvirt, OpCodes.Newobj };
+        public VMOpCode Output => VMOpCode.Call;
+        public VMInstruction Translate(VMBody body, MethodDef method, int index, Offsets helper, out bool success) {
+            var operand = method.Body.Instructions[index].Operand;
+            if (operand is MethodSpec) {
+                success = false;
+                return new VMInstruction(VMOpCode.UNUSED);
+            }
+
+            var target = ((IMethod)operand).ResolveMethodDef();
+            var fqname = target.Module.Assembly.FullName;
+            if (!body.References.Contains(fqname))
+                body.References.Add(fqname);
+
+            success = true;
+            return new VMInstruction(VMOpCode.Call, new Tuple<short, MethodDef>((short)body.References.IndexOf(fqname), target));
+        }
+
+        public byte[] Serialize(VMBody body, VMInstruction instruction, Offsets helper) {
+            var buf = new byte[8];
+            buf[0] = (byte)VMOpCode.Call;
+            var (referenceId, method) = (Tuple<short, MethodDef>)instruction.Operand;
+
+            if (!body.Translated.ContainsKey(method)) {
+                Array.Copy(BitConverter.GetBytes(referenceId), 0, buf, 1, 2);
+                Array.Copy(BitConverter.GetBytes(TokenGetter.GetMdToken(method)), 0, buf, 3, 4);
+                buf[7] = 0;
+                return buf;
+            }
+
+            Array.Copy(BitConverter.GetBytes((short)body.MethodToIndex[method]), 0, buf, 1, 2);
+            Array.Copy(BitConverter.GetBytes(method.Parameters.Count), 0, buf, 3, 4);
+            buf[7] = 1;
+            return buf;
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM/Translation/Handlers/Comparisons.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using MemeVM.Translation.Helpers;
+
+namespace MemeVM.Translation.Handlers {
+    class Ceq : IHandler {
+        public OpCode[] Translates => new[] { OpCodes.Ceq };
+        public VMOpCode Output => VMOpCode.Cmp;
+        public VMInstruction Translate(VMBody body, MethodDef method, int index, Offsets helper, out bool success) {
+            success = true;
+            return new VMInstruction(VMOpCode.Cmp);
+        }
+
+        public byte[] Serialize(VMBody body, VMInstruction instruction, Offsets helper) =>
+            new[] { (byte)VMOpCode.Cmp };
+    }
+
+    class Cgt : IHandler {
+        public OpCode[] Translates => new[] { OpCodes.Cgt };
+        public VMOpCode Output => VMOpCode.Cgt;
+        public VMInstruction Translate(VMBody body, MethodDef method, int index, Offsets helper, out bool success) {
+            success = true;
+            return new VMInstruction(VMOpCode.Cgt);
+        }
+
+        public byte[] Serialize(VMBody body, VMInstruction instruction, Offsets helper) =>
+            new[] { (byte)VMOpCode.Cgt };
+    }
+
+    class Clt : IHandler {
+        public OpCode[] Translates => new[] { OpCodes.Clt };
+        public VMOpCode Output => VMOpCode.Clt;
+        public VMInstruction Translate(VMBody body, MethodDef method, int index, Offsets helper, out bool success) {
+            success = true;
+            return new VMInstruction(VMOpCode.Clt);
+        }
+
+        public byte[] Serialize(VMBody body, VMInstruction instruction, Offsets helper) =>
+            new[] { (byte)VMOpCode.Clt };
+    }
+}
+
+
+
+================================================
+File: MemeVM/Translation/Handlers/Dup.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using MemeVM.Translation.Helpers;
+
+namespace MemeVM.Translation.Handlers {
+    class Dup : IHandler {
+        public OpCode[] Translates => new[] { OpCodes.Dup };
+        public VMOpCode Output => VMOpCode.Dup;
+        public VMInstruction Translate(VMBody body, MethodDef method, int index, Offsets helper, out bool success) {
+            success = true;
+            return new VMInstruction(VMOpCode.Dup);
+        }
+
+        public byte[] Serialize(VMBody body, VMInstruction instruction, Offsets helper) =>
+            new[] { (byte)VMOpCode.Dup };
+    }
+}
+
+
+
+================================================
+File: MemeVM/Translation/Handlers/Int.cs
+================================================
+ï»¿using System;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using MemeVM.Translation.Helpers;
+
+namespace MemeVM.Translation.Handlers {
+    class Int : IHandler {
+        public OpCode[] Translates => new[] { OpCodes.Ldc_I4 };
+        public VMOpCode Output => VMOpCode.Int32;
+        public VMInstruction Translate(VMBody body, MethodDef method, int index, Offsets helper, out bool success) {
+            success = true;
+            return new VMInstruction(VMOpCode.Int32, (int)method.Body.Instructions[index].Operand);
+        }
+
+        public byte[] Serialize(VMBody body, VMInstruction instruction, Offsets helper) {
+            var buf = new byte[5];
+            buf[0] = (byte)VMOpCode.Int32;
+            Array.Copy(BitConverter.GetBytes((int)instruction.Operand), 0, buf, 1, 4);
+
+            return buf;
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM/Translation/Handlers/Ldarg.cs
+================================================
+ï»¿using System;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using MemeVM.Translation.Helpers;
+
+namespace MemeVM.Translation.Handlers {
+    class Ldarg : IHandler {
+        public OpCode[] Translates => new[] { OpCodes.Ldarg };
+        public VMOpCode Output => VMOpCode.Ldarg;
+        public VMInstruction Translate(VMBody body, MethodDef method, int index, Offsets helper, out bool success) {
+            var arg = (short)method.Parameters.IndexOf((Parameter)method.Body.Instructions[index].Operand);
+            success = true;
+            return new VMInstruction(VMOpCode.Ldarg, arg);
+        }
+
+        public byte[] Serialize(VMBody body, VMInstruction instruction, Offsets helper) {
+            var buf = new byte[3];
+            buf[0] = (byte)VMOpCode.Ldarg;
+            Array.Copy(BitConverter.GetBytes((short)instruction.Operand), 0, buf, 1, 2);
+            return buf;
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM/Translation/Handlers/Ldelem.cs
+================================================
+ï»¿using System;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using MemeVM.Translation.Helpers;
+
+namespace MemeVM.Translation.Handlers {
+    /*class Ldelem : IHandler {
+        public OpCode[] Translates => new[] { OpCodes.Ldelem, OpCodes.Ldelem_Ref };
+        public VMOpCode Output => VMOpCode.Ldelem;
+        public VMInstruction Translate(VMBody body, MethodDef method, int index, Offsets helper, out bool success) {
+            throw new NotImplementedException();
+        }
+
+        public byte[] Serialize(VMBody body, VMInstruction instruction, Offsets helper) {
+            throw new NotImplementedException();
+        }
+    }*/
+}
+
+
+
+================================================
+File: MemeVM/Translation/Handlers/Ldfld.cs
+================================================
+ï»¿using System;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using MemeVM.Translation.Helpers;
+
+namespace MemeVM.Translation.Handlers {
+    class Ldfld : IHandler {
+        public OpCode[] Translates => new[] { OpCodes.Ldfld, OpCodes.Ldsfld };
+        public VMOpCode Output => VMOpCode.Ldfld;
+        public VMInstruction Translate(VMBody body, MethodDef method, int index, Offsets helper, out bool success) {
+            var op = ((IField)method.Body.Instructions[index].Operand).ResolveFieldDef();
+            if (op == null) {
+                success = false;
+                return new VMInstruction(VMOpCode.UNUSED);
+            }
+
+            var fqname = op.Module.Assembly.FullName;
+            if (!body.References.Contains(fqname))
+                body.References.Add(fqname);
+
+            success = true;
+            return new VMInstruction(VMOpCode.Ldfld, new Tuple<short, FieldDef>((short)body.References.IndexOf(fqname), op));
+        }
+
+        public byte[] Serialize(VMBody body, VMInstruction instruction, Offsets helper) {
+            var buf = new byte[7];
+            buf[0] = (byte)VMOpCode.Ldfld;
+            var (refid, field) = (Tuple<short, FieldDef>)instruction.Operand;
+            Array.Copy(BitConverter.GetBytes(refid), 0, buf, 1, 2);
+            Array.Copy(BitConverter.GetBytes(TokenGetter.GetMdToken(field)), 0, buf, 3, 4);
+            return buf;
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM/Translation/Handlers/Ldloc.cs
+================================================
+ï»¿using System;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using MemeVM.Translation.Helpers;
+
+namespace MemeVM.Translation.Handlers {
+    class Ldloc : IHandler {
+        public OpCode[] Translates => new[] { OpCodes.Ldloc };
+        public VMOpCode Output => VMOpCode.Ldloc;
+        public VMInstruction Translate(VMBody body, MethodDef method, int index, Offsets helper, out bool success) {
+            var loc = (short)method.Body.Variables.IndexOf((Local)method.Body.Instructions[index].Operand);
+            success = true;
+            return new VMInstruction(VMOpCode.Ldloc, loc);
+        }
+
+        public byte[] Serialize(VMBody body, VMInstruction instruction, Offsets helper) {
+            var buf = new byte[3];
+            buf[0] = (byte)VMOpCode.Ldloc;
+            Array.Copy(BitConverter.GetBytes((short)instruction.Operand), 0, buf, 1, 2);
+            return buf;
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM/Translation/Handlers/Ldnull.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using MemeVM.Translation.Helpers;
+
+namespace MemeVM.Translation.Handlers {
+    class Ldnull : IHandler {
+        public OpCode[] Translates => new[] { OpCodes.Ldnull };
+        public VMOpCode Output => VMOpCode.Null;
+        public VMInstruction Translate(VMBody body, MethodDef method, int index, Offsets helper, out bool success) {
+            success = true;
+            return new VMInstruction(VMOpCode.Null);
+        }
+
+        public byte[] Serialize(VMBody body, VMInstruction instruction, Offsets helper) {
+            var buf = new byte[1];
+            buf[0] = (byte)VMOpCode.Null;
+            return buf;
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM/Translation/Handlers/Ldstr.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using MemeVM.Translation.Helpers;
+
+namespace MemeVM.Translation.Handlers {
+    class Ldstr : IHandler {
+        public OpCode[] Translates => new[] { OpCodes.Ldstr };
+        public VMOpCode Output => VMOpCode.String;
+        public VMInstruction Translate(VMBody body, MethodDef method, int index, Offsets helper, out bool success) {
+            var operand = (string)method.Body.Instructions[index].Operand;
+
+            success = true;
+            return new VMInstruction(VMOpCode.String, operand);
+        }
+
+        public byte[] Serialize(VMBody body, VMInstruction instruction, Offsets helper) {
+            var str = Encoding.UTF8.GetBytes((string)instruction.Operand);
+            var buf = new byte[5 + str.Length];
+            buf[0] = (byte)VMOpCode.String;
+            Array.Copy(BitConverter.GetBytes(str.Length), 0, buf, 1, 4);
+            Array.Copy(str, 0, buf, 5, str.Length);
+            return buf;
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM/Translation/Handlers/Long.cs
+================================================
+ï»¿using System;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using MemeVM.Translation.Helpers;
+
+namespace MemeVM.Translation.Handlers {
+    class Long : IHandler {
+        public OpCode[] Translates => new[] { OpCodes.Ldc_I8 };
+        public VMOpCode Output => VMOpCode.Int64;
+        public VMInstruction Translate(VMBody body, MethodDef method, int index, Offsets helper, out bool success) {
+            success = true;
+            return new VMInstruction(VMOpCode.Int32, (long)method.Body.Instructions[index].Operand);
+        }
+
+        public byte[] Serialize(VMBody body, VMInstruction instruction, Offsets helper) {
+            var buf = new byte[9];
+            buf[0] = (byte)VMOpCode.Int64;
+
+            Array.Copy(BitConverter.GetBytes((long)instruction.Operand), 0, buf, 1, 8);
+            return buf;
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM/Translation/Handlers/Newarr.cs
+================================================
+ï»¿using System;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using MemeVM.Translation.Helpers;
+
+namespace MemeVM.Translation.Handlers {
+    //TODO: Generics
+    class Newarr : IHandler {
+        public OpCode[] Translates => new[] { OpCodes.Newarr };
+        public VMOpCode Output => VMOpCode.Newarr;
+        public VMInstruction Translate(VMBody body, MethodDef method, int index, Offsets helper, out bool success) {
+            var type = ((ITypeDefOrRef)method.Body.Instructions[index].Operand).ResolveTypeDef();
+            if (type == null) {
+                success = false;
+                return new VMInstruction(VMOpCode.UNUSED);
+            }
+
+            var fqname = type.Module.Assembly.FullName;
+            if (!body.References.Contains(fqname))
+                body.References.Add(fqname);
+
+            success = true;
+            return new VMInstruction(VMOpCode.Newarr, new Tuple<short, TypeDef>((short)body.References.IndexOf(fqname), type));
+        }
+
+        public byte[] Serialize(VMBody body, VMInstruction instruction, Offsets helper) {
+            var buf = new byte[7];
+            buf[0] = (byte)VMOpCode.Newarr;
+            var (referenceid, type) = (Tuple<short, TypeDef>)instruction.Operand;
+            Array.Copy(BitConverter.GetBytes(referenceid), 0, buf, 1, 2);
+            Array.Copy(BitConverter.GetBytes(TokenGetter.GetMdToken(type)), 0, buf, 3, 4);
+            return buf;
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM/Translation/Handlers/Pop.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using MemeVM.Translation.Helpers;
+
+namespace MemeVM.Translation.Handlers {
+    class Pop : IHandler {
+        public OpCode[] Translates => new[] { OpCodes.Pop };
+        public VMOpCode Output => VMOpCode.Pop;
+        public VMInstruction Translate(VMBody body, MethodDef method, int index, Offsets helper, out bool success) {
+            success = true;
+            return new VMInstruction(VMOpCode.Pop);
+        }
+
+        public byte[] Serialize(VMBody body, VMInstruction instruction, Offsets helper) {
+            var buf = new byte[1];
+            buf[0] = (byte)VMOpCode.Pop;
+            return buf;
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM/Translation/Handlers/Ret.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using MemeVM.Translation.Helpers;
+
+namespace MemeVM.Translation.Handlers {
+    class Ret : IHandler {
+        public OpCode[] Translates => new[] { OpCodes.Ret };
+        public VMOpCode Output => VMOpCode.Ret;
+        public VMInstruction Translate(VMBody body, MethodDef method, int index, Offsets helper, out bool success) {
+            success = true;
+            return new VMInstruction(VMOpCode.Ret);
+        }
+
+        public byte[] Serialize(VMBody body, VMInstruction instruction, Offsets helper) {
+            return new[] { (byte)VMOpCode.Ret };
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM/Translation/Handlers/Starg.cs
+================================================
+ï»¿using System;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using MemeVM.Translation.Helpers;
+
+namespace MemeVM.Translation.Handlers {
+    class Starg : IHandler {
+        public OpCode[] Translates => new[] { OpCodes.Starg };
+        public VMOpCode Output => VMOpCode.Starg;
+        public VMInstruction Translate(VMBody body, MethodDef method, int index, Offsets helper, out bool success) {
+            var arg = (short)method.Parameters.IndexOf((Parameter)method.Body.Instructions[index].Operand);
+            success = true;
+            return new VMInstruction(VMOpCode.Starg, arg);
+        }
+
+        public byte[] Serialize(VMBody body, VMInstruction instruction, Offsets helper) {
+            var buf = new byte[3];
+            buf[0] = (byte)VMOpCode.Starg;
+            Array.Copy(BitConverter.GetBytes((short)instruction.Operand), 0, buf, 1, 2);
+            return buf;
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM/Translation/Handlers/Stfld.cs
+================================================
+ï»¿using System;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using MemeVM.Translation.Helpers;
+
+namespace MemeVM.Translation.Handlers {
+    class Stfld : IHandler {
+        public OpCode[] Translates => new[] { OpCodes.Stfld, OpCodes.Stsfld };
+        public VMOpCode Output => VMOpCode.Stfld;
+        public VMInstruction Translate(VMBody body, MethodDef method, int index, Offsets helper, out bool success) {
+            var op = ((IField)method.Body.Instructions[index].Operand).ResolveFieldDef();
+            if (op == null) {
+                success = false;
+                return new VMInstruction(VMOpCode.UNUSED);
+            }
+
+            var fqname = op.Module.Assembly.FullName;
+            if (!body.References.Contains(fqname))
+                body.References.Add(fqname);
+
+            success = true;
+            return new VMInstruction(VMOpCode.Stfld, new Tuple<short, FieldDef>((short)body.References.IndexOf(fqname), op));
+        }
+
+        public byte[] Serialize(VMBody body, VMInstruction instruction, Offsets helper) {
+            var buf = new byte[7];
+            buf[0] = (byte)VMOpCode.Stfld;
+            var (refid, field) = (Tuple<short, FieldDef>)instruction.Operand;
+            Array.Copy(BitConverter.GetBytes(refid), 0, buf, 1, 2);
+            Array.Copy(BitConverter.GetBytes(TokenGetter.GetMdToken(field)), 0, buf, 3, 4);
+            return buf;
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM/Translation/Handlers/Stloc.cs
+================================================
+ï»¿using System;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using MemeVM.Translation.Helpers;
+
+namespace MemeVM.Translation.Handlers {
+    class Stloc : IHandler {
+        public OpCode[] Translates => new[] { OpCodes.Stloc };
+        public VMOpCode Output => VMOpCode.Stloc;
+        public VMInstruction Translate(VMBody body, MethodDef method, int index, Offsets helper, out bool success) {
+            var loc = (short)method.Body.Variables.IndexOf((Local)method.Body.Instructions[index].Operand);
+            success = true;
+            return new VMInstruction(VMOpCode.Stloc, loc);
+        }
+
+        public byte[] Serialize(VMBody body, VMInstruction instruction, Offsets helper) {
+            var buf = new byte[3];
+            buf[0] = (byte)VMOpCode.Stloc;
+            Array.Copy(BitConverter.GetBytes((short)instruction.Operand), 0, buf, 1, 2);
+            return buf;
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM/Translation/Handlers/Useless.cs
+================================================
+ï»¿using System;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using MemeVM.Translation.Helpers;
+
+namespace MemeVM.Translation.Handlers {
+    class Useless : IHandler {
+        public OpCode[] Translates => new[] { OpCodes.Nop, OpCodes.Break };
+        public VMOpCode Output => VMOpCode.UNUSED;
+        public VMInstruction Translate(VMBody body, MethodDef method, int index, Offsets helper, out bool success) {
+            helper.Add(index, -1);
+            success = true;
+            return new VMInstruction(VMOpCode.UNUSED);
+        }
+
+        public byte[] Serialize(VMBody body, VMInstruction instruction, Offsets helper) =>
+            Array.Empty<byte>();
+    }
+}
+
+
+
+================================================
+File: MemeVM/Translation/Helpers/Map.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using dnlib.DotNet.Emit;
+
+namespace MemeVM.Translation.Helpers {
+    static class Map {
+        static Map() {
+            foreach (var type in typeof(Map).Assembly.DefinedTypes) {
+                if (type.IsInterface)
+                    continue;
+
+                if (!typeof(IHandler).IsAssignableFrom(type))
+                    continue;
+
+                var instance = (IHandler)Activator.CreateInstance(type);
+                
+                foreach (var regular in instance.Translates)
+                    OpCodeToHandler.Add(regular, instance);
+
+                VMOpCodeToHandler.Add(instance.Output, instance);
+            }
+        }
+
+        static readonly Dictionary<OpCode, IHandler> OpCodeToHandler = new Dictionary<OpCode, IHandler>();
+        static readonly Dictionary<VMOpCode, IHandler> VMOpCodeToHandler = new Dictionary<VMOpCode, IHandler>();
+
+        internal static IHandler Lookup(OpCode opcode) =>
+            OpCodeToHandler.ContainsKey(opcode) ? OpCodeToHandler[opcode] : null;
+
+        internal static IHandler Lookup(VMOpCode opcode) =>
+            VMOpCodeToHandler.ContainsKey(opcode) ? VMOpCodeToHandler[opcode] : null;
+    }
+}
+
+
+
+================================================
+File: MemeVM/Translation/Helpers/Offset.cs
+================================================
+ï»¿namespace MemeVM.Translation.Helpers {
+    struct Offset {
+        internal Offset(int start, int val) {
+            Starts = start;
+            Value = val;
+        }
+
+        internal int Starts;
+        internal int Value;
+    }
+}
+
+
+
+================================================
+File: MemeVM/Translation/Helpers/Offsets.cs
+================================================
+ï»¿using System.Collections.Generic;
+using System.Linq;
+
+namespace MemeVM.Translation.Helpers {
+    class Offsets {
+        internal Offsets() =>
+            _offsets = new List<Offset>();
+
+        readonly List<Offset> _offsets;
+
+        internal void Add(int index, int offset) =>
+            _offsets.Add(new Offset(index, offset));
+
+        internal int Get(int index) =>
+            _offsets.Where(o => o.Starts < index).Sum(off => off.Value) - 1 + index;
+    }
+}
+
+
+
+================================================
+File: MemeVM/Translation/Helpers/TokenGetter.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Writer;
+
+namespace MemeVM.Translation.Helpers {
+    static class TokenGetter {
+        internal static ModuleWriterBase Writer;
+
+        internal static int GetMdToken(IMemberDef member) =>
+            Writer.Module == member.Module ? Writer.MetaData.GetToken(member).ToInt32() : member.MDToken.ToInt32();
+    }
+}
+
+
+
+================================================
+File: MemeVM.Confuser/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.7.2" />
+    </startup>
+</configuration>
+
+
+================================================
+File: MemeVM.Confuser/MemeVM.Confuser.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{77B2C83B-CA34-4738-9384-C52F0121647C}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>MemeVM.Confuser</RootNamespace>
+    <AssemblyName>MemeVM.Confuser</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Confuser.Core">
+      <HintPath>..\Confuser.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="dnlib">
+      <HintPath>..\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="MemeVMProtection.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MemeVM\MemeVM.csproj">
+      <Project>{ef18f7f2-1f03-481c-98f9-4a18a2f12c11}</Project>
+      <Name>MemeVM</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: MemeVM.Confuser/MemeVMProtection.cs
+================================================
+ï»¿using Confuser.Core;
+
+namespace MemeVM.Confuser {
+    [BeforeProtection("Ki.Resources", "Ki.Constants", "Ki.AntiTamper", "Ki.ControlFlow")]
+    public class MemeVMProtection : Protection {
+        public override string Name => "MemeVM";
+        public override string Description => "Virtualization for .NET";
+        public override string Id => "memevm";
+        public override string FullId => "xsilent007.MemeVM";
+        public override ProtectionPreset Preset => ProtectionPreset.None;
+
+        protected override void Initialize(ConfuserContext context) { }
+
+        protected override void PopulatePipeline(ProtectionPipeline pipeline) {
+            pipeline.InsertPostStage(PipelineStage.Inspection, new InjectPhase(this));
+            pipeline.InsertPreStage(PipelineStage.ProcessModule, new VirtualizatonPhase(this));
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM.Confuser/Program.cs
+================================================
+ï»¿using System;
+
+namespace MemeVM.Confuser {
+    class Program {
+        static void Main(string[] args) {
+            //
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM.Confuser/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("MemeVM.Confuser")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("MemeVM.Confuser")]
+[assembly: AssemblyCopyright("Copyright Â© xsilent007 2019")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Setting ComVisible to false makes the types in this assembly not visible
+// to COM components.  If you need to access a type in this assembly from
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("77b2c83b-ca34-4738-9384-c52f0121647c")]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+
+
+================================================
+File: MemeVM.Runtime/Body.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using MemeVM.Runtime.Helpers;
+
+namespace MemeVM.Runtime {
+    class Body {
+        internal Body(Stream resourceStream) {
+            _references = new Dictionary<string, Assembly>();
+            _methods = new List<List<Instruction>>();
+
+            using (var def = new DeflateStream(resourceStream, CompressionMode.Decompress)) {
+                using (var reader = new BinaryReader(def)) {
+                    var rCount = reader.ReadInt32();
+                    for (var i = 0; i < rCount; i++) {
+                        var len = reader.ReadInt32();
+                        _references.Add(Encoding.UTF8.GetString(reader.ReadBytes(len)), null);
+                    }
+
+                    var mCount = reader.ReadInt32();
+                    for (var i = 0; i < mCount; i++) {
+                        var len = reader.ReadInt32();
+                        var list = new List<Instruction>();
+                        for (var j = 0; j < len; j++) {
+                            var code = (OpCode)reader.ReadByte();
+                            list.Add(Map.Lookup(code).Deserialize(reader));
+                        }
+
+                        _methods.Add(list);
+                    }
+                }
+            }
+        }
+
+        readonly Dictionary<string, Assembly> _references;
+        readonly List<List<Instruction>> _methods;
+
+        internal Assembly CurrentAssembly { get; set; }
+
+        internal Assembly GetReference(short index) {
+            var pair = _references.ElementAt(index);
+
+            if (pair.Value == null)
+                _references[pair.Key] = AppDomain.CurrentDomain.Load(new AssemblyName(pair.Key));
+
+            return _references[pair.Key];
+        }
+
+        internal List<Instruction> GetMethod(int index) =>
+            _methods[index];
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/Dispatcher.cs
+================================================
+ï»¿using System.Collections.Generic;
+using System.Reflection;
+using MemeVM.Runtime.Engine;
+
+namespace MemeVM.Runtime {
+    static class Dispatcher {
+        static readonly Dictionary<Assembly, Body> Bodies = new Dictionary<Assembly, Body>();
+
+        internal static object Run(Assembly asm, int index, object[] parameters) {
+            var body = GetBody(asm);
+            body.CurrentAssembly = asm;
+
+            var instance = new VM(body.GetMethod(index).ToArray(), body, parameters);
+            return instance.Run();
+        }
+
+        internal static Body GetBody(Assembly asm) {
+            if (!Bodies.ContainsKey(asm))
+                Bodies.Add(asm, new Body(asm.GetManifestResourceStream(" ")));
+
+            return Bodies[asm];
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/Entry.cs
+================================================
+ï»¿using System;
+
+namespace MemeVM.Runtime
+{
+    public static class Entry {
+        public static T Run<T>(RuntimeTypeHandle handle, int index, object[] parameters) {
+            var result = Dispatcher.Run(Type.GetTypeFromHandle(handle).Assembly, index, parameters);
+
+            if (result is NoMoreStackItem)
+                return default(T);
+
+            if (typeof(T).IsEnum)
+                return (T)Enum.ToObject(typeof(T), result);
+
+            return (T)Convert.ChangeType(result, typeof(T));
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/IHandler.cs
+================================================
+ï»¿using System.IO;
+using MemeVM.Runtime.Engine;
+
+namespace MemeVM.Runtime {
+    interface IHandler {
+        OpCode Handles { get; }
+        void Handle(VM machine, Body body, Instruction instruction);
+        Instruction Deserialize(BinaryReader reader);
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/Instruction.cs
+================================================
+ï»¿namespace MemeVM.Runtime {
+    struct Instruction {
+        internal Instruction(OpCode code, object op = null) {
+            Code = code;
+            Operand = op;
+        }
+
+        internal OpCode Code;
+        internal object Operand;
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/MemeVM.Runtime.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{14D5D12E-9A32-4516-904E-DF3393626317}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MemeVM.Runtime</RootNamespace>
+    <AssemblyName>MemeVM.Runtime</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Body.cs" />
+    <Compile Include="Dispatcher.cs" />
+    <Compile Include="Engine\LocalStorage.cs" />
+    <Compile Include="Engine\Stack.cs" />
+    <Compile Include="Engine\VM.cs" />
+    <Compile Include="Engine\VMState.cs" />
+    <Compile Include="Entry.cs" />
+    <Compile Include="Handlers\Add.cs" />
+    <Compile Include="Handlers\Call.cs" />
+    <Compile Include="Handlers\Cgt.cs" />
+    <Compile Include="Handlers\Clt.cs" />
+    <Compile Include="Handlers\Cmp.cs" />
+    <Compile Include="Handlers\Dup.cs" />
+    <Compile Include="Handlers\Int.cs" />
+    <Compile Include="Handlers\Jf.cs" />
+    <Compile Include="Handlers\Jmp.cs" />
+    <Compile Include="Handlers\Jt.cs" />
+    <Compile Include="Handlers\Ldarg.cs" />
+    <Compile Include="Handlers\Ldfld.cs" />
+    <Compile Include="Handlers\Ldloc.cs" />
+    <Compile Include="Handlers\Long.cs" />
+    <Compile Include="Handlers\Newarr.cs" />
+    <Compile Include="Handlers\Null.cs" />
+    <Compile Include="Handlers\Pop.cs" />
+    <Compile Include="Handlers\Ret.cs" />
+    <Compile Include="Handlers\Stfld.cs" />
+    <Compile Include="Handlers\Stloc.cs" />
+    <Compile Include="Handlers\String.cs" />
+    <Compile Include="Helpers\Map.cs" />
+    <Compile Include="IHandler.cs" />
+    <Compile Include="Instruction.cs" />
+    <Compile Include="NoMoreStackItem.cs" />
+    <Compile Include="OpCode.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: MemeVM.Runtime/NoMoreStackItem.cs
+================================================
+ï»¿namespace MemeVM.Runtime { struct NoMoreStackItem { } }
+
+
+================================================
+File: MemeVM.Runtime/OpCode.cs
+================================================
+ï»¿namespace MemeVM.Runtime {
+    enum OpCode : byte {
+        Int32,
+        Int64,
+        Float,
+        Double,
+        String,
+        Null,
+
+        Add,
+        Sub,
+        Mul,
+        Div,
+        Rem,
+
+        Dup,
+        Pop,
+
+        Jmp,
+        Jt,
+        Jf,
+        Je,
+        Jne,
+        Jge,
+        Jgt,
+        Jle,
+        Jlt,
+
+        Cmp,
+        Cgt,
+        Clt,
+
+        Newarr,
+
+        Ldarg,
+        Ldloc,
+        Ldfld,
+        Ldelem,
+
+        Starg,
+        Stloc,
+        Stfld,
+        Stelem,
+
+        Call,
+
+        Ret
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/Engine/LocalStorage.cs
+================================================
+ï»¿using System;
+
+namespace MemeVM.Runtime.Engine {
+    class LocalStorage {
+        object[] _locals;
+
+        internal LocalStorage() =>
+            _locals = new object[10];
+
+        ~LocalStorage() {
+            Array.Clear(_locals, 0, _locals.Length);
+            _locals = null;
+        }
+
+        internal object Get(short index) =>
+            _locals[index];
+
+        internal void Set(short index, object val) {
+            if (index >= _locals.Length) {
+                var arr = new object[2 * _locals.Length];
+                Array.Copy(_locals, 0, arr, 0, _locals.Length);
+                _locals = arr;
+            }
+
+            _locals[index] = val;
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/Engine/Stack.cs
+================================================
+ï»¿using System;
+
+namespace MemeVM.Runtime.Engine {
+    class Stack {
+        object[] _array;
+        uint _index;
+
+        internal Stack() {
+            _array = new object[10];
+            _index = 0;
+        }
+
+        ~Stack() {
+            Array.Clear(_array, 0, _array.Length);
+            _array = null;
+            _index = 0;
+        }
+
+        internal void Push(object val) {
+            if (_index == _array.Length) {
+                var arr = new object[2 * _array.Length];
+                Array.Copy(_array, 0, arr, 0, _index);
+                _array = arr;
+            }
+
+            _array[_index++] = val;
+        }
+
+        internal object Pop() {
+            if (_index == 0)
+                return new NoMoreStackItem();
+
+            var res = _array[--_index];
+            _array[_index] = null;
+            return res;
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/Engine/VM.cs
+================================================
+ï»¿using System;
+using MemeVM.Runtime.Helpers;
+
+namespace MemeVM.Runtime.Engine {
+    class VM {
+        readonly Instruction[] _instructions;
+
+        internal int Ip;
+        internal VMState State;
+        internal readonly Stack Stack;
+        internal readonly LocalStorage Locals;
+        internal readonly Body VMBody;
+        internal object[] Parameters;
+
+        internal VM(Instruction[] program, Body body, object[] parameters) {
+            _instructions = program;
+
+            Ip = 0;
+            State = VMState.Next;
+            Stack = new Stack();
+            Locals = new LocalStorage();
+            VMBody = body;
+            Parameters = parameters;
+        }
+
+        internal object Run() {
+            for (;State == VMState.Next; ++Ip)
+                Map.Lookup(_instructions[Ip].Code).Handle(this, VMBody, _instructions[Ip]);
+
+            if (State == VMState.Return)
+                return Stack.Pop();
+
+            throw (Exception)Stack.Pop();
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/Engine/VMState.cs
+================================================
+ï»¿namespace MemeVM.Runtime.Engine {
+    enum VMState {
+        Next,
+        Exception,
+        Rethrow,
+        Return
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/Handlers/Add.cs
+================================================
+ï»¿using System.IO;
+using MemeVM.Runtime.Engine;
+
+namespace MemeVM.Runtime.Handlers {
+    class Add : IHandler {
+        public OpCode Handles => OpCode.Add;
+        public void Handle(VM machine, Body body, Instruction instruction) {
+            dynamic one = machine.Stack.Pop(), two = machine.Stack.Pop();
+
+            machine.Stack.Push(one + two);
+        }
+
+        public Instruction Deserialize(BinaryReader reader) => 
+            new Instruction(OpCode.Add);
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/Handlers/Call.cs
+================================================
+ï»¿using System;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using MemeVM.Runtime.Engine;
+
+namespace MemeVM.Runtime.Handlers {
+    //TODO: Generic methods
+    class Call : IHandler {
+        public OpCode Handles => OpCode.Call;
+        public void Handle(VM machine, Body body, Instruction instruction) {
+            var op = (Tuple<short, int, bool>)instruction.Operand;
+
+            if (!op.Item3) {
+                HandleNormal(machine, body, instruction);
+                return;
+            }
+
+            var index = op.Item1;
+            var pcount = op.Item2;
+
+            var parameters = new object[pcount];
+            for (var i = parameters.Length - 1; i >= 0; i--)
+                parameters[i] = machine.Stack.Pop();
+
+            var res = Dispatcher.Run(body.CurrentAssembly, index, parameters);
+            if (!(res is NoMoreStackItem))
+                machine.Stack.Push(res);
+        }
+
+        static void HandleNormal(VM machine, Body body, Instruction instruction) {
+            var op = (Tuple<short, int, bool>)instruction.Operand;
+
+            var asm = body.GetReference(op.Item1);
+            var info = asm.ManifestModule.ResolveMember(op.Item2);
+            var target = asm.ManifestModule.ResolveMethod(op.Item2);
+
+            var rawparams = target.GetParameters();
+            var paramscount = rawparams.Length;
+            var parameters = new object[paramscount];
+            for (var i = parameters.Length - 1; i >= 0; i--)
+                parameters[i] = machine.Stack.Pop();
+
+            if ((info.MemberType & MemberTypes.Constructor) == MemberTypes.Constructor) {
+                var ctorinfo = (ConstructorInfo)info;
+                machine.Stack.Push(ctorinfo.Invoke(parameters));
+                return;
+            }
+
+            var methodinfo = (MethodInfo)info;
+            var parent = methodinfo.IsStatic ? null : machine.Stack.Pop();
+            var res = target.Invoke(parent, parameters);
+            if (methodinfo.ReturnType != typeof(void))
+                machine.Stack.Push(res);
+        }
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Call, new Tuple<short, int, bool>(reader.ReadInt16(), reader.ReadInt32(), reader.ReadBoolean()));
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/Handlers/Cgt.cs
+================================================
+ï»¿using System.IO;
+using MemeVM.Runtime.Engine;
+
+namespace MemeVM.Runtime.Handlers {
+    class Cgt : IHandler {
+        public OpCode Handles => OpCode.Cgt;
+        public void Handle(VM machine, Body body, Instruction instruction) {
+            dynamic one = machine.Stack.Pop(), two = machine.Stack.Pop();
+
+            machine.Stack.Push(one > two);
+        }
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Cgt);
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/Handlers/Clt.cs
+================================================
+ï»¿using System.IO;
+using MemeVM.Runtime.Engine;
+
+namespace MemeVM.Runtime.Handlers {
+    class Clt : IHandler {
+        public OpCode Handles => OpCode.Clt;
+        public void Handle(VM machine, Body body, Instruction instruction) {
+            dynamic one = machine.Stack.Pop(), two = machine.Stack.Pop();
+
+            machine.Stack.Push(one < two);
+        }
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Clt);
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/Handlers/Cmp.cs
+================================================
+ï»¿using System.IO;
+using MemeVM.Runtime.Engine;
+
+namespace MemeVM.Runtime.Handlers {
+    class Cmp : IHandler {
+        public OpCode Handles => OpCode.Cmp;
+        public void Handle(VM machine, Body body, Instruction instruction) {
+            dynamic one = machine.Stack.Pop(), two = machine.Stack.Pop();
+
+            machine.Stack.Push(one == two);
+        }
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Cmp);
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/Handlers/Dup.cs
+================================================
+ï»¿using System.IO;
+using MemeVM.Runtime.Engine;
+
+namespace MemeVM.Runtime.Handlers {
+    class Dup : IHandler {
+        public OpCode Handles => OpCode.Dup;
+        public void Handle(VM machine, Body body, Instruction instruction) {
+            var value = machine.Stack.Pop();
+            machine.Stack.Push(value);
+            machine.Stack.Push(value);
+        }
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Dup);
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/Handlers/Int.cs
+================================================
+ï»¿using System.IO;
+using MemeVM.Runtime.Engine;
+
+namespace MemeVM.Runtime.Handlers {
+    class Int : IHandler {
+        public OpCode Handles => OpCode.Int32;
+        public void Handle(VM machine, Body body, Instruction instruction) =>
+            machine.Stack.Push(instruction.Operand);
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Int32, reader.ReadInt32());
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/Handlers/Jf.cs
+================================================
+ï»¿using System.IO;
+using MemeVM.Runtime.Engine;
+
+namespace MemeVM.Runtime.Handlers {
+    class Jf : IHandler {
+        public OpCode Handles => OpCode.Jf;
+        public void Handle(VM machine, Body body, Instruction instruction) {
+            var value = machine.Stack.Pop();
+            if (value == null || !(bool)value)
+                machine.Ip = (int)instruction.Operand;
+        }
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Jf, reader.ReadInt32());
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/Handlers/Jmp.cs
+================================================
+ï»¿using System.IO;
+using MemeVM.Runtime.Engine;
+
+namespace MemeVM.Runtime.Handlers {
+    class Jmp : IHandler {
+        public OpCode Handles => OpCode.Jmp;
+        public void Handle(VM machine, Body body, Instruction instruction) =>
+            machine.Ip = (int) instruction.Operand;
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Jmp, reader.ReadInt32());
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/Handlers/Jt.cs
+================================================
+ï»¿using System.IO;
+using MemeVM.Runtime.Engine;
+
+namespace MemeVM.Runtime.Handlers {
+    class Jt : IHandler {
+        public OpCode Handles => OpCode.Jt;
+        public void Handle(VM machine, Body body, Instruction instruction) {
+            var value = machine.Stack.Pop();
+            if (value != null && (bool) value)
+                machine.Ip = (int)instruction.Operand;
+        }
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Jt, reader.ReadInt32());
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/Handlers/Ldarg.cs
+================================================
+ï»¿using System.IO;
+using MemeVM.Runtime.Engine;
+
+namespace MemeVM.Runtime.Handlers {
+    class Ldarg : IHandler {
+        public OpCode Handles => OpCode.Ldarg;
+        public void Handle(VM machine, Body body, Instruction instruction) =>
+            machine.Stack.Push(machine.Parameters[(short)instruction.Operand]);
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Ldarg, reader.ReadInt16());
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/Handlers/Ldfld.cs
+================================================
+ï»¿using System;
+using System.IO;
+using MemeVM.Runtime.Engine;
+
+namespace MemeVM.Runtime.Handlers {
+    class Ldfld : IHandler {
+        public OpCode Handles => OpCode.Ldfld;
+        public void Handle(VM machine, Body body, Instruction instruction) {
+            var id = ((Tuple<short, int>)instruction.Operand).Item1;
+            var token = ((Tuple<short, int>)instruction.Operand).Item2;
+
+            var asm = body.GetReference(id);
+            var field = asm.ManifestModule.ResolveField(token);
+            var obj = field.IsStatic ? null : machine.Stack.Pop();
+            machine.Stack.Push(field.GetValue(obj));
+        }
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Ldfld, new Tuple<short, int>(reader.ReadInt16(), reader.ReadInt32()));
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/Handlers/Ldloc.cs
+================================================
+ï»¿using System.IO;
+using MemeVM.Runtime.Engine;
+
+namespace MemeVM.Runtime.Handlers {
+    class Ldloc : IHandler {
+        public OpCode Handles => OpCode.Ldloc;
+        public void Handle(VM machine, Body body, Instruction instruction) =>
+            machine.Stack.Push(machine.Locals.Get((short)instruction.Operand));
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Ldloc, reader.ReadInt16());
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/Handlers/Long.cs
+================================================
+ï»¿using System.IO;
+using MemeVM.Runtime.Engine;
+
+namespace MemeVM.Runtime.Handlers {
+    class Long : IHandler {
+        public OpCode Handles => OpCode.Int64;
+        public void Handle(VM machine, Body body, Instruction instruction) =>
+            machine.Stack.Push(instruction.Operand);
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Int64, reader.ReadInt64());
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/Handlers/Newarr.cs
+================================================
+ï»¿using System;
+using System.IO;
+using MemeVM.Runtime.Engine;
+
+namespace MemeVM.Runtime.Handlers {
+    class Newarr : IHandler {
+        public OpCode Handles => OpCode.Newarr;
+        public void Handle(VM machine, Body body, Instruction instruction) {
+            var tuple = (Tuple<short, int>)instruction.Operand;
+
+            var refid = tuple.Item1;
+            var token = tuple.Item2;
+
+            var asm = body.GetReference(refid).ManifestModule;
+            var type = asm.ResolveType(token);
+            var length = (int)machine.Stack.Pop();
+
+            machine.Stack.Push(Array.CreateInstance(type, length));
+        }
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Newarr, new Tuple<short, int>(reader.ReadInt16(), reader.ReadInt32()));
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/Handlers/Null.cs
+================================================
+ï»¿using System.IO;
+using MemeVM.Runtime.Engine;
+
+namespace MemeVM.Runtime.Handlers {
+    class Null : IHandler {
+        public OpCode Handles => OpCode.Null;
+        public void Handle(VM machine, Body body, Instruction instruction) =>
+            machine.Stack.Push(null);
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Null);
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/Handlers/Pop.cs
+================================================
+ï»¿using System.IO;
+using MemeVM.Runtime.Engine;
+
+namespace MemeVM.Runtime.Handlers {
+    class Pop : IHandler {
+        public OpCode Handles => OpCode.Pop;
+        public void Handle(VM machine, Body body, Instruction instruction) =>
+            machine.Stack.Pop();
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Pop);
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/Handlers/Ret.cs
+================================================
+ï»¿using System.IO;
+using MemeVM.Runtime.Engine;
+
+namespace MemeVM.Runtime.Handlers {
+    class Ret : IHandler {
+        public OpCode Handles => OpCode.Ret;
+        public void Handle(VM machine, Body body, Instruction instruction) =>
+            machine.State = VMState.Return;
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Ret);
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/Handlers/Stfld.cs
+================================================
+ï»¿using System;
+using System.IO;
+using MemeVM.Runtime.Engine;
+
+namespace MemeVM.Runtime.Handlers {
+    class Stfld : IHandler {
+        public OpCode Handles => OpCode.Stfld;
+        public void Handle(VM machine, Body body, Instruction instruction) {
+            var id = ((Tuple<short, int>)instruction.Operand).Item1;
+            var token = ((Tuple<short, int>)instruction.Operand).Item2;
+
+            var asm = body.GetReference(id);
+            var field = asm.ManifestModule.ResolveField(token);
+            var obj = field.IsStatic ? null : machine.Stack.Pop();
+            field.SetValue(obj, Convert.ChangeType(machine.Stack.Pop(), field.FieldType));
+        }
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Stfld, new Tuple<short, int>(reader.ReadInt16(), reader.ReadInt32()));
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/Handlers/Stloc.cs
+================================================
+ï»¿using System.IO;
+using MemeVM.Runtime.Engine;
+
+namespace MemeVM.Runtime.Handlers {
+    class Stloc : IHandler {
+        public OpCode Handles => OpCode.Stloc;
+        public void Handle(VM machine, Body body, Instruction instruction) =>
+            machine.Locals.Set((short) instruction.Operand, machine.Stack.Pop());
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Stloc, reader.ReadInt16());
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/Handlers/String.cs
+================================================
+ï»¿using System.IO;
+using System.Text;
+using MemeVM.Runtime.Engine;
+
+namespace MemeVM.Runtime.Handlers {
+    class String : IHandler {
+        public OpCode Handles => OpCode.String;
+        public void Handle(VM machine, Body body, Instruction instruction) =>
+            machine.Stack.Push(instruction.Operand);
+
+        public Instruction Deserialize(BinaryReader reader) {
+            var len = reader.ReadInt32();
+
+            return new Instruction(OpCode.String, Encoding.UTF8.GetString(reader.ReadBytes(len)));
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/Helpers/Map.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace MemeVM.Runtime.Helpers {
+    static class Map {
+        static Map() {
+            foreach (var type in typeof(Map).Module.GetTypes()) {
+                if (type.IsInterface)
+                    continue;
+
+                if (!typeof(IHandler).IsAssignableFrom(type))
+                    continue;
+
+                var instance = (IHandler)Activator.CreateInstance(type);
+                OpCodeToHandler.Add(instance.Handles, instance);
+            }
+        }
+
+        private static readonly Dictionary<OpCode, IHandler> OpCodeToHandler = new Dictionary<OpCode, IHandler>();
+
+        internal static IHandler Lookup(OpCode code) =>
+            OpCodeToHandler[code];
+    }
+}
+
+
+
+================================================
+File: MemeVM.Runtime/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("MemeVM.Runtime")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("MemeVM.Runtime")]
+[assembly: AssemblyCopyright("Copyright Â© xsilent007 2019")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Setting ComVisible to false makes the types in this assembly not visible
+// to COM components.  If you need to access a type in this assembly from
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("14d5d12e-9a32-4516-904e-df3393626317")]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+[assembly: Obfuscation(Exclude = false, Feature = "+ref proxy(mode=strong,encoding=expression,internal=true,typeErasure=true);+ctrl flow(predicate=expression);+rename(renEnum=true);+constants(mode=dynamic,elements=SNPI,cfg=true)")]
+
+

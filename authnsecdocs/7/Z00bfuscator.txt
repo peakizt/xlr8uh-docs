@@ -1,0 +1,1847 @@
+Directory structure:
+└── dentrax-z00bfuscator/
+    ├── README.md
+    ├── CONTRIBUTING.md
+    ├── LICENSE
+    ├── Z00bfuscator.sln
+    ├── appveyor.yml
+    ├── .travis.yml
+    ├── Z00bfuscator/
+    │   ├── Globals.cs
+    │   ├── IObfuscator.cs
+    │   ├── ObfuscationInfo.cs
+    │   ├── ObfuscationItem.cs
+    │   ├── ObfuscationProgress.cs
+    │   ├── Obfuscator.cs
+    │   ├── ObfuscatorBase.cs
+    │   ├── Program.cs
+    │   ├── Z00bfuscator.csproj
+    │   └── Engine/
+    │       ├── Field.cs
+    │       ├── Method.cs
+    │       ├── Namespace.cs
+    │       ├── Property.cs
+    │       ├── Resource.cs
+    │       └── Type.cs
+    ├── Z00bfuscator.Test/
+    │   ├── Program.cs
+    │   └── Z00bfuscator.Test.csproj
+    ├── Z00bfuscator.Tests/
+    │   ├── TestCase.cs
+    │   ├── TestField.cs
+    │   ├── TestMethod.cs
+    │   ├── TestNamespace.cs
+    │   ├── TestProperty.cs
+    │   ├── TestResource.cs
+    │   ├── TestType.cs
+    │   └── Z00bfuscator.Tests.csproj
+    └── images/
+
+================================================
+File: README.md
+================================================
+<h1 align="center">Z00bfuscator</h1>
+
+[![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php)
+[![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.png?v=103)](https://github.com/ellerbrock/open-source-badges/)
+[![Build status](https://ci.appveyor.com/api/projects/status/l2orub6ui0hr1h08/branch/master?svg=true)](https://ci.appveyor.com/project/Dentrax/z00bfuscator/branch/master)
+[![Build Status](https://travis-ci.org/Dentrax/Z00bfuscator.svg?branch=master)](https://travis-ci.org/Dentrax/Z00bfuscator)
+[![Sourcegraph](https://img.shields.io/badge/view%20on-Sourcegraph-brightgreen.svg)](https://sourcegraph.com/github.com/Dentrax/Z00bfuscator)
+
+**Z00bfuscator is the simple, open-source, cross-platform obfuscator for .NET Assemblies built in .NET Core**
+
+**Warning:** It is an old Obfuscator I made in `2013`. I converted whole project into .NET Core and made new improvements.
+
+Click here for **[.NET Core](https://docs.microsoft.com/en-us/dotnet/core/)**
+
+Click here for **[Mono.Cecil](https://github.com/jbevain/cecil)**
+
+[What It Is](#what-it-is)
+
+[How To Use](#how-to-use)
+
+[Features](#features)
+
+[Requirements](#requirements)
+
+[Dependencies](#dependencies)
+
+[About](#about)
+
+[Collaborators](#collaborators)
+
+[Branches](#branches) 
+
+[Copyright & Licensing](#copyright--licensing)
+
+[Contributing](#contributing)
+
+[Contact](#contact)
+
+## What It Is
+
+**Z00bfuscator is the simple, open-source, cross-platform obfuscator for .NET Assemblies built in .NET Core SDK**
+
+Z00bfuscator teaches you how obfuscating phases works as simplified as possibly. It is designed in the bare-minimum struct.
+
+### Screenshots
+
+Obfuscating
+--------------------------
+
+![Obfuscating](https://raw.githubusercontent.com/Dentrax/Z00bfuscator/master/images/ss_cli_test-run.png)
+
+Before
+--------------------------
+
+![Before](https://raw.githubusercontent.com/Dentrax/Z00bfuscator/master/images/ss_gui_before.png)
+
+After
+--------------------------
+
+![After](https://raw.githubusercontent.com/Dentrax/Z00bfuscator/master/images/ss_gui_after.png)
+
+Example PE
+--------------------------
+
+![Example .NET File](https://raw.githubusercontent.com/Dentrax/Z00bfuscator/master/images/ss_gui_simpleif-obfuscated.png)
+
+Example PE Class
+--------------------------
+
+![Example .NET File - Class](https://raw.githubusercontent.com/Dentrax/Z00bfuscator/master/images/ss_gui_simpleif-obfuscated-class.png)
+
+## How To Use
+
+1. Clone the project to your computer by executing the following command:
+```
+$ git clone https://github.com/Dentrax/Z00bfuscator.git
+```
+
+2. Navigate to your `Z00bfuscator` folder: 
+```
+$ cd Z00bfuscator/
+```
+
+3. Build the all projects using `dotnet` command
+```
+$ dotnet build --configuration Release --output ./bin/Release --verbosity quiet
+```
+
+* Run this command if you want to test all cases
+```
+$ dotnet test .\Z00bfuscator.Tests\Z00bfuscator.Tests.csproj
+```
+
+4. Run the Z00bfuscator; Obfuscate the [Z00bfuscator.Test](https://github.com/dentrax/Z00bfuscator/tree/master/Z00bfuscator.Test)
+```
+$ dotnet run --configuration Release --project .\Z00bfuscator\Z00bfuscator.csproj .\Z00bfuscator.Test\bin\Release\Z00bfuscator.Test.dll
+```
+
+5. Test the output project; test the both before and after builds
+```
+$ dotnet run --configuration Release --project .\Z00bfuscator.Test\Z00bfuscator.Test.csproj
+
+$ cp .\Z00bfuscator.Test\bin\Release\Z00bfuscator.Test.runtimeconfig.json .\Z00bfuscator.Test\bin\Release\Obfuscated_Z00bfuscator.Test.runtimeconfig.json
+
+$ dotnet .\Z00bfuscator.Test\bin\Release\Obfuscated_Z00bfuscator.Test.dll
+```
+
+Output
+--------------------------
+
+![Output](https://raw.githubusercontent.com/Dentrax/Z00bfuscator/master/images/ss_cli_test.png)
+
+## Features
+
+* Obfuscating Fields
+
+* Obfuscating Methods
+
+* Obfuscating Namespaces
+
+* Obfuscating Properties
+
+* Obfuscating Resources
+
+* Obfuscating Types
+
+## Requirements
+
+* You should be familiar with C# programming
+* You should be familiar with Mono.Cecil
+* You will need a computer on which you have the rights to compile dotnet files
+
+## Dependencies
+
+* .NET 6 SDK (for compiling and testing)
+* Mono.Cecil
+
+## About
+
+Z00bfuscator was created to serve three purposes:
+
+**Z00bfuscator teaches you how obfuscating phases works actually as simplified as possibly**
+
+1. To act as a guide to teach how obfuscating phases works using Mono.Cecil
+
+2. To provide a simplest and easiest way to learn things about Mono.Cecil
+
+3. There is a source for you to develop own Obfuscator mechanism in dotNET environment using Mono.Cecil
+
+## Collaborators
+
+**Project Manager** - Furkan TÃ¼rkal (GitHub: **[Dentrax](https://github.com/dentrax)**)
+
+## Branches
+
+We publish source for the **[Z00bfuscator]** in single rolling branch:
+
+The **[master branch](https://github.com/dentrax/Z00bfuscator/tree/master)** is extensively tested and makes a great starting point. Also tracks [live changes](https://github.com/dentrax/Z00bfuscator/commits/master) by commits.
+
+## Copyright & Licensing
+
+The base project code is copyrighted by Furkan 'Dentrax' TÃ¼rkal and is covered by single licence.
+
+All program code (i.e. cs, .md) is licensed under MIT License unless otherwise specified. Please see the **[LICENSE.md](https://github.com/Dentrax/Z00bfuscator/blob/master/LICENSE)** file for more information.
+
+* **[Cecil](https://github.com/jbevain/cecil)**
+    - `Cecil` is a library to inspect, modify and create .NET programs and libraries.
+    - Please see the **[LICENSE.md](https://github.com/jbevain/cecil/blob/master/LICENSE.txt)** file for more information.
+
+**References**
+
+While this repository is being prepared, it may have been quoted from some sources. 
+
+- https://www.mono-project.com
+
+If there is an unspecified source or if you think that I made a copyright infringement, please contact with me.
+
+## Contributing
+
+Please check the [CONTRIBUTING.md](CONTRIBUTING.md) file for contribution instructions and naming guidelines.
+
+## Contact
+
+Z00bfuscator was created by Furkan 'Dentrax' TÃ¼rkal
+
+ * <https://www.furkanturkal.com>
+ 
+You can contact by URL:
+    **[CONTACT](https://github.com/dentrax)**
+
+<kbd>Best Regards</kbd>
+
+
+================================================
+File: CONTRIBUTING.md
+================================================
+
+
+
+================================================
+File: LICENSE
+================================================
+MIT License
+
+Copyright (c) 2013-2019 Furkan 'Dentrax' TÃ¼rkal
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+================================================
+File: Z00bfuscator.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27428.2015
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Z00bfuscator", "Z00bfuscator\Z00bfuscator.csproj", "{641F96AF-6127-4194-B57B-005D4E31F41F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Z00bfuscator.Test", "Z00bfuscator.Test\Z00bfuscator.Test.csproj", "{83F64600-8E6B-4A4E-98E6-E5D054D115DE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Z00bfuscator.Tests", "Z00bfuscator.Tests\Z00bfuscator.Tests.csproj", "{A218B7FA-065D-4483-8906-BCB8B1CA5A0C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{641F96AF-6127-4194-B57B-005D4E31F41F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{641F96AF-6127-4194-B57B-005D4E31F41F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{641F96AF-6127-4194-B57B-005D4E31F41F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{641F96AF-6127-4194-B57B-005D4E31F41F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{83F64600-8E6B-4A4E-98E6-E5D054D115DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83F64600-8E6B-4A4E-98E6-E5D054D115DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83F64600-8E6B-4A4E-98E6-E5D054D115DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83F64600-8E6B-4A4E-98E6-E5D054D115DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A218B7FA-065D-4483-8906-BCB8B1CA5A0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A218B7FA-065D-4483-8906-BCB8B1CA5A0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A218B7FA-065D-4483-8906-BCB8B1CA5A0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A218B7FA-065D-4483-8906-BCB8B1CA5A0C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C3717B07-666D-4F09-85F8-90A29255B86B}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: appveyor.yml
+================================================
+version: 1.0.{build}
+image: Visual Studio 2017
+configuration:
+- Release
+- Debug
+platform: Any CPU
+skip_tags: true
+branches:
+  only:
+  - master
+clone_depth: 1
+init:
+  - cmd: git config --global core.autocrlf true
+build:
+  verbosity: minimal
+install:
+before_build:
+  - cmd: dotnet --version
+build_script:
+  - dotnet build --configuration Release --output ./bin/Release
+test:
+  assemblies:
+    - Z00bfuscator.Tests.dll
+test_script:
+  - dotnet test .\Z00bfuscator.Tests\Z00bfuscator.Tests.csproj
+
+
+================================================
+File: .travis.yml
+================================================
+[Non-text file]
+
+
+================================================
+File: Z00bfuscator/Globals.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Z00bfuscator
+{
+    public static class Globals
+    {
+        public const string BANNER = @"
+ _____ ___   ___  _      __                     _             
+/ _  // _ \ / _ \| |__  / _|_   _ ___  ___ __ _| |_ ___  _ __ 
+\// /| | | | | | | '_ \| |_| | | / __|/ __/ _` | __/ _ \| '__|
+ / //\ |_| | |_| | |_) |  _| |_| \__ \ (_| (_| | || (_) | |   
+/____/\___/ \___/|_.__/|_|  \__,_|___/\___\__,_|\__\___/|_|   
+        ";
+
+        public const string STRING_SEPERATOR = "--------------------------------------------------------";
+    }
+}
+
+
+
+================================================
+File: Z00bfuscator/IObfuscator.cs
+================================================
+ï»¿#region License
+// ====================================================
+// Z00bfuscator Copyright(C) 2013-2019 Furkan TÃ¼rkal
+// This program comes with ABSOLUTELY NO WARRANTY; This is free software,
+// and you are welcome to redistribute it under certain conditions; See
+// file LICENSE, which is part of this source code package, for details.
+// ====================================================
+#endregion
+
+namespace Z00bfuscator
+{
+    public interface IObfuscator {
+        void AddAssembly(string path, bool obfuscate);
+        void StartObfuscation();
+    }
+}
+
+
+
+================================================
+File: Z00bfuscator/ObfuscationInfo.cs
+================================================
+ï»¿#region License
+// ====================================================
+// Z00bfuscator Copyright(C) 2013-2019 Furkan TÃ¼rkal
+// This program comes with ABSOLUTELY NO WARRANTY; This is free software,
+// and you are welcome to redistribute it under certain conditions; See
+// file LICENSE, which is part of this source code package, for details.
+// ====================================================
+#endregion
+
+namespace Z00bfuscator
+{
+    public struct ObfuscationInfo
+    {
+        public string OutputDirectory { get; set; }
+        public bool ObfuscateTypes { get; set; }
+        public bool ObfuscateMethods { get; set; }
+        public bool ObfuscateNamespaces { get; set; }
+        public bool ObfuscateProperties { get; set; }
+        public bool ObfuscateFields { get; set; }
+        public bool ObfuscateResources { get; set; }
+
+        public ObfuscationInfo(string outputDirectory, bool obfuscateTypes, bool obfuscateMethods, bool obfuscateNamespaces, bool obfuscateProperties, bool obfuscateFields, bool obfuscateResources) : this() {
+            this.OutputDirectory = outputDirectory;
+            this.ObfuscateTypes = obfuscateTypes;
+            this.ObfuscateMethods = obfuscateMethods;
+            this.ObfuscateNamespaces = obfuscateNamespaces;
+            this.ObfuscateProperties = obfuscateProperties;
+            this.ObfuscateFields = obfuscateFields;
+            this.ObfuscateResources = obfuscateResources;
+        }
+    }
+}
+
+
+
+================================================
+File: Z00bfuscator/ObfuscationItem.cs
+================================================
+ï»¿#region License
+// ====================================================
+// Z00bfuscator Copyright(C) 2013-2019 Furkan TÃ¼rkal
+// This program comes with ABSOLUTELY NO WARRANTY; This is free software,
+// and you are welcome to redistribute it under certain conditions; See
+// file LICENSE, which is part of this source code package, for details.
+// ====================================================
+#endregion
+
+namespace Z00bfuscator
+{
+    public enum ObfuscationItem {
+        Namespace,
+        Type,
+        Method,
+        Property,
+        Field
+    }
+}
+
+
+
+================================================
+File: Z00bfuscator/ObfuscationProgress.cs
+================================================
+ï»¿#region License
+// ====================================================
+// Z00bfuscator Copyright(C) 2013-2019 Furkan TÃ¼rkal
+// This program comes with ABSOLUTELY NO WARRANTY; This is free software,
+// and you are welcome to redistribute it under certain conditions; See
+// file LICENSE, which is part of this source code package, for details.
+// ====================================================
+#endregion
+
+namespace Z00bfuscator
+{
+    public struct ObfuscationProgress {
+        public ulong CurrentObfuscatedMethodID { get; set; }
+        public ulong CurrentObfuscatedTypeID { get; set; }
+        public ulong CurrentObfuscatedNamespaceID { get; set; }
+        public ulong CurrentObfuscatedPropertyID { get; set; }
+        public ulong CurrentObfuscatedFieldID { get; set; }
+    }
+}
+
+
+
+================================================
+File: Z00bfuscator/Obfuscator.cs
+================================================
+#region License
+// ====================================================
+// Z00bfuscator Copyright(C) 2013-2019 Furkan TÃ¼rkal
+// This program comes with ABSOLUTELY NO WARRANTY; This is free software,
+// and you are welcome to redistribute it under certain conditions; See
+// file LICENSE, which is part of this source code package, for details.
+// ====================================================
+#endregion
+
+using System;
+using System.IO;
+using System.Xml;
+using System.Threading;
+using System.Collections.Generic;
+
+using Mono.Cecil;
+using System.Text;
+using System.Linq;
+
+namespace Z00bfuscator
+{
+    public delegate void DelOutputEvent(string message);
+    public delegate void DelNameObfuscated(ObfuscationItem item, string initialName, string obfuscatedName);
+    public delegate void DelProgress(string phaseName, int percents);
+
+    public sealed partial class Obfuscator : ObfuscatorBase, IObfuscator {
+
+        #region Variables
+
+        private Dictionary<string, string> m_mapResources = new Dictionary<string, string>();
+
+        private List<AssemblyDefinition> m_assemblyDefinitions = new List<AssemblyDefinition>();
+
+        private Dictionary<string, string> m_mapObfuscatedNamespaces = new Dictionary<string, string>();
+
+        private Dictionary<string, bool> m_assemblies = new Dictionary<string, bool>();
+
+        private List<string> m_excludedTypes = new List<string>();
+
+        private ObfuscationInfo m_obfuscationInfo;
+
+        private ObfuscationProgress m_obfuscationProgress;
+
+        private XmlDocument m_xmlDocument;
+        private XmlElement m_xmlElement;
+
+        public event DelOutputEvent OnOutputEvent;
+        public event DelNameObfuscated OnNameObfuscated;
+        public event DelProgress OnProgress;
+
+        #endregion
+
+        #region Constructor
+
+        public Obfuscator(ObfuscationInfo obfuscationInfo) {
+            this.m_obfuscationInfo = obfuscationInfo;
+            this.m_obfuscationProgress = new ObfuscationProgress(); 
+        }
+
+        #endregion
+
+        #region AddAssembly
+
+        public void AddAssembly(string path, bool obfuscate) {
+            m_assemblies.Add(path, obfuscate);
+        }
+
+        #endregion
+
+        #region ExcludeType
+
+        public void ExcludeType(string typeName) {
+            m_excludedTypes.Add(typeName);
+        }
+
+        #endregion
+
+        #region Events
+        protected override void UpdateProgress(string message, int percent) {
+            OnProgress?.Invoke(message, percent);
+        }
+
+        protected override void LogProgress(string message) {
+            OnOutputEvent?.Invoke(message);
+        }
+
+        #endregion
+
+        #region StartObfuscation
+
+        public void StartObfuscation() {
+            Thread thread = new Thread(new ThreadStart(AsyncStartObfuscation));
+            thread.Start();
+        }
+
+        protected override void AsyncStartObfuscation() {
+            List<string> assembliesPaths = new List<string>();
+            List<bool> assembliesToObfuscate = new List<bool>();
+
+            LogProgress("[0]: Starting...");
+
+            this.m_xmlDocument = new XmlDocument();
+            this.m_xmlElement = this.m_xmlDocument.CreateElement("mappings");
+            this.m_xmlDocument.AppendChild(m_xmlElement);
+
+            UpdateProgress("[1]: Loading assemblies...", 10);
+            foreach (string assemblyPath in m_assemblies.Keys) {
+                try {
+                    AssemblyDefinition assembly = AssemblyDefinition.ReadAssembly(assemblyPath);
+                    foreach (ModuleDefinition module in assembly.Modules)
+                        LogProgress($"[OK]: Module loaded: {module.Name}");
+
+                    this.m_assemblyDefinitions.Add(assembly);
+                    assembliesPaths.Add(Path.GetFileName(assemblyPath));
+                    assembliesToObfuscate.Add(m_assemblies[assemblyPath]);
+                } catch (Exception ex) {
+                    LogProgress($"[ERR]: Module load failed: {ex.Message}");
+                    continue;
+                }
+            }
+
+            UpdateProgress("[2]: Starting obfuscate...", 20);
+
+            int progressCurrent = 20;
+            int assemblyIndex = -1;
+
+            if (this.m_assemblyDefinitions.Any())
+            {
+                int progressIncrement = 60 / this.m_assemblyDefinitions.Count;
+
+                foreach (AssemblyDefinition assembly in m_assemblyDefinitions)
+                {
+                    assemblyIndex++;
+
+                    if (!assembliesToObfuscate[assemblyIndex])
+                        continue;
+
+                    LogProgress("Obfuscating assembly: " + assembly.Name.Name);
+
+                    LogProgress("Obfuscating Types");
+                    foreach (TypeDefinition type in assembly.MainModule.Types)
+                        DoObfuscateType(type);
+
+                    if (m_obfuscationInfo.ObfuscateNamespaces)
+                        LogProgress("Obfuscating Namespaces");
+                    foreach (TypeDefinition type in assembly.MainModule.Types)
+                        DoObfuscateNamespace(type);
+
+                    if (m_obfuscationInfo.ObfuscateResources)
+                        LogProgress("Obfuscating Resources");
+                    foreach (Resource resource in assembly.MainModule.Resources)
+                        DoObfuscateResource(resource);
+
+                    progressCurrent += progressIncrement;
+                }
+            }
+
+            UpdateProgress("[3]: Saving assembly...", 80);
+
+            assemblyIndex = -1;
+            foreach (AssemblyDefinition assembly in m_assemblyDefinitions) {
+                assemblyIndex++;
+
+                if (Directory.Exists(this.m_obfuscationInfo.OutputDirectory) == false)
+                    Directory.CreateDirectory(this.m_obfuscationInfo.OutputDirectory);
+
+                string outputFileName = Path.Combine(this.m_obfuscationInfo.OutputDirectory, "Obfuscated_" + assembliesPaths[assemblyIndex]);
+
+                if (File.Exists(outputFileName))
+                    File.Delete(outputFileName);
+
+                assembly.Write(outputFileName);
+            }
+
+            this.m_xmlDocument.Save(Path.Combine(m_obfuscationInfo.OutputDirectory, "Mapping.xml"));
+
+            UpdateProgress("[4]: Testing assembly...", 90);
+
+            foreach (string assemblyPath in this.m_assemblies.Keys) {
+                if (!File.Exists(assemblyPath)) {
+                    LogProgress($"[FAIL]: File not exists: {assemblyPath}");
+                    continue;
+                }
+
+                try {
+                    AssemblyDefinition assembly = AssemblyDefinition.ReadAssembly(assemblyPath);
+                    foreach (ModuleDefinition module in assembly.Modules)
+                        LogProgress($"[OK]: {module.Name}");
+
+                } catch (Exception ex) {
+                    LogProgress($"[FAIL]: {assemblyPath} - Exception: {ex.Message}");
+                }
+
+            }
+
+            UpdateProgress("[5]: Complete.", 100);
+        }
+
+        #endregion
+
+        #region DoObfuscateItem
+
+        internal string DoObfuscateItem(ObfuscationItem item, string initialName) {
+            string obfuscated = string.Empty;
+
+            switch (item) {
+                case ObfuscationItem.Method:
+                    if (!this.m_obfuscationInfo.ObfuscateMethods)
+                        return initialName;
+                    this.m_obfuscationProgress.CurrentObfuscatedMethodID++;
+                    obfuscated = this.GetObfuscatedFormat(item, initialName, this.m_obfuscationProgress.CurrentObfuscatedMethodID);
+                    break;
+
+                case ObfuscationItem.Type:
+                    if (!this.m_obfuscationInfo.ObfuscateTypes)
+                        return initialName;
+                    this.m_obfuscationProgress.CurrentObfuscatedTypeID++;
+                    obfuscated = this.GetObfuscatedFormat(item, initialName, this.m_obfuscationProgress.CurrentObfuscatedTypeID);
+                    break;
+
+                case ObfuscationItem.Namespace:
+                    this.m_obfuscationProgress.CurrentObfuscatedNamespaceID++;
+                    obfuscated = this.GetObfuscatedFormat(item, initialName, this.m_obfuscationProgress.CurrentObfuscatedNamespaceID);
+                    break;
+
+                case ObfuscationItem.Property:
+                    if (!this.m_obfuscationInfo.ObfuscateProperties)
+                        return initialName;
+                    this.m_obfuscationProgress.CurrentObfuscatedPropertyID++;
+                    obfuscated = this.GetObfuscatedFormat(item, initialName, this.m_obfuscationProgress.CurrentObfuscatedPropertyID);
+                    break;
+
+                case ObfuscationItem.Field:
+                    if (!this.m_obfuscationInfo.ObfuscateFields)
+                        return initialName;
+                    this.m_obfuscationProgress.CurrentObfuscatedFieldID++;
+                    obfuscated = this.GetObfuscatedFormat(item, initialName, this.m_obfuscationProgress.CurrentObfuscatedFieldID);
+                    break;
+            }
+
+            OnNameObfuscated?.Invoke(item, initialName, obfuscated);
+
+            this.AddToXMLMap(item, initialName, obfuscated);
+
+            return obfuscated;
+        }
+
+        string GetObfuscatedFormat(ObfuscationItem item, string initialName, ulong index) {
+            return string.Format("[SECURED-by-Z00bfuscator]-{0}-{1}", this.EncryptAsCaesar(initialName, 1), index);
+        }
+
+        string EncryptAsCaesar(string value, int shift) {
+            char[] buffer = value.ToCharArray();
+            char letter;
+            for (int i = 0; i < buffer.Length; i++) {
+                letter = buffer[i];
+                letter = (char)(letter + shift);
+                if (letter > 'z') {
+                    letter = (char)(letter - 26);
+                } else if (letter < 'a') {
+                    letter = (char)(letter + 26);
+                }
+                buffer[i] = letter;
+            }
+            return new string(buffer);
+        }
+
+        void AddToXMLMap(ObfuscationItem item, string initialName, String obfuscated) {
+            XmlElement element = this.m_xmlDocument.CreateElement("mapping");
+            this.m_xmlElement.AppendChild(element);
+            element.SetAttribute("Type", item.ToString());
+            element.SetAttribute("InitialValue", initialName);
+            element.SetAttribute("ObfuscatedValue", obfuscated);
+        }
+
+        #endregion
+
+    }
+}
+
+
+
+================================================
+File: Z00bfuscator/ObfuscatorBase.cs
+================================================
+ï»¿#region License
+// ====================================================
+// Z00bfuscator Copyright(C) 2013-2019 Furkan TÃ¼rkal
+// This program comes with ABSOLUTELY NO WARRANTY; This is free software,
+// and you are welcome to redistribute it under certain conditions; See
+// file LICENSE, which is part of this source code package, for details.
+// ====================================================
+#endregion
+
+using Mono.Cecil;
+
+namespace Z00bfuscator
+{
+    public abstract class ObfuscatorBase {
+        protected abstract void AsyncStartObfuscation();
+
+        protected abstract void UpdateProgress(string message, int percent);
+
+        protected abstract void LogProgress(string message);
+
+        protected abstract void DoObfuscateField(TypeDefinition type, FieldDefinition field);
+
+        protected abstract void DoObfuscateMethod(TypeDefinition type, string initialTypeName, MethodDefinition method);
+
+        protected abstract void DoObfuscateNamespace(TypeDefinition type);
+
+        protected abstract void DoObfuscateProperty(TypeDefinition type, PropertyDefinition property);
+
+        protected abstract void DoObfuscateResource(Resource resource);
+
+        protected abstract void DoObfuscateType(TypeDefinition type);
+    }
+}
+
+
+
+================================================
+File: Z00bfuscator/Program.cs
+================================================
+ï»¿#region License
+// ====================================================
+// Z00bfuscator Copyright(C) 2013-2019 Furkan TÃ¼rkal
+// This program comes with ABSOLUTELY NO WARRANTY; This is free software,
+// and you are welcome to redistribute it under certain conditions; See
+// file LICENSE, which is part of this source code package, for details.
+// ====================================================
+#endregion
+
+using System;
+using System.IO;
+using System.Reflection;
+
+namespace Z00bfuscator
+{
+    class Program
+    {
+        static int Main(string[] args)
+        {
+            Program.SetupConsole();
+
+            if (args.Length == 0) {
+                Console.WriteLine("Please input target file path!");
+                return 1;
+            }
+
+            string target = args[0];
+            string outputPath = Path.GetDirectoryName(target);
+
+            if (!File.Exists(target)) {
+                Console.WriteLine("Input file not exists!");
+                return 1;
+            }
+
+            ObfuscationInfo info = new ObfuscationInfo(outputPath, true, true, true, true, true, false);
+
+            Obfuscator obfuscator = new Obfuscator(info);
+
+            obfuscator.AddAssembly(target, true);
+
+            obfuscator.OnOutputEvent += new DelOutputEvent(Program.RaiseOnOutputEvent);
+            obfuscator.OnNameObfuscated += new DelNameObfuscated(Program.RaiseOnNameObfuscated);
+            obfuscator.OnProgress += new DelProgress(Program.RaiseOnProgress);
+
+            obfuscator.StartObfuscation();
+
+            return 0;
+        }
+
+        private static void RaiseOnOutputEvent(string message) {
+            Console.WriteLine();
+            Console.WriteLine(message);
+        }
+
+        private static void RaiseOnNameObfuscated(ObfuscationItem item, string initialName, string obfuscatedName) {
+            Console.WriteLine();
+            Console.WriteLine($"ItemObfuscated: [{item.ToString()}]");
+            Console.WriteLine($"Old: [{initialName}]");
+            Console.WriteLine($"New: [{obfuscatedName}]");
+        }
+
+        private static void RaiseOnProgress(string phaseName, int percents) {
+            Console.WriteLine();
+            Console.WriteLine($"{phaseName} : [%{percents}]");
+        }
+
+        private static void SetupConsole() {
+
+            #region GetAssemblyInformation
+
+            var asm = Assembly.GetExecutingAssembly();
+            var title = asm.GetCustomAttribute<AssemblyTitleAttribute>()?.Title;
+            var version = asm.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version;
+            var configuration = asm.GetCustomAttribute<AssemblyConfigurationAttribute>()?.Configuration;
+            var informationalVersion = asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+
+            if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows)) {
+                Console.WindowWidth = 140;
+                Console.BufferHeight = 5000;
+            }
+            Console.Title = string.Format("{0} {1} ({2}) [{3}] {4}",
+                title,
+                version,
+                File.GetLastWriteTime(asm.Location),
+                string.IsNullOrEmpty(configuration) ? "Undefined" : string.Format("{0}", configuration),
+                string.IsNullOrEmpty(informationalVersion) ? string.Empty : string.Format("<{0}>", informationalVersion));
+
+            Console.WriteLine(Globals.BANNER);
+            Console.WriteLine(Globals.STRING_SEPERATOR);
+
+            #endregion GetAssemblyInformation
+        }
+    }
+}
+
+
+
+================================================
+File: Z00bfuscator/Z00bfuscator.csproj
+================================================
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <StartupObject>Z00bfuscator.Program</StartupObject>
+    <Copyright>Copyright Â© Furkan 'Dentrax' TÃ¼rkal</Copyright>
+    <PackageLicenseUrl>https://github.com/Dentrax/Z00bfuscator/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/Dentrax/Z00bfuscator</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Dentrax/Z00bfuscator</RepositoryUrl>
+    <Description>A simple obfuscator using Mono.Cecil</Description>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Mono.Cecil" Version="0.11.4" />
+  </ItemGroup>
+  
+</Project>
+
+
+
+================================================
+File: Z00bfuscator/Engine/Field.cs
+================================================
+ï»¿#region License
+// ====================================================
+// Z00bfuscator Copyright(C) 2013-2019 Furkan TÃ¼rkal
+// This program comes with ABSOLUTELY NO WARRANTY; This is free software,
+// and you are welcome to redistribute it under certain conditions; See
+// file LICENSE, which is part of this source code package, for details.
+// ====================================================
+#endregion
+
+using System;
+
+using Mono.Cecil;
+
+namespace Z00bfuscator
+{
+    public sealed partial class Obfuscator : ObfuscatorBase {
+
+        #region ObfuscateFields
+
+        protected override void DoObfuscateField(TypeDefinition type, FieldDefinition field) {
+            if (!IsFieldObfuscatable(field))
+                return;
+
+            string initialName = field.Name;
+            string obfuscatedName = DoObfuscateItem(ObfuscationItem.Field, field.Name);
+
+            if (field.DeclaringType.Name == type.Name && field.DeclaringType.Namespace == type.Namespace)
+                if (!Object.ReferenceEquals(field, field) && (field.Name == initialName)) {
+                    try {
+                        field.Name = obfuscatedName;
+                    } catch (InvalidOperationException) { }
+                }
+
+            field.Name = obfuscatedName;
+        }
+
+        public static bool IsFieldObfuscatable(FieldDefinition field) {
+            bool flag = true;
+
+            if (field.IsRuntimeSpecialName)
+                flag = false;
+
+            if (field.IsSpecialName)
+                flag = false;
+
+            if (field.Name.StartsWith("<"))
+                flag = false;
+
+            return flag;
+        }
+
+        #endregion
+
+    }
+}
+
+
+
+================================================
+File: Z00bfuscator/Engine/Method.cs
+================================================
+ï»¿#region License
+// ====================================================
+// Z00bfuscator Copyright(C) 2013-2019 Furkan TÃ¼rkal
+// This program comes with ABSOLUTELY NO WARRANTY; This is free software,
+// and you are welcome to redistribute it under certain conditions; See
+// file LICENSE, which is part of this source code package, for details.
+// ====================================================
+#endregion
+
+using System;
+
+using Mono.Cecil;
+
+namespace Z00bfuscator
+{
+    public sealed partial class Obfuscator : ObfuscatorBase {
+
+        #region DoObfuscateMethod
+
+        protected override void DoObfuscateMethod(TypeDefinition type, string initialTypeName, MethodDefinition method) {
+            if (!IsMethodObfuscatable(method))
+                return;
+
+            string initialName = method.Name;
+            string obfuscatedName = DoObfuscateItem(ObfuscationItem.Method, method.Name);
+
+            if (method.DeclaringType.Name == type.Name && method.DeclaringType.Namespace == type.Namespace)
+
+                if (!Object.ReferenceEquals(method, method) &&
+                    method.Name == initialName &&
+                    method.HasThis == method.HasThis &&
+                    method.CallingConvention == method.CallingConvention &&
+                    method.Parameters.Count == method.Parameters.Count &&
+                    method.GenericParameters.Count == method.GenericParameters.Count &&
+                    method.ReturnType.Name == method.ReturnType.Name &&
+                    method.ReturnType.Namespace == method.ReturnType.Namespace
+                    ) {
+                    bool paramsEquals = true;
+                    for (int paramIndex = 0; paramIndex < method.Parameters.Count; paramIndex++)
+                        if (method.Parameters[paramIndex].ParameterType.FullName != method.Parameters[paramIndex].ParameterType.FullName) {
+                            paramsEquals = false;
+                            break;
+                        }
+
+                    for (int paramIndex = 0; paramIndex < method.GenericParameters.Count; paramIndex++)
+                        if (method.GenericParameters[paramIndex].FullName != method.GenericParameters[paramIndex].FullName) {
+                            paramsEquals = false;
+                            break;
+                        }
+
+                    try {
+                        if (paramsEquals)
+                            method.Name = obfuscatedName;
+                    } catch (InvalidOperationException) { }
+                }
+
+            method.Name = obfuscatedName;
+        }
+
+        public static bool IsMethodObfuscatable(MethodDefinition method) {
+            bool flag = true;
+
+            if (string.IsNullOrEmpty(method.Name))
+                flag = false;
+
+            if (method.IsConstructor)
+                flag = false;
+
+            if (method.IsRuntime)
+                flag = false;
+
+            if (method.IsRuntimeSpecialName)
+                flag = false;
+
+            if (method.IsSpecialName)
+                flag = false;
+
+            if (method.IsVirtual)
+                flag = false;
+
+            if (method.IsAbstract)
+                flag = false;
+
+            if (method.Overrides.Count > 0)
+                flag = false;
+
+            if (method.Name.StartsWith("<"))
+                flag = false;
+
+            if (method.Name.StartsWith("Main"))
+                flag = false;
+
+            return flag;
+        }
+
+        #endregion
+
+    }
+}
+
+
+
+================================================
+File: Z00bfuscator/Engine/Namespace.cs
+================================================
+ï»¿#region License
+// ====================================================
+// Z00bfuscator Copyright(C) 2013-2019 Furkan TÃ¼rkal
+// This program comes with ABSOLUTELY NO WARRANTY; This is free software,
+// and you are welcome to redistribute it under certain conditions; See
+// file LICENSE, which is part of this source code package, for details.
+// ====================================================
+#endregion
+
+using System;
+using System.Collections.Generic;
+
+using Mono.Cecil;
+
+namespace Z00bfuscator
+{
+    public sealed partial class Obfuscator : ObfuscatorBase {
+
+        #region DoObfuscateNamespace
+
+        protected override void DoObfuscateNamespace(TypeDefinition type) {
+            if (!IsNamespaceObfuscatable(type))
+                return;
+
+            if (m_excludedTypes.Contains(type.FullName))
+                return;
+
+            string initialFullName = type.FullName;
+            string initialNamespace = type.Namespace;
+
+            type.Namespace = this.GetObfuscatedNamespace(type.Namespace);
+
+            foreach (AssemblyDefinition assembly in m_assemblyDefinitions)
+                foreach (ModuleDefinition module in assembly.Modules)
+                    foreach (TypeReference typeReference in module.GetTypeReferences())
+                        if (typeReference.Namespace == initialNamespace)
+                            typeReference.Namespace = type.Namespace;
+
+            Dictionary<string, string> dic = new Dictionary<string, string>();
+            foreach (string key in this.m_mapResources.Keys) {
+                string resValue = this.m_mapResources[key];
+                if (resValue.Contains("."))
+                    if (resValue.Substring(0, resValue.LastIndexOf('.')) == initialNamespace)
+                        resValue = type.Namespace + resValue.Substring(resValue.LastIndexOf('.'));
+
+                dic.Add(key, resValue);
+            }
+
+            this.m_mapResources = dic;
+        }
+
+        public static bool IsNamespaceObfuscatable(TypeDefinition type) {
+            bool flag = true;
+
+            if (string.IsNullOrEmpty(type.Name))
+                flag = false;
+
+            if (type.Name == "<Module>")
+                flag = false;
+
+            if (type.IsRuntimeSpecialName)
+                flag = false;
+
+            if (type.IsSpecialName)
+                flag = false;
+
+            if (type.Name.Contains("Resources"))
+                flag = false;
+
+            if (type.Name.StartsWith("<"))
+                flag = false;
+
+            if (type.Name.Contains("__"))
+                flag = false;
+
+            if (type.Namespace.Length < 1)
+                flag = false;
+
+            return flag;
+        }
+
+        private string GetObfuscatedNamespace(string initialNamespace) {
+            if (this.m_mapObfuscatedNamespaces.ContainsKey(initialNamespace))
+                return this.m_mapObfuscatedNamespaces[initialNamespace];
+
+            string[] namespaceSet = initialNamespace.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+            string currentNs = "";
+            string currentNsObfuscated = "";
+            foreach (string ns in namespaceSet) {
+                if (currentNs.Length > 0) {
+                    currentNs += ".";
+                    currentNsObfuscated += ".";
+                }
+
+                currentNs += ns;
+
+                if (!this.m_mapObfuscatedNamespaces.ContainsKey(currentNs)) {
+                    this.m_mapObfuscatedNamespaces.Add(currentNs, currentNsObfuscated + this.DoObfuscateItem(ObfuscationItem.Namespace, ns));
+                }
+
+                currentNsObfuscated = this.m_mapObfuscatedNamespaces[currentNs];
+            }
+
+            return this.m_mapObfuscatedNamespaces[initialNamespace];
+        }
+
+        #endregion
+    }
+}
+
+
+
+================================================
+File: Z00bfuscator/Engine/Property.cs
+================================================
+ï»¿#region License
+// ====================================================
+// Z00bfuscator Copyright(C) 2013-2019 Furkan TÃ¼rkal
+// This program comes with ABSOLUTELY NO WARRANTY; This is free software,
+// and you are welcome to redistribute it under certain conditions; See
+// file LICENSE, which is part of this source code package, for details.
+// ====================================================
+#endregion
+
+using System;
+
+using Mono.Cecil;
+
+namespace Z00bfuscator
+{
+    public sealed partial class Obfuscator : ObfuscatorBase {
+
+        #region DoObfuscateProperty
+
+        protected override void DoObfuscateProperty(TypeDefinition type, PropertyDefinition property) {
+            if (!IsPropertyObfuscatable(property))
+                return;
+
+            string initialName = property.Name;
+            string obfuscatedName = DoObfuscateItem(ObfuscationItem.Property, property.Name);
+
+            if (property.DeclaringType.Name == type.Name && property.DeclaringType.Namespace == type.Namespace) {
+                if (!Object.ReferenceEquals(property, property) && (property.Name == property.Name) && (property.Parameters.Count == property.Parameters.Count)) {
+                    bool paramsEquals = true;
+                    for (int paramIndex = 0; paramIndex < property.Parameters.Count; paramIndex++)
+                        if (property.Parameters[paramIndex].ParameterType.FullName != property.Parameters[paramIndex].ParameterType.FullName) {
+                            paramsEquals = false;
+                            break;
+                        }
+                    try {
+                        if (paramsEquals)
+                            property.Name = obfuscatedName;
+                    } catch (InvalidOperationException) { }
+                }
+            }
+
+            property.Name = obfuscatedName;
+        }
+
+        public static bool IsPropertyObfuscatable(PropertyDefinition property) {
+            bool flag = true;
+
+            if (property.IsSpecialName)
+                flag = false;
+
+            if (property.IsRuntimeSpecialName)
+                flag = false;
+
+            return flag;
+        }
+
+        #endregion
+    }
+}
+
+
+
+================================================
+File: Z00bfuscator/Engine/Resource.cs
+================================================
+ï»¿#region License
+// ====================================================
+// Z00bfuscator Copyright(C) 2013-2019 Furkan TÃ¼rkal
+// This program comes with ABSOLUTELY NO WARRANTY; This is free software,
+// and you are welcome to redistribute it under certain conditions; See
+// file LICENSE, which is part of this source code package, for details.
+// ====================================================
+#endregion
+
+using Mono.Cecil;
+
+namespace Z00bfuscator
+{
+    public sealed partial class Obfuscator : ObfuscatorBase {
+
+        #region DoObfuscateResource
+
+        protected override void DoObfuscateResource(Resource resource) {
+            if (!IsResourceObfuscatable(resource.Name))
+                return;
+
+            string resourceName = resource.Name.Substring(0, resource.Name.Length - 10);
+
+            if (!m_mapResources.ContainsKey(resourceName))
+                return;
+
+            string obfucatedName = m_mapResources[resourceName];
+            resource.Name = obfucatedName + ".resources";
+        }
+
+        public static bool IsResourceObfuscatable(string name) {
+            bool flag = true;
+
+            if (name == "<Module>")
+                flag = false;
+
+            return flag;
+        }
+
+        #endregion
+
+    }
+}
+
+
+
+================================================
+File: Z00bfuscator/Engine/Type.cs
+================================================
+ï»¿#region License
+// ====================================================
+// Z00bfuscator Copyright(C) 2013-2019 Furkan TÃ¼rkal
+// This program comes with ABSOLUTELY NO WARRANTY; This is free software,
+// and you are welcome to redistribute it under certain conditions; See
+// file LICENSE, which is part of this source code package, for details.
+// ====================================================
+#endregion
+
+using Mono.Cecil;
+
+namespace Z00bfuscator
+{
+    public sealed partial class Obfuscator : ObfuscatorBase {
+
+        #region DoObfuscateType
+
+        protected override void DoObfuscateType(TypeDefinition type) {
+            if (!IsTypeObfuscatable(type))
+                return;
+
+            if (m_excludedTypes.Contains(type.FullName))
+                return;
+
+            string initialTypeName = type.FullName;
+            type.Name = this.DoObfuscateItem(ObfuscationItem.Type, type.Name);
+
+            if (!initialTypeName.Contains("/")) {
+                this.m_mapResources.Add(initialTypeName, type.FullName);
+            }
+
+            foreach (AssemblyDefinition assembly in m_assemblyDefinitions)
+                foreach (ModuleDefinition module in assembly.Modules)
+                    foreach (TypeReference typeReference in module.GetTypeReferences())
+                        if (typeReference.FullName == initialTypeName)
+                            typeReference.Name = type.Name;
+
+            foreach (MethodDefinition method in type.Methods)
+                this.DoObfuscateMethod(type, initialTypeName, method);
+
+            foreach (PropertyDefinition property in type.Properties)
+                this.DoObfuscateProperty(type, property);
+
+            foreach (FieldDefinition field in type.Fields)
+                this.DoObfuscateField(type, field);
+        }
+
+        public static bool IsTypeObfuscatable(TypeDefinition type) {
+            bool flag = true;
+
+            if (string.IsNullOrEmpty(type.Name))
+                flag = false;
+
+            if (type.Name == "<Module>")
+                flag = false;
+
+            if (type.IsRuntimeSpecialName)
+                flag = false;
+
+            if (type.IsSpecialName)
+                flag = false;
+
+            if (type.Name.Contains("Resources"))
+                flag = false;
+
+            if (type.Name.StartsWith("<"))
+                flag = false;
+
+            if (type.Name.Contains("__"))
+                flag = false;
+
+            return flag;
+        }
+
+        #endregion
+
+    }
+}
+
+
+
+================================================
+File: Z00bfuscator.Test/Program.cs
+================================================
+ï»¿#region License
+// ====================================================
+// Z00bfuscator Copyright(C) 2013-2019 Furkan TÃ¼rkal
+// This program comes with ABSOLUTELY NO WARRANTY; This is free software,
+// and you are welcome to redistribute it under certain conditions; See
+// file LICENSE, which is part of this source code package, for details.
+// ====================================================
+#endregion
+
+using System;
+
+namespace Z00bfuscator.Test
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            try {
+                while (true) {
+                    Console.Write("Enter your password: ");
+                    string read = Console.ReadLine();
+
+                    bool flag = true;
+
+                    if (!string.IsNullOrEmpty(read)) {
+                        if (ulong.TryParse(read.Trim(), out ulong input)) {
+                            if (input == 0123456789) {
+                                Console.WriteLine("Access granted!");
+                                break;
+                            } else {
+                                Console.WriteLine("Access denied!");
+                                break;
+                            }
+                        } else {
+                            flag = false;
+                        }
+                    } else {
+                        flag = false;
+                    }
+
+                    if (!flag) {
+                        Console.WriteLine("Input format must be in integer format and can not be null or empty!");
+                    }
+                }
+            } catch (Exception ex) {
+                Console.WriteLine($"[Program::Main()]: Unexpected condition handled: {ex.ToString()}");
+            }
+
+            Console.WriteLine("Reached end of the application!");
+        }
+    }
+}
+
+
+
+================================================
+File: Z00bfuscator.Test/Z00bfuscator.Test.csproj
+================================================
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Description>A simple test for Z00bfuscator</Description>
+    <Copyright>Copyright Â© Furkan 'Dentrax' TÃ¼rkal</Copyright>
+    <PackageLicenseUrl>https://github.com/Dentrax/Z00bfuscator/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/Dentrax/Z00bfuscator</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Dentrax/Z00bfuscator</RepositoryUrl>
+  </PropertyGroup>
+
+</Project>
+
+
+
+================================================
+File: Z00bfuscator.Tests/TestCase.cs
+================================================
+ï»¿#region License
+// ====================================================
+// Z00bfuscator Copyright(C) 2013-2019 Furkan TÃ¼rkal
+// This program comes with ABSOLUTELY NO WARRANTY; This is free software,
+// and you are welcome to redistribute it under certain conditions; See
+// file LICENSE, which is part of this source code package, for details.
+// ====================================================
+#endregion
+
+namespace Z00bfuscator.Tests
+{
+    public abstract class TestCase
+    {
+        protected string GetAssertMessage(string testCaseName, string testFuncName, string name, string attributes, bool expected, bool actual) {
+            return string.Format("[{0}::{1}]: Name: {2} - Attributes: {3} - Expected: {4} - Actual: {5}", testCaseName, testFuncName, name, attributes, expected, actual);
+        }
+
+        protected string PrintTestCase(string testCaseName, bool start) {
+            if (start) {
+                return string.Format("[{0}::Test]: Test case started!", testCaseName);
+            }
+            return string.Format("[{0}::Test]: Test case finished!", testCaseName);
+        }
+    }
+}
+
+
+
+================================================
+File: Z00bfuscator.Tests/TestField.cs
+================================================
+#region License
+// ====================================================
+// Z00bfuscator Copyright(C) 2013-2019 Furkan Türkal
+// This program comes with ABSOLUTELY NO WARRANTY; This is free software,
+// and you are welcome to redistribute it under certain conditions; See
+// file LICENSE, which is part of this source code package, for details.
+// ====================================================
+#endregion
+
+using Mono.Cecil;
+using Xunit;
+
+namespace Z00bfuscator.Tests
+{
+    public sealed class TestField : TestCase
+    {
+        [Fact]
+        public void Test()
+        {
+            void TestOK(string name, FieldAttributes attributes) {
+                FieldDefinition definition = new FieldDefinition(name, attributes, new TypeReference(string.Empty, string.Empty, null, null));
+
+                string message = this.GetAssertMessage("TestField", "TestOK()", name, attributes.ToString(), true, false);
+
+                Assert.True(Obfuscator.IsFieldObfuscatable(definition), message);
+            }
+
+            void TestFAIL(string name, FieldAttributes attributes) {
+                FieldDefinition definition = new FieldDefinition(name, attributes, new TypeReference(string.Empty, string.Empty, null, null));
+
+                string message = this.GetAssertMessage("TestField", "TestFAIL()", name, attributes.ToString(), false, true);
+
+                Assert.False(Obfuscator.IsFieldObfuscatable(definition), message);
+            }
+
+            TestFAIL("<Test>", FieldAttributes.Public);
+            TestFAIL("<Test>", FieldAttributes.SpecialName);
+            TestFAIL("Test", FieldAttributes.SpecialName);
+            TestFAIL("Test", FieldAttributes.RTSpecialName);
+
+            TestOK("Test", FieldAttributes.Public);
+        }
+    }
+}
+
+
+
+================================================
+File: Z00bfuscator.Tests/TestMethod.cs
+================================================
+ï»¿#region License
+// ====================================================
+// Z00bfuscator Copyright(C) 2013-2019 Furkan TÃ¼rkal
+// This program comes with ABSOLUTELY NO WARRANTY; This is free software,
+// and you are welcome to redistribute it under certain conditions; See
+// file LICENSE, which is part of this source code package, for details.
+// ====================================================
+#endregion
+
+using Mono.Cecil;
+using Xunit;
+
+namespace Z00bfuscator.Tests {
+    public sealed class TestMethod : TestCase {
+        [Fact]
+        public void Test() {
+            void TestOK(string name, MethodAttributes attributes) {
+                MethodDefinition definition = new MethodDefinition(name, attributes, new TypeReference(string.Empty, string.Empty, null, null));
+
+                string message = this.GetAssertMessage("TestMethod", "TestOK()", name, attributes.ToString(), true, false);
+
+                Assert.True(Obfuscator.IsMethodObfuscatable(definition), message);
+            }
+
+            void TestFAIL(string name, MethodAttributes attributes) {
+                MethodDefinition definition = new MethodDefinition(name, attributes, new TypeReference(string.Empty, string.Empty, null, null));
+
+                string message = this.GetAssertMessage("TestMethod", "TestFAIL()", name, attributes.ToString(), false, true);
+
+                Assert.False(Obfuscator.IsMethodObfuscatable(definition), message);
+            }
+
+            TestFAIL("", MethodAttributes.Public);
+            TestFAIL("Main", MethodAttributes.Public);
+            TestFAIL("Main", MethodAttributes.SpecialName);
+            TestFAIL("Main", MethodAttributes.RTSpecialName);
+            TestFAIL("<Test>", MethodAttributes.Public);
+            TestFAIL("<Test>", MethodAttributes.Abstract);
+            TestFAIL("Test", MethodAttributes.Abstract);
+            TestFAIL("Test", MethodAttributes.Virtual);
+
+            TestOK("Test", MethodAttributes.Private);
+            TestOK("Test", MethodAttributes.Static);
+            TestOK("Test", MethodAttributes.Public);
+        }
+    }
+}
+
+
+
+================================================
+File: Z00bfuscator.Tests/TestNamespace.cs
+================================================
+ï»¿#region License
+// ====================================================
+// Z00bfuscator Copyright(C) 2013-2019 Furkan TÃ¼rkal
+// This program comes with ABSOLUTELY NO WARRANTY; This is free software,
+// and you are welcome to redistribute it under certain conditions; See
+// file LICENSE, which is part of this source code package, for details.
+// ====================================================
+#endregion
+
+using Mono.Cecil;
+using Xunit;
+
+namespace Z00bfuscator.Tests {
+    public sealed class TestNamespace : TestCase {
+        [Fact]
+        public void Test() {
+            void TestOK(string @namespace, string name, TypeAttributes attributes) {
+                TypeDefinition definition = new TypeDefinition(@namespace, name, attributes, new TypeReference(string.Empty, string.Empty, null, null));
+
+                string message = this.GetAssertMessage("TestNamespace", "TestOK()", name, attributes.ToString(), true, false);
+
+                Assert.True(Obfuscator.IsNamespaceObfuscatable(definition), message);
+            }
+
+            void TestFAIL(string @namespace, string name, TypeAttributes attributes) {
+                TypeDefinition definition = new TypeDefinition(@namespace, name, attributes, new TypeReference(string.Empty, string.Empty, null, null));
+
+                string message = this.GetAssertMessage("TestNamespace", "TestFAIL()", name, attributes.ToString(), false, true);
+
+                Assert.False(Obfuscator.IsNamespaceObfuscatable(definition), message);
+            }
+
+            TestFAIL("x", "<Module>", TypeAttributes.Public);
+            TestFAIL("x", "Resources", TypeAttributes.Public);
+            TestFAIL("x", "", TypeAttributes.Public);
+            TestFAIL("x", "___TEST__", TypeAttributes.Public);
+            TestFAIL("x", "<Test>", TypeAttributes.Public);
+            TestFAIL("x", "Test", TypeAttributes.SpecialName);
+            TestFAIL("x", "Test", TypeAttributes.RTSpecialName);
+
+            TestOK("x", "Test", TypeAttributes.Public);
+            TestOK("x", "_Test_", TypeAttributes.Public);
+
+        }
+    }
+}
+
+
+
+================================================
+File: Z00bfuscator.Tests/TestProperty.cs
+================================================
+ï»¿#region License
+// ====================================================
+// Z00bfuscator Copyright(C) 2013-2019 Furkan TÃ¼rkal
+// This program comes with ABSOLUTELY NO WARRANTY; This is free software,
+// and you are welcome to redistribute it under certain conditions; See
+// file LICENSE, which is part of this source code package, for details.
+// ====================================================
+#endregion
+
+using Mono.Cecil;
+using Xunit;
+
+namespace Z00bfuscator.Tests {
+    public sealed class TestProperty : TestCase {
+        [Fact]
+        public void Test() {
+            void TestOK(string name, PropertyAttributes attributes) {
+                PropertyDefinition definition = new PropertyDefinition(name, attributes, new TypeReference(string.Empty, string.Empty, null, null));
+
+                string message = this.GetAssertMessage("TestProperty", "TestOK()", name, attributes.ToString(), true, false);
+
+                Assert.True(Obfuscator.IsPropertyObfuscatable(definition), message);
+            }
+
+            void TestFAIL(string name, PropertyAttributes attributes) {
+                PropertyDefinition definition = new PropertyDefinition(name, attributes, new TypeReference(string.Empty, string.Empty, null, null));
+
+                string message = this.GetAssertMessage("TestProperty", "TestFAIL()", name, attributes.ToString(), false, true);
+
+                Assert.False(Obfuscator.IsPropertyObfuscatable(definition), message);
+            }
+
+            TestFAIL("test", PropertyAttributes.SpecialName);
+            TestFAIL("test", PropertyAttributes.RTSpecialName);
+
+            TestOK("Test", PropertyAttributes.HasDefault);
+            TestOK("Test", PropertyAttributes.None);
+            TestOK("Test", PropertyAttributes.Unused);
+        }
+    }
+}
+
+
+
+================================================
+File: Z00bfuscator.Tests/TestResource.cs
+================================================
+ï»¿#region License
+// ====================================================
+// Z00bfuscator Copyright(C) 2013-2019 Furkan TÃ¼rkal
+// This program comes with ABSOLUTELY NO WARRANTY; This is free software,
+// and you are welcome to redistribute it under certain conditions; See
+// file LICENSE, which is part of this source code package, for details.
+// ====================================================
+#endregion
+
+using Mono.Cecil;
+using Xunit;
+
+namespace Z00bfuscator.Tests {
+    public sealed class TestResource : TestCase {
+        [Fact]
+        public void Test() {
+            void TestOK(string name, ManifestResourceAttributes attributes) {
+                string message = this.GetAssertMessage("TestResource", "TestOK()", name, attributes.ToString(), true, false);
+
+                Assert.True(Obfuscator.IsResourceObfuscatable(name), message);
+            }
+
+            void TestFAIL(string name, ManifestResourceAttributes attributes) {
+                string message = this.GetAssertMessage("TestResource", "TestFAIL()", name, attributes.ToString(), false, true);
+
+                Assert.False(Obfuscator.IsResourceObfuscatable(name), message);
+            }
+
+            TestFAIL("<Module>", ManifestResourceAttributes.Private);
+
+            TestOK("Test", ManifestResourceAttributes.Private);
+            TestOK("Test", ManifestResourceAttributes.Public);
+            TestOK("Test", ManifestResourceAttributes.VisibilityMask);
+        }
+    }
+}
+
+
+
+================================================
+File: Z00bfuscator.Tests/TestType.cs
+================================================
+ï»¿#region License
+// ====================================================
+// Z00bfuscator Copyright(C) 2013-2019 Furkan TÃ¼rkal
+// This program comes with ABSOLUTELY NO WARRANTY; This is free software,
+// and you are welcome to redistribute it under certain conditions; See
+// file LICENSE, which is part of this source code package, for details.
+// ====================================================
+#endregion
+
+using Mono.Cecil;
+using Xunit;
+
+namespace Z00bfuscator.Tests {
+    public sealed class TestType : TestCase{
+        [Fact]
+        public void Test() {
+            void TestOK(string @namespace, string name, TypeAttributes attributes) {
+                TypeDefinition definition = new TypeDefinition(@namespace, name, attributes, new TypeReference(string.Empty, string.Empty, null, null));
+
+                string message = this.GetAssertMessage("TestType", "TestOK()", name, attributes.ToString(), true, false);
+
+                Assert.True(Obfuscator.IsTypeObfuscatable(definition), message);
+            }
+
+            void TestFAIL(string @namespace, string name, TypeAttributes attributes) {
+                TypeDefinition definition = new TypeDefinition(@namespace, name, attributes, new TypeReference(string.Empty, string.Empty, null, null));
+
+                string message = this.GetAssertMessage("TestType", "TestFAIL()", name, attributes.ToString(), false, true);
+
+                Assert.False(Obfuscator.IsTypeObfuscatable(definition), message);
+            }
+
+            TestFAIL("x", "<Module>", TypeAttributes.Public);
+            TestFAIL("x", "Resources", TypeAttributes.Public);
+            TestFAIL("x", "", TypeAttributes.Public);
+            TestFAIL("x", "___TEST__", TypeAttributes.Public);
+            TestFAIL("x", "<Test>", TypeAttributes.Public);
+            TestFAIL("x", "Test", TypeAttributes.SpecialName);
+            TestFAIL("x", "Test", TypeAttributes.RTSpecialName);
+
+            TestOK("x", "Test", TypeAttributes.Public);
+            TestOK("x", "_Test_", TypeAttributes.Public);
+        }
+    }
+}
+
+
+
+================================================
+File: Z00bfuscator.Tests/Z00bfuscator.Tests.csproj
+================================================
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.6.0" />
+    <PackageReference Include="xunit" Version="2.3.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
+    <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Z00bfuscator\Z00bfuscator.csproj" />
+  </ItemGroup>
+
+</Project>
+
+
+

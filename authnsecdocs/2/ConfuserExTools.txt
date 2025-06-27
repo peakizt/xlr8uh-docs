@@ -1,0 +1,1517 @@
+Directory structure:
+└── wwh1004-confuserextools/
+    ├── README.md
+    ├── ConfuserExTools.sln
+    ├── LICENSE
+    ├── appveyor.yml
+    ├── .editorconfig
+    ├── AntiTamperKiller/
+    │   ├── AntiTamperKiller.csproj
+    │   ├── AntiTamperKillerImpl.cs
+    │   ├── AntiTamperKillerSettings.cs
+    │   ├── AntiTamperKillerTool.cs
+    │   └── PEInfo.cs
+    ├── ConfuserExKiller/
+    │   ├── ConfuserExKiller.csproj
+    │   ├── ConfuserExKillerSettings.cs
+    │   ├── ConfuserExKillerTool.cs
+    │   └── DnlibLogger.cs
+    ├── ConstantKiller/
+    │   ├── ConstantKiller.csproj
+    │   ├── ConstantKillerImpl.cs
+    │   ├── ConstantKillerSettings.cs
+    │   ├── ConstantKillerTool.cs
+    │   ├── DnlibLogger.cs
+    │   └── ModuleDefExtensions.cs
+    ├── Libraries/
+    │   ├── Tool.Interface/
+    │   └── dnlib/
+    └── ProxyKiller/
+        ├── DnlibLogger.cs
+        ├── ModuleDefExtensions.cs
+        ├── ProxyKiller.csproj
+        ├── ProxyKillerImpl.cs
+        ├── ProxyKillerSettings.cs
+        └── ProxyKillerTool.cs
+
+================================================
+File: README.md
+================================================
+# ConfuserExTools
+ConfuserEx unpacking tools
+
+It has only basic support for ConfuserEx (AntiTamper, ReferenceProxy, Constants) because it is a tool for my personal use.
+
+Whether it gets further update is based on whether I still need it.
+
+NOTE: For constants decryption, it only supports non-cfg mode.
+
+## Usage
+
+Download latest [ToolLoader](https://github.com/wwh1004/ToolLoader/releases/latest/download/ToolLoader.zip) and decompress it into build artifacts folder.
+
+Open cmd or powershell here and enter "**Tool.Loader.Auto.exe ConfuserExKiller.dll -f ***your_assembly_path*****"
+
+
+
+================================================
+File: ConfuserExTools.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30406.217
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AntiTamperKiller", "AntiTamperKiller\AntiTamperKiller.csproj", "{3FEF0836-A692-4C86-8C1A-847561472830}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dnlib", "Libraries\dnlib\src\dnlib.csproj", "{FDFC1237-143F-4919-8318-4926901F4639}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProxyKiller", "ProxyKiller\ProxyKiller.csproj", "{97843730-F812-435B-8FEE-EB972309018C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{CB5AEF43-4AE8-4DFD-9A5B-895CB5564473}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConstantKiller", "ConstantKiller\ConstantKiller.csproj", "{F2CEEB29-4DB4-4DE3-AD5B-F4CD4386E695}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConfuserExKiller", "ConfuserExKiller\ConfuserExKiller.csproj", "{2F20BF5A-A5C2-4BFA-96E6-ACD79586E4E6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3FEF0836-A692-4C86-8C1A-847561472830}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3FEF0836-A692-4C86-8C1A-847561472830}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3FEF0836-A692-4C86-8C1A-847561472830}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3FEF0836-A692-4C86-8C1A-847561472830}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FDFC1237-143F-4919-8318-4926901F4639}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDFC1237-143F-4919-8318-4926901F4639}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDFC1237-143F-4919-8318-4926901F4639}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDFC1237-143F-4919-8318-4926901F4639}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97843730-F812-435B-8FEE-EB972309018C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97843730-F812-435B-8FEE-EB972309018C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97843730-F812-435B-8FEE-EB972309018C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97843730-F812-435B-8FEE-EB972309018C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2CEEB29-4DB4-4DE3-AD5B-F4CD4386E695}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2CEEB29-4DB4-4DE3-AD5B-F4CD4386E695}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2CEEB29-4DB4-4DE3-AD5B-F4CD4386E695}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2CEEB29-4DB4-4DE3-AD5B-F4CD4386E695}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F20BF5A-A5C2-4BFA-96E6-ACD79586E4E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F20BF5A-A5C2-4BFA-96E6-ACD79586E4E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F20BF5A-A5C2-4BFA-96E6-ACD79586E4E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F20BF5A-A5C2-4BFA-96E6-ACD79586E4E6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FDFC1237-143F-4919-8318-4926901F4639} = {CB5AEF43-4AE8-4DFD-9A5B-895CB5564473}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {19F53293-8F4D-49B4-B53B-CF477E6F38D3}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: LICENSE
+================================================
+MIT License
+
+Copyright (c) 2018-2020 æ–‡ç…Œ
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+
+================================================
+File: appveyor.yml
+================================================
+version: '{build}'
+image: Visual Studio 2019
+configuration: Release
+platform: Any CPU
+install:
+- cmd: git submodule update --init --recursive
+before_build:
+- cmd: appveyor-retry nuget restore
+build:
+  project: ConfuserExTools.sln
+  verbosity: normal
+artifacts:
+- path: bin\Release
+  name: ConfuserExTools
+deploy:
+- provider: GitHub
+  tag: $(APPVEYOR_REPO_TAG_NAME)
+  release: ConfuserExTools
+  auth_token:
+    secure: +8UJ1C312inNq+80I8WST34vPMrCylnmTx+9rmuIh1qnsArA5x2b8yc+kcwkXmQC
+  on:
+    APPVEYOR_REPO_TAG: true
+
+
+================================================
+File: .editorconfig
+================================================
+# Remove the line below if you want to inherit .editorconfig settings from higher directories
+root = true
+
+[*]
+charset = utf-8
+end_of_line = crlf
+indent_style = tab
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+# C# files
+[*.cs]
+
+#### .NET Coding Conventions ####
+
+# Organize usings
+dotnet_separate_import_directive_groups = false
+dotnet_sort_system_directives_first = true
+
+# this. and Me. preferences
+dotnet_style_qualification_for_event = false:suggestion
+dotnet_style_qualification_for_field = false:suggestion
+dotnet_style_qualification_for_method = false:suggestion
+dotnet_style_qualification_for_property = false:suggestion
+
+# Language keywords vs BCL types preferences
+dotnet_style_predefined_type_for_locals_parameters_members = true:suggestion
+dotnet_style_predefined_type_for_member_access = true:suggestion
+
+# Parentheses preferences
+dotnet_style_parentheses_in_arithmetic_binary_operators = always_for_clarity:suggestion
+dotnet_style_parentheses_in_other_binary_operators = always_for_clarity:suggestion
+dotnet_style_parentheses_in_other_operators = never_if_unnecessary:suggestion
+dotnet_style_parentheses_in_relational_binary_operators = always_for_clarity:suggestion
+
+# Modifier preferences
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:silent
+
+# Expression-level preferences
+dotnet_style_coalesce_expression = true:suggestion
+dotnet_style_collection_initializer = true:suggestion
+dotnet_style_explicit_tuple_names = true:suggestion
+dotnet_style_null_propagation = true:suggestion
+dotnet_style_object_initializer = true:suggestion
+dotnet_style_prefer_auto_properties = false:suggestion
+dotnet_style_prefer_compound_assignment = true:suggestion
+dotnet_style_prefer_conditional_expression_over_assignment = true:silent
+dotnet_style_prefer_conditional_expression_over_return = true:silent
+dotnet_style_prefer_inferred_anonymous_type_member_names = true:suggestion
+dotnet_style_prefer_inferred_tuple_names = true:suggestion
+dotnet_style_prefer_is_null_check_over_reference_equality_method = true:suggestion
+dotnet_style_prefer_simplified_interpolation = true:suggestion
+
+# Field preferences
+dotnet_style_readonly_field = true:suggestion
+
+# Parameter preferences
+dotnet_code_quality_unused_parameters = all:suggestion
+
+#### C# Coding Conventions ####
+
+# var preferences
+csharp_style_var_elsewhere = true:suggestion
+csharp_style_var_for_built_in_types = false:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+
+# Expression-bodied members
+csharp_style_expression_bodied_accessors = true:suggestion
+csharp_style_expression_bodied_constructors = false:suggestion
+csharp_style_expression_bodied_indexers = true:suggestion
+csharp_style_expression_bodied_lambdas = true:suggestion
+csharp_style_expression_bodied_local_functions = false:suggestion
+csharp_style_expression_bodied_methods = false:suggestion
+csharp_style_expression_bodied_operators = false:suggestion
+csharp_style_expression_bodied_properties = true:suggestion
+
+# Pattern matching preferences
+csharp_style_pattern_matching_over_as_with_null_check = true:suggestion
+csharp_style_pattern_matching_over_is_with_cast_check = true:suggestion
+csharp_style_prefer_switch_expression = false:suggestion
+
+# Null-checking preferences
+csharp_style_conditional_delegate_call = true:suggestion
+
+# Modifier preferences
+csharp_prefer_static_local_function = true:suggestion
+csharp_preferred_modifier_order = public,private,protected,internal,static,extern,new,virtual,abstract,sealed,override,readonly,unsafe,volatile,async:silent
+
+# Code-block preferences
+csharp_prefer_braces = false:silent
+csharp_prefer_simple_using_statement = true:suggestion
+
+# Expression-level preferences
+csharp_prefer_simple_default_expression = true:suggestion
+csharp_style_deconstructed_variable_declaration = true:suggestion
+csharp_style_inlined_variable_declaration = true:suggestion
+csharp_style_pattern_local_over_anonymous_function = true:suggestion
+csharp_style_prefer_index_operator = true:suggestion
+csharp_style_prefer_range_operator = true:suggestion
+csharp_style_throw_expression = true:suggestion
+csharp_style_unused_value_assignment_preference = unused_local_variable:silent
+csharp_style_unused_value_expression_statement_preference = unused_local_variable:silent
+
+# 'using' directive preferences
+csharp_using_directive_placement = outside_namespace:suggestion
+
+#### C# Formatting Rules ####
+
+# New line preferences
+csharp_new_line_before_catch = true
+csharp_new_line_before_else = true
+csharp_new_line_before_finally = true
+csharp_new_line_before_members_in_anonymous_types = true
+csharp_new_line_before_members_in_object_initializers = true
+csharp_new_line_before_open_brace = none
+csharp_new_line_between_query_expression_clauses = false
+
+# Indentation preferences
+csharp_indent_block_contents = true
+csharp_indent_braces = false
+csharp_indent_case_contents = true
+csharp_indent_case_contents_when_block = false
+csharp_indent_labels = one_less_than_current
+csharp_indent_switch_labels = false
+
+# Space preferences
+csharp_space_after_cast = false
+csharp_space_after_colon_in_inheritance_clause = true
+csharp_space_after_comma = true
+csharp_space_after_dot = false
+csharp_space_after_keywords_in_control_flow_statements = true
+csharp_space_after_semicolon_in_for_statement = true
+csharp_space_around_binary_operators = before_and_after
+csharp_space_around_declaration_statements = false
+csharp_space_before_colon_in_inheritance_clause = true
+csharp_space_before_comma = false
+csharp_space_before_dot = false
+csharp_space_before_open_square_brackets = false
+csharp_space_before_semicolon_in_for_statement = false
+csharp_space_between_empty_square_brackets = false
+csharp_space_between_method_call_empty_parameter_list_parentheses = false
+csharp_space_between_method_call_name_and_opening_parenthesis = false
+csharp_space_between_method_call_parameter_list_parentheses = false
+csharp_space_between_method_declaration_empty_parameter_list_parentheses = false
+csharp_space_between_method_declaration_name_and_open_parenthesis = false
+csharp_space_between_method_declaration_parameter_list_parentheses = false
+csharp_space_between_parentheses = false
+csharp_space_between_square_brackets = false
+
+# Wrapping preferences
+csharp_preserve_single_line_blocks = true
+csharp_preserve_single_line_statements = true
+
+#### Naming styles ####
+
+# Naming rules
+
+dotnet_naming_rule.interface_should_be_begins_with_i.severity = suggestion
+dotnet_naming_rule.interface_should_be_begins_with_i.symbols = interface
+dotnet_naming_rule.interface_should_be_begins_with_i.style = begins_with_i
+
+dotnet_naming_rule.types_should_be_pascal_case.severity = suggestion
+dotnet_naming_rule.types_should_be_pascal_case.symbols = types
+dotnet_naming_rule.types_should_be_pascal_case.style = pascal_case
+
+dotnet_naming_rule.non_field_members_should_be_pascal_case.severity = suggestion
+dotnet_naming_rule.non_field_members_should_be_pascal_case.symbols = non_field_members
+dotnet_naming_rule.non_field_members_should_be_pascal_case.style = pascal_case
+
+# Symbol specifications
+
+dotnet_naming_symbols.interface.applicable_kinds = interface
+dotnet_naming_symbols.interface.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
+dotnet_naming_symbols.interface.required_modifiers = 
+
+dotnet_naming_symbols.types.applicable_kinds = class, struct, interface, enum
+dotnet_naming_symbols.types.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
+dotnet_naming_symbols.types.required_modifiers = 
+
+dotnet_naming_symbols.non_field_members.applicable_kinds = property, event, method
+dotnet_naming_symbols.non_field_members.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
+dotnet_naming_symbols.non_field_members.required_modifiers = 
+
+# Naming styles
+
+dotnet_naming_style.pascal_case.required_prefix = 
+dotnet_naming_style.pascal_case.required_suffix = 
+dotnet_naming_style.pascal_case.word_separator = 
+dotnet_naming_style.pascal_case.capitalization = pascal_case
+
+dotnet_naming_style.begins_with_i.required_prefix = I
+dotnet_naming_style.begins_with_i.required_suffix = 
+dotnet_naming_style.begins_with_i.word_separator = 
+dotnet_naming_style.begins_with_i.capitalization = pascal_case
+
+
+
+================================================
+File: AntiTamperKiller/AntiTamperKiller.csproj
+================================================
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<Title>$(ProjectName)</Title>
+		<Version>2.1.0.0</Version>
+		<Copyright>Copyright Â© 2018-2020 Wwh</Copyright>
+	</PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net35</TargetFramework>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<LangVersion>7.3</LangVersion>
+		<OutputPath>..\bin\$(Configuration)</OutputPath>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<RootNamespace>ConfuserExTools.AntiTamperKiller</RootNamespace>
+	</PropertyGroup>
+	<ItemGroup>
+		<Reference Include="Tool.Interface">
+			<HintPath>..\Libraries\Tool.Interface\Tool.Interface.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+</Project>
+
+
+
+================================================
+File: AntiTamperKiller/AntiTamperKillerImpl.cs
+================================================
+using System;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+namespace ConfuserExTools.AntiTamperKiller {
+	public static unsafe class AntiTamperKillerImpl {
+		public static byte[] Execute(Module module, byte[] peImage) {
+			if (module is null)
+				throw new ArgumentNullException(nameof(module));
+			if (peImage is null)
+				throw new ArgumentNullException(nameof(peImage));
+
+			var peInfo = new PEInfo((void*)Marshal.GetHINSTANCE(module));
+			var sectionHeader = peInfo.SectionHeaders[0];
+			byte[] section = new byte[sectionHeader.SizeOfRawData];
+			RuntimeHelpers.RunModuleConstructor(module.ModuleHandle);
+			byte[] result = new byte[peImage.Length];
+			Buffer.BlockCopy(peImage, 0, result, 0, peImage.Length);
+			Marshal.Copy((IntPtr)((byte*)peInfo.PEImage + sectionHeader.VirtualAddress), result, (int)sectionHeader.PointerToRawData, (int)sectionHeader.SizeOfRawData);
+			return result;
+		}
+	}
+}
+
+
+
+================================================
+File: AntiTamperKiller/AntiTamperKillerSettings.cs
+================================================
+using System;
+using System.Cli;
+using System.IO;
+
+namespace ConfuserExTools.AntiTamperKiller {
+	public sealed class AntiTamperKillerSettings {
+		private string _assemblyPath;
+
+		[Argument("-f", IsRequired = true, Type = "FILE", Description = "程序集路径")]
+		internal string AssemblyPathCliSetter {
+			set => AssemblyPath = value;
+		}
+
+		public string AssemblyPath {
+			get => _assemblyPath;
+			set {
+				if (string.IsNullOrEmpty(value))
+					throw new ArgumentNullException(nameof(value));
+				if (!File.Exists(value))
+					throw new FileNotFoundException($"{value} 不存在");
+
+				_assemblyPath = Path.GetFullPath(value);
+			}
+		}
+	}
+}
+
+
+
+================================================
+File: AntiTamperKiller/AntiTamperKillerTool.cs
+================================================
+using System.IO;
+using System.Reflection;
+using Tool;
+using Tool.Interface;
+
+namespace ConfuserExTools.AntiTamperKiller {
+	public sealed class AntiTamperKillerTool : ITool<AntiTamperKillerSettings> {
+		public string Title => GetTitle();
+
+		public void Execute(AntiTamperKillerSettings settings) {
+			Logger.Initialize(false);
+			byte[] peImage = AntiTamperKillerImpl.Execute(Assembly.LoadFile(settings.AssemblyPath).ManifestModule, File.ReadAllBytes(settings.AssemblyPath));
+			SaveAs(PathInsertSuffix(settings.AssemblyPath, ".atk"), peImage);
+			Logger.Flush();
+		}
+
+		private static string PathInsertSuffix(string path, string suffix) {
+			return Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path) + suffix + Path.GetExtension(path));
+		}
+
+		private static void SaveAs(string filePath, byte[] peImage) {
+			Logger.LogInfo($"正在保存: {filePath}");
+			Logger.LogInfo("请手动移除AntiTamper初始化代码");
+			Logger.LogInfo();
+			File.WriteAllBytes(filePath, peImage);
+		}
+
+		private static string GetTitle() {
+			string productName = GetAssemblyAttribute<AssemblyProductAttribute>().Product;
+			string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+			string copyright = GetAssemblyAttribute<AssemblyCopyrightAttribute>().Copyright.Substring(12);
+			int firstBlankIndex = copyright.IndexOf(' ');
+			string copyrightOwnerName = copyright.Substring(firstBlankIndex + 1);
+			string copyrightYear = copyright.Substring(0, firstBlankIndex);
+			return $"{productName} v{version} by {copyrightOwnerName} {copyrightYear}";
+		}
+
+		private static T GetAssemblyAttribute<T>() {
+			return (T)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(T), false)[0];
+		}
+	}
+}
+
+
+
+================================================
+File: AntiTamperKiller/PEInfo.cs
+================================================
+using System.Runtime.InteropServices;
+
+namespace ConfuserExTools.AntiTamperKiller {
+	[StructLayout(LayoutKind.Sequential)]
+	internal unsafe struct IMAGE_SECTION_HEADER {
+		public fixed byte Name[8];
+		public uint VirtualSize;
+		public uint VirtualAddress;
+		public uint SizeOfRawData;
+		public uint PointerToRawData;
+		public uint PointerToRelocations;
+		public uint PointerToLinenumbers;
+		public ushort NumberOfRelocations;
+		public ushort NumberOfLinenumbers;
+		public uint Characteristics;
+	}
+
+	internal sealed unsafe class PEInfo {
+		private readonly void* _pPEImage;
+		private readonly uint _sectionsCount;
+		private readonly IMAGE_SECTION_HEADER* _pSectionHeaders;
+
+		public void* PEImage => _pPEImage;
+
+		public uint SectionsCount => _sectionsCount;
+
+		public IMAGE_SECTION_HEADER* SectionHeaders => _pSectionHeaders;
+
+		public PEInfo(void* pPEImage) {
+			_pPEImage = pPEImage;
+			byte* p = (byte*)pPEImage;
+			p += *(uint*)(p + 0x3C);
+			// NtHeader
+			p += 4 + 2;
+			// è·³è¿‡ Signature + Machine
+			_sectionsCount = *(ushort*)p;
+			p += 2 + 4 + 4 + 4;
+			// è·³è¿‡ NumberOfSections + TimeDateStamp + PointerToSymbolTable + NumberOfSymbols
+			ushort optionalHeaderSize = *(ushort*)p;
+			p += 2 + 2;
+			// è·³è¿‡ SizeOfOptionalHeader + Characteristics
+			p += optionalHeaderSize;
+			// è·³è¿‡ OptionalHeader
+			_pSectionHeaders = (IMAGE_SECTION_HEADER*)p;
+		}
+	}
+}
+
+
+
+================================================
+File: ConfuserExKiller/ConfuserExKiller.csproj
+================================================
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<Title>$(ProjectName)</Title>
+		<Version>1.0.0.1</Version>
+		<Copyright>Copyright Â© 2020 Wwh</Copyright>
+	</PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net35</TargetFramework>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<LangVersion>7.3</LangVersion>
+		<OutputPath>..\bin\$(Configuration)</OutputPath>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<RootNamespace>ConfuserExTools.ConfuserExKiller</RootNamespace>
+	</PropertyGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\AntiTamperKiller\AntiTamperKiller.csproj" />
+		<ProjectReference Include="..\ConstantKiller\ConstantKiller.csproj" />
+		<ProjectReference Include="..\Libraries\dnlib\src\dnlib.csproj" />
+		<ProjectReference Include="..\ProxyKiller\ProxyKiller.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<Reference Include="Tool.Interface">
+			<HintPath>..\Libraries\Tool.Interface\Tool.Interface.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+</Project>
+
+
+
+================================================
+File: ConfuserExKiller/ConfuserExKillerSettings.cs
+================================================
+using System;
+using System.Cli;
+using System.IO;
+
+namespace ConfuserExTools.ConfuserExKiller {
+	public sealed class ConfuserExKillerSettings {
+		private string _assemblyPath;
+
+		[Argument("-f", IsRequired = true, Type = "FILE", Description = "程序集路径")]
+		internal string AssemblyPathCliSetter {
+			set => AssemblyPath = value;
+		}
+
+		public string AssemblyPath {
+			get => _assemblyPath;
+			set {
+				if (string.IsNullOrEmpty(value))
+					throw new ArgumentNullException(nameof(value));
+				if (!File.Exists(value))
+					throw new FileNotFoundException($"{value} 不存在");
+
+				_assemblyPath = Path.GetFullPath(value);
+			}
+		}
+	}
+}
+
+
+
+================================================
+File: ConfuserExKiller/ConfuserExKillerTool.cs
+================================================
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using ConfuserExTools.AntiTamperKiller;
+using ConfuserExTools.ConstantKiller;
+using ConfuserExTools.ProxyKiller;
+using dnlib.DotNet;
+using dnlib.DotNet.Writer;
+using Tool;
+using Tool.Interface;
+
+namespace ConfuserExTools.ConfuserExKiller {
+	public sealed class ConfuserExKillerTool : ITool<ConfuserExKillerSettings> {
+		public string Title => GetTitle();
+
+		public void Execute(ConfuserExKillerSettings settings) {
+			Logger.Initialize(false);
+			var reflModule = Assembly.LoadFile(settings.AssemblyPath).ManifestModule;
+			byte[] peImageOld = File.ReadAllBytes(settings.AssemblyPath);
+			byte[] peImage = AntiTamperKillerImpl.Execute(reflModule, peImageOld);
+			if (!peImage.SequenceEqual(peImageOld))
+				Logger.LogInfo($"AntiTamper已移除");
+			using (var module = ModuleDefMD.Load(peImage)) {
+				int count = ProxyKillerImpl.Execute(module, false, true);
+				Logger.LogInfo($"共 {count} 个代理方法被还原");
+				count = ConstantKillerImpl.Execute(module, reflModule);
+				Logger.LogInfo($"共 {count} 个常量被解密");
+				string newFilePath = PathInsertSuffix(settings.AssemblyPath, ".cexk");
+				Logger.LogInfo($"正在保存: {newFilePath}");
+				Logger.LogInfo();
+				module.Write(newFilePath, new ModuleWriterOptions(module) { Logger = DnlibLogger.Instance });
+			}
+			Logger.Flush();
+		}
+
+		private static string PathInsertSuffix(string path, string suffix) {
+			return Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path) + suffix + Path.GetExtension(path));
+		}
+
+		private static string GetTitle() {
+			string productName = GetAssemblyAttribute<AssemblyProductAttribute>().Product;
+			string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+			string copyright = GetAssemblyAttribute<AssemblyCopyrightAttribute>().Copyright.Substring(12);
+			int firstBlankIndex = copyright.IndexOf(' ');
+			string copyrightOwnerName = copyright.Substring(firstBlankIndex + 1);
+			string copyrightYear = copyright.Substring(0, firstBlankIndex);
+			return $"{productName} v{version} by {copyrightOwnerName} {copyrightYear}";
+		}
+
+		private static T GetAssemblyAttribute<T>() {
+			return (T)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(T), false)[0];
+		}
+	}
+}
+
+
+
+================================================
+File: ConfuserExKiller/DnlibLogger.cs
+================================================
+using System;
+using dnlib.DotNet;
+using Tool;
+
+namespace ConfuserExTools.ConfuserExKiller {
+	internal sealed class DnlibLogger : ILogger {
+		private static readonly DnlibLogger _instance = new DnlibLogger();
+
+		private DnlibLogger() {
+		}
+
+		public static DnlibLogger Instance => _instance;
+
+		public bool IgnoresEvent(LoggerEvent loggerEvent) {
+			return false;
+		}
+
+		public void Log(object sender, LoggerEvent loggerEvent, string format, params object[] args) {
+			string text = $"{loggerEvent}: {string.Format(format, args)}";
+			switch (loggerEvent) {
+			case LoggerEvent.Error: Logger.LogError(text); break;
+			case LoggerEvent.Warning: Logger.LogWarning(text); break;
+			case LoggerEvent.Info: Logger.LogInfo(text); break;
+			case LoggerEvent.Verbose:
+			case LoggerEvent.VeryVerbose: Logger.LogDebugInfo(text); break;
+			default: throw new ArgumentOutOfRangeException(nameof(loggerEvent));
+			}
+		}
+	}
+}
+
+
+
+================================================
+File: ConstantKiller/ConstantKiller.csproj
+================================================
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<Title>$(ProjectName)</Title>
+		<Version>1.0.0.1</Version>
+		<Copyright>Copyright Â© 2020 Wwh</Copyright>
+	</PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net35</TargetFramework>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<LangVersion>7.3</LangVersion>
+		<OutputPath>..\bin\$(Configuration)</OutputPath>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<RootNamespace>ConfuserExTools.ConstantKiller</RootNamespace>
+	</PropertyGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Libraries\dnlib\src\dnlib.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<Reference Include="Tool.Interface">
+			<HintPath>..\Libraries\Tool.Interface\Tool.Interface.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+</Project>
+
+
+
+================================================
+File: ConstantKiller/ConstantKillerImpl.cs
+================================================
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using Tool;
+using FieldAttributes = dnlib.DotNet.FieldAttributes;
+using TypeAttributes = dnlib.DotNet.TypeAttributes;
+
+namespace ConfuserExTools.ConstantKiller {
+	public static class ConstantKillerImpl {
+		public static int Execute(ModuleDef module, Module reflModule) {
+			if (module is null)
+				throw new ArgumentNullException(nameof(module));
+			if (reflModule is null)
+				throw new ArgumentNullException(nameof(reflModule));
+
+			var decrypters = new HashSet<MethodDef>();
+			foreach (var method in module.GlobalType.Methods) {
+				if (!method.HasBody)
+					continue;
+				if (!method.IsStatic || !method.HasGenericParameters)
+					continue;
+				if (method.ReturnType.ElementType != ElementType.MVar || method.Parameters.Count != 1 || method.Parameters[0].Type.ElementType != ElementType.U4)
+					continue;
+
+				decrypters.Add(method);
+			}
+
+			var oldAssemblyResolver = module.Context.AssemblyResolver;
+			var oldResolver = module.Context.Resolver;
+			module.Context.AssemblyResolver = NullResolver.Instance;
+			module.Context.Resolver = new Resolver(NullResolver.Instance);
+			int count = 0;
+			foreach (var method in module.EnumerateMethods()) {
+				if (!method.HasBody)
+					continue;
+				if (decrypters.Contains(method))
+					continue;
+
+				method.Body.SimplifyMacros(method.Parameters);
+				for (int i = 1; i < method.Body.Instructions.Count; i++) {
+					var instructions = method.Body.Instructions;
+					var instruction = instructions[i];
+					if (instruction.OpCode.Code != Code.Call)
+						continue;
+					if (!(instruction.Operand is MethodSpec operandMethod))
+						continue;
+					if (!(operandMethod.Method is MethodDef operandMethodDef))
+						continue;
+					if (!decrypters.Contains(operandMethodDef))
+						continue;
+
+					var ldKeyInstr = default(Instruction);
+					int key = 0;
+					for (int j = 1; j <= i; j++) {
+						var instr = instructions[i - j];
+						if (instr.OpCode.Code == Code.Nop)
+							continue;
+						if (instr.OpCode.Code != Code.Ldc_I4)
+							break;
+						ldKeyInstr = instr;
+						key = (int)instr.Operand;
+						break;
+					}
+					if (ldKeyInstr is null) {
+						Logger.LogError($"[0x{method.MDToken.Raw:X8}] 无法找到常量解密器参数");
+						continue;
+					}
+
+					var constantType = operandMethod.GenericInstMethodSig.GenericArguments[0].RemoveModifiers();
+					var elementType = constantType.ElementType;
+					var arrayType = default(TypeSig);
+					var arrayElementType = default(ElementType);
+					var reflType = ToType(elementType);
+					if (reflType is null) {
+						if (elementType != ElementType.SZArray) {
+							Logger.LogError($"[0x{method.MDToken.Raw:X8}] 无效常量解密器泛型参数");
+							continue;
+						}
+
+						var arraySig = (SZArraySig)operandMethod.GenericInstMethodSig.GenericArguments[0];
+						arrayType = arraySig.Next.RemoveModifiers();
+						arrayElementType = arrayType.ElementType;
+						reflType = ToType(arrayElementType);
+						if (reflType is null) {
+							Logger.LogError($"[0x{method.MDToken.Raw:X8}] 无效常量解密器泛型参数");
+							continue;
+						}
+					}
+
+					object value;
+					try {
+						var reflMethod = reflModule.ResolveMethod(operandMethod.MDToken.ToInt32());
+						value = reflMethod.Invoke(null, new object[] { (uint)key });
+					}
+					catch (Exception ex) {
+						Logger.LogError($"[0x{method.MDToken.Raw:X8}] 调用常量解密器失败");
+						Logger.LogException(ex);
+						continue;
+					}
+					if (value is null) {
+						Logger.LogError($"[0x{method.MDToken.Raw:X8}] 常量解密器返回值为空");
+						continue;
+					}
+
+					if (elementType != ElementType.SZArray) {
+						switch (elementType) {
+						case ElementType.Boolean:
+						case ElementType.Char:
+						case ElementType.I1:
+						case ElementType.U1:
+						case ElementType.I2:
+						case ElementType.U2:
+						case ElementType.I4:
+						case ElementType.U4:
+							instruction.OpCode = OpCodes.Ldc_I4;
+							instruction.Operand = Convert.ToInt32(value);
+							break;
+						case ElementType.I8:
+						case ElementType.U8:
+							instruction.OpCode = OpCodes.Ldc_I8;
+							instruction.Operand = Convert.ToInt64(value);
+							break;
+						case ElementType.R4:
+							instruction.OpCode = OpCodes.Ldc_R4;
+							instruction.Operand = value;
+							break;
+						case ElementType.R8:
+							instruction.OpCode = OpCodes.Ldc_R8;
+							instruction.Operand = value;
+							break;
+						case ElementType.String:
+							instruction.OpCode = OpCodes.Ldstr;
+							instruction.Operand = value;
+							break;
+						default:
+							throw new InvalidOperationException();
+						}
+					}
+					else {
+						int elementSize;
+						switch (arrayElementType) {
+						case ElementType.Boolean:
+						case ElementType.I1:
+						case ElementType.U1:
+							elementSize = 1;
+							break;
+						case ElementType.Char:
+						case ElementType.I2:
+						case ElementType.U2:
+							elementSize = 2;
+							break;
+						case ElementType.I4:
+						case ElementType.U4:
+						case ElementType.R4:
+							elementSize = 4;
+							break;
+						case ElementType.I8:
+						case ElementType.U8:
+						case ElementType.R8:
+							elementSize = 8;
+							break;
+						default:
+							throw new InvalidOperationException();
+						}
+						byte[] data = new byte[((Array)value).Length * elementSize];
+						Buffer.BlockCopy((Array)value, 0, data, 0, data.Length);
+						var arrayInitializer = CreateArrayInitializer(module, arrayType.ToTypeDefOrRef(), ((Array)value).Length, data);
+						instructions.InsertRange(i, arrayInitializer);
+						instruction.OpCode = OpCodes.Nop;
+						instruction.Operand = null;
+						i += arrayInitializer.Count;
+					}
+					ldKeyInstr.OpCode = OpCodes.Nop;
+					ldKeyInstr.Operand = null;
+					count++;
+				}
+			}
+			module.Context.AssemblyResolver = oldAssemblyResolver;
+			module.Context.Resolver = oldResolver;
+
+			foreach (var decrypter in decrypters)
+				decrypter.DeclaringType.Methods.Remove(decrypter);
+
+			return count;
+		}
+
+		private static Type ToType(ElementType elementType) {
+			switch (elementType) {
+			case ElementType.Boolean: return typeof(bool);
+			case ElementType.Char: return typeof(char);
+			case ElementType.I1: return typeof(sbyte);
+			case ElementType.U1: return typeof(byte);
+			case ElementType.I2: return typeof(short);
+			case ElementType.U2: return typeof(ushort);
+			case ElementType.I4: return typeof(int);
+			case ElementType.U4: return typeof(uint);
+			case ElementType.I8: return typeof(long);
+			case ElementType.U8: return typeof(ulong);
+			case ElementType.R4: return typeof(float);
+			case ElementType.R8: return typeof(double);
+			case ElementType.String: return typeof(string);
+			default: return null;
+			}
+		}
+
+		private static List<Instruction> CreateArrayInitializer(ModuleDef module, ITypeDefOrRef arrayType, int arrayLength, byte[] data) {
+			return CreateArrayInitializer(module, arrayType, arrayLength, GetOrCreateDataField(module, data));
+		}
+
+		private static List<Instruction> CreateArrayInitializer(ModuleDef module, ITypeDefOrRef arrayType, int arrayLength, FieldDef dataField) {
+			var instructions = new List<Instruction> {
+				new Instruction(OpCodes.Ldc_I4, arrayLength),
+				new Instruction(OpCodes.Newarr, arrayType),
+				new Instruction(OpCodes.Dup),
+				new Instruction(OpCodes.Ldtoken, dataField),
+				new Instruction(OpCodes.Call, module.Import(typeof(RuntimeHelpers).GetMethod("InitializeArray"))),
+			};
+			return instructions;
+		}
+
+		private static FieldDef GetOrCreateDataField(ModuleDef module, byte[] data) {
+			var privateImplementationDetails = module.FindNormal("<PrivateImplementationDetails>");
+			if (privateImplementationDetails is null) {
+				privateImplementationDetails = new TypeDefUser(UTF8String.Empty, "<PrivateImplementationDetails>", module.CorLibTypes.Object.TypeRef) {
+					Attributes = TypeAttributes.NotPublic | TypeAttributes.Sealed
+				};
+				var compilerGeneratedAttribute = module.CorLibTypes.GetTypeRef("System.Runtime.CompilerServices", "CompilerGeneratedAttribute");
+				var ca = new CustomAttribute(new MemberRefUser(module, ".ctor", MethodSig.CreateInstance(module.CorLibTypes.Void), compilerGeneratedAttribute));
+				privateImplementationDetails.CustomAttributes.Add(ca);
+				module.Types.Add(privateImplementationDetails);
+			}
+			string storageStructName = $"__StaticArrayInitTypeSize={data.Length}";
+			var storageStruct = privateImplementationDetails.NestedTypes.FirstOrDefault(t => t.Name == storageStructName);
+			if (storageStruct is null) {
+				storageStruct = new TypeDefUser(string.Empty, storageStructName, module.CorLibTypes.GetTypeRef("System", "ValueType")) {
+					Attributes = TypeAttributes.NestedPrivate | TypeAttributes.ExplicitLayout | TypeAttributes.Sealed,
+					ClassLayout = new ClassLayoutUser(1, (uint)data.Length)
+				};
+				privateImplementationDetails.NestedTypes.Add(storageStruct);
+			}
+			string dataFieldName;
+			using (var sha256 = SHA256.Create())
+				dataFieldName = BitConverter.ToString(sha256.ComputeHash(data)).Replace("-", string.Empty);
+			var dataField = privateImplementationDetails.FindField(dataFieldName);
+			if (!(dataField is null))
+				return dataField;
+			dataField = new FieldDefUser(dataFieldName, new FieldSig(storageStruct.ToTypeSig())) {
+				Attributes = FieldAttributes.Assembly | FieldAttributes.Static | FieldAttributes.InitOnly | FieldAttributes.HasFieldRVA,
+				InitialValue = data
+			};
+			privateImplementationDetails.Fields.Add(dataField);
+			return dataField;
+		}
+
+		private static void InsertRange<T>(this IList<T> list, int index, IEnumerable<T> collection) {
+			if (!(collection is ICollection<T> c))
+				c = new List<T>(collection);
+			if (list is List<T> list2) {
+				list2.InsertRange(index, c);
+			}
+			else {
+				int length = list.Count;
+				for (int i = 0; i < c.Count; i++)
+					list.Add(default);
+				for (int i = index; i < length; i++)
+					list[i + c.Count] = list[i];
+				int n = 0;
+				foreach (var item in c)
+					list[index + n++] = item;
+			}
+		}
+	}
+}
+
+
+
+================================================
+File: ConstantKiller/ConstantKillerSettings.cs
+================================================
+using System;
+using System.Cli;
+using System.IO;
+
+namespace ConfuserExTools.ConstantKiller {
+	public sealed class ConstantKillerSettings {
+		private string _assemblyPath;
+		private bool _preserveAll;
+
+		[Argument("-f", IsRequired = true, Type = "FILE", Description = "程序集路径")]
+		internal string AssemblyPathCliSetter {
+			set => AssemblyPath = value;
+		}
+
+		[Argument("--preserve-all", Description = "是否保留全部，仅还原代理方法")]
+		internal bool PreserveAllCliSetter {
+			set => PreserveAll = value;
+		}
+
+		public string AssemblyPath {
+			get => _assemblyPath;
+			set {
+				if (string.IsNullOrEmpty(value))
+					throw new ArgumentNullException(nameof(value));
+				if (!File.Exists(value))
+					throw new FileNotFoundException($"{value} 不存在");
+
+				_assemblyPath = Path.GetFullPath(value);
+			}
+		}
+
+		public bool PreserveAll {
+			get => _preserveAll;
+			set => _preserveAll = value;
+		}
+	}
+}
+
+
+
+================================================
+File: ConstantKiller/ConstantKillerTool.cs
+================================================
+using System.IO;
+using System.Reflection;
+using dnlib.DotNet;
+using dnlib.DotNet.Writer;
+using Tool;
+using Tool.Interface;
+
+namespace ConfuserExTools.ConstantKiller {
+	public sealed class ConstantKillerTool : ITool<ConstantKillerSettings> {
+		private ConstantKillerSettings _settings;
+		private ModuleDef _module;
+		private int _count;
+
+		public string Title => GetTitle();
+
+		public void Execute(ConstantKillerSettings settings) {
+			Logger.Initialize(false);
+			_settings = settings;
+			using (var module = ModuleDefMD.Load(settings.AssemblyPath)) {
+				_module = module;
+				_count = ConstantKillerImpl.Execute(module, Assembly.LoadFile(settings.AssemblyPath).ManifestModule);
+				SaveAs(PathInsertSuffix(settings.AssemblyPath, ".ck"));
+			}
+			Logger.Flush();
+		}
+
+		private static string PathInsertSuffix(string path, string suffix) {
+			return Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path) + suffix + Path.GetExtension(path));
+		}
+
+		private void SaveAs(string filePath) {
+			Logger.LogInfo($"共 {_count} 个常量被解密");
+			Logger.LogInfo($"正在保存: {filePath}");
+			Logger.LogInfo();
+			var options = new ModuleWriterOptions(_module);
+			if (_settings.PreserveAll)
+				options.MetadataOptions.Flags |= MetadataFlags.PreserveAll;
+			options.Logger = DnlibLogger.Instance;
+			_module.Write(filePath, options);
+		}
+
+		private static string GetTitle() {
+			string productName = GetAssemblyAttribute<AssemblyProductAttribute>().Product;
+			string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+			string copyright = GetAssemblyAttribute<AssemblyCopyrightAttribute>().Copyright.Substring(12);
+			int firstBlankIndex = copyright.IndexOf(' ');
+			string copyrightOwnerName = copyright.Substring(firstBlankIndex + 1);
+			string copyrightYear = copyright.Substring(0, firstBlankIndex);
+			return $"{productName} v{version} by {copyrightOwnerName} {copyrightYear}";
+		}
+
+		private static T GetAssemblyAttribute<T>() {
+			return (T)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(T), false)[0];
+		}
+	}
+}
+
+
+
+================================================
+File: ConstantKiller/DnlibLogger.cs
+================================================
+using System;
+using dnlib.DotNet;
+using Tool;
+
+namespace ConfuserExTools.ConstantKiller {
+	internal sealed class DnlibLogger : ILogger {
+		private static readonly DnlibLogger _instance = new DnlibLogger();
+
+		private DnlibLogger() {
+		}
+
+		public static DnlibLogger Instance => _instance;
+
+		public bool IgnoresEvent(LoggerEvent loggerEvent) {
+			return false;
+		}
+
+		public void Log(object sender, LoggerEvent loggerEvent, string format, params object[] args) {
+			string text = $"{loggerEvent}: {string.Format(format, args)}";
+			switch (loggerEvent) {
+			case LoggerEvent.Error: Logger.LogError(text); break;
+			case LoggerEvent.Warning: Logger.LogWarning(text); break;
+			case LoggerEvent.Info: Logger.LogInfo(text); break;
+			case LoggerEvent.Verbose:
+			case LoggerEvent.VeryVerbose: Logger.LogDebugInfo(text); break;
+			default: throw new ArgumentOutOfRangeException(nameof(loggerEvent));
+			}
+		}
+	}
+}
+
+
+
+================================================
+File: ConstantKiller/ModuleDefExtensions.cs
+================================================
+using System.Collections.Generic;
+using dnlib.DotNet;
+using dnlib.DotNet.MD;
+
+namespace ConfuserExTools.ConstantKiller {
+	internal static class ModuleDefExtensions {
+		public static IEnumerable<MethodDef> EnumerateMethods(this ModuleDef module) {
+			if (module is ModuleDefMD moduleDefMD) {
+				uint methodTableLength = moduleDefMD.TablesStream.MethodTable.Rows;
+				for (uint rid = 1; rid <= methodTableLength; rid++)
+					yield return moduleDefMD.ResolveMethod(rid);
+			}
+			else {
+				for (uint rid = 1; ; rid++) {
+					if (!(module.ResolveToken(new MDToken(Table.Method, rid)) is MethodDef method))
+						yield break;
+					yield return method;
+				}
+			}
+		}
+	}
+}
+
+
+
+
+
+================================================
+File: ProxyKiller/DnlibLogger.cs
+================================================
+using System;
+using dnlib.DotNet;
+using Tool;
+
+namespace ConfuserExTools.ProxyKiller {
+	internal sealed class DnlibLogger : ILogger {
+		private static readonly DnlibLogger _instance = new DnlibLogger();
+
+		private DnlibLogger() {
+		}
+
+		public static DnlibLogger Instance => _instance;
+
+		public bool IgnoresEvent(LoggerEvent loggerEvent) {
+			return false;
+		}
+
+		public void Log(object sender, LoggerEvent loggerEvent, string format, params object[] args) {
+			string text = $"{loggerEvent}: {string.Format(format, args)}";
+			switch (loggerEvent) {
+			case LoggerEvent.Error: Logger.LogError(text); break;
+			case LoggerEvent.Warning: Logger.LogWarning(text); break;
+			case LoggerEvent.Info: Logger.LogInfo(text); break;
+			case LoggerEvent.Verbose:
+			case LoggerEvent.VeryVerbose: Logger.LogDebugInfo(text); break;
+			default: throw new ArgumentOutOfRangeException(nameof(loggerEvent));
+			}
+		}
+	}
+}
+
+
+
+================================================
+File: ProxyKiller/ModuleDefExtensions.cs
+================================================
+using System.Collections.Generic;
+using dnlib.DotNet;
+using dnlib.DotNet.MD;
+
+namespace ConfuserExTools.ProxyKiller {
+	internal static class ModuleDefExtensions {
+		public static IEnumerable<MethodDef> EnumerateMethods(this ModuleDef module) {
+			if (module is ModuleDefMD moduleDefMD) {
+				uint methodTableLength = moduleDefMD.TablesStream.MethodTable.Rows;
+				for (uint rid = 1; rid <= methodTableLength; rid++)
+					yield return moduleDefMD.ResolveMethod(rid);
+			}
+			else {
+				for (uint rid = 1; ; rid++) {
+					if (!(module.ResolveToken(new MDToken(Table.Method, rid)) is MethodDef method))
+						yield break;
+					yield return method;
+				}
+			}
+		}
+	}
+}
+
+
+
+================================================
+File: ProxyKiller/ProxyKiller.csproj
+================================================
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<Title>$(ProjectName)</Title>
+		<Version>1.0.0.1</Version>
+		<Copyright>Copyright Â© 2020 Wwh</Copyright>
+	</PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net35</TargetFramework>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<LangVersion>7.3</LangVersion>
+		<OutputPath>..\bin\$(Configuration)</OutputPath>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<RootNamespace>ConfuserExTools.ProxyKiller</RootNamespace>
+	</PropertyGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Libraries\dnlib\src\dnlib.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<Reference Include="Tool.Interface">
+			<HintPath>..\Libraries\Tool.Interface\Tool.Interface.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+</Project>
+
+
+
+================================================
+File: ProxyKiller/ProxyKillerImpl.cs
+================================================
+using System;
+using System.Collections.Generic;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using Tool;
+
+namespace ConfuserExTools.ProxyKiller {
+	public static class ProxyKillerImpl {
+		public static int Execute(ModuleDef module, bool ignoreAccess, bool removeProxyMethods) {
+			if (module is null)
+				throw new ArgumentNullException(nameof(module));
+
+			var proxyMethods = new Dictionary<MethodDef, Instruction>();
+			foreach (var method in module.EnumerateMethods()) {
+				if (!method.HasBody)
+					continue;
+				if (!(ignoreAccess || method.IsPrivateScope))
+					continue;
+
+				bool isProxy = true;
+				var realInstruction = default(Instruction);
+				foreach (var instruction in method.Body.Instructions) {
+					switch (instruction.OpCode.Code) {
+					case Code.Nop:
+					case Code.Ldarg:
+					case Code.Ldarg_0:
+					case Code.Ldarg_1:
+					case Code.Ldarg_2:
+					case Code.Ldarg_3:
+					case Code.Ldarg_S:
+					case Code.Ldarga:
+					case Code.Ldarga_S:
+					case Code.Ret:
+						continue;
+					case Code.Call:
+					case Code.Callvirt:
+					case Code.Newobj:
+						if (realInstruction is null) {
+							realInstruction = instruction;
+							continue;
+						}
+						break;
+					}
+					isProxy = false;
+					break;
+				}
+				if (!isProxy) {
+					Logger.LogWarning($"[0x{method.MDToken.Raw:X8}] {method} 不是代理方法（可能判断错误）");
+					continue;
+				}
+
+				proxyMethods.Add(method, realInstruction);
+			}
+
+			var oldAssemblyResolver = module.Context.AssemblyResolver;
+			var oldResolver = module.Context.Resolver;
+			module.Context.AssemblyResolver = NullResolver.Instance;
+			module.Context.Resolver = new Resolver(NullResolver.Instance);
+			foreach (var method in module.EnumerateMethods()) {
+				if (!method.HasBody)
+					continue;
+				if (proxyMethods.ContainsKey(method))
+					continue;
+
+				foreach (var instruction in method.Body.Instructions) {
+					if (instruction.OpCode.Code != Code.Call)
+						continue;
+					var operandMethod = ((IMethod)instruction.Operand).ResolveMethodDef();
+					if (operandMethod is null)
+						continue;
+					if (!proxyMethods.TryGetValue(operandMethod, out var realCall))
+						continue;
+
+					instruction.OpCode = realCall.OpCode;
+					instruction.Operand = realCall.Operand;
+				}
+			}
+			module.Context.AssemblyResolver = oldAssemblyResolver;
+			module.Context.Resolver = oldResolver;
+
+			if (removeProxyMethods) {
+				foreach (var proxyMethod in proxyMethods.Keys)
+					proxyMethod.DeclaringType.Methods.Remove(proxyMethod);
+			}
+
+			return proxyMethods.Count;
+		}
+	}
+}
+
+
+
+================================================
+File: ProxyKiller/ProxyKillerSettings.cs
+================================================
+using System;
+using System.Cli;
+using System.IO;
+
+namespace ConfuserExTools.ProxyKiller {
+	public sealed class ProxyKillerSettings {
+		private string _assemblyPath;
+		private bool _preserveProxyMethods;
+		private bool _preserveAll;
+		private bool _ignoreAccess;
+
+		[Argument("-f", IsRequired = true, Type = "FILE", Description = "程序集路径")]
+		internal string AssemblyPathCliSetter {
+			set => AssemblyPath = value;
+		}
+
+		[Argument("--preserve-proxies", Description = "是否保留代理方法")]
+		internal bool PreserveProxyMethodsCliSetter {
+			set => PreserveProxyMethods = value;
+		}
+
+		[Argument("--preserve-all", Description = "是否保留全部，仅还原代理方法")]
+		internal bool PreserveAllCliSetter {
+			set => PreserveAll = value;
+		}
+
+		[Argument("--ignore-access", Description = "是否忽略访问权限")]
+		internal bool IgnoreAccessCliSetter {
+			set => IgnoreAccess = value;
+		}
+
+		public string AssemblyPath {
+			get => _assemblyPath;
+			set {
+				if (string.IsNullOrEmpty(value))
+					throw new ArgumentNullException(nameof(value));
+				if (!File.Exists(value))
+					throw new FileNotFoundException($"{value} 不存在");
+
+				_assemblyPath = Path.GetFullPath(value);
+			}
+		}
+
+		public bool PreserveProxyMethods {
+			get => _preserveProxyMethods;
+			set => _preserveProxyMethods = value;
+		}
+
+		public bool PreserveAll {
+			get => _preserveAll;
+			set => _preserveAll = value;
+		}
+
+		public bool IgnoreAccess {
+			get => _ignoreAccess;
+			set => _ignoreAccess = value;
+		}
+	}
+}
+
+
+
+================================================
+File: ProxyKiller/ProxyKillerTool.cs
+================================================
+using System.IO;
+using System.Reflection;
+using dnlib.DotNet;
+using dnlib.DotNet.Writer;
+using Tool;
+using Tool.Interface;
+
+namespace ConfuserExTools.ProxyKiller {
+	public sealed class ProxyKillerTool : ITool<ProxyKillerSettings> {
+		private ProxyKillerSettings _settings;
+		private ModuleDef _module;
+		private int _count;
+
+		public string Title => GetTitle();
+
+		public void Execute(ProxyKillerSettings settings) {
+			Logger.Initialize(false);
+			_settings = settings;
+			using (var module = ModuleDefMD.Load(settings.AssemblyPath)) {
+				_module = module;
+				_count = ProxyKillerImpl.Execute(module, settings.IgnoreAccess, !settings.PreserveProxyMethods && !settings.PreserveAll);
+				SaveAs(PathInsertSuffix(settings.AssemblyPath, ".pk"));
+			}
+			Logger.Flush();
+		}
+
+		private static string PathInsertSuffix(string path, string suffix) {
+			return Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path) + suffix + Path.GetExtension(path));
+		}
+
+		private void SaveAs(string filePath) {
+			Logger.LogInfo($"共 {_count} 个代理方法被还原");
+			Logger.LogInfo($"正在保存: {filePath}");
+			Logger.LogInfo();
+			var options = new ModuleWriterOptions(_module);
+			if (_settings.PreserveAll)
+				options.MetadataOptions.Flags |= MetadataFlags.PreserveAll;
+			options.Logger = DnlibLogger.Instance;
+			_module.Write(filePath, options);
+		}
+
+		private static string GetTitle() {
+			string productName = GetAssemblyAttribute<AssemblyProductAttribute>().Product;
+			string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+			string copyright = GetAssemblyAttribute<AssemblyCopyrightAttribute>().Copyright.Substring(12);
+			int firstBlankIndex = copyright.IndexOf(' ');
+			string copyrightOwnerName = copyright.Substring(firstBlankIndex + 1);
+			string copyrightYear = copyright.Substring(0, firstBlankIndex);
+			return $"{productName} v{version} by {copyrightOwnerName} {copyrightYear}";
+		}
+
+		private static T GetAssemblyAttribute<T>() {
+			return (T)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(T), false)[0];
+		}
+	}
+}
+
+

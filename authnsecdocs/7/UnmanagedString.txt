@@ -1,0 +1,448 @@
+Directory structure:
+└── mrakdev-unmanagedstring/
+    ├── README.md
+    ├── LICENSE
+    ├── img/
+    └── src/
+        ├── UnmanagedString.sln
+        ├── UnmanagedString/
+        │   ├── EntryPoint.cs
+        │   ├── Logger.cs
+        │   └── UnmanagedString.csproj
+        └── .idea/
+            └── .idea.UnmanagedString/
+                └── .idea/
+                    ├── encodings.xml
+                    ├── indexLayout.xml
+                    ├── vcs.xml
+                    ├── .gitignore
+                    └── .name
+
+================================================
+File: README.md
+================================================
+# UnmanagedString
+A simple tool for converting strings to unmanaged methods. Thanks to the power of [AsmResolver](https://github.com/Washi1337/AsmResolver), you can do this little trick.
+
+## How does it work?
+`UnmanagedString.exe <path to file>`
+Via the command prompt or by dragging the file to be modified. Works with .NET Framework and .NET Core!
+
+## Images
+![alt text](/img/img1.png)
+![alt text](/img/img2.png)
+![alt text](/img/img3.png)
+
+## Credits
+A special shoutout to [BitMono](https://github.com/sunnamed434/BitMono) for their efforts in refactoring and enhancing this tool.
+
+
+================================================
+File: LICENSE
+================================================
+MIT License
+
+Copyright (c) 2022 ÐœÑ€Ð°Ðº
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+
+
+================================================
+File: src/UnmanagedString.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnmanagedString", "UnmanagedString\UnmanagedString.csproj", "{9DFBDD82-6DF9-4B44-8F28-94F337E50A8A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9DFBDD82-6DF9-4B44-8F28-94F337E50A8A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9DFBDD82-6DF9-4B44-8F28-94F337E50A8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9DFBDD82-6DF9-4B44-8F28-94F337E50A8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9DFBDD82-6DF9-4B44-8F28-94F337E50A8A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: src/UnmanagedString/EntryPoint.cs
+================================================
+ï»¿using System.Text;
+using AsmResolver.DotNet;
+using AsmResolver.DotNet.Code.Native;
+using AsmResolver.DotNet.Signatures;
+using AsmResolver.PE.DotNet;
+using AsmResolver.PE.DotNet.Cil;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.File.Headers;
+using MethodDefinition = AsmResolver.DotNet.MethodDefinition;
+using ModuleDefinition = AsmResolver.DotNet.ModuleDefinition;
+
+namespace UnmanagedString;
+
+public static class EntryPoint
+{
+    public static void Main(string[] args)
+    {
+        if (args.Length != 1)
+        {
+            Logger.Error("Usage: UnmanagedString.exe <path to assembly>");
+            return;
+        }
+
+        if (!File.Exists(args[0]))
+        {
+            Logger.Error($"File not found: {args[0]}");
+            return;
+        }
+
+        var module = ModuleDefinition.FromFile(args[0]);
+        var importer = new ReferenceImporter(module);
+
+        var stringSbytePointerCtor =
+            importer.ImportMethod(typeof(string).GetConstructor(new[] { typeof(sbyte*) })!);
+        var stringCharPointerCtor =
+            importer.ImportMethod(typeof(string).GetConstructor(new[] { typeof(char*) })!);
+        var stringSbytePointerWithLengthCtor =
+            importer.ImportMethod(typeof(string).GetConstructor(new[] { typeof(sbyte*), typeof(int), typeof(int) })!);
+        var stringCharPointerWithLengthCtor =
+            importer.ImportMethod(typeof(string).GetConstructor(new[] { typeof(char*), typeof(int), typeof(int) })!);
+
+        Logger.Information("Starting...");
+
+        module.Attributes &= ~DotNetDirectoryFlags.ILOnly;
+        var isx86 = module.MachineType == MachineType.I386;
+
+        if (isx86)
+        {
+            module.PEKind = OptionalHeaderMagic.Pe32;
+            module.MachineType = MachineType.I386;
+            module.Attributes |= DotNetDirectoryFlags.Bit32Required;
+        }
+        else
+        {
+            module.PEKind = OptionalHeaderMagic.Pe32Plus;
+            module.MachineType = MachineType.Amd64;
+        }
+
+        var encodedStrings = new Dictionary<string, MethodDefinition>();
+
+        foreach (var type in module.GetAllTypes())
+        foreach (var method in type.Methods)
+            for (var index = 0; index < method.CilMethodBody!.Instructions.Count; ++index)
+            {
+                var instruction = method.CilMethodBody!.Instructions[index];
+
+                if (instruction.OpCode == CilOpCodes.Ldstr &&
+                    instruction.Operand is string { Length: > 0 } content)
+                {
+                    var useUnicode = !CanBeEncodedIn7BitAscii(content);
+                    var addNullTerminator = !HasNullCharacter(content);
+
+                    if (!encodedStrings.TryGetValue(content, out var nativeMethod)) // reuse encoded strings
+                    {
+                        nativeMethod = CreateNewNativeMethodWithString(content, module, isx86, useUnicode,
+                            addNullTerminator);
+                        encodedStrings.Add(content, nativeMethod);
+                    }
+
+                    instruction.ReplaceWith(CilOpCodes.Call, nativeMethod);
+                    if (addNullTerminator)
+                    {
+                        method.CilMethodBody.Instructions.Insert(++index,
+                            new CilInstruction(CilOpCodes.Newobj,
+                                useUnicode ? stringCharPointerCtor : stringSbytePointerCtor));
+                    }
+                    else
+                    {
+                        method.CilMethodBody.Instructions.Insert(++index,
+                            CilInstruction.CreateLdcI4(0));
+                        method.CilMethodBody.Instructions.Insert(++index,
+                            CilInstruction.CreateLdcI4(content.Length));
+                        method.CilMethodBody.Instructions.Insert(++index,
+                            new CilInstruction(CilOpCodes.Newobj,
+                                useUnicode ? stringCharPointerWithLengthCtor : stringSbytePointerWithLengthCtor));
+                    }
+                }
+            }
+
+        module.Write(args[0] + "_strings.exe");
+        Logger.Success("Done!");
+    }
+
+    private static MethodDefinition? CreateNewNativeMethodWithString(string content, ModuleDefinition originalModule,
+        bool isX86, bool useUnicode, bool addNullTerminator)
+    {
+        ArgumentNullException.ThrowIfNull(originalModule);
+        ArgumentNullException.ThrowIfNull(content);
+
+        var factory = originalModule.CorLibTypeFactory;
+
+        var methodName = Guid.NewGuid().ToString();
+        var method = new MethodDefinition(methodName, MethodAttributes.Public | MethodAttributes.Static,
+            MethodSignature.CreateStatic(factory.SByte.MakePointerType()));
+
+        method.ImplAttributes |= MethodImplAttributes.Native | MethodImplAttributes.Unmanaged |
+                                 MethodImplAttributes.PreserveSig;
+        method.Attributes |= MethodAttributes.PInvokeImpl;
+
+        originalModule.GetOrCreateModuleType().Methods.Add(method);
+
+        if (addNullTerminator)
+        {
+            content += "\0"; // not adding on byte level as it has encoding-dependent size
+        }
+
+        var stringBytes = useUnicode
+            ? Encoding.Unicode.GetBytes(content)
+            : Encoding.ASCII.GetBytes(content);
+
+        var prefix = isX86
+            ? stackalloc byte[]
+            {
+                0x55, // push ebp
+                0x89, 0xE5, // mov ebp, esp
+                0xE8, 0x05, 0x00, 0x00, 0x00, // call <jump1>
+                0x83, 0xC0, 0x01, // add eax, 1
+                // <jump2>:
+                0x5D, // pop ebp
+                0xC3, // ret
+                // <jump1>:
+                0x58, // pop eax
+                0x83, 0xC0, 0x0B, // add eax, 0xb
+                0xEB, 0xF8 // jmp <jump2>
+            }
+            : stackalloc byte[]
+            {
+                0x48, 0x8D, 0x05, 0x01, 0x00, 0x00, 0x00, // lea rax, [rip + 0x1]
+                0xC3 // ret
+            };
+
+        Span<byte> code = stackalloc byte[prefix.Length + stringBytes.Length];
+        prefix.CopyTo(code);
+        stringBytes.CopyTo(code[prefix.Length..]);
+
+        var body = new NativeMethodBody(method)
+        {
+            Code = code.ToArray()
+        };
+
+        Logger.Success($"Created new native method with name: {methodName} for string: {content.TrimEnd()}");
+        method.NativeMethodBody = body;
+        return method;
+    }
+
+    private static bool CanBeEncodedIn7BitAscii(ReadOnlySpan<char> text)
+    {
+        // ReSharper disable once ForCanBeConvertedToForeach
+        for (var i = 0; i < text.Length; i++)
+        {
+            if (text[i] > '\x7f')
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static bool HasNullCharacter(ReadOnlySpan<char> text)
+    {
+        // ReSharper disable once ForCanBeConvertedToForeach
+        for (var i = 0; i < text.Length; i++)
+        {
+            if (text[i] == '\0')
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+}
+
+
+================================================
+File: src/UnmanagedString/Logger.cs
+================================================
+ï»¿using System.Drawing;
+using Colorful;
+using Console = Colorful.Console;
+
+namespace UnmanagedString;
+
+public static class Logger
+{
+    private const string MessageStyle = "[{0}] [{1}] {2}";
+
+    public static void Information(ReadOnlySpan<char> message)
+    {
+        var replacements = new[]
+        {
+            new(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), Color.LightGreen),
+            new Formatter("INFO", Color.LightGreen),
+            new Formatter(message.ToString(), Color.White)
+        };
+        Console.WriteLineFormatted(MessageStyle, Color.Gray, replacements);
+    }
+
+    public static void Success(ReadOnlySpan<char> message)
+    {
+        var replacements = new[]
+        {
+            new(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), Color.Green),
+            new Formatter("SUCCESS", Color.Green),
+            new Formatter(message.ToString(), Color.White)
+        };
+        Console.WriteLineFormatted(MessageStyle, Color.Gray, replacements);
+    }
+
+    public static void Warning(ReadOnlySpan<char> message)
+    {
+        var replacements = new[]
+        {
+            new(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), Color.Yellow),
+            new Formatter("WARNING", Color.Yellow),
+            new Formatter(message.ToString(), Color.White)
+        };
+        Console.WriteLineFormatted(MessageStyle, Color.Gray, replacements);
+    }
+
+    public static void Error(ReadOnlySpan<char> message)
+    {
+        var replacements = new[]
+        {
+            new(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), Color.Red),
+            new Formatter("ERROR", Color.Red),
+            new Formatter(message.ToString(), Color.White)
+        };
+        Console.WriteLineFormatted(MessageStyle, Color.Gray, replacements);
+    }
+
+    public static void Skipped(ReadOnlySpan<char> message)
+    {
+        var replacements = new[]
+        {
+            new(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), Color.DarkGray),
+            new Formatter("SKIPPED", Color.DarkGray),
+            new Formatter(message.ToString(), Color.White)
+        };
+        Console.WriteLineFormatted(MessageStyle, Color.Gray, replacements);
+    }
+
+    public static void Exception(Exception ex)
+    {
+        var replacements = new[]
+        {
+            new(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), Color.Red),
+            new Formatter("EXCEPTION", Color.Red),
+            new Formatter(ex.Message, Color.White)
+        };
+        Console.WriteLineFormatted(MessageStyle, Color.Gray, replacements);
+    }
+}
+
+
+================================================
+File: src/UnmanagedString/UnmanagedString.csproj
+================================================
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net7.0-windows</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="AsmResolver" Version="4.11.2" />
+      <PackageReference Include="AsmResolver.DotNet" Version="4.11.2" />
+      <PackageReference Include="AsmResolver.PE" Version="4.11.2" />
+      <PackageReference Include="Colorful.Console" Version="1.2.15" />
+    </ItemGroup>
+
+</Project>
+
+
+
+================================================
+File: src/.idea/.idea.UnmanagedString/.idea/encodings.xml
+================================================
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding" addBOMForNewFiles="with BOM under Windows, with no BOM otherwise" />
+</project>
+
+
+================================================
+File: src/.idea/.idea.UnmanagedString/.idea/indexLayout.xml
+================================================
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="UserContentModel">
+    <attachedFolders />
+    <explicitIncludes />
+    <explicitExcludes />
+  </component>
+</project>
+
+
+================================================
+File: src/.idea/.idea.UnmanagedString/.idea/vcs.xml
+================================================
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$/.." vcs="Git" />
+  </component>
+</project>
+
+
+================================================
+File: src/.idea/.idea.UnmanagedString/.idea/.gitignore
+================================================
+ï»¿# Default ignored files
+/shelf/
+/workspace.xml
+# Rider ignored files
+/contentModel.xml
+/modules.xml
+/projectSettingsUpdater.xml
+/.idea.UnmanagedString.iml
+# Editor-based HTTP Client requests
+/httpRequests/
+# Datasource local storage ignored files
+/dataSources/
+/dataSources.local.xml
+
+
+
+================================================
+File: src/.idea/.idea.UnmanagedString/.idea/.name
+================================================
+UnmanagedString
+

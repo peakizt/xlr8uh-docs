@@ -1,0 +1,3950 @@
+Directory structure:
+└── wwh1004-assemblyfixer/
+    ├── AssemblyFixer.sln
+    ├── LICENSE
+    ├── appveyor.yml
+    ├── .editorconfig
+    └── AssemblyFixer/
+        ├── AssemblyFixer.cs
+        ├── AssemblyFixer.csproj
+        ├── FixerContext.cs
+        ├── IFixer.cs
+        ├── Program.cs
+        ├── Fixers/
+        │   ├── Cor20HeaderFixer.cs
+        │   ├── DosHeaderFixer.cs
+        │   ├── FileHeaderFixer.cs
+        │   ├── NtHeaderFixer.cs
+        │   ├── OptionalHeaderFixer.cs
+        │   ├── SectionHeaderFixer.cs
+        │   └── Utils.cs
+        ├── Mdlib/
+        │   ├── Utils.cs
+        │   ├── DotNet/
+        │   │   └── Metadata/
+        │   │       ├── ComImageFlags.cs
+        │   │       ├── Cor20Header.cs
+        │   │       ├── HeapFlags.cs
+        │   │       ├── HeapStream.cs
+        │   │       ├── Metadata.cs
+        │   │       ├── MetadataStream.cs
+        │   │       ├── MetadataToken.cs
+        │   │       ├── NativeMethods.cs
+        │   │       ├── StorageHeader.cs
+        │   │       ├── StorageSignature.cs
+        │   │       ├── StreamHeader.cs
+        │   │       ├── TableStream.cs
+        │   │       └── TableType.cs
+        │   └── PE/
+        │       ├── Address.cs
+        │       ├── DataDirectory.cs
+        │       ├── DosHeader.cs
+        │       ├── FileHeader.cs
+        │       ├── IRawData.cs
+        │       ├── Machine.cs
+        │       ├── NativeMethods.cs
+        │       ├── NtHeader.cs
+        │       ├── OptionalHeader.cs
+        │       ├── OptionalHeaderType.cs
+        │       ├── PEImage.cs
+        │       ├── SectionHeader.cs
+        │       └── Subsystem.cs
+        └── Properties/
+            └── AssemblyInfo.cs
+
+================================================
+File: AssemblyFixer.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29123.89
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssemblyFixer", "AssemblyFixer\AssemblyFixer.csproj", "{863234B0-499F-4A07-87C9-13B92E5B9866}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{863234B0-499F-4A07-87C9-13B92E5B9866}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{863234B0-499F-4A07-87C9-13B92E5B9866}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{863234B0-499F-4A07-87C9-13B92E5B9866}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{863234B0-499F-4A07-87C9-13B92E5B9866}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7F7B3B91-7386-4280-9D66-9610EEF0D48B}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: LICENSE
+================================================
+MIT License
+
+Copyright (c) 2019 æ–‡ç…Œ
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+
+================================================
+File: appveyor.yml
+================================================
+version: '{build}'
+image: Visual Studio 2019 Preview
+configuration: Release
+platform: Any CPU
+build:
+  project: AssemblyFixer.sln
+  verbosity: normal
+artifacts:
+- path: bin\Release\
+  name: AssemblyFixer
+deploy:
+- provider: GitHub
+  tag: $(APPVEYOR_REPO_TAG_NAME)
+  release: AssemblyFixer
+  auth_token:
+    secure: +8UJ1C312inNq+80I8WST34vPMrCylnmTx+9rmuIh1qnsArA5x2b8yc+kcwkXmQC
+  on:
+    APPVEYOR_REPO_TAG: true
+
+
+================================================
+File: .editorconfig
+================================================
+# Remove the line below if you want to inherit .editorconfig settings from higher directories
+root = true
+
+[*]
+charset = utf-8
+end_of_line = crlf  
+indent_style = tab
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.xaml]
+indent_style = space
+
+# C# files
+[*.cs]
+
+#### .NET Coding Conventions ####
+
+# this. and Me. preferences
+dotnet_style_qualification_for_event = false:silent
+dotnet_style_qualification_for_field = false:silent
+dotnet_style_qualification_for_method = false:silent
+dotnet_style_qualification_for_property = false:silent
+
+# Language keywords vs BCL types preferences
+dotnet_style_predefined_type_for_locals_parameters_members = true:silent
+dotnet_style_predefined_type_for_member_access = true:silent
+
+# Parentheses preferences
+dotnet_style_parentheses_in_arithmetic_binary_operators = always_for_clarity:silent
+dotnet_style_parentheses_in_other_binary_operators = always_for_clarity:silent
+dotnet_style_parentheses_in_other_operators = never_if_unnecessary:silent
+dotnet_style_parentheses_in_relational_binary_operators = always_for_clarity:silent
+
+# Modifier preferences
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:silent
+
+# Expression-level preferences
+csharp_style_deconstructed_variable_declaration = true:suggestion
+csharp_style_inlined_variable_declaration = false:suggestion
+csharp_style_throw_expression = false:suggestion
+dotnet_style_coalesce_expression = true:suggestion
+dotnet_style_collection_initializer = true:suggestion
+dotnet_style_explicit_tuple_names = true:suggestion
+dotnet_style_null_propagation = true:suggestion
+dotnet_style_object_initializer = true:suggestion
+dotnet_style_prefer_auto_properties = false:silent
+dotnet_style_prefer_conditional_expression_over_assignment = true:silent
+dotnet_style_prefer_conditional_expression_over_return = true:silent
+dotnet_style_prefer_inferred_anonymous_type_member_names = true:suggestion
+dotnet_style_prefer_inferred_tuple_names = true:suggestion
+dotnet_style_prefer_is_null_check_over_reference_equality_method = true:suggestion
+
+# Field preferences
+dotnet_style_readonly_field = true:suggestion
+
+#### C# Coding Conventions ####
+
+# var preferences
+csharp_style_var_elsewhere = false:silent
+csharp_style_var_for_built_in_types = false:silent
+csharp_style_var_when_type_is_apparent = false:silent
+
+# Expression-bodied members
+csharp_style_expression_bodied_accessors = true:silent
+csharp_style_expression_bodied_constructors = false:silent
+csharp_style_expression_bodied_indexers = true:silent
+csharp_style_expression_bodied_lambdas = true:silent
+csharp_style_expression_bodied_methods = false:silent
+csharp_style_expression_bodied_operators = false:silent
+csharp_style_expression_bodied_properties = true:silent
+
+# Pattern matching preferences
+csharp_style_pattern_matching_over_as_with_null_check = false:suggestion
+csharp_style_pattern_matching_over_is_with_cast_check = false:suggestion
+
+# Null-checking preferences
+csharp_style_conditional_delegate_call = true:suggestion
+
+# Modifier preferences
+csharp_preferred_modifier_order = public,private,protected,internal,static,extern,new,virtual,abstract,sealed,override,readonly,unsafe,volatile,async
+
+# Code-block preferences
+csharp_prefer_braces = false:silent
+
+# Expression-level preferences
+csharp_prefer_simple_default_expression = true:suggestion
+csharp_style_pattern_local_over_anonymous_function = true:suggestion
+
+#### C# Formatting Rules ####
+
+# New line preferences
+csharp_new_line_before_catch = true
+csharp_new_line_before_else = true
+csharp_new_line_before_finally = true
+csharp_new_line_before_members_in_anonymous_types = true
+csharp_new_line_before_members_in_object_initializers = true
+csharp_new_line_before_open_brace = none
+csharp_new_line_between_query_expression_clauses = false
+
+# Indentation preferences
+csharp_indent_block_contents = true
+csharp_indent_braces = false
+csharp_indent_case_contents = true
+csharp_indent_case_contents_when_block = true
+csharp_indent_labels = one_less_than_current
+csharp_indent_switch_labels = false
+
+# Space preferences
+csharp_space_after_cast = false
+csharp_space_after_colon_in_inheritance_clause = true
+csharp_space_after_comma = true
+csharp_space_after_dot = false
+csharp_space_after_keywords_in_control_flow_statements = true
+csharp_space_after_semicolon_in_for_statement = true
+csharp_space_around_binary_operators = before_and_after
+csharp_space_around_declaration_statements = false
+csharp_space_before_colon_in_inheritance_clause = true
+csharp_space_before_comma = false
+csharp_space_before_dot = false
+csharp_space_before_open_square_brackets = false
+csharp_space_before_semicolon_in_for_statement = false
+csharp_space_between_empty_square_brackets = false
+csharp_space_between_method_call_empty_parameter_list_parentheses = false
+csharp_space_between_method_call_name_and_opening_parenthesis = false
+csharp_space_between_method_call_parameter_list_parentheses = false
+csharp_space_between_method_declaration_empty_parameter_list_parentheses = false
+csharp_space_between_method_declaration_name_and_open_parenthesis = false
+csharp_space_between_method_declaration_parameter_list_parentheses = false
+csharp_space_between_parentheses = false
+csharp_space_between_square_brackets = false
+
+# Wrapping preferences
+csharp_preserve_single_line_blocks = true
+csharp_preserve_single_line_statements = true
+
+
+
+
+================================================
+File: AssemblyFixer/AssemblyFixer.cs
+================================================
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace UniversalDotNetTools {
+	/// <summary>
+	/// Assembly fixer
+	/// </summary>
+	public static class AssemblyFixer {
+		private static IFixer[] _fixers;
+
+		/// <summary>
+		/// Internal fixers
+		/// </summary>
+		public static IFixer[] Fixers {
+			get {
+				if (_fixers is null) {
+					Type fixerType;
+
+					fixerType = typeof(IFixer);
+					_fixers = fixerType.Module.GetTypes().Where(t => t.GetInterfaces().Any(i => i.IsAssignableFrom(fixerType))).Select(t => (IFixer)Activator.CreateInstance(t)).ToArray();
+				}
+				return _fixers;
+			}
+		}
+
+		/// <summary>
+		/// Check errors
+		/// </summary>
+		/// <param name="context"></param>
+		/// <returns></returns>
+		public static IDictionary<IFixer, FixerMessage> Check(FixerContext context) {
+			if (context is null)
+				throw new ArgumentNullException(nameof(context));
+
+			Dictionary<IFixer, FixerMessage> messages;
+
+			messages = new Dictionary<IFixer, FixerMessage>();
+			foreach (IFixer fixer in Fixers) {
+				FixerMessage message;
+
+				if (fixer.Check(context, out message))
+					messages.Add(fixer, message);
+			}
+			return messages;
+		}
+
+		/// <summary>
+		/// Fix errors
+		/// </summary>
+		/// <param name="context"></param>
+		/// <returns></returns>
+		public static IDictionary<IFixer, FixerMessage> Fix(FixerContext context) {
+			if (context is null)
+				throw new ArgumentNullException(nameof(context));
+
+			Dictionary<IFixer, FixerMessage> messages;
+
+			messages = new Dictionary<IFixer, FixerMessage>();
+			foreach (IFixer fixer in Fixers) {
+				FixerMessage message;
+
+				if (fixer.Fix(context, out message))
+					messages.Add(fixer, message);
+			}
+			return messages;
+		}
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/AssemblyFixer.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{863234B0-499F-4A07-87C9-13B92E5B9866}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>UniversalDotNetTools</RootNamespace>
+    <AssemblyName>AssemblyFixer</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyFixer.cs" />
+    <Compile Include="FixerContext.cs" />
+    <Compile Include="Fixers\Cor20HeaderFixer.cs" />
+    <Compile Include="Fixers\DosHeaderFixer.cs" />
+    <Compile Include="Fixers\FileHeaderFixer.cs" />
+    <Compile Include="Fixers\NtHeaderFixer.cs" />
+    <Compile Include="Fixers\OptionalHeaderFixer.cs" />
+    <Compile Include="Fixers\SectionHeaderFixer.cs" />
+    <Compile Include="Fixers\Utils.cs" />
+    <Compile Include="IFixer.cs" />
+    <Compile Include="Mdlib\DotNet\Metadata\ComImageFlags.cs" />
+    <Compile Include="Mdlib\DotNet\Metadata\Cor20Header.cs" />
+    <Compile Include="Mdlib\DotNet\Metadata\HeapFlags.cs" />
+    <Compile Include="Mdlib\DotNet\Metadata\HeapStream.cs" />
+    <Compile Include="Mdlib\DotNet\Metadata\Metadata.cs" />
+    <Compile Include="Mdlib\DotNet\Metadata\MetadataStream.cs" />
+    <Compile Include="Mdlib\DotNet\Metadata\MetadataToken.cs" />
+    <Compile Include="Mdlib\DotNet\Metadata\NativeMethods.cs" />
+    <Compile Include="Mdlib\DotNet\Metadata\StorageHeader.cs" />
+    <Compile Include="Mdlib\DotNet\Metadata\StorageSignature.cs" />
+    <Compile Include="Mdlib\DotNet\Metadata\StreamHeader.cs" />
+    <Compile Include="Mdlib\DotNet\Metadata\TableStream.cs" />
+    <Compile Include="Mdlib\DotNet\Metadata\TableType.cs" />
+    <Compile Include="Mdlib\PE\Address.cs" />
+    <Compile Include="Mdlib\PE\DataDirectory.cs" />
+    <Compile Include="Mdlib\PE\DosHeader.cs" />
+    <Compile Include="Mdlib\PE\FileHeader.cs" />
+    <Compile Include="Mdlib\PE\IRawData.cs" />
+    <Compile Include="Mdlib\PE\Machine.cs" />
+    <Compile Include="Mdlib\PE\NativeMethods.cs" />
+    <Compile Include="Mdlib\PE\NtHeader.cs" />
+    <Compile Include="Mdlib\PE\OptionalHeader.cs" />
+    <Compile Include="Mdlib\PE\OptionalHeaderType.cs" />
+    <Compile Include="Mdlib\PE\PEImage.cs" />
+    <Compile Include="Mdlib\PE\SectionHeader.cs" />
+    <Compile Include="Mdlib\PE\Subsystem.cs" />
+    <Compile Include="Mdlib\Utils.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: AssemblyFixer/FixerContext.cs
+================================================
+using System;
+using Mdlib.PE;
+
+namespace UniversalDotNetTools {
+	/// <summary>
+	/// Fixer context
+	/// </summary>
+	public sealed class FixerContext : IDisposable {
+		private readonly IPEImage _peImage;
+		private bool _isDll;
+		private bool _isDisposed;
+
+		/// <summary />
+		internal IPEImage PEImage => _peImage;
+
+		/// <summary />
+		public IntPtr RawData => _peImage.RawData;
+
+		/// <summary />
+		public uint Length => _peImage.Length;
+
+		/// <summary />
+		public bool IsDll {
+			get => _isDll;
+			set => _isDll = value;
+		}
+
+		internal FixerContext(IPEImage peImage) {
+			if (peImage is null)
+				throw new ArgumentNullException(nameof(peImage));
+
+			_peImage = peImage;
+		}
+
+		/// <summary />
+		public void Dispose() {
+			if (_isDisposed)
+				return;
+			_peImage.Dispose();
+			_isDisposed = true;
+		}
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/IFixer.cs
+================================================
+using System;
+
+namespace UniversalDotNetTools {
+	/// <summary>
+	/// Fixer level
+	/// </summary>
+	public enum FixerLevel {
+		/// <summary>
+		/// No error
+		/// </summary>
+		None,
+
+		/// <summary>
+		/// A possible error
+		/// </summary>
+		Warning,
+
+		/// <summary>
+		/// An error
+		/// </summary>
+		Error
+	}
+
+	/// <summary>
+	/// Fixer message
+	/// </summary>
+	public sealed class FixerMessage {
+		private readonly FixerLevel _level;
+		private readonly string _text;
+
+		/// <summary>
+		/// An empty message
+		/// </summary>
+		public static readonly FixerMessage None = new FixerMessage(FixerLevel.None, string.Empty);
+
+		/// <summary>
+		/// Level
+		/// </summary>
+		public FixerLevel Level => _level;
+
+		/// <summary>
+		/// Text
+		/// </summary>
+		public string Text => _text;
+
+		/// <summary>
+		/// Constructor
+		/// </summary>
+		/// <param name="level"></param>
+		/// <param name="text"></param>
+		public FixerMessage(FixerLevel level, string text) {
+			switch (level) {
+			case FixerLevel.None:
+			case FixerLevel.Warning:
+			case FixerLevel.Error:
+				break;
+			default:
+				throw new ArgumentOutOfRangeException(nameof(level));
+			}
+			if (text is null)
+				throw new ArgumentNullException(nameof(text));
+
+			_level = level;
+			_text = text;
+		}
+	}
+
+	/// <summary>
+	/// A fixer interface
+	/// </summary>
+	public interface IFixer {
+		/// <summary>
+		/// Fixer name
+		/// </summary>
+		string Name { get; }
+
+		/// <summary>
+		/// Check errors
+		/// </summary>
+		/// <param name="context"></param>
+		/// <param name="message"></param>
+		/// <returns></returns>
+		bool Check(FixerContext context, out FixerMessage message);
+
+		/// <summary>
+		/// Fix errors
+		/// </summary>
+		/// <param name="context"></param>
+		/// <param name="message"></param>
+		/// <returns></returns>
+		bool Fix(FixerContext context, out FixerMessage message);
+	}
+
+	internal static class Extensions {
+		public static void Ensure(this ref FixerLevel level, FixerLevel minLevel) {
+			level = level < minLevel ? minLevel : level;
+		}
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Program.cs
+================================================
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using Mdlib.PE;
+
+namespace UniversalDotNetTools {
+	internal sealed class Program {
+		private static void Main(string[] args) {
+			if (args is null || args.Length != 1)
+				return;
+
+			string assemblyPath;
+
+			try {
+				Console.Title = GetTitle();
+			}
+			catch {
+			}
+			assemblyPath = Path.GetFullPath(args[0]);
+			if (!File.Exists(assemblyPath)) {
+				Console.WriteLine("File doesn't exist.");
+				return;
+			}
+			using (FixerContext context = new FixerContext(PEImageFactory.Create(assemblyPath))) {
+				IDictionary<IFixer, FixerMessage> messages;
+
+				switch (assemblyPath.Substring(assemblyPath.Length - 4).ToUpperInvariant()) {
+				case ".EXE":
+					Console.WriteLine("exe detected");
+					context.IsDll = false;
+					break;
+				case ".DLL":
+					Console.WriteLine("dll detected");
+					context.IsDll = true;
+					break;
+				default:
+					Console.WriteLine("Unknown file extension!!!");
+					context.IsDll = true;
+					break;
+				}
+				Console.WriteLine();
+				Console.WriteLine("Fixing...");
+				messages = AssemblyFixer.Fix(context);
+				Console.WriteLine("Fixed errors:");
+				Console.WriteLine();
+				foreach (KeyValuePair<IFixer, FixerMessage> fixerToMessage in messages) {
+					Console.WriteLine(fixerToMessage.Key.Name + ":");
+					Console.WriteLine($"Level: {fixerToMessage.Value.Level}");
+					Console.WriteLine("Message:");
+					Console.WriteLine(fixerToMessage.Value.Text);
+					Console.WriteLine();
+				}
+				Console.WriteLine();
+				Console.WriteLine("If the assembly still does NOT run, may be you should rebuild it!!!");
+				Console.WriteLine();
+				if (messages.Count != 0) {
+					byte[] peImageData;
+					string newAssemblyPath;
+
+					peImageData = new byte[context.Length];
+					Marshal.Copy(context.RawData, peImageData, 0, peImageData.Length);
+					newAssemblyPath = PathInsertPostfix(assemblyPath, ".fix");
+					Console.WriteLine("Saving: " + newAssemblyPath);
+					File.WriteAllBytes(newAssemblyPath, peImageData);
+					Console.WriteLine("Finished");
+					Console.WriteLine();
+				}
+			}
+			if (IsN00bUser() || Debugger.IsAttached) {
+				Console.WriteLine("Press any key to exit...");
+				try {
+					Console.ReadKey(true);
+				}
+				catch {
+				}
+			}
+		}
+
+		private static string PathInsertPostfix(string path, string postfix) {
+			return Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path) + postfix + Path.GetExtension(path));
+		}
+
+		private static string GetTitle() {
+			string productName;
+			string version;
+			string copyright;
+			int firstBlankIndex;
+			string copyrightOwnerName;
+			string copyrightYear;
+
+			productName = GetAssemblyAttribute<AssemblyProductAttribute>().Product;
+			version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+			copyright = GetAssemblyAttribute<AssemblyCopyrightAttribute>().Copyright.Substring(12);
+			firstBlankIndex = copyright.IndexOf(' ');
+			copyrightOwnerName = copyright.Substring(firstBlankIndex + 1);
+			copyrightYear = copyright.Substring(0, firstBlankIndex);
+			return $"{productName} v{version} by {copyrightOwnerName} {copyrightYear}";
+		}
+
+		private static T GetAssemblyAttribute<T>() {
+			return (T)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(T), false)[0];
+		}
+
+		private static bool IsN00bUser() {
+			if (HasEnv("VisualStudioDir"))
+				return false;
+			if (HasEnv("SHELL"))
+				return false;
+			return HasEnv("windir") && !HasEnv("PROMPT");
+		}
+
+		private static bool HasEnv(string name) {
+			foreach (object key in Environment.GetEnvironmentVariables().Keys) {
+				string env;
+
+				env = key as string;
+				if (env is null)
+					continue;
+				if (string.Equals(env, name, StringComparison.OrdinalIgnoreCase))
+					return true;
+			}
+			return false;
+		}
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Fixers/Cor20HeaderFixer.cs
+================================================
+using System;
+using System.Collections.Generic;
+using static Mdlib.DotNet.Metadata.NativeMethods;
+
+namespace UniversalDotNetTools.Fixers {
+	internal sealed class Cor20HeaderFixer : IFixer {
+		public string Name => nameof(Cor20HeaderFixer);
+
+		public bool Check(FixerContext context, out FixerMessage message) {
+			if (context is null)
+				throw new ArgumentNullException(nameof(context));
+
+			return FixImpl(context, false, out message);
+		}
+
+		public bool Fix(FixerContext context, out FixerMessage message) {
+			if (context is null)
+				throw new ArgumentNullException(nameof(context));
+
+			return FixImpl(context, true, out message);
+		}
+
+		private static unsafe bool FixImpl(FixerContext context, bool fix, out FixerMessage message) {
+			FixerLevel level;
+			List<string> texts;
+			IMAGE_COR20_HEADER* p;
+			uint flags;
+
+			level = FixerLevel.None;
+			texts = new List<string>();
+			p = context.PEImage.Metadata.Cor20Header.RawValue;
+			flags = p->Flags;
+			flags |= 0x1;
+			// ILONLY
+			Utils.FixErrorInternal("IMAGE_COR20_HEADER.Flags", &p->Flags, flags, fix, ref level, texts);
+			if (level == FixerLevel.None) {
+				message = FixerMessage.None;
+				return false;
+			}
+			else {
+				message = new FixerMessage(level, string.Join(Environment.NewLine, texts));
+				return true;
+			}
+		}
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Fixers/DosHeaderFixer.cs
+================================================
+using System;
+using System.Collections.Generic;
+using static Mdlib.NativeMethods;
+
+namespace UniversalDotNetTools.Fixers {
+	internal sealed class DosHeaderFixer : IFixer {
+		public string Name => nameof(DosHeaderFixer);
+
+		public bool Check(FixerContext context, out FixerMessage message) {
+			if (context is null)
+				throw new ArgumentNullException(nameof(context));
+
+			return FixImpl(context, false, out message);
+		}
+
+		public bool Fix(FixerContext context, out FixerMessage message) {
+			if (context is null)
+				throw new ArgumentNullException(nameof(context));
+
+			return FixImpl(context, true, out message);
+		}
+
+		private static unsafe bool FixImpl(FixerContext context, bool fix, out FixerMessage message) {
+			FixerLevel level;
+			List<string> texts;
+			IMAGE_DOS_HEADER* p;
+
+			level = FixerLevel.None;
+			texts = new List<string>();
+			p = context.PEImage.DosHeader.RawValue;
+			Utils.FixErrorInternal("IMAGE_DOS_HEADER.e_magic", &p->e_magic, 0x5A4D, fix, ref level, texts);
+			if (level == FixerLevel.None) {
+				message = FixerMessage.None;
+				return false;
+			}
+			else {
+				message = new FixerMessage(level, string.Join(Environment.NewLine, texts));
+				return true;
+			}
+		}
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Fixers/FileHeaderFixer.cs
+================================================
+using System;
+using System.Collections.Generic;
+using Mdlib.PE;
+using static Mdlib.NativeMethods;
+
+namespace UniversalDotNetTools.Fixers {
+	internal sealed class FileHeaderFixer : IFixer {
+		public string Name => nameof(FileHeaderFixer);
+
+		public bool Check(FixerContext context, out FixerMessage message) {
+			if (context is null)
+				throw new ArgumentNullException(nameof(context));
+
+			return FixImpl(context, false, out message);
+		}
+
+		public bool Fix(FixerContext context, out FixerMessage message) {
+			if (context is null)
+				throw new ArgumentNullException(nameof(context));
+
+			return FixImpl(context, true, out message);
+		}
+
+		private static unsafe bool FixImpl(FixerContext context, bool fix, out FixerMessage message) {
+			FixerLevel level;
+			List<string> texts;
+			IMAGE_FILE_HEADER* p;
+			ushort machine;
+			ushort characteristics;
+
+			level = FixerLevel.None;
+			texts = new List<string>();
+			p = context.PEImage.FileHeader.RawValue;
+			machine = (ushort)(context.PEImage.Is64Bit ? Machine.AMD64 : Machine.I386);
+			Utils.FixErrorInternal("IMAGE_FILE_HEADER.Machine", &p->Machine, machine, fix, ref level, texts);
+			Utils.FixErrorInternal("IMAGE_FILE_HEADER.PointerToSymbolTable", &p->PointerToSymbolTable, 0, fix, ref level, texts);
+			Utils.FixErrorInternal("IMAGE_FILE_HEADER.NumberOfSymbols", &p->NumberOfSymbols, 0, fix, ref level, texts);
+			characteristics = (ushort)(context.IsDll ? 0x2022 : 0x0022);
+			/*
+			 * IMAGE_FILE_EXECUTABLE_IMAGE    = 0x0002
+			 * IMAGE_FILE_LARGE_ADDRESS_AWARE = 0x0020
+			 * IMAGE_FILE_DLL                 = 0x2000
+			 */
+			Utils.FixErrorInternal("IMAGE_FILE_HEADER.Characteristics", &p->Characteristics, characteristics, fix, ref level, texts);
+			if (level == FixerLevel.None) {
+				message = FixerMessage.None;
+				return false;
+			}
+			else {
+				message = new FixerMessage(level, string.Join(Environment.NewLine, texts));
+				return true;
+			}
+		}
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Fixers/NtHeaderFixer.cs
+================================================
+using System;
+using System.Collections.Generic;
+using static Mdlib.NativeMethods;
+
+namespace UniversalDotNetTools.Fixers {
+	internal sealed class NtHeaderFixer : IFixer {
+		public string Name => nameof(NtHeaderFixer);
+
+		public bool Check(FixerContext context, out FixerMessage message) {
+			if (context is null)
+				throw new ArgumentNullException(nameof(context));
+
+			return FixImpl(context, false, out message);
+		}
+
+		public bool Fix(FixerContext context, out FixerMessage message) {
+			if (context is null)
+				throw new ArgumentNullException(nameof(context));
+
+			return FixImpl(context, true, out message);
+		}
+
+		private static unsafe bool FixImpl(FixerContext context, bool fix, out FixerMessage message) {
+			FixerLevel level;
+			List<string> texts;
+			IMAGE_NT_HEADERS32* p;
+
+			level = FixerLevel.None;
+			texts = new List<string>();
+			p = (IMAGE_NT_HEADERS32*)context.PEImage.NtHeader.RawData;
+			Utils.FixErrorInternal("IMAGE_NT_HEADERS.Signature", &p->Signature, 0x4550, fix, ref level, texts);
+			if (level == FixerLevel.None) {
+				message = FixerMessage.None;
+				return false;
+			}
+			else {
+				message = new FixerMessage(level, string.Join(Environment.NewLine, texts));
+				return true;
+			}
+		}
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Fixers/OptionalHeaderFixer.cs
+================================================
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Mdlib.PE;
+using static Mdlib.NativeMethods;
+
+namespace UniversalDotNetTools.Fixers {
+	internal sealed class OptionalHeaderFixer : IFixer {
+		public string Name => nameof(OptionalHeaderFixer);
+
+		public bool Check(FixerContext context, out FixerMessage message) {
+			if (context is null)
+				throw new ArgumentNullException(nameof(context));
+
+			return FixImpl(context, false, out message);
+		}
+
+		public bool Fix(FixerContext context, out FixerMessage message) {
+			if (context is null)
+				throw new ArgumentNullException(nameof(context));
+
+			return FixImpl(context, true, out message);
+		}
+
+		private static unsafe bool FixImpl(FixerContext context, bool fix, out FixerMessage message) {
+			FixerLevel level;
+			List<string> texts;
+			DataDirectory* pDataDirectories;
+
+			level = FixerLevel.None;
+			texts = new List<string>();
+			if (!context.PEImage.Is64Bit) {
+				IMAGE_OPTIONAL_HEADER32* p;
+				uint imageSize;
+				SectionHeader lastSectionHeader;
+				uint headersSize;
+
+				p = context.PEImage.OptionalHeader.RawValue32;
+				Utils.FixErrorInternal("IMAGE_OPTIONAL_HEADER.SizeOfUninitializedData", &p->SizeOfUninitializedData, 0, fix, ref level, texts);
+				Utils.FixWarningInternal("(TODO!!!) IMAGE_OPTIONAL_HEADER.AddressOfEntryPoint", &p->AddressOfEntryPoint, 0, fix, ref level, texts);
+				imageSize = GetImageSize(context.PEImage);
+				Utils.FixErrorInternal("IMAGE_OPTIONAL_HEADER.SizeOfImage", &p->SizeOfImage, imageSize, fix, ref level, texts);
+				lastSectionHeader = context.PEImage.SectionHeaders.Last();
+				headersSize = AlignUp((uint)lastSectionHeader.FOA + lastSectionHeader.Length, context.PEImage.OptionalHeader.FileAlignment);
+				Utils.FixErrorInternal("IMAGE_OPTIONAL_HEADER.SizeOfHeaders", &p->SizeOfHeaders, headersSize, fix, ref level, texts);
+				Utils.FixWarningInternal("IMAGE_OPTIONAL_HEADER.CheckSum", &p->CheckSum, 0, fix, ref level, texts);
+				Utils.FixWarningInternal("IMAGE_OPTIONAL_HEADER.DllCharacteristics", &p->DllCharacteristics, 0x8540, fix, ref level, texts);
+				// DYNAMIC_BASE  | NX_COMPAT | NO_SEH | TERMINAL_SERVER_AWARE
+				Utils.FixWarningInternal("IMAGE_OPTIONAL_HEADER.SizeOfStackReserve", &p->SizeOfStackReserve, 0x00100000, fix, ref level, texts);
+				Utils.FixWarningInternal("IMAGE_OPTIONAL_HEADER.SizeOfStackCommit", &p->SizeOfStackCommit, 0x00001000, fix, ref level, texts);
+				Utils.FixWarningInternal("IMAGE_OPTIONAL_HEADER.SizeOfHeapReserve", &p->SizeOfHeapReserve, 0x00100000, fix, ref level, texts);
+				Utils.FixWarningInternal("IMAGE_OPTIONAL_HEADER.SizeOfHeapCommit", &p->SizeOfHeapCommit, 0x00001000, fix, ref level, texts);
+				Utils.FixWarningInternal("IMAGE_OPTIONAL_HEADER.LoaderFlags", &p->LoaderFlags, 0, fix, ref level, texts);
+				Utils.FixWarningInternal("IMAGE_OPTIONAL_HEADER.NumberOfRvaAndSizes", &p->NumberOfRvaAndSizes, 0x10, fix, ref level, texts);
+				pDataDirectories = (DataDirectory*)p->DataDirectory;
+			}
+			else {
+				IMAGE_OPTIONAL_HEADER64* p;
+				uint imageSize;
+				SectionHeader lastSectionHeader;
+				uint headersSize;
+
+				p = context.PEImage.OptionalHeader.RawValue64;
+				Utils.FixErrorInternal("IMAGE_OPTIONAL_HEADER.SizeOfUninitializedData", &p->SizeOfUninitializedData, 0, fix, ref level, texts);
+				Utils.FixErrorInternal("IMAGE_OPTIONAL_HEADER.AddressOfEntryPoint", &p->AddressOfEntryPoint, 0, fix, ref level, texts);
+				imageSize = GetImageSize(context.PEImage);
+				Utils.FixErrorInternal("IMAGE_OPTIONAL_HEADER.SizeOfImage", &p->SizeOfImage, imageSize, fix, ref level, texts);
+				lastSectionHeader = context.PEImage.SectionHeaders.Last();
+				headersSize = AlignUp((uint)lastSectionHeader.FOA + lastSectionHeader.Length, context.PEImage.OptionalHeader.FileAlignment);
+				Utils.FixErrorInternal("IMAGE_OPTIONAL_HEADER.SizeOfHeaders", &p->SizeOfHeaders, headersSize, fix, ref level, texts);
+				Utils.FixWarningInternal("IMAGE_OPTIONAL_HEADER.CheckSum", &p->CheckSum, 0, fix, ref level, texts);
+				Utils.FixWarningInternal("IMAGE_OPTIONAL_HEADER.DllCharacteristics", &p->DllCharacteristics, 0x8540, fix, ref level, texts);
+				// DYNAMIC_BASE  | NX_COMPAT | NO_SEH | TERMINAL_SERVER_AWARE
+				Utils.FixWarningInternal("IMAGE_OPTIONAL_HEADER.SizeOfStackReserve", &p->SizeOfStackReserve, 0x0000000000400000, fix, ref level, texts);
+				Utils.FixWarningInternal("IMAGE_OPTIONAL_HEADER.SizeOfStackCommit", &p->SizeOfStackCommit, 0x0000000000004000, fix, ref level, texts);
+				Utils.FixWarningInternal("IMAGE_OPTIONAL_HEADER.SizeOfHeapReserve", &p->SizeOfHeapReserve, 0x0000000000100000, fix, ref level, texts);
+				Utils.FixWarningInternal("IMAGE_OPTIONAL_HEADER.SizeOfHeapCommit", &p->SizeOfHeapCommit, 0x0000000000002000, fix, ref level, texts);
+				Utils.FixWarningInternal("IMAGE_OPTIONAL_HEADER.LoaderFlags", &p->LoaderFlags, 0, fix, ref level, texts);
+				Utils.FixWarningInternal("IMAGE_OPTIONAL_HEADER.NumberOfRvaAndSizes", &p->NumberOfRvaAndSizes, 0x10, fix, ref level, texts);
+				pDataDirectories = (DataDirectory*)p->DataDirectory;
+			}
+			Utils.FixWarningInternal("IMAGE_OPTIONAL_HEADER.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT]", (ulong*)pDataDirectories, 0, fix, ref level, texts);
+			Utils.FixWarningInternal("(TODO!!!)IMAGE_OPTIONAL_HEADER.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT]", (ulong*)(pDataDirectories + 1), 0, fix, ref level, texts);
+			Utils.FixWarningInternal("IMAGE_OPTIONAL_HEADER.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXCEPTION]", (ulong*)(pDataDirectories + 3), 0, fix, ref level, texts);
+			Utils.FixWarningInternal("IMAGE_OPTIONAL_HEADER.DataDirectory[IMAGE_DIRECTORY_ENTRY_SECURITY]", (ulong*)(pDataDirectories + 4), 0, fix, ref level, texts);
+			Utils.FixWarningInternal("IMAGE_OPTIONAL_HEADER.DataDirectory[IMAGE_DIRECTORY_ENTRY_DEBUG]", (ulong*)(pDataDirectories + 6), 0, fix, ref level, texts);
+			Utils.FixWarningInternal("IMAGE_OPTIONAL_HEADER.DataDirectory[IMAGE_DIRECTORY_ENTRY_ARCHITECTURE]", (ulong*)(pDataDirectories + 7), 0, fix, ref level, texts);
+			Utils.FixWarningInternal("IMAGE_OPTIONAL_HEADER.DataDirectory[IMAGE_DIRECTORY_ENTRY_GLOBALPTR]", (ulong*)(pDataDirectories + 8), 0, fix, ref level, texts);
+			Utils.FixWarningInternal("IMAGE_OPTIONAL_HEADER.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS]", (ulong*)(pDataDirectories + 9), 0, fix, ref level, texts);
+			Utils.FixWarningInternal("IMAGE_OPTIONAL_HEADER.DataDirectory[IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG]", (ulong*)(pDataDirectories + 10), 0, fix, ref level, texts);
+			Utils.FixWarningInternal("IMAGE_OPTIONAL_HEADER.DataDirectory[IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT]", (ulong*)(pDataDirectories + 11), 0, fix, ref level, texts);
+			Utils.FixWarningInternal("IMAGE_OPTIONAL_HEADER.DataDirectory[IMAGE_DIRECTORY_ENTRY_IAT]", (ulong*)(pDataDirectories + 12), 0, fix, ref level, texts);
+			Utils.FixWarningInternal("IMAGE_OPTIONAL_HEADER.DataDirectory[IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT]", (ulong*)(pDataDirectories + 13), 0, fix, ref level, texts);
+			if (level == FixerLevel.None) {
+				message = FixerMessage.None;
+				return false;
+			}
+			else {
+				message = new FixerMessage(level, string.Join(Environment.NewLine, texts));
+				return true;
+			}
+		}
+
+		private static uint GetImageSize(IPEImage peImage) {
+			SectionHeader lastSectionHeader;
+			uint alignment;
+			uint imageSize;
+
+			lastSectionHeader = peImage.SectionHeaders.Last();
+			alignment = peImage.OptionalHeader.SectionAlignment;
+			imageSize = (uint)lastSectionHeader.VirtualAddress + lastSectionHeader.VirtualSize;
+			if (imageSize % alignment != 0)
+				imageSize = AlignUp(imageSize, alignment);
+			return imageSize;
+		}
+
+		private static uint AlignUp(uint value, uint alignment) {
+			return value - (value % alignment) + alignment;
+		}
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Fixers/SectionHeaderFixer.cs
+================================================
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using static Mdlib.NativeMethods;
+
+namespace UniversalDotNetTools.Fixers {
+	internal sealed class SectionHeaderFixer : IFixer {
+		public string Name => nameof(SectionHeaderFixer);
+
+		public bool Check(FixerContext context, out FixerMessage message) {
+			if (context is null)
+				throw new ArgumentNullException(nameof(context));
+
+			return FixImpl(context, false, out message);
+		}
+
+		public bool Fix(FixerContext context, out FixerMessage message) {
+			if (context is null)
+				throw new ArgumentNullException(nameof(context));
+
+			return FixImpl(context, true, out message);
+		}
+
+		private static unsafe bool FixImpl(FixerContext context, bool fix, out FixerMessage message) {
+			FixerLevel level;
+			List<string> texts;
+			IMAGE_SECTION_HEADER* p;
+			uint sectionCount;
+
+			level = FixerLevel.None;
+			texts = new List<string>();
+			p = context.PEImage.SectionHeaders.First().RawValue;
+			sectionCount = context.PEImage.FileHeader.SectionCount;
+			for (uint i = 0; i < sectionCount; i++) {
+				uint characteristics;
+
+				characteristics = (p + i)->Characteristics;
+				characteristics &= 0x00000020 | 0x00000040 | 0x02000000 | 0x04000000 | 0x08000000 | 0x20000000 | 0x40000000 | 0x80000000;
+				Utils.FixWarningInternal($"IMAGE_SECTION_HEADER[{i}].Characteristics", &(p + i)->Characteristics, characteristics, fix, ref level, texts);
+			}
+			if (level == FixerLevel.None) {
+				message = FixerMessage.None;
+				return false;
+			}
+			else {
+				message = new FixerMessage(level, string.Join(Environment.NewLine, texts));
+				return true;
+			}
+		}
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Fixers/Utils.cs
+================================================
+using System.Collections.Generic;
+
+namespace UniversalDotNetTools.Fixers {
+	internal static unsafe class Utils {
+		public static void FixErrorInternal(string name, ushort* p, ushort correctValue, bool fix, ref FixerLevel level, List<string> texts) {
+			if (*p != correctValue) {
+				level.Ensure(FixerLevel.Error);
+				texts.Add($"{name} should be 0x{correctValue.ToString("X4")} (now it is 0x{(*p).ToString("X4")})");
+				if (fix)
+					*p = correctValue;
+			}
+		}
+
+		public static void FixErrorInternal(string name, uint* p, uint correctValue, bool fix, ref FixerLevel level, List<string> texts) {
+			if (*p != correctValue) {
+				level.Ensure(FixerLevel.Error);
+				texts.Add($"{name} should be 0x{correctValue.ToString("X8")} (now it is 0x{(*p).ToString("X8")})");
+				if (fix)
+					*p = correctValue;
+			}
+		}
+
+		public static void FixErrorInternal(string name, ulong* p, ulong correctValue, bool fix, ref FixerLevel level, List<string> texts) {
+			if (*p != correctValue) {
+				level.Ensure(FixerLevel.Error);
+				texts.Add($"{name} should be 0x{correctValue.ToString("X16")} (now it is 0x{(*p).ToString("X16")})");
+				if (fix)
+					*p = correctValue;
+			}
+		}
+
+		public static void FixWarningInternal(string name, ushort* p, ushort correctValue, bool fix, ref FixerLevel level, List<string> texts) {
+			if (*p != correctValue) {
+				level.Ensure(FixerLevel.Warning);
+				texts.Add($"{name} may be 0x{correctValue.ToString("X4")} (now it is 0x{(*p).ToString("X4")})");
+				if (fix)
+					*p = correctValue;
+			}
+		}
+
+		public static void FixWarningInternal(string name, uint* p, uint correctValue, bool fix, ref FixerLevel level, List<string> texts) {
+			if (*p != correctValue) {
+				level.Ensure(FixerLevel.Warning);
+				texts.Add($"{name} may be 0x{correctValue.ToString("X8")} (now it is 0x{(*p).ToString("X8")})");
+				if (fix)
+					*p = correctValue;
+			}
+		}
+
+		public static void FixWarningInternal(string name, ulong* p, ulong correctValue, bool fix, ref FixerLevel level, List<string> texts) {
+			if (*p != correctValue) {
+				level.Ensure(FixerLevel.Warning);
+				texts.Add($"{name} may be 0x{correctValue.ToString("X16")} (now it is 0x{(*p).ToString("X16")})");
+				if (fix)
+					*p = correctValue;
+			}
+		}
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Mdlib/Utils.cs
+================================================
+using System;
+
+namespace Mdlib {
+	internal static unsafe class Utils {
+		public static string PointerToString(IntPtr value) {
+			return "0x" + ((ulong)value > uint.MaxValue ? value.ToString("X16") : value.ToString("X8"));
+		}
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Mdlib/DotNet/Metadata/ComImageFlags.cs
+================================================
+// reference dnlib\src\DotNet\MD\ComImageFlags.cs
+
+using System;
+
+namespace Mdlib.DotNet.Metadata {
+	/// <summary>
+	/// See COMIMAGE_FLAGS_XXX in CorHdr.h in the Windows SDK
+	/// </summary>
+	[Flags]
+	internal enum ComImageFlags : uint {
+		/// <summary>
+		/// See COMIMAGE_FLAGS_ILONLY in the Windows SDK
+		/// </summary>
+		ILOnly = 1,
+
+		/// <summary>
+		/// See COMIMAGE_FLAGS_32BITREQUIRED in the Windows SDK
+		/// </summary>
+		Bit32Required = 2,
+
+		/// <summary>
+		/// Set if a native header exists (COMIMAGE_FLAGS_IL_LIBRARY)
+		/// </summary>
+		ILLibrary = 4,
+
+		/// <summary>
+		/// See COMIMAGE_FLAGS_STRONGNAMESIGNED in the Windows SDK
+		/// </summary>
+		StrongNameSigned = 8,
+
+		/// <summary>
+		/// See COMIMAGE_FLAGS_NATIVE_ENTRYPOINT in the Windows SDK
+		/// </summary>
+		NativeEntryPoint = 0x10,
+
+		/// <summary>
+		/// See COMIMAGE_FLAGS_TRACKDEBUGDATA in the Windows SDK
+		/// </summary>
+		TrackDebugData = 0x10000,
+
+		/// <summary>
+		/// See COMIMAGE_FLAGS_32BITPREFERRED in the Windows SDK
+		/// </summary>
+		Bit32Preferred = 0x20000
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Mdlib/DotNet/Metadata/Cor20Header.cs
+================================================
+using System;
+using System.Diagnostics;
+using Mdlib.PE;
+using static Mdlib.DotNet.Metadata.NativeMethods;
+
+namespace Mdlib.DotNet.Metadata {
+	/// <summary>
+	/// Cor20头
+	/// </summary>
+	[DebuggerDisplay("CorHdr:[P:{Utils.PointerToString(RawData)} RVA:{RVA} FOA:{FOA}]")]
+	internal sealed unsafe class Cor20Header : IRawData<IMAGE_COR20_HEADER> {
+		private readonly IPEImage _peImage;
+		private readonly void* _rawData;
+		private readonly uint _offset;
+
+		/// <summary />
+		public IntPtr RawData => (IntPtr)_rawData;
+
+		/// <summary />
+		public IMAGE_COR20_HEADER* RawValue => (IMAGE_COR20_HEADER*)_rawData;
+
+		/// <summary />
+		public RVA RVA => _peImage.ToRVA((FOA)_offset);
+
+		/// <summary />
+		public FOA FOA => (FOA)_offset;
+
+		/// <summary />
+		public uint Length => IMAGE_COR20_HEADER.UnmanagedSize;
+
+		/// <summary />
+		public uint Size {
+			get => RawValue->cb;
+			set => RawValue->cb = value;
+		}
+
+		/// <summary />
+		public ushort MajorRuntimeVersion {
+			get => RawValue->MajorRuntimeVersion;
+			set => RawValue->MajorRuntimeVersion = value;
+		}
+
+		/// <summary />
+		public ushort MinorRuntimeVersion {
+			get => RawValue->MinorRuntimeVersion;
+			set => RawValue->MinorRuntimeVersion = value;
+		}
+
+		/// <summary />
+		public DataDirectory* MetadataDirectory => (DataDirectory*)&RawValue->MetaData;
+
+		/// <summary />
+		public ComImageFlags Flags {
+			get => (ComImageFlags)RawValue->Flags;
+			set => RawValue->Flags = (uint)value;
+		}
+
+		/// <summary>
+		/// 托管入口点，若无托管入口点返回 <see langword="null"/>，设置本机入口点时将自动设置 <see cref="ComImageFlags.NativeEntryPoint"/> 位为 <see langword="true"/>
+		/// </summary>
+		public MetadataToken? EntryPointToken {
+			get {
+				if ((Flags & ComImageFlags.NativeEntryPoint) != 0)
+					return null;
+
+				return (MetadataToken)RawValue->EntryPointTokenOrRVA;
+			}
+			set {
+				if (value is null)
+					throw new ArgumentNullException(nameof(value));
+
+				Flags &= ~ComImageFlags.NativeEntryPoint;
+				RawValue->EntryPointTokenOrRVA = (uint)value.Value;
+			}
+		}
+
+		/// <summary>
+		/// 本机入口点，若无本机入口点返回 <see langword="null"/>，设置本机入口点时将自动设置 <see cref="ComImageFlags.NativeEntryPoint"/> 位为 <see langword="true"/>
+		/// </summary>
+		public RVA? EntryPointRVA {
+			get {
+				if ((Flags & ComImageFlags.NativeEntryPoint) == 0)
+					return null;
+
+				return (RVA)RawValue->EntryPointTokenOrRVA;
+			}
+			set {
+				if (value is null)
+					throw new ArgumentNullException(nameof(value));
+
+				Flags |= ComImageFlags.NativeEntryPoint;
+				RawValue->EntryPointTokenOrRVA = (uint)value.Value;
+			}
+		}
+
+		/// <summary />
+		public DataDirectory* ResourcesDirectory => (DataDirectory*)&RawValue->Resources;
+
+		/// <summary />
+		public DataDirectory* StrongNameSignatureDirectory => (DataDirectory*)&RawValue->StrongNameSignature;
+
+		/// <summary />
+		public DataDirectory* VTableFixupsDirectory => (DataDirectory*)&RawValue->VTableFixups;
+
+		internal Cor20Header(IMetadata metadata) {
+			if (metadata is null)
+				throw new ArgumentNullException(nameof(metadata));
+
+			_peImage = metadata.PEImage;
+			_offset = (uint)_peImage.ToFOA((RVA)_peImage.OptionalHeader.DotNetDirectory->Address);
+			_rawData = (byte*)_peImage.RawData + _offset;
+		}
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Mdlib/DotNet/Metadata/HeapFlags.cs
+================================================
+//// dnlib\src\DotNet\MD\MDStreamFlags.cs modified
+
+using System;
+
+namespace Mdlib.DotNet.Metadata {
+	/// <summary>
+	/// å †äºŒè¿›åˆ¶æ ‡å¿—
+	/// </summary>
+	[Flags]
+	internal enum HeapFlags : byte {
+		/// <summary>
+		/// #Strings stream is big and requires 4 byte offsets
+		/// </summary>
+		BigString = 0x01,
+
+		/// <summary>
+		/// #GUID stream is big and requires 4 byte offsets
+		/// </summary>
+		BigGuid = 0x02,
+
+		/// <summary>
+		/// #Blob stream is big and requires 4 byte offsets
+		/// </summary>
+		BigBlob = 0x04,
+
+		/// <summary />
+		Padding = 0x08,
+
+		/// <summary />
+		DeltaOnly = 0x20,
+
+		/// <summary>
+		/// Extra data follows the row counts
+		/// </summary>
+		ExtraData = 0x40,
+
+		/// <summary>
+		/// Set if certain tables can contain deleted rows. The name column (if present) is set to "_Deleted"
+		/// </summary>
+		HasDelete = 0x80
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Mdlib/DotNet/Metadata/HeapStream.cs
+================================================
+namespace Mdlib.DotNet.Metadata {
+	/// <summary>
+	/// #Strings堆
+	/// </summary>
+	internal sealed class StringHeap : MetadataStream {
+		internal StringHeap(IMetadata metadata, int index) : base(metadata, index) {
+		}
+	}
+
+	/// <summary>
+	/// #US堆
+	/// </summary>
+	internal sealed class UserStringHeap : MetadataStream {
+		internal UserStringHeap(IMetadata metadata, int index) : base(metadata, index) {
+		}
+	}
+
+	/// <summary>
+	/// #GUID堆
+	/// </summary>
+	internal sealed class GuidHeap : MetadataStream {
+		internal GuidHeap(IMetadata metadata, int index) : base(metadata, index) {
+		}
+	}
+
+	/// <summary>
+	/// #Blob堆
+	/// </summary>
+	internal sealed class BlobHeap : MetadataStream {
+		internal BlobHeap(IMetadata metadata, int index) : base(metadata, index) {
+		}
+	}
+
+	/// <summary>
+	/// 未知元数据堆
+	/// </summary>
+	internal sealed class UnknownHeap : MetadataStream {
+		/// <summary>
+		/// 构造器
+		/// </summary>
+		/// <param name="metadata">元数据</param>
+		/// <param name="index">堆的索引</param>
+		public UnknownHeap(IMetadata metadata, int index) : base(metadata, index) {
+		}
+
+		/// <summary>
+		/// 构造器
+		/// </summary>
+		/// <param name="metadata">元数据</param>
+		/// <param name="header">元数据流头</param>
+		public UnknownHeap(IMetadata metadata, StreamHeader header) : base(metadata, header) {
+		}
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Mdlib/DotNet/Metadata/Metadata.cs
+================================================
+using System;
+using Mdlib.PE;
+
+namespace Mdlib.DotNet.Metadata {
+	/// <summary>
+	/// 元数据
+	/// </summary>
+	internal interface IMetadata {
+		/// <summary>
+		/// 当前元数据所属的PE映像
+		/// </summary>
+		IPEImage PEImage { get; }
+
+		/// <summary>
+		/// Cor20头
+		/// </summary>
+		Cor20Header Cor20Header { get; }
+
+		/// <summary>
+		/// 存储签名
+		/// </summary>
+		StorageSignature StorageSignature { get; }
+
+		/// <summary>
+		/// 存储头
+		/// </summary>
+		StorageHeader StorageHeader { get; }
+
+		/// <summary>
+		/// 流头
+		/// </summary>
+		StreamHeader[] StreamHeaders { get; }
+
+		/// <summary>
+		/// 元数据表流#~或#-
+		/// </summary>
+		TableStream TableStream { get; }
+
+		/// <summary>
+		/// Strings堆
+		/// </summary>
+		StringHeap StringHeap { get; }
+
+		/// <summary>
+		/// US堆
+		/// </summary>
+		UserStringHeap UserStringHeap { get; }
+
+		/// <summary>
+		/// GUID堆
+		/// </summary>
+		GuidHeap GuidHeap { get; }
+
+		/// <summary>
+		/// Blob堆
+		/// </summary>
+		BlobHeap BlobHeap { get; }
+	}
+
+	internal sealed class Metadata : IMetadata {
+		private readonly IPEImage _peImage;
+		private readonly Cor20Header _cor20Header;
+		private readonly StorageSignature _storageSignature;
+		private readonly StorageHeader _storageHeader;
+		private readonly StreamHeader[] _streamHeaders;
+		private readonly TableStream _tableStream;
+		private readonly StringHeap _stringHeap;
+		private readonly UserStringHeap _userStringHeap;
+		private readonly GuidHeap _guidHeap;
+		private readonly BlobHeap _blobHeap;
+
+		public IPEImage PEImage => _peImage;
+
+		public Cor20Header Cor20Header => _cor20Header;
+
+		public StorageSignature StorageSignature => _storageSignature;
+
+		public StorageHeader StorageHeader => _storageHeader;
+
+		public StreamHeader[] StreamHeaders => _streamHeaders;
+
+		public TableStream TableStream => _tableStream;
+
+		public StringHeap StringHeap => _stringHeap;
+
+		public UserStringHeap UserStringHeap => _userStringHeap;
+
+		public GuidHeap GuidHeap => _guidHeap;
+
+		public BlobHeap BlobHeap => _blobHeap;
+
+		public Metadata(IPEImage peImage) {
+			if (peImage is null)
+				throw new ArgumentNullException(nameof(peImage));
+			if (!peImage.IsDotNetImage)
+				throw new InvalidOperationException();
+
+			bool? isCompressed;
+
+			_peImage = peImage;
+			_cor20Header = new Cor20Header(this);
+			_storageSignature = new StorageSignature(this);
+			_storageHeader = new StorageHeader(this);
+			_streamHeaders = new StreamHeader[_storageHeader.StreamCount];
+			for (int i = 0; i < _streamHeaders.Length; i++)
+				_streamHeaders[i] = new StreamHeader(this, (uint)i);
+			isCompressed = null;
+			foreach (StreamHeader header in _streamHeaders) {
+				string name;
+
+				name = header.DisplayName;
+				if (isCompressed is null)
+					if (name == "#~")
+						isCompressed = true;
+					else if (name == "#-")
+						isCompressed = false;
+				if (name == "#Schema")
+					isCompressed = false;
+			}
+			if (isCompressed is null)
+				throw new BadImageFormatException("Metadata table (#~ / #-) not found");
+			if (isCompressed.Value)
+				for (int i = _streamHeaders.Length - 1; i >= 0; i--)
+					switch (_streamHeaders[i].DisplayName) {
+					case "#~":
+						if (_tableStream is null)
+							_tableStream = new TableStream(this, i, true);
+						break;
+					case "#Strings":
+						if (_stringHeap is null)
+							_stringHeap = new StringHeap(this, i);
+						break;
+					case "#US":
+						if (_userStringHeap is null)
+							_userStringHeap = new UserStringHeap(this, i);
+						break;
+					case "#GUID":
+						if (_guidHeap is null)
+							_guidHeap = new GuidHeap(this, i);
+						break;
+					case "#Blob":
+						if (_blobHeap is null)
+							_blobHeap = new BlobHeap(this, i);
+						break;
+					}
+			else
+				for (int i = 0; i < _streamHeaders.Length; i++)
+					switch (_streamHeaders[i].DisplayName.ToUpperInvariant()) {
+					case "#~":
+					case "#-":
+						if (_tableStream is null)
+							_tableStream = new TableStream(this, i, false);
+						break;
+					case "#STRINGS":
+						if (_stringHeap is null)
+							_stringHeap = new StringHeap(this, i);
+						break;
+					case "#US":
+						if (_userStringHeap is null)
+							_userStringHeap = new UserStringHeap(this, i);
+						break;
+					case "#GUID":
+						if (_guidHeap is null)
+							_guidHeap = new GuidHeap(this, i);
+						break;
+					case "#BLOB":
+						if (_blobHeap is null)
+							_blobHeap = new BlobHeap(this, i);
+						break;
+					}
+		}
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Mdlib/DotNet/Metadata/MetadataStream.cs
+================================================
+using System;
+using System.Diagnostics;
+using Mdlib.PE;
+
+namespace Mdlib.DotNet.Metadata {
+	/// <summary>
+	/// 元数据流
+	/// </summary>
+	[DebuggerDisplay("MdStm:[P:{Utils.PointerToString(RawData)} RVA:{RVA} FOA:{FOA} L:{Length}]")]
+	internal abstract unsafe class MetadataStream : IRawData {
+		/// <summary />
+		protected readonly IPEImage _peImage;
+		/// <summary />
+		protected readonly void* _rawData;
+		/// <summary />
+		protected readonly uint _offset;
+		/// <summary />
+		protected readonly uint _length;
+
+		/// <summary />
+		public IntPtr RawData => (IntPtr)_rawData;
+
+		/// <summary />
+		public RVA RVA => _peImage.ToRVA((FOA)_offset);
+
+		/// <summary />
+		public FOA FOA => (FOA)_offset;
+
+		/// <summary />
+		public uint Length => _length;
+
+		internal MetadataStream(IMetadata metadata, int index) : this(metadata, metadata.StreamHeaders[index]) {
+		}
+
+		internal MetadataStream(IMetadata metadata, StreamHeader header) {
+			if (metadata is null)
+				throw new ArgumentNullException(nameof(metadata));
+			if (header is null)
+				throw new ArgumentNullException(nameof(header));
+
+			_peImage = metadata.PEImage;
+			_offset = (uint)metadata.StorageSignature.FOA + header.Offset;
+			_rawData = (byte*)_peImage.RawData + _offset;
+			_length = header.Size;
+		}
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Mdlib/DotNet/Metadata/MetadataToken.cs
+================================================
+using System;
+using System.Diagnostics;
+
+namespace Mdlib.DotNet.Metadata {
+	/// <summary>
+	/// 元数据标记
+	/// </summary>
+	[DebuggerDisplay("MDToken:{ToString()} ({Type})")]
+	internal struct MetadataToken : IEquatable<MetadataToken> {
+		private readonly uint _value;
+
+		/// <summary>
+		/// 原始值
+		/// </summary>
+		public uint Value => _value;
+
+		/// <summary>
+		/// 元数据表类型
+		/// </summary>
+		public TableType Type => (TableType)((_value & 0xFF000000) >> 24);
+
+		/// <summary>
+		/// RID
+		/// </summary>
+		public uint RowId => _value & 0x00FFFFFF;
+
+		/// <summary>
+		/// 构造器
+		/// </summary>
+		/// <param name="value"></param>
+		public MetadataToken(int value) => _value = (uint)value;
+
+		/// <summary>
+		/// 构造器
+		/// </summary>
+		/// <param name="value"></param>
+		public MetadataToken(uint value) => _value = value;
+
+		/// <summary>
+		/// 构造器
+		/// </summary>
+		/// <param name="type"></param>
+		/// <param name="rowId"></param>
+		public MetadataToken(TableType type, int rowId) => _value = (uint)type << 24 | (uint)rowId;
+
+		/// <summary>
+		/// 构造器
+		/// </summary>
+		/// <param name="type"></param>
+		/// <param name="rowId"></param>
+		public MetadataToken(TableType type, uint rowId) => _value = (uint)type << 24 | rowId;
+
+		/// <summary />
+		public static explicit operator int(MetadataToken value) => (int)value._value;
+
+		/// <summary />
+		public static explicit operator uint(MetadataToken value) => value._value;
+
+		/// <summary />
+		public static explicit operator MetadataToken(int value) => new MetadataToken(value);
+
+		/// <summary />
+		public static explicit operator MetadataToken(uint value) => new MetadataToken(value);
+
+		/// <summary />
+		public static bool operator ==(MetadataToken left, MetadataToken right) => left._value == right._value;
+
+		/// <summary />
+		public static bool operator !=(MetadataToken left, MetadataToken right) => left._value != right._value;
+
+		/// <summary />
+		public bool Equals(MetadataToken other) {
+			return _value == other._value;
+		}
+
+		/// <summary />
+		public override bool Equals(object obj) {
+			return obj is MetadataToken ? _value == ((MetadataToken)obj)._value : false;
+		}
+
+		/// <summary />
+		public override int GetHashCode() {
+			return (int)_value;
+		}
+
+		/// <summary />
+		public override string ToString() {
+			return "0x" + _value.ToString("X8");
+		}
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Mdlib/DotNet/Metadata/NativeMethods.cs
+================================================
+#pragma warning disable CS1591
+using System.Runtime.InteropServices;
+using static Mdlib.NativeMethods;
+
+namespace Mdlib.DotNet.Metadata {
+	internal static unsafe class NativeMethods {
+		public const ushort MAXSTREAMNAME = 32;
+		public const byte TBL_COUNT = 45;
+
+		[StructLayout(LayoutKind.Sequential, Pack = 1)]
+		internal struct IMAGE_COR20_HEADER {
+			public static readonly uint UnmanagedSize = (uint)sizeof(IMAGE_COR20_HEADER);
+
+			public uint cb;
+			public ushort MajorRuntimeVersion;
+			public ushort MinorRuntimeVersion;
+			public IMAGE_DATA_DIRECTORY MetaData;
+			public uint Flags;
+			public uint EntryPointTokenOrRVA;
+			public IMAGE_DATA_DIRECTORY Resources;
+			public IMAGE_DATA_DIRECTORY StrongNameSignature;
+			public IMAGE_DATA_DIRECTORY CodeManagerTable;
+			public IMAGE_DATA_DIRECTORY VTableFixups;
+			public IMAGE_DATA_DIRECTORY ExportAddressTableJumps;
+			public IMAGE_DATA_DIRECTORY ManagedNativeHeader;
+		}
+
+		[StructLayout(LayoutKind.Sequential, Pack = 1)]
+		internal struct STORAGESIGNATURE {
+			/// <summary>
+			/// 大小不包括pVersion的长度
+			/// </summary>
+			public static readonly uint UnmanagedSize = (uint)sizeof(STORAGESIGNATURE) - 1;
+
+			public uint lSignature;
+			public ushort iMajorVer;
+			public ushort iMinorVer;
+			public uint iExtraData;
+			public uint iVersionString;
+			/// <summary>
+			/// 由于C#语法问题不能写pVersion[0]，实际长度由 <see cref="iVersionString"/> 决定
+			/// </summary>
+			public fixed byte pVersion[1];
+		}
+
+		[StructLayout(LayoutKind.Sequential, Pack = 1)]
+		internal struct STORAGEHEADER {
+			public static readonly uint UnmanagedSize = (uint)sizeof(STORAGEHEADER);
+
+			public byte fFlags;
+			public byte pad;
+			public ushort iStreams;
+		}
+
+		[StructLayout(LayoutKind.Sequential, Pack = 1)]
+		internal struct STORAGESTREAM {
+			/// <summary>
+			/// 大小不包括rcName的长度
+			/// </summary>
+			public static readonly uint UnmanagedSize = (uint)sizeof(STORAGESTREAM) - 4;
+
+			public uint iOffset;
+			public uint iSize;
+			/// <summary>
+			/// 对齐到4字节边界，最大长度为 <see cref="MAXSTREAMNAME"/>
+			/// </summary>
+			public fixed byte rcName[4];
+		}
+	}
+}
+#pragma warning restore CS1591
+
+
+
+================================================
+File: AssemblyFixer/Mdlib/DotNet/Metadata/StorageHeader.cs
+================================================
+using System;
+using System.Diagnostics;
+using Mdlib.PE;
+using static Mdlib.DotNet.Metadata.NativeMethods;
+
+namespace Mdlib.DotNet.Metadata {
+	/// <summary>
+	/// å­˜å‚¨å¤´
+	/// </summary>
+	[DebuggerDisplay("StgHdr:[P:{Utils.PointerToString(RawData)} RVA:{RVA} FOA:{FOA} SC:{StreamsCount}]")]
+	internal sealed unsafe class StorageHeader : IRawData<STORAGEHEADER> {
+		private readonly IPEImage _peImage;
+		private readonly void* _rawData;
+		private readonly uint _offset;
+
+		/// <summary />
+		public IntPtr RawData => (IntPtr)_rawData;
+
+		/// <summary />
+		public STORAGEHEADER* RawValue => (STORAGEHEADER*)_rawData;
+
+		/// <summary />
+		public RVA RVA => _peImage.ToRVA((FOA)_offset);
+
+		/// <summary />
+		public FOA FOA => (FOA)_offset;
+
+		/// <summary />
+		public uint Length => STORAGEHEADER.UnmanagedSize;
+
+		/// <summary />
+		public byte Flags {
+			get => RawValue->fFlags;
+			set => RawValue->fFlags = value;
+		}
+
+		/// <summary />
+		public byte Padding {
+			get => RawValue->pad;
+			set => RawValue->pad = value;
+		}
+
+		/// <summary />
+		public ushort StreamCount {
+			get => RawValue->iStreams;
+			set => RawValue->iStreams = value;
+		}
+
+		internal StorageHeader(IMetadata metadata) {
+			if (metadata is null)
+				throw new ArgumentNullException(nameof(metadata));
+
+			_peImage = metadata.PEImage;
+			_offset = (uint)metadata.StorageSignature.FOA + metadata.StorageSignature.Length;
+			_rawData = (byte*)_peImage.RawData + _offset;
+		}
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Mdlib/DotNet/Metadata/StorageSignature.cs
+================================================
+using System;
+using System.Diagnostics;
+using System.Text;
+using Mdlib.PE;
+using static Mdlib.DotNet.Metadata.NativeMethods;
+
+namespace Mdlib.DotNet.Metadata {
+	/// <summary>
+	/// 存储签名
+	/// </summary>
+	[DebuggerDisplay("StgSig:[P:{Utils.PointerToString(RawData)} RVA:{RVA} FOA:{FOA} V:{DisplayVersionString}]")]
+	internal sealed unsafe class StorageSignature : IRawData<STORAGESIGNATURE> {
+		private readonly IPEImage _peImage;
+		private readonly void* _rawData;
+		private readonly uint _offset;
+		private string _displayVersionString;
+
+		/// <summary />
+		public IntPtr RawData => (IntPtr)_rawData;
+
+		/// <summary />
+		public STORAGESIGNATURE* RawValue => (STORAGESIGNATURE*)_rawData;
+
+		/// <summary />
+		public RVA RVA => _peImage.ToRVA((FOA)_offset);
+
+		/// <summary />
+		public FOA FOA => (FOA)_offset;
+
+		/// <summary />
+		public uint Length => STORAGESIGNATURE.UnmanagedSize + RawValue->iVersionString;
+
+		/// <summary />
+		public uint Signature {
+			get => RawValue->lSignature;
+			set => RawValue->lSignature = value;
+		}
+
+		/// <summary />
+		public ushort MajorVersion {
+			get => RawValue->iMajorVer;
+			set => RawValue->iMajorVer = value;
+		}
+
+		/// <summary />
+		public ushort MinorVersion {
+			get => RawValue->iMinorVer;
+			set => RawValue->iMinorVer = value;
+		}
+
+		/// <summary />
+		public uint ExtraData {
+			get => RawValue->iExtraData;
+			set => RawValue->iExtraData = value;
+		}
+
+		/// <summary />
+		public uint VersionStringLength {
+			get => RawValue->iVersionString;
+			set => RawValue->iVersionString = value;
+		}
+
+		/// <summary />
+		public byte* VersionString => RawValue->pVersion;
+
+		/// <summary />
+		public string DisplayVersionString {
+			get {
+				if (_displayVersionString is null)
+					RefreshCache();
+				return _displayVersionString;
+			}
+		}
+
+		internal StorageSignature(IMetadata metadata) {
+			if (metadata is null)
+				throw new ArgumentNullException(nameof(metadata));
+
+			_peImage = metadata.PEImage;
+			_offset = (uint)metadata.PEImage.ToFOA((RVA)metadata.Cor20Header.MetadataDirectory->Address);
+			_rawData = (byte*)_peImage.RawData + _offset;
+		}
+
+		/// <summary>
+		/// 刷新内部字符串缓存，这些缓存被Display*属性使用。若更改了字符串相关内容，请调用此方法。
+		/// </summary>
+		public void RefreshCache() {
+			StringBuilder builder;
+
+			builder = new StringBuilder((int)RawValue->iVersionString);
+			for (uint i = 0; i < RawValue->iVersionString; i++) {
+				if (RawValue->pVersion[i] == 0)
+					break;
+				builder.Append((char)RawValue->pVersion[i]);
+			}
+			_displayVersionString = builder.ToString();
+		}
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Mdlib/DotNet/Metadata/StreamHeader.cs
+================================================
+using System;
+using System.Diagnostics;
+using System.Text;
+using Mdlib.PE;
+using static Mdlib.DotNet.Metadata.NativeMethods;
+
+namespace Mdlib.DotNet.Metadata {
+	/// <summary>
+	/// 元数据流头
+	/// </summary>
+	[DebuggerDisplay("StmHdr:[P:{Utils.PointerToString(RawData)} RVA:{RVA} FOA:{FOA} N:{DisplayName}]")]
+	internal sealed unsafe class StreamHeader : IRawData<STORAGESTREAM> {
+		private readonly IPEImage _peImage;
+		private readonly void* _rawData;
+		private readonly uint _offset;
+		private string _displayName;
+
+		/// <summary />
+		public IntPtr RawData => (IntPtr)_rawData;
+
+		/// <summary />
+		public STORAGESTREAM* RawValue => (STORAGESTREAM*)_rawData;
+
+		/// <summary />
+		public RVA RVA => _peImage.ToRVA((FOA)_offset);
+
+		/// <summary />
+		public FOA FOA => (FOA)_offset;
+
+		/// <summary />
+		public uint Length => STORAGESTREAM.UnmanagedSize + NameLength;
+
+		/// <summary />
+		public uint Offset {
+			get => RawValue->iOffset;
+			set => RawValue->iOffset = value;
+		}
+
+		/// <summary />
+		public uint Size {
+			get => RawValue->iSize;
+			set => RawValue->iSize = value;
+		}
+
+		/// <summary />
+		public byte* Name => RawValue->rcName;
+
+		/// <summary>
+		/// 名称长度，包括0终止符
+		/// </summary>
+		public uint NameLength {
+			get {
+				for (uint i = 0; i < MAXSTREAMNAME; i++)
+					if (RawValue->rcName[i] == 0)
+						return (i & ~3u) + 4;
+				return 32;
+			}
+		}
+
+		/// <summary />
+		public string DisplayName {
+			get {
+				if (_displayName is null)
+					RefreshCache();
+				return _displayName;
+			}
+		}
+
+		internal StreamHeader(IMetadata metadata, uint index) {
+			if (metadata is null)
+				throw new ArgumentNullException(nameof(metadata));
+
+			_peImage = metadata.PEImage;
+			if (index == 0)
+				_offset = (uint)metadata.StorageHeader.FOA + metadata.StorageHeader.Length;
+			else
+				_offset = (uint)metadata.StreamHeaders[index - 1].FOA + metadata.StreamHeaders[index - 1].Length;
+			_rawData = (byte*)_peImage.RawData + _offset;
+		}
+
+		/// <summary>
+		/// 刷新内部字符串缓存，这些缓存被Display*属性使用。若更改了字符串相关内容，请调用此方法。
+		/// </summary>
+		public void RefreshCache() {
+			StringBuilder builder;
+
+			builder = new StringBuilder(MAXSTREAMNAME);
+			for (uint i = 0; i < MAXSTREAMNAME; i++) {
+				if (RawValue->rcName[i] == 0)
+					break;
+				builder.Append((char)RawValue->rcName[i]);
+			}
+			_displayName = builder.ToString();
+		}
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Mdlib/DotNet/Metadata/TableStream.cs
+================================================
+using Mdlib.PE;
+using static Mdlib.DotNet.Metadata.NativeMethods;
+
+namespace Mdlib.DotNet.Metadata {
+	/// <summary>
+	/// 元数据表流
+	/// </summary>
+	internal sealed unsafe class TableStream : MetadataStream {
+		private readonly bool _isCompressed;
+		private readonly bool _isBigString;
+		private readonly bool _isBigGuid;
+		private readonly bool _isBigBlob;
+
+		/// <summary>
+		/// 元数据架构主版本
+		/// </summary>
+		public byte MajorVersion {
+			get => *((byte*)_rawData + 4);
+			set => *((byte*)_rawData + 4) = value;
+		}
+
+		/// <summary>
+		/// 元数据架构次版本
+		/// </summary>
+		public byte MinorVersion {
+			get => *((byte*)_rawData + 5);
+			set => *((byte*)_rawData + 5) = value;
+		}
+
+		/// <summary>
+		/// 堆二进制标志
+		/// </summary>
+		public HeapFlags Flags {
+			get => *((HeapFlags*)_rawData + 6);
+			set => *((HeapFlags*)_rawData + 6) = value;
+		}
+
+		/// <summary>
+		/// 表示存在哪些表
+		/// </summary>
+		public ulong ValidMask {
+			get => *(ulong*)((byte*)_rawData + 8);
+			set => *(ulong*)((byte*)_rawData + 8) = value;
+		}
+
+		/// <summary>
+		/// 表示哪些表被排序了
+		/// </summary>
+		public ulong SortedMask {
+			get => *(ulong*)((byte*)_rawData + 16);
+			set => *(ulong*)((byte*)_rawData + 16) = value;
+		}
+
+		/// <summary />
+		public IPEImage PEImage => _peImage;
+
+		/// <summary>
+		/// 是否是压缩的元数据表
+		/// </summary>
+		public bool IsCompressed => _isCompressed;
+
+		/// <summary />
+		public bool IsBigString => _isBigString;
+
+		/// <summary />
+		public bool IsBigGuid => _isBigGuid;
+
+		/// <summary />
+		public bool IsBigBlob => _isBigBlob;
+
+		internal TableStream(IMetadata metadata, int index, bool isCompressed) : base(metadata, index) {
+			ulong validMask;
+			uint[] rowCounts;
+			uint tablesOffset;
+
+			_isCompressed = isCompressed;
+			_isBigString = (Flags & HeapFlags.BigString) != 0;
+			_isBigGuid = (Flags & HeapFlags.BigGuid) != 0;
+			_isBigBlob = (Flags & HeapFlags.BigBlob) != 0;
+			validMask = ValidMask;
+			rowCounts = new uint[TBL_COUNT];
+			tablesOffset = 24;
+			// 到SortedMask为止有24个字节，再之后还有个长度为有效表长度的uint[]
+			for (byte i = 0; i < TBL_COUNT; i++) {
+				if ((validMask & 1ul << i) == 0)
+					continue;
+				rowCounts[i] = *(uint*)((byte*)_rawData + tablesOffset);
+				tablesOffset += 4;
+				// 算出所有表真正开始的偏移
+			}
+		}
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Mdlib/DotNet/Metadata/TableType.cs
+================================================
+namespace Mdlib.DotNet.Metadata {
+	/// <summary>
+	/// 元数据表类型
+	/// </summary>
+	internal enum TableType : byte {
+		/// <summary>
+		/// Module表
+		/// </summary>
+		Module,
+
+		/// <summary>
+		/// TypeRef表
+		/// </summary>
+		TypeRef,
+
+		/// <summary>
+		/// TypeDef表
+		/// </summary>
+		TypeDef,
+
+		/// <summary>
+		/// FieldPtr表
+		/// </summary>
+		FieldPtr,
+
+		/// <summary>
+		/// Field表
+		/// </summary>
+		Field,
+
+		/// <summary>
+		/// MethodPtr表
+		/// </summary>
+		MethodPtr,
+
+		/// <summary>
+		/// Method表
+		/// </summary>
+		Method,
+
+		/// <summary>
+		/// ParamPtr表
+		/// </summary>
+		ParamPtr,
+
+		/// <summary>
+		/// Param表
+		/// </summary>
+		Param,
+		/// <summary>
+		/// InterfaceImpl表
+		/// </summary>
+		InterfaceImpl,
+
+		/// <summary>
+		/// MemberRef表
+		/// </summary>
+		MemberRef,
+
+		/// <summary>
+		/// Constant表
+		/// </summary>
+		Constant,
+
+		/// <summary>
+		/// CustomAttribute表
+		/// </summary>
+		CustomAttribute,
+
+		/// <summary>
+		/// FieldMarshal表
+		/// </summary>
+		FieldMarshal,
+
+		/// <summary>
+		/// DeclSecurity表
+		/// </summary>
+		DeclSecurity,
+
+		/// <summary>
+		/// ClassLayout表
+		/// </summary>
+		ClassLayout,
+
+		/// <summary>
+		/// FieldLayout表
+		/// </summary>
+		FieldLayout,
+
+		/// <summary>
+		/// StandAloneSig表
+		/// </summary>
+		StandAloneSig,
+
+		/// <summary>
+		/// EventMap表
+		/// </summary>
+		EventMap,
+
+		/// <summary>
+		/// EventPtr表
+		/// </summary>
+		EventPtr,
+
+		/// <summary>
+		/// Event表
+		/// </summary>
+		Event,
+
+		/// <summary>
+		/// PropertyMap表
+		/// </summary>
+		PropertyMap,
+
+		/// <summary>
+		/// PropertyPtr表
+		/// </summary>
+		PropertyPtr,
+
+		/// <summary>
+		/// Property表
+		/// </summary>
+		Property,
+
+		/// <summary>
+		/// MethodSemantics表
+		/// </summary>
+		MethodSemantics,
+
+		/// <summary>
+		/// MethodImpl表
+		/// </summary>
+		MethodImpl,
+
+		/// <summary>
+		/// ModuleRef表
+		/// </summary>
+		ModuleRef,
+
+		/// <summary>
+		/// TypeSpec表
+		/// </summary>
+		TypeSpec,
+
+		/// <summary>
+		/// ImplMap表
+		/// </summary>
+		ImplMap,
+
+		/// <summary>
+		/// FieldRVA表
+		/// </summary>
+		FieldRVA,
+
+		/// <summary>
+		/// ENCLog表
+		/// </summary>
+		ENCLog,
+
+		/// <summary>
+		/// ENCMap表
+		/// </summary>
+		ENCMap,
+
+		/// <summary>
+		/// Assembly表
+		/// </summary>
+		Assembly,
+
+		/// <summary>
+		/// AssemblyProcessor表
+		/// </summary>
+		AssemblyProcessor,
+
+		/// <summary>
+		/// AssemblyOS表
+		/// </summary>
+		AssemblyOS,
+
+		/// <summary>
+		/// AssemblyRef表
+		/// </summary>
+		AssemblyRef,
+
+		/// <summary>
+		/// AssemblyRefProcessor表
+		/// </summary>
+		AssemblyRefProcessor,
+
+		/// <summary>
+		/// AssemblyRefOS表
+		/// </summary>
+		AssemblyRefOS,
+
+		/// <summary>
+		/// File表
+		/// </summary>
+		File,
+
+		/// <summary>
+		/// ExportedType表
+		/// </summary>
+		ExportedType,
+
+		/// <summary>
+		/// ManifestResource表
+		/// </summary>
+		ManifestResource,
+
+		/// <summary>
+		/// NestedClass表
+		/// </summary>
+		NestedClass,
+
+		/// <summary>
+		/// GenericParam表
+		/// </summary>
+		GenericParam,
+
+		/// <summary>
+		/// MethodSpec表
+		/// </summary>
+		MethodSpec,
+
+		/// <summary>
+		/// GenericParamConstraint表
+		/// </summary>
+		GenericParamConstraint
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Mdlib/PE/Address.cs
+================================================
+namespace Mdlib.PE {
+	/// <summary>
+	/// Relative Virtual Address
+	/// </summary>
+	internal enum RVA : uint {
+	}
+
+	/// <summary>
+	/// File Offset Address
+	/// </summary>
+	internal enum FOA : uint {
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Mdlib/PE/DataDirectory.cs
+================================================
+using System.Runtime.InteropServices;
+
+namespace Mdlib.PE {
+	/// <summary />
+	[StructLayout(LayoutKind.Sequential)]
+	internal struct DataDirectory {
+		private uint _address;
+		private uint _size;
+
+		/// <summary />
+		public uint Address {
+			get => _address;
+			set => _address = value;
+		}
+
+		/// <summary />
+		public uint Size {
+			get => _size;
+			set => _size = value;
+		}
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Mdlib/PE/DosHeader.cs
+================================================
+using System;
+using System.Diagnostics;
+using static Mdlib.NativeMethods;
+
+namespace Mdlib.PE {
+	/// <summary>
+	/// Doså¤´
+	/// </summary>
+	[DebuggerDisplay("DosHdr:[P:{Utils.PointerToString(RawData)} NTO:{NtHeaderOffset}]")]
+	internal sealed unsafe class DosHeader : IRawData<IMAGE_DOS_HEADER> {
+		private readonly void* _rawData;
+
+		/// <summary />
+		public IntPtr RawData => (IntPtr)_rawData;
+
+		/// <summary />
+		public IMAGE_DOS_HEADER* RawValue => (IMAGE_DOS_HEADER*)_rawData;
+
+		/// <summary />
+		public RVA RVA => 0;
+
+		/// <summary />
+		public FOA FOA => 0;
+
+		/// <summary />
+		public uint Length => IMAGE_DOS_HEADER.UnmanagedSize;
+
+		/// <summary />
+		public ushort MagicNumber {
+			get => RawValue->e_magic;
+			set => RawValue->e_magic = value;
+		}
+
+		/// <summary />
+		public uint NtHeaderOffset {
+			get => RawValue->e_lfanew;
+			set => RawValue->e_lfanew = value;
+		}
+
+		internal DosHeader(IPEImage peImage) {
+			if (peImage is null)
+				throw new ArgumentNullException(nameof(peImage));
+
+			_rawData = (byte*)peImage.RawData;
+		}
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Mdlib/PE/FileHeader.cs
+================================================
+using System;
+using System.Diagnostics;
+using static Mdlib.NativeMethods;
+
+namespace Mdlib.PE {
+	/// <summary>
+	/// æ–‡ä»¶å¤´
+	/// </summary>
+	[DebuggerDisplay("FileHdr:[P:{Utils.PointerToString(RawData)} RVA:{RVA} FOA:{FOA} MT:{MachineType}]")]
+	internal sealed unsafe class FileHeader : IRawData<IMAGE_FILE_HEADER> {
+		private readonly void* _rawData;
+		private readonly uint _offset;
+
+		/// <summary />
+		public IntPtr RawData => (IntPtr)_rawData;
+
+		/// <summary />
+		public IMAGE_FILE_HEADER* RawValue => (IMAGE_FILE_HEADER*)_rawData;
+
+		/// <summary />
+		public RVA RVA => (RVA)_offset;
+
+		/// <summary />
+		public FOA FOA => (FOA)_offset;
+
+		/// <summary />
+		public Machine Machine {
+			get => (Machine)RawValue->Machine;
+			set => RawValue->Machine = (ushort)value;
+		}
+
+		/// <summary />
+		public ushort SectionCount {
+			get => RawValue->NumberOfSections;
+			set => RawValue->NumberOfSections = value;
+		}
+
+		/// <summary />
+		public uint TimeDateStamp {
+			get => RawValue->TimeDateStamp;
+			set => RawValue->TimeDateStamp = value;
+		}
+
+		/// <summary />
+		public ushort OptionalHeaderSize {
+			get => RawValue->SizeOfOptionalHeader;
+			set => RawValue->SizeOfOptionalHeader = value;
+		}
+
+		/// <summary />
+		public ushort Characteristics {
+			get => RawValue->Characteristics;
+			set => RawValue->Characteristics = value;
+		}
+
+		/// <summary />
+		public uint Length => IMAGE_FILE_HEADER.UnmanagedSize;
+
+		internal FileHeader(NtHeader ntHeader) {
+			if (ntHeader is null)
+				throw new ArgumentNullException(nameof(ntHeader));
+
+			_rawData = (byte*)ntHeader.RawData + 4;
+			_offset = (uint)ntHeader.FOA + 4;
+		}
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Mdlib/PE/IRawData.cs
+================================================
+using System;
+
+namespace Mdlib.PE {
+	/// <summary>
+	/// 原始数据泛型接口，提供访问结构化数据的能力
+	/// </summary>
+	internal unsafe interface IRawData<T> : IRawData where T : unmanaged {
+		/// <summary>
+		/// 原始二进制数据对应的结构化数据
+		/// </summary>
+		T* RawValue { get; }
+	}
+
+	/// <summary>
+	/// 原始数据接口
+	/// </summary>
+	internal interface IRawData {
+		/// <summary>
+		/// 当前数据的原始数据
+		/// </summary>
+		IntPtr RawData { get; }
+
+		/// <summary>
+		/// 当前数据在PE映像中的RVA
+		/// </summary>
+		RVA RVA { get; }
+
+		/// <summary>
+		/// 当前数据在PE映像中的FOA
+		/// </summary>
+		FOA FOA { get; }
+
+		/// <summary>
+		/// 当前数据在PE映像中的长度
+		/// </summary>
+		uint Length { get; }
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Mdlib/PE/Machine.cs
+================================================
+// reference dnlib\src\PE\Machine.cs
+
+namespace Mdlib.PE {
+	/// <summary>
+	/// IMAGE_FILE_HEADER.Machine enum
+	/// </summary>
+	internal enum Machine : ushort {
+		/// <summary>
+		/// Unknown machine
+		/// </summary>
+		Unknown = 0,
+
+		/// <summary>
+		/// x86
+		/// </summary>
+		I386 = 0x014C,
+
+		/// <summary>
+		/// MIPS little-endian, 0x160 big-endian
+		/// </summary>
+		R3000 = 0x0162,
+
+		/// <summary>
+		/// MIPS little-endian
+		/// </summary>
+		R4000 = 0x0166,
+
+		/// <summary>
+		/// MIPS little-endian
+		/// </summary>
+		R10000 = 0x0168,
+
+		/// <summary>
+		/// MIPS little-endian WCE v2
+		/// </summary>
+		WCEMIPSV2 = 0x0169,
+
+		/// <summary>
+		/// Alpha_AXP
+		/// </summary>
+		ALPHA = 0x0184,
+
+		/// <summary>
+		/// SH3 little-endian
+		/// </summary>
+		SH3 = 0x01A2,
+
+		/// <summary />
+		SH3DSP = 0x01A3,
+
+		/// <summary>
+		/// SH3E little-endian
+		/// </summary>
+		SH3E = 0x01A4,
+
+		/// <summary>
+		/// SH4 little-endian
+		/// </summary>
+		SH4 = 0x01A6,
+
+		/// <summary>
+		/// SH5
+		/// </summary>
+		SH5 = 0x01A8,
+
+		/// <summary>
+		/// ARM Little-Endian
+		/// </summary>
+		ARM = 0x01C0,
+
+		/// <summary>
+		/// ARM Thumb/Thumb-2 Little-Endian
+		/// </summary>
+		THUMB = 0x01C2,
+
+		/// <summary>
+		/// ARM Thumb-2 Little-Endian
+		/// </summary>
+		ARMNT = 0x01C4,
+
+		/// <summary />
+		AM33 = 0x01D3,
+
+		/// <summary>
+		/// IBM PowerPC Little-Endian
+		/// </summary>
+		POWERPC = 0x01F0,
+
+		/// <summary />
+		POWERPCFP = 0x01F1,
+
+		/// <summary>
+		/// IA-64
+		/// </summary>
+		IA64 = 0x0200,
+
+		/// <summary />
+		MIPS16 = 0x0266,
+
+		/// <summary />
+		ALPHA64 = 0x0284,
+
+		/// <summary />
+		MIPSFPU = 0x0366,
+
+		/// <summary />
+		MIPSFPU16 = 0x0466,
+
+		/// <summary>
+		/// Infineon
+		/// </summary>
+		TRICORE = 0x0520,
+
+		/// <summary />
+		CEF = 0x0CEF,
+
+		/// <summary>
+		/// EFI Byte Code
+		/// </summary>
+		EBC = 0x0EBC,
+
+		/// <summary>
+		/// x64
+		/// </summary>
+		AMD64 = 0x8664,
+
+		/// <summary>
+		/// M32R little-endian
+		/// </summary>
+		M32R = 0x9041,
+
+		/// <summary />
+		ARM64 = 0xAA64,
+
+		/// <summary />
+		CEE = 0xC0EE,
+
+		// Search for IMAGE_FILE_MACHINE_NATIVE and IMAGE_FILE_MACHINE_NATIVE_OS_OVERRIDE here:
+		//		https://github.com/dotnet/coreclr/blob/master/src/inc/pedecoder.h
+		// Note that IMAGE_FILE_MACHINE_NATIVE_OS_OVERRIDE == 0 if it's Windows
+
+		/// <summary />
+		I386_Native_Apple = I386 ^ 0x4644,
+
+		/// <summary />
+		AMD64_Native_Apple = AMD64 ^ 0x4644,
+
+		/// <summary />
+		ARMNT_Native_Apple = ARMNT ^ 0x4644,
+
+		/// <summary />
+		ARM64_Native_Apple = ARM64 ^ 0x4644,
+
+		/// <summary />
+		I386_Native_FreeBSD = I386 ^ 0xADC4,
+
+		/// <summary />
+		AMD64_Native_FreeBSD = AMD64 ^ 0xADC4,
+
+		/// <summary />
+		ARMNT_Native_FreeBSD = ARMNT ^ 0xADC4,
+
+		/// <summary />
+		ARM64_Native_FreeBSD = ARM64 ^ 0xADC4,
+
+		/// <summary />
+		I386_Native_Linux = I386 ^ 0x7B79,
+
+		/// <summary />
+		AMD64_Native_Linux = AMD64 ^ 0x7B79,
+
+		/// <summary />
+		ARMNT_Native_Linux = ARMNT ^ 0x7B79,
+
+		/// <summary />
+		ARM64_Native_Linux = ARM64 ^ 0x7B79,
+
+		/// <summary />
+		I386_Native_NetBSD = I386 ^ 0x1993,
+
+		/// <summary />
+		AMD64_Native_NetBSD = AMD64 ^ 0x1993,
+
+		/// <summary />
+		ARMNT_Native_NetBSD = ARMNT ^ 0x1993,
+
+		/// <summary />
+		ARM64_Native_NetBSD = ARM64 ^ 0x1993
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Mdlib/PE/NativeMethods.cs
+================================================
+#pragma warning disable CS1591
+using System.Runtime.InteropServices;
+
+namespace Mdlib {
+	internal static unsafe class NativeMethods {
+		public const ushort IMAGE_NUMBEROF_DIRECTORY_ENTRIES = 16;
+		public const ushort IMAGE_SIZEOF_SHORT_NAME = 8;
+
+		[StructLayout(LayoutKind.Sequential, Pack = 1)]
+		internal struct IMAGE_DOS_HEADER {
+			public static readonly uint UnmanagedSize = (uint)sizeof(IMAGE_DOS_HEADER);
+
+			public ushort e_magic;
+			public ushort e_cblp;
+			public ushort e_cp;
+			public ushort e_crlc;
+			public ushort e_cparhdr;
+			public ushort e_minalloc;
+			public ushort e_maxalloc;
+			public ushort e_ss;
+			public ushort e_sp;
+			public ushort e_csum;
+			public ushort e_ip;
+			public ushort e_cs;
+			public ushort e_lfarlc;
+			public ushort e_ovno;
+			public fixed ushort e_res[4];
+			public ushort e_oemid;
+			public ushort e_oeminfo;
+			public fixed ushort e_res2[10];
+			public uint e_lfanew;
+		}
+
+		[StructLayout(LayoutKind.Sequential, Pack = 1)]
+		internal struct IMAGE_NT_HEADERS32 {
+			public static readonly uint UnmanagedSize = (uint)sizeof(IMAGE_NT_HEADERS32);
+
+			public uint Signature;
+			public IMAGE_FILE_HEADER FileHeader;
+			public IMAGE_OPTIONAL_HEADER32 OptionalHeader;
+		}
+
+		[StructLayout(LayoutKind.Sequential, Pack = 1)]
+		internal struct IMAGE_NT_HEADERS64 {
+			public static readonly uint UnmanagedSize = (uint)sizeof(IMAGE_NT_HEADERS64);
+
+			public uint Signature;
+			public IMAGE_FILE_HEADER FileHeader;
+			public IMAGE_OPTIONAL_HEADER64 OptionalHeader;
+		}
+
+		[StructLayout(LayoutKind.Sequential, Pack = 1)]
+		internal struct IMAGE_FILE_HEADER {
+			public static readonly uint UnmanagedSize = (uint)sizeof(IMAGE_FILE_HEADER);
+
+			public ushort Machine;
+			public ushort NumberOfSections;
+			public uint TimeDateStamp;
+			public uint PointerToSymbolTable;
+			public uint NumberOfSymbols;
+			public ushort SizeOfOptionalHeader;
+			public ushort Characteristics;
+		}
+
+		[StructLayout(LayoutKind.Sequential, Pack = 1)]
+		internal struct IMAGE_OPTIONAL_HEADER32 {
+			public static readonly uint UnmanagedSize = (uint)sizeof(IMAGE_OPTIONAL_HEADER32);
+
+			public ushort Magic;
+			public byte MajorLinkerVersion;
+			public byte MinorLinkerVersion;
+			public uint SizeOfCode;
+			public uint SizeOfInitializedData;
+			public uint SizeOfUninitializedData;
+			public uint AddressOfEntryPoint;
+			public uint BaseOfCode;
+			public uint BaseOfData;
+			public uint ImageBase;
+			public uint SectionAlignment;
+			public uint FileAlignment;
+			public ushort MajorOperatingSystemVersion;
+			public ushort MinorOperatingSystemVersion;
+			public ushort MajorImageVersion;
+			public ushort MinorImageVersion;
+			public ushort MajorSubsystemVersion;
+			public ushort MinorSubsystemVersion;
+			public uint Win32VersionValue;
+			public uint SizeOfImage;
+			public uint SizeOfHeaders;
+			public uint CheckSum;
+			public ushort Subsystem;
+			public ushort DllCharacteristics;
+			public uint SizeOfStackReserve;
+			public uint SizeOfStackCommit;
+			public uint SizeOfHeapReserve;
+			public uint SizeOfHeapCommit;
+			public uint LoaderFlags;
+			public uint NumberOfRvaAndSizes;
+			public fixed ulong DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
+		}
+
+		[StructLayout(LayoutKind.Sequential, Pack = 1)]
+		internal struct IMAGE_OPTIONAL_HEADER64 {
+			public static readonly uint UnmanagedSize = (uint)sizeof(IMAGE_OPTIONAL_HEADER64);
+
+			public ushort Magic;
+			public byte MajorLinkerVersion;
+			public byte MinorLinkerVersion;
+			public uint SizeOfCode;
+			public uint SizeOfInitializedData;
+			public uint SizeOfUninitializedData;
+			public uint AddressOfEntryPoint;
+			public uint BaseOfCode;
+			public ulong ImageBase;
+			public uint SectionAlignment;
+			public uint FileAlignment;
+			public ushort MajorOperatingSystemVersion;
+			public ushort MinorOperatingSystemVersion;
+			public ushort MajorImageVersion;
+			public ushort MinorImageVersion;
+			public ushort MajorSubsystemVersion;
+			public ushort MinorSubsystemVersion;
+			public uint Win32VersionValue;
+			public uint SizeOfImage;
+			public uint SizeOfHeaders;
+			public uint CheckSum;
+			public ushort Subsystem;
+			public ushort DllCharacteristics;
+			public ulong SizeOfStackReserve;
+			public ulong SizeOfStackCommit;
+			public ulong SizeOfHeapReserve;
+			public ulong SizeOfHeapCommit;
+			public uint LoaderFlags;
+			public uint NumberOfRvaAndSizes;
+			public fixed ulong DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
+		}
+
+		[StructLayout(LayoutKind.Sequential, Pack = 1)]
+		internal struct IMAGE_DATA_DIRECTORY {
+			public static readonly uint UnmanagedSize = (uint)sizeof(IMAGE_DATA_DIRECTORY);
+
+			public uint VirtualAddress;
+			public uint Size;
+		}
+
+		[StructLayout(LayoutKind.Sequential, Pack = 1)]
+		internal struct IMAGE_SECTION_HEADER {
+			public static readonly uint UnmanagedSize = (uint)sizeof(IMAGE_SECTION_HEADER);
+
+			public fixed byte Name[IMAGE_SIZEOF_SHORT_NAME];
+			public uint VirtualSize;
+			public uint VirtualAddress;
+			public uint SizeOfRawData;
+			public uint PointerToRawData;
+			public uint PointerToRelocations;
+			public uint PointerToLinenumbers;
+			public ushort NumberOfRelocations;
+			public ushort NumberOfLinenumbers;
+			public uint Characteristics;
+		}
+	}
+}
+#pragma warning restore CS1591
+
+
+
+================================================
+File: AssemblyFixer/Mdlib/PE/NtHeader.cs
+================================================
+using System;
+using System.Diagnostics;
+using static Mdlib.NativeMethods;
+
+namespace Mdlib.PE {
+	/// <summary>
+	/// Ntå¤´
+	/// </summary>
+	[DebuggerDisplay("NtHdr:[P:{Utils.PointerToString(RawData)} RVA:{RVA} FOA:{FOA}]")]
+	internal sealed unsafe class NtHeader : IRawData {
+		private readonly void* _rawData;
+		private readonly uint _offset;
+		private readonly FileHeader _fileHeader;
+		private readonly OptionalHeader _optionalHeader;
+
+		/// <summary />
+		public IntPtr RawData => (IntPtr)_rawData;
+
+		/// <summary />
+		public IMAGE_NT_HEADERS32* RawValue32 => Is64Bit ? throw new InvalidOperationException("It's PE32 format.") : (IMAGE_NT_HEADERS32*)_rawData;
+
+		/// <summary />
+		public IMAGE_NT_HEADERS64* RawValue64 => Is64Bit ? (IMAGE_NT_HEADERS64*)_rawData : throw new InvalidOperationException("It's PE32+ format.");
+
+		/// <summary />
+		public RVA RVA => (RVA)_offset;
+
+		/// <summary />
+		public FOA FOA => (FOA)_offset;
+
+		/// <summary />
+		public uint Length => 4 + IMAGE_FILE_HEADER.UnmanagedSize + _fileHeader.OptionalHeaderSize;
+
+		/// <summary />
+		public uint Signature {
+			get => *(uint*)_rawData;
+			set => *(uint*)_rawData = value;
+		}
+
+		/// <summary />
+		public FileHeader FileHeader => _fileHeader;
+
+		/// <summary />
+		public OptionalHeader OptionalHeader => _optionalHeader;
+
+		/// <summary />
+		public bool Is64Bit => _optionalHeader.Is64Bit;
+
+		internal NtHeader(IPEImage peImage) {
+			if (peImage is null)
+				throw new ArgumentNullException(nameof(peImage));
+
+			_offset = peImage.DosHeader.NtHeaderOffset;
+			_rawData = (byte*)peImage.RawData + _offset;
+			_fileHeader = new FileHeader(this);
+			_optionalHeader = new OptionalHeader(this);
+		}
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Mdlib/PE/OptionalHeader.cs
+================================================
+using System;
+using System.Diagnostics;
+using static Mdlib.NativeMethods;
+
+namespace Mdlib.PE {
+	/// <summary>
+	/// 可选头
+	/// </summary>
+	[DebuggerDisplay("OptHdr:[P:{Utils.PointerToString(RawData)} RVA:{RVA} FOA:{FOA}]")]
+	internal sealed unsafe class OptionalHeader : IRawData {
+		private readonly void* _rawData;
+		private readonly uint _offset;
+		private readonly bool _is64Bit;
+
+		/// <summary />
+		public IntPtr RawData => (IntPtr)_rawData;
+
+		/// <summary />
+		public IMAGE_OPTIONAL_HEADER32* RawValue32 => _is64Bit ? throw new InvalidOperationException() : (IMAGE_OPTIONAL_HEADER32*)_rawData;
+
+		/// <summary />
+		public IMAGE_OPTIONAL_HEADER64* RawValue64 => _is64Bit ? (IMAGE_OPTIONAL_HEADER64*)_rawData : throw new InvalidOperationException();
+
+		/// <summary />
+		public RVA RVA => (RVA)_offset;
+
+		/// <summary />
+		public FOA FOA => (FOA)_offset;
+
+		/// <summary />
+		public uint Length => _is64Bit ? IMAGE_OPTIONAL_HEADER64.UnmanagedSize : IMAGE_OPTIONAL_HEADER32.UnmanagedSize;
+
+		/// <summary />
+		public bool Is64Bit => _is64Bit;
+
+		/// <summary />
+		public OptionalHeaderType Type {
+			get => *(OptionalHeaderType*)_rawData;
+			set => *(OptionalHeaderType*)_rawData = value;
+		}
+
+		/// <summary />
+		public RVA EntryPointRVA {
+			get {
+				if (_is64Bit)
+					return (RVA)RawValue64->AddressOfEntryPoint;
+				else
+					return (RVA)RawValue32->AddressOfEntryPoint;
+			}
+			set {
+				if (_is64Bit)
+					RawValue64->AddressOfEntryPoint = (uint)value;
+				else
+					RawValue32->AddressOfEntryPoint = (uint)value;
+			}
+		}
+
+		/// <summary />
+		public ulong ImageBase {
+			get {
+				if (_is64Bit)
+					return RawValue64->ImageBase;
+				else
+					return RawValue32->ImageBase;
+			}
+			set {
+				if (_is64Bit)
+					RawValue64->ImageBase = value;
+				else
+					RawValue32->ImageBase = (uint)value;
+			}
+		}
+
+		/// <summary />
+		public uint SectionAlignment {
+			get {
+				if (_is64Bit)
+					return RawValue64->SectionAlignment;
+				else
+					return RawValue32->SectionAlignment;
+			}
+			set {
+				if (_is64Bit)
+					RawValue64->SectionAlignment = value;
+				else
+					RawValue32->SectionAlignment = value;
+			}
+		}
+
+		/// <summary />
+		public uint FileAlignment {
+			get {
+				if (_is64Bit)
+					return RawValue64->FileAlignment;
+				else
+					return RawValue32->FileAlignment;
+			}
+			set {
+				if (_is64Bit)
+					RawValue64->FileAlignment = value;
+				else
+					RawValue32->FileAlignment = value;
+			}
+		}
+
+		/// <summary />
+		public uint ImageSize {
+			get {
+				if (_is64Bit)
+					return RawValue64->SizeOfImage;
+				else
+					return RawValue32->SizeOfImage;
+			}
+			set {
+				if (_is64Bit)
+					RawValue64->SizeOfImage = value;
+				else
+					RawValue32->SizeOfImage = value;
+			}
+		}
+
+		/// <summary />
+		public uint HeadersSize {
+			get {
+				if (_is64Bit)
+					return RawValue64->SizeOfHeaders;
+				else
+					return RawValue32->SizeOfHeaders;
+			}
+			set {
+				if (_is64Bit)
+					RawValue64->SizeOfHeaders = value;
+				else
+					RawValue32->SizeOfHeaders = value;
+			}
+		}
+
+		/// <summary />
+		public Subsystem Subsystem {
+			get {
+				if (_is64Bit)
+					return (Subsystem)RawValue64->Subsystem;
+				else
+					return (Subsystem)RawValue32->Subsystem;
+			}
+			set {
+				if (_is64Bit)
+					RawValue64->Subsystem = (ushort)value;
+				else
+					RawValue32->Subsystem = (ushort)value;
+			}
+		}
+
+		/// <summary />
+		public ushort DllCharacteristics {
+			get {
+				if (_is64Bit)
+					return RawValue64->DllCharacteristics;
+				else
+					return RawValue32->DllCharacteristics;
+			}
+			set {
+				if (_is64Bit)
+					RawValue64->DllCharacteristics = value;
+				else
+					RawValue32->DllCharacteristics = value;
+			}
+		}
+
+		/// <summary />
+		public uint DataDirectoryCount {
+			get {
+				if (_is64Bit)
+					return RawValue64->NumberOfRvaAndSizes;
+				else
+					return RawValue32->NumberOfRvaAndSizes;
+			}
+			set {
+				if (_is64Bit)
+					RawValue64->NumberOfRvaAndSizes = value;
+				else
+					RawValue32->NumberOfRvaAndSizes = value;
+			}
+		}
+
+		/// <summary />
+		public DataDirectory* DataDirectories => _is64Bit ? (DataDirectory*)RawValue64->DataDirectory : (DataDirectory*)RawValue32->DataDirectory;
+
+		/// <summary>
+		/// 导出表目录
+		/// </summary>
+		public DataDirectory* ExportTableDirectory => DataDirectories;
+
+		/// <summary>
+		/// 导入表目录
+		/// </summary>
+		public DataDirectory* ImportTableDirectory => DataDirectories + 1;
+
+		/// <summary>
+		/// 资源表目录
+		/// </summary>
+		public DataDirectory* ResourceTableDirectory => DataDirectories + 2;
+
+		/// <summary>
+		/// 重定位表目录
+		/// </summary>
+		public DataDirectory* RelocationTableDirectory => DataDirectories + 5;
+
+		/// <summary>
+		/// 调试信息目录
+		/// </summary>
+		public DataDirectory* DebugInfoDirectory => DataDirectories + 6;
+
+		/// <summary>
+		/// TLS表目录
+		/// </summary>
+		public DataDirectory* TlsTableDirectory => DataDirectories + 11;
+
+		/// <summary>
+		/// 导入地址表目录
+		/// </summary>
+		public DataDirectory* ImportAddressTableDirectory => DataDirectories + 12;
+
+		/// <summary>
+		/// .NET目录
+		/// </summary>
+		public DataDirectory* DotNetDirectory => DataDirectories + 14;
+
+		internal OptionalHeader(NtHeader ntHeader) {
+			if (ntHeader is null)
+				throw new ArgumentNullException(nameof(ntHeader));
+
+			_rawData = (byte*)ntHeader.RawData + 4 + IMAGE_FILE_HEADER.UnmanagedSize;
+			_offset = (uint)ntHeader.FOA + 4 + IMAGE_FILE_HEADER.UnmanagedSize;
+			switch (*(OptionalHeaderType*)_rawData) {
+			case OptionalHeaderType.PE32:
+				_is64Bit = false;
+				break;
+			case OptionalHeaderType.PE64:
+				_is64Bit = true;
+				break;
+			default:
+				throw new BadImageFormatException("Invalid IMAGE_OPTIONAL_HEADER.Magic");
+			}
+		}
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Mdlib/PE/OptionalHeaderType.cs
+================================================
+namespace Mdlib.PE {
+	/// <summary>
+	/// IMAGE_OPTIONAL_HEADER.Magic
+	/// </summary>
+	internal enum OptionalHeaderType : ushort {
+		/// <summary>
+		/// ROM
+		/// </summary>
+		ROM = 0x107,
+
+		/// <summary>
+		/// 32位PE头
+		/// </summary>
+		PE32 = 0x10B,
+
+		/// <summary>
+		/// 64位PE头
+		/// </summary>
+		PE64 = 0x20B
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Mdlib/PE/PEImage.cs
+================================================
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Runtime.InteropServices;
+using Mdlib.DotNet.Metadata;
+
+namespace Mdlib.PE {
+	/// <summary>
+	/// PE映像布局方式
+	/// </summary>
+	internal enum PEImageLayout {
+		/// <summary>
+		/// 文件
+		/// </summary>
+		File,
+
+		/// <summary>
+		/// 内存
+		/// </summary>
+		Memory
+	}
+
+	/// <summary>
+	/// PE映像接口
+	/// </summary>
+	internal interface IPEImage : IDisposable {
+		/// <summary>
+		/// 当前PE映像的原始数据
+		/// </summary>
+		IntPtr RawData { get; }
+
+		/// <summary>
+		/// 当前PE映像的长度
+		/// </summary>
+		uint Length { get; }
+
+		/// <summary>
+		/// 是否为64位PE头
+		/// </summary>
+		bool Is64Bit { get; }
+
+		/// <summary>
+		/// 是否为.NET程序集
+		/// </summary>
+		bool IsDotNetImage { get; }
+
+		/// <summary>
+		/// PE映像布局方式
+		/// </summary>
+		PEImageLayout Layout { get; }
+
+		/// <summary>
+		/// Dos头
+		/// </summary>
+		DosHeader DosHeader { get; }
+
+		/// <summary>
+		/// Nt头
+		/// </summary>
+		NtHeader NtHeader { get; }
+
+		/// <summary>
+		/// 文件头
+		/// </summary>
+		FileHeader FileHeader { get; }
+
+		/// <summary>
+		/// 可选头
+		/// </summary>
+		OptionalHeader OptionalHeader { get; }
+
+		/// <summary>
+		/// 节头
+		/// </summary>
+		SectionHeader[] SectionHeaders { get; }
+
+		/// <summary>
+		/// 元数据
+		/// </summary>
+		/// <exception cref="InvalidOperationException">非.NET程序集时引发</exception>
+		IMetadata Metadata { get; }
+
+		/// <summary>
+		/// FOA => RVA
+		/// </summary>
+		/// <param name="foa">FOA</param>
+		/// <returns></returns>
+		RVA ToRVA(FOA foa);
+
+		/// <summary>
+		/// RVA => FOA
+		/// </summary>
+		/// <param name="rva">RVA</param>
+		/// <returns></returns>
+		FOA ToFOA(RVA rva);
+	}
+
+	/// <summary>
+	/// PE映像工厂类
+	/// </summary>
+	internal static unsafe class PEImageFactory {
+		/// <summary>
+		/// 创建 <see cref="IPEImage"/> 实例，使用文件布局
+		/// </summary>
+		/// <param name="filePath">PE映像文件路径</param>
+		/// <returns></returns>
+		public static IPEImage Create(string filePath) {
+			return Create(File.ReadAllBytes(filePath));
+		}
+
+		/// <summary>
+		/// 创建 <see cref="IPEImage"/> 实例，使用文件布局
+		/// </summary>
+		/// <param name="peImage">PE映像数据</param>
+		/// <returns></returns>
+		public static IPEImage Create(Stream peImage) {
+			return Create(ReadStreamAllBytes(peImage));
+		}
+
+		/// <summary>
+		/// 创建 <see cref="IPEImage"/> 实例，使用文件布局
+		/// </summary>
+		/// <param name="peImage">PE映像数据</param>
+		/// <returns></returns>
+		public static IPEImage Create(byte[] peImage) {
+			return new FilePEImage(peImage);
+		}
+
+		/// <summary>
+		/// 创建 <see cref="IPEImage"/> 实例，使用内存布局
+		/// </summary>
+		/// <param name="pPEImage">PE映像地址</param>
+		/// <returns></returns>
+		public static IPEImage Create(IntPtr pPEImage) {
+			return Create((void*)pPEImage);
+		}
+
+		/// <summary>
+		/// 创建 <see cref="IPEImage"/> 实例，使用内存布局
+		/// </summary>
+		/// <param name="pPEImage">PE映像地址</param>
+		/// <returns></returns>
+		public static IPEImage Create(void* pPEImage) {
+			return new MemoryPEImage(pPEImage);
+		}
+
+		private static byte[] ReadStreamAllBytes(Stream stream) {
+			if (stream is null)
+				throw new ArgumentNullException(nameof(stream));
+
+			int length;
+
+			try {
+				length = (int)stream.Length;
+			}
+			catch {
+				length = -1;
+			}
+			if (length == -1) {
+				byte[] buffer;
+				List<byte> byteList;
+				int count;
+
+				buffer = new byte[0x1000];
+				byteList = new List<byte>();
+				for (int i = 0; i < int.MaxValue; i++) {
+					count = stream.Read(buffer, 0, buffer.Length);
+					if (count == 0x1000)
+						byteList.AddRange(buffer);
+					else if (count == 0)
+						return byteList.ToArray();
+					else
+						for (int j = 0; j < count; j++)
+							byteList.Add(buffer[j]);
+				}
+				return byteList.ToArray();
+			}
+			else {
+				byte[] buffer;
+
+				buffer = new byte[length];
+				stream.Read(buffer, 0, length);
+				return buffer;
+			}
+		}
+	}
+
+	[DebuggerDisplay("FilePEImage:[P:{Utils.PointerToString(RawData)} L:{Length}]")]
+	internal sealed unsafe class FilePEImage : IPEImage {
+		private readonly void* _rawData;
+		private readonly uint _length;
+		private readonly bool _isDotNetImage;
+		private readonly DosHeader _dosHeader;
+		private readonly NtHeader _ntHeader;
+		private readonly SectionHeader[] _sectionHeaders;
+		private IMetadata _metadata;
+		private bool _isDisposed;
+
+		public IntPtr RawData => (IntPtr)_rawData;
+
+		public uint Length => _length;
+
+		public bool Is64Bit => _ntHeader.Is64Bit;
+
+		public bool IsDotNetImage => _isDotNetImage;
+
+		public PEImageLayout Layout => PEImageLayout.File;
+
+		public DosHeader DosHeader => _dosHeader;
+
+		public NtHeader NtHeader => _ntHeader;
+
+		public FileHeader FileHeader => _ntHeader.FileHeader;
+
+		public OptionalHeader OptionalHeader => _ntHeader.OptionalHeader;
+
+		public SectionHeader[] SectionHeaders => _sectionHeaders;
+
+		public IMetadata Metadata {
+			get {
+				if (!_isDotNetImage)
+					throw new InvalidOperationException();
+
+				if (_metadata is null)
+					_metadata = new Metadata(this);
+				return _metadata;
+			}
+		}
+
+		public FilePEImage(byte[] peImage) : this(PinByteArray(peImage), (uint)peImage.Length) {
+		}
+
+		internal FilePEImage(void* rawData, uint length) {
+			_rawData = rawData;
+			_length = length;
+			_dosHeader = new DosHeader(this);
+			_ntHeader = new NtHeader(this);
+			_sectionHeaders = new SectionHeader[_ntHeader.FileHeader.SectionCount];
+			for (uint i = 0; i < _sectionHeaders.Length; i++)
+				_sectionHeaders[i] = new SectionHeader(this, i);
+			_isDotNetImage = _ntHeader.OptionalHeader.DotNetDirectory->Address != 0;
+		}
+
+		private static void* PinByteArray(byte[] array) {
+			IntPtr pBuffer;
+
+			pBuffer = Marshal.AllocHGlobal(array.Length);
+			Marshal.Copy(array, 0, pBuffer, array.Length);
+			return (void*)pBuffer;
+		}
+
+		public RVA ToRVA(FOA foa) {
+			foreach (SectionHeader sectionHeader in _sectionHeaders)
+				if (foa >= sectionHeader.RawAddress && foa < sectionHeader.RawAddress + sectionHeader.RawSize)
+					return foa - sectionHeader.RawAddress + sectionHeader.VirtualAddress;
+			return (RVA)foa;
+		}
+
+		public FOA ToFOA(RVA rva) {
+			foreach (SectionHeader sectionHeader in _sectionHeaders)
+				if (rva >= sectionHeader.VirtualAddress && rva < sectionHeader.VirtualAddress + Math.Max(sectionHeader.VirtualSize, sectionHeader.RawSize))
+					return rva - sectionHeader.VirtualAddress + sectionHeader.RawAddress;
+			return (FOA)rva;
+		}
+
+		public void Dispose() {
+			if (_isDisposed)
+				return;
+
+			Marshal.FreeHGlobal((IntPtr)_rawData);
+			_isDisposed = true;
+		}
+	}
+
+	[DebuggerDisplay("MemoryPEImage:[P:{Utils.PointerToString(RawData)} L:{Length}]")]
+	internal sealed unsafe class MemoryPEImage : IPEImage {
+		private readonly void* _rawData;
+		private readonly uint _length;
+		private readonly bool _isDotNetImage;
+		private readonly DosHeader _dosHeader;
+		private readonly NtHeader _ntHeader;
+		private readonly SectionHeader[] _sectionHeaders;
+		private IMetadata _metadata;
+
+		public IntPtr RawData => (IntPtr)_rawData;
+
+		public uint Length => _length;
+
+		public bool Is64Bit => _ntHeader.Is64Bit;
+
+		public bool IsDotNetImage => _isDotNetImage;
+
+		public PEImageLayout Layout => PEImageLayout.Memory;
+
+		public DosHeader DosHeader => _dosHeader;
+
+		public NtHeader NtHeader => _ntHeader;
+
+		public FileHeader FileHeader => _ntHeader.FileHeader;
+
+		public OptionalHeader OptionalHeader => _ntHeader.OptionalHeader;
+
+		public SectionHeader[] SectionHeaders => _sectionHeaders;
+
+		public IMetadata Metadata {
+			get {
+				if (!_isDotNetImage)
+					throw new InvalidOperationException();
+
+				if (_metadata is null)
+					_metadata = new Metadata(this);
+				return _metadata;
+			}
+		}
+
+		internal MemoryPEImage(void* rawData) {
+			_rawData = null;
+			_length = 0;
+			_isDotNetImage = false;
+			_dosHeader = null;
+			_ntHeader = null;
+			_sectionHeaders = null;
+			throw new NotImplementedException();
+		}
+
+		public RVA ToRVA(FOA foa) {
+			return (RVA)foa;
+		}
+
+		public FOA ToFOA(RVA rva) {
+			return (FOA)rva;
+		}
+
+		public void Dispose() {
+			throw new NotImplementedException();
+		}
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Mdlib/PE/SectionHeader.cs
+================================================
+using System;
+using System.Diagnostics;
+using System.Text;
+using static Mdlib.NativeMethods;
+
+namespace Mdlib.PE {
+	/// <summary>
+	/// èŠ‚å¤´
+	/// </summary>
+	[DebuggerDisplay("SectHdr:[P:{Utils.PointerToString(RawData)} RVA:{RVA} FOA:{FOA} N:{DisplayName}]")]
+	internal sealed unsafe class SectionHeader : IRawData<IMAGE_SECTION_HEADER> {
+		private readonly void* _rawData;
+		private readonly uint _offset;
+		private string _displayName;
+
+		/// <summary />
+		public IntPtr RawData => (IntPtr)_rawData;
+
+		/// <summary />
+		public IMAGE_SECTION_HEADER* RawValue => (IMAGE_SECTION_HEADER*)_rawData;
+
+		/// <summary />
+		public RVA RVA => (RVA)_offset;
+
+		/// <summary />
+		public FOA FOA => (FOA)_offset;
+
+		/// <summary />
+		public uint Length => IMAGE_SECTION_HEADER.UnmanagedSize;
+
+		/// <summary />
+		public byte* Name => RawValue->Name;
+
+		/// <summary />
+		public uint VirtualSize {
+			get => RawValue->VirtualSize;
+			set => RawValue->VirtualSize = value;
+		}
+
+		/// <summary />
+		public RVA VirtualAddress {
+			get => (RVA)RawValue->VirtualAddress;
+			set => RawValue->VirtualAddress = (uint)value;
+		}
+
+		/// <summary />
+		public uint RawSize {
+			get => RawValue->SizeOfRawData;
+			set => RawValue->SizeOfRawData = value;
+		}
+
+		/// <summary />
+		public FOA RawAddress {
+			get => (FOA)RawValue->PointerToRawData;
+			set => RawValue->PointerToRawData = (uint)value;
+		}
+
+		/// <summary />
+		public uint Characteristics {
+			get => RawValue->Characteristics;
+			set => RawValue->Characteristics = value;
+		}
+
+		/// <summary />
+		public string DisplayName {
+			get {
+				if (_displayName is null)
+					RefreshCache();
+				return _displayName;
+			}
+		}
+
+		internal SectionHeader(IPEImage peImage, uint index) {
+			if (peImage is null)
+				throw new ArgumentNullException(nameof(peImage));
+
+			_offset = (uint)peImage.FileHeader.FOA + IMAGE_FILE_HEADER.UnmanagedSize + peImage.FileHeader.OptionalHeaderSize + index * IMAGE_SECTION_HEADER.UnmanagedSize;
+			_rawData = (byte*)peImage.RawData + _offset;
+		}
+
+		/// <summary>
+		/// åˆ·æ–°å†…éƒ¨å­—ç¬¦ä¸²ç¼“å­˜ï¼Œè¿™äº›ç¼“å­˜è¢«Display*å±žæ€§ä½¿ç”¨ã€‚è‹¥æ›´æ”¹äº†å­—ç¬¦ä¸²ç›¸å…³å†…å®¹ï¼Œè¯·è°ƒç”¨æ­¤æ–¹æ³•ã€‚
+		/// </summary>
+		public void RefreshCache() {
+			byte* pName;
+			StringBuilder builder;
+
+			pName = (byte*)_rawData;
+			builder = new StringBuilder(IMAGE_SIZEOF_SHORT_NAME);
+			for (ushort i = 0; i < IMAGE_SIZEOF_SHORT_NAME; i++) {
+				if (pName[i] == 0)
+					break;
+				builder.Append((char)pName[i]);
+			}
+			_displayName = builder.ToString();
+		}
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Mdlib/PE/Subsystem.cs
+================================================
+// reference dnlib\src\PE\Subsystem.cs
+
+namespace Mdlib.PE {
+	/// <summary>
+	/// IMAGE_OPTIONAL_HEADER.Subsystem
+	/// </summary>
+	internal enum Subsystem : ushort {
+		/// <summary>
+		/// Unknown subsystem.
+		/// </summary>
+		Unknown = 0,
+
+		/// <summary>
+		/// Image doesn't require a subsystem.
+		/// </summary>
+		Native = 1,
+
+		/// <summary>
+		/// Image runs in the Windows GUI subsystem.
+		/// </summary>
+		WindowsGui = 2,
+
+		/// <summary>
+		/// Image runs in the Windows character subsystem.
+		/// </summary>
+		WindowsCui = 3,
+
+		/// <summary>
+		/// Image runs in the OS/2 character subsystem.
+		/// </summary>
+		Os2Cui = 5,
+
+		/// <summary>
+		/// Image runs in the Posix character subsystem.
+		/// </summary>
+		PosixCui = 7,
+
+		/// <summary>
+		/// Image is a native Win9x driver.
+		/// </summary>
+		NativeWindows = 8,
+
+		/// <summary>
+		/// Image runs in the Windows CE subsystem.
+		/// </summary>
+		WindowsCeGui = 9,
+
+		/// <summary />
+		EfiApplication = 10,
+
+		/// <summary />
+		EfiBootServiceDriver = 11,
+
+		/// <summary />
+		EfiRuntimeDriver = 12,
+
+		/// <summary />
+		EfiRom = 13,
+
+		/// <summary />
+		Xbox = 14,
+
+		/// <summary />
+		WindowsBootApplication = 16
+	}
+}
+
+
+
+================================================
+File: AssemblyFixer/Properties/AssemblyInfo.cs
+================================================
+using System.Reflection;
+
+[assembly: AssemblyTitle("AssemblyFixer")]
+[assembly: AssemblyProduct("AssemblyFixer")]
+[assembly: AssemblyCopyright("Copyright Â© 2019 Wwh")]
+[assembly: AssemblyVersion("1.0.1.0")]
+[assembly: AssemblyFileVersion("1.0.1.0")]
+
+

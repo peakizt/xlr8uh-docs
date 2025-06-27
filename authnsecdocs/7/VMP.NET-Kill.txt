@@ -1,0 +1,1385 @@
+Directory structure:
+└── darkbullnull-vmp.net-kill/
+    ├── README.md
+    ├── VMPKiller.sln
+    └── VMPKiller/
+        ├── AntiTricks.cs
+        ├── App.config
+        ├── BypassVirtualMachine.cs
+        ├── Controller.cs
+        ├── FixCorruptMethods.cs
+        ├── PatchCRCMetadata.cs
+        ├── Program.cs
+        ├── RestoreMetadatas.cs
+        ├── VMPKiller.csproj
+        ├── packages.config
+        └── Properties/
+            └── AssemblyInfo.cs
+
+================================================
+File: README.md
+================================================
+# VMP.NET-Kill V2.1 (VMP 1213-1261)
+
+###### Guys, please read the README on github before you ask questions.
+- [x] Remove mutations. For using, need unpack vmp anti-tamper. Tools: https://yadi.sk/d/OXEqQ_3UfcVLag (thank you wwh1004! https://github.com/wwh1004) WARNING: NEED USE, WHEN ALL METHODBODY != NULL(delete this methods after successfull unpacking)
+- [x] Bypass anti virtual-machine (old build)
+- [x] Bypass anti-debugging
+- [x] Bypass CRC
+- [x] Import Protection (new)
+- [x] String Decrypting
+- [x] Unpacking. Tools: https://yadi.sk/d/DtpNdfpIOj_cZQ (thank you codecracker! https://github.com/CodeCrackerSND) or KSDumper - https://github.com/EquiFox/KsDumper
+
+
+
+Instructions:
+1) Use tools SMD, for unpacking vmp, or KSDumper
+2) use demutator from wwh
+3) use de4dot
+4) use vmp.net-killer
+
+https://yougame.biz/threads/166893/ - guide on RU lang
+
+### https://youtu.be/cMw0B6I5uL0 - video-guide UPDATE
+
+
+
+================================================
+File: VMPKiller.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30413.136
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VMPKiller", "VMPKiller\VMPKiller.csproj", "{A5C3C7C4-9B86-45AD-A0A7-A3D1EA9F7A57}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A5C3C7C4-9B86-45AD-A0A7-A3D1EA9F7A57}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5C3C7C4-9B86-45AD-A0A7-A3D1EA9F7A57}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5C3C7C4-9B86-45AD-A0A7-A3D1EA9F7A57}.Debug|x64.ActiveCfg = Debug|x64
+		{A5C3C7C4-9B86-45AD-A0A7-A3D1EA9F7A57}.Debug|x64.Build.0 = Debug|x64
+		{A5C3C7C4-9B86-45AD-A0A7-A3D1EA9F7A57}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5C3C7C4-9B86-45AD-A0A7-A3D1EA9F7A57}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5C3C7C4-9B86-45AD-A0A7-A3D1EA9F7A57}.Release|x64.ActiveCfg = Release|x64
+		{A5C3C7C4-9B86-45AD-A0A7-A3D1EA9F7A57}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A765F867-8B0E-4496-B877-D175872F68CA}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: VMPKiller/AntiTricks.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Runtime;
+using System.Threading.Tasks;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace VMPKiller
+{
+    class AntiTricks
+    {
+        public AntiTricks(ref ModuleDefMD moduleDef, string folderPathFile)
+        {
+            AntiDebug(ref moduleDef, folderPathFile);
+        }
+
+        void AntiDebug(ref ModuleDefMD moduleDef, string folderPathFile)
+        {
+            int skipFirstInvoke = 0;
+            foreach (var type in moduleDef.Types)
+            {
+                foreach (var method in type.Methods)
+                {
+                    if (method.Parameters.Count == 3 && method.Parameters[1].Type.TypeName == "MethodBase" && method.Parameters[2].Type.TypeName == "Boolean")
+                    {
+                        for (int i = 0; i < method.Body.Instructions.Count; i++)
+                        {
+                            if (method.Body.Instructions[i].Operand?.ToString().Contains("Invoke") ?? false)
+                            {
+                                if (skipFirstInvoke++ == 1)
+                                {
+                                    var indexInvoke = method.Body.Instructions.IndexOf(method.Body.Instructions[i]);
+                                    var lastInstruction = method.Body.Instructions[indexInvoke + 2]; // stub, will be reinitialized later
+
+                                    Local getLocal;
+
+                                    if (method.Body.Instructions[indexInvoke + 1].IsStloc())
+                                    {
+                                        if (method.Body.Instructions[indexInvoke + 1].OpCode == OpCodes.Stloc_0 )
+                                        {
+                                            getLocal = method.Body.Variables.Locals[0];
+                                        }
+                                        else if (method.Body.Instructions[indexInvoke + 1].OpCode == OpCodes.Stloc_1 )
+                                        {
+                                            getLocal = method.Body.Variables.Locals[1];
+                                        }
+                                        else if (method.Body.Instructions[indexInvoke + 1].OpCode == OpCodes.Stloc_2 )
+                                        {
+                                            getLocal = method.Body.Variables.Locals[2];
+                                        }
+                                        else if (method.Body.Instructions[indexInvoke + 1].OpCode == OpCodes.Stloc_3 )
+                                        {
+                                            getLocal = method.Body.Variables.Locals[3];
+                                        }
+                                        else
+                                        {
+                                            getLocal = method.Body.Instructions[indexInvoke + 1].GetLocal(null);
+                                        }
+                                        
+                                    }
+                                    else if (method.Body.Instructions[indexInvoke + 3].OpCode == OpCodes.Stloc_S)
+                                    {
+                                        getLocal = method.Body.Instructions[indexInvoke + 3].GetLocal(null);
+                                        indexInvoke += 2;
+                                    }
+                                    else
+                                    {
+                                        getLocal = method.Body.Instructions[indexInvoke + 5].GetLocal(null); // skip VMP-mutations
+                                        indexInvoke += 4;
+                                    }
+                                    
+                                    // ### CRC-Check ###
+                                    Console.WriteLine("CRC-check bypassing...");
+                                    int indexPreInvoke = indexInvoke;
+                                    Local getLocalObjectInvokeArgs;
+                                    dynamic opcodeLdlocS;
+                                    while (true)
+                                    {
+                                        if (method.Body.Instructions[indexPreInvoke].IsLdloc())
+                                        {
+                                            opcodeLdlocS = method.Body.Instructions[indexPreInvoke].Operand;
+                                            if (opcodeLdlocS.Type?.FullName == "System.Object[]")
+                                            {
+                                                getLocalObjectInvokeArgs = method.Body.Variables[opcodeLdlocS.Index];
+                                                break;
+                                            }
+                                        }
+                                        indexPreInvoke--;
+                                    }
+                                    while (true)
+                                    {
+                                        if (method.Body.Instructions[indexPreInvoke].IsLdarg())
+                                        {
+                                            method.Body.Instructions.Insert(indexPreInvoke + 1, Instruction.Create(OpCodes.Callvirt, moduleDef.Import(typeof(System.Reflection.MemberInfo).GetMethod("get_Name", new Type[] { }))));
+                                            method.Body.Instructions.Insert(indexPreInvoke + 2, Instruction.Create(OpCodes.Ldstr, "CreateFile"));
+                                            method.Body.Instructions.Insert(indexPreInvoke + 3, Instruction.Create(OpCodes.Call, moduleDef.Import(typeof(System.String).GetMethod("op_Equality", new Type[] { typeof(string), typeof(string) }))));
+                                            method.Body.Instructions.Insert(indexPreInvoke + 4, Instruction.Create(OpCodes.Brfalse_S, lastInstruction));
+                                            method.Body.Instructions.Insert(indexPreInvoke + 5, Instruction.Create(OpCodes.Ldloc_S, getLocalObjectInvokeArgs));
+                                            method.Body.Instructions.Insert(indexPreInvoke + 6, Instruction.Create(OpCodes.Ldc_I4_0));
+                                            method.Body.Instructions.Insert(indexPreInvoke + 7, Instruction.Create(OpCodes.Ldstr, folderPathFile));
+                                            method.Body.Instructions.Insert(indexPreInvoke + 8, Instruction.Create(OpCodes.Stelem_Ref));
+                                            method.Body.Instructions.Insert(indexPreInvoke + 9, Instruction.Create(OpCodes.Ldarg_1));
+                                            indexInvoke += 9;
+                                            break;
+                                        }
+                                        indexPreInvoke--;
+                                    }
+                                    
+                                    
+                                    Console.WriteLine("Anti-debug bypassing...");
+                                    // ### NtQueryInformationProcess ###
+                                    method.Body.Instructions.Insert(indexInvoke + 2, Instruction.Create(OpCodes.Ldarg_1));
+                                    method.Body.Instructions.Insert(indexInvoke + 3, Instruction.Create(OpCodes.Callvirt, moduleDef.Import(typeof(System.Reflection.MemberInfo).GetMethod("get_Name", new Type[] { }))));
+                                    method.Body.Instructions.Insert(indexInvoke + 4, Instruction.Create(OpCodes.Ldstr, "NtQueryInformationProcess"));
+                                    method.Body.Instructions.Insert(indexInvoke + 5, Instruction.Create(OpCodes.Call, moduleDef.Import(typeof(System.String).GetMethod("op_Equality", new Type[] { typeof(string), typeof(string) }))));
+                                    method.Body.Instructions.Insert(indexInvoke + 6, Instruction.Create(OpCodes.Brfalse_S, lastInstruction));
+                                    method.Body.Instructions.Insert(indexInvoke + 7, Instruction.Create(OpCodes.Ldc_I4_1));
+                                    method.Body.Instructions.Insert(indexInvoke + 8, Instruction.Create(OpCodes.Box, moduleDef.Import(typeof(System.Int32))));
+                                    method.Body.Instructions.Insert(indexInvoke + 9, Instruction.Create(OpCodes.Stloc_S, getLocal));
+
+                                    // ### is_Attached ###
+                                    method.Body.Instructions.Insert(indexInvoke + 10, Instruction.Create(OpCodes.Ldarg_1));
+                                    method.Body.Instructions.Insert(indexInvoke + 11, Instruction.Create(OpCodes.Callvirt, moduleDef.Import(typeof(System.Reflection.MemberInfo).GetMethod("get_Name", new Type[] { }))));
+                                    method.Body.Instructions.Insert(indexInvoke + 12, Instruction.Create(OpCodes.Ldstr, "get_IsAttached"));
+                                    method.Body.Instructions.Insert(indexInvoke + 13, Instruction.Create(OpCodes.Call, moduleDef.Import(typeof(System.String).GetMethod("op_Equality", new Type[] { typeof(string), typeof(string) }))));
+                                    method.Body.Instructions.Insert(indexInvoke + 14, Instruction.Create(OpCodes.Brfalse_S, lastInstruction));
+                                    method.Body.Instructions.Insert(indexInvoke + 15, Instruction.Create(OpCodes.Ldc_I4_0));
+                                    method.Body.Instructions.Insert(indexInvoke + 16, Instruction.Create(OpCodes.Box, moduleDef.Import(typeof(System.Boolean))));
+                                    method.Body.Instructions.Insert(indexInvoke + 17, Instruction.Create(OpCodes.Stloc_S, getLocal));
+
+                                    // ### IsLogging ###
+                                    method.Body.Instructions.Insert(indexInvoke + 18, Instruction.Create(OpCodes.Ldarg_1));
+                                    method.Body.Instructions.Insert(indexInvoke + 19, Instruction.Create(OpCodes.Callvirt, moduleDef.Import(typeof(System.Reflection.MemberInfo).GetMethod("get_Name", new Type[] { }))));
+                                    method.Body.Instructions.Insert(indexInvoke + 20, Instruction.Create(OpCodes.Ldstr, "IsLogging"));
+                                    method.Body.Instructions.Insert(indexInvoke + 21, Instruction.Create(OpCodes.Call, moduleDef.Import(typeof(System.String).GetMethod("op_Equality", new Type[] { typeof(string), typeof(string) }))));
+                                    method.Body.Instructions.Insert(indexInvoke + 22, Instruction.Create(OpCodes.Brfalse_S, lastInstruction));
+                                    method.Body.Instructions.Insert(indexInvoke + 23, Instruction.Create(OpCodes.Ldc_I4_0));
+                                    method.Body.Instructions.Insert(indexInvoke + 24, Instruction.Create(OpCodes.Box, moduleDef.Import(typeof(System.Boolean))));
+                                    method.Body.Instructions.Insert(indexInvoke + 25, Instruction.Create(OpCodes.Stloc_S, getLocal));
+                                    // ### IsDebuggerPresent ###
+                                    method.Body.Instructions.Insert(indexInvoke + 26, Instruction.Create(OpCodes.Ldarg_1));
+                                    method.Body.Instructions.Insert(indexInvoke + 27, Instruction.Create(OpCodes.Callvirt, moduleDef.Import(typeof(System.Reflection.MemberInfo).GetMethod("get_Name", new Type[] { }))));
+                                    method.Body.Instructions.Insert(indexInvoke + 28, Instruction.Create(OpCodes.Ldstr, "IsDebuggerPresent"));
+                                    method.Body.Instructions.Insert(indexInvoke + 29, Instruction.Create(OpCodes.Call, moduleDef.Import(typeof(System.String).GetMethod("op_Equality", new Type[] { typeof(string), typeof(string) }))));
+                                    method.Body.Instructions.Insert(indexInvoke + 30, Instruction.Create(OpCodes.Brfalse_S, lastInstruction));
+                                    method.Body.Instructions.Insert(indexInvoke + 31, Instruction.Create(OpCodes.Ldc_I4_0));
+                                    method.Body.Instructions.Insert(indexInvoke + 32, Instruction.Create(OpCodes.Box, moduleDef.Import(typeof(System.Boolean))));
+                                    method.Body.Instructions.Insert(indexInvoke + 33, Instruction.Create(OpCodes.Stloc_S, getLocal));
+
+                                    // ### CheckRemoteDebuggerPresent ###
+                                    method.Body.Instructions.Insert(indexInvoke + 34, Instruction.Create(OpCodes.Ldarg_1));
+                                    method.Body.Instructions.Insert(indexInvoke + 35, Instruction.Create(OpCodes.Callvirt, moduleDef.Import(typeof(System.Reflection.MemberInfo).GetMethod("get_Name", new Type[] { }))));
+                                    method.Body.Instructions.Insert(indexInvoke + 36, Instruction.Create(OpCodes.Ldstr, "CheckRemoteDebuggerPresent"));
+                                    method.Body.Instructions.Insert(indexInvoke + 37, Instruction.Create(OpCodes.Call, moduleDef.Import(typeof(System.String).GetMethod("op_Equality", new Type[] { typeof(string), typeof(string) }))));
+                                    method.Body.Instructions.Insert(indexInvoke + 38, Instruction.Create(OpCodes.Brfalse_S, lastInstruction));
+                                    method.Body.Instructions.Insert(indexInvoke + 39, Instruction.Create(OpCodes.Ldc_I4_0));
+                                    method.Body.Instructions.Insert(indexInvoke + 40, Instruction.Create(OpCodes.Box, moduleDef.Import(typeof(System.Boolean))));
+                                    method.Body.Instructions.Insert(indexInvoke + 41, Instruction.Create(OpCodes.Stloc_S, getLocal));
+
+
+                                    var invoke = (MemberRef)method.Body.Instructions[indexInvoke].Operand;
+                                    
+                                    method.Body.UpdateInstructionOffsets(); // update offsets
+
+                                    if (invoke.GetParamCount() == 5) // new version VMP (build 1261)
+                                    {
+                                        // lastInstruction = this pointer, when need jump
+                                        lastInstruction = method.Body.Instructions[indexInvoke - 6]; // On Ldarg.1
+                                        method.Body.Instructions[indexInvoke - 11] = Instruction.Create(OpCodes.Brfalse_S, lastInstruction); // create Instruction
+                                    }
+                                    else // old version VMP (build 1213)
+                                    {
+                                        // lastInstruction = this pointer, when need jump
+                                        lastInstruction = method.Body.Instructions[indexInvoke - 3]; // On Ldarg.1
+                                        method.Body.Instructions[indexInvoke - 8] = Instruction.Create(OpCodes.Brfalse_S, lastInstruction); // create Instruction
+                                    }
+                                    
+                                    lastInstruction = method.Body.Instructions[indexInvoke + 10];
+                                    method.Body.Instructions[indexInvoke + 6] = Instruction.Create(OpCodes.Brfalse_S, lastInstruction);
+
+                                    lastInstruction = method.Body.Instructions[indexInvoke + 18];
+                                    method.Body.Instructions[indexInvoke + 14] = Instruction.Create(OpCodes.Brfalse_S, lastInstruction);
+
+                                    lastInstruction = method.Body.Instructions[indexInvoke + 26];
+                                    method.Body.Instructions[indexInvoke + 22] = Instruction.Create(OpCodes.Brfalse_S, lastInstruction);
+
+                                    lastInstruction = method.Body.Instructions[indexInvoke + 34];
+                                    method.Body.Instructions[indexInvoke + 30] = Instruction.Create(OpCodes.Brfalse_S, lastInstruction);
+
+                                    lastInstruction = method.Body.Instructions[indexInvoke + 42];
+                                    method.Body.Instructions[indexInvoke + 38] = Instruction.Create(OpCodes.Brfalse_S, lastInstruction);
+
+
+                                    i += 20;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: VMPKiller/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.8" />
+    </startup>
+</configuration>
+
+
+================================================
+File: VMPKiller/BypassVirtualMachine.cs
+================================================
+ï»¿using System;
+using System.Reflection.Emit;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using dnlib.DotNet.MD;
+using dnlib.DotNet.Writer;
+using dnlib.PE;
+using Metadata = dnlib.DotNet.MD.Metadata;
+using MethodAttributes = System.Reflection.MethodAttributes;
+using OpCode = System.Reflection.Emit.OpCode;
+using OpCodes = dnlib.DotNet.Emit.OpCodes;
+
+namespace VMPKiller
+{
+    public class BypassVirtualMachine
+    {
+        public BypassVirtualMachine(ref ModuleDefMD moduleDef)
+        {
+            AntiVMInit(ref moduleDef);
+        }
+        private void AntiVMInit(ref ModuleDefMD moduleDefMD)
+        {
+            foreach (var type in moduleDefMD.Types)
+            {
+                // Bypass EnumSystemFirmwareTables()
+                if (type.Methods.Count == 1 || type.Fields.Count == 5)
+                {
+                    foreach (var method in type.Methods)
+                    {
+                        if (method.HasBody)
+                        {
+                            var countLdcI4_1 = 0;
+                            foreach (var instruction in method.Body.Instructions)
+                                // Bypass EnumSystemFirmwareTables()
+                                if (instruction.OpCode.Code == Code.Ldc_I4_1) // check signature (count Ldc_I4_1 == 13)
+                                {
+                                    countLdcI4_1++;
+                                }
+                                else if (instruction.IsLdcI4() && instruction.GetLdcI4Value() == 1)
+                                {
+                                    countLdcI4_1++;
+                                }
+
+                            if (countLdcI4_1 == 13)
+                            {
+                                Console.WriteLine("Bypass Anti-Virtual-Machine: \nBypassing(EnumSystemFirmwareTables)");
+                                // C:\Users\skorp\Desktop\vmpKill\clean.vmpAVM1.dem-cleaned.exe
+                                for (var indexInstructions = 0;
+                                    indexInstructions < method.Body.Instructions.Count - 2;
+                                    indexInstructions++)
+                                    method.Body.Instructions[indexInstructions] = Instruction.Create(OpCodes.Nop);
+
+                                method.Body.Instructions[method.Body.Instructions.Count - 2] =
+                                    Instruction.Create(OpCodes.Ldc_I4, 0);
+                            }
+                        }
+                    }
+                }
+                // Bypass CPUID 0x40000000 && 0x40000010
+                if (type.Fields.Count == 2 && type.Methods.Count == 2)
+                {
+                    foreach (var method in type.Methods)
+                    {
+                        if (method.HasBody)
+                        {
+                            for (int indexInstructions = 0; indexInstructions < method.Body.Instructions.Count; indexInstructions++)
+                            {
+                                if (method.Body.Instructions[indexInstructions].OpCode == OpCodes.Ldtoken && 
+                                    method.Body.Instructions[indexInstructions + 3].OpCode == OpCodes.Castclass && 
+                                    method.Body.Instructions[indexInstructions + 6].OpCode == OpCodes.Initobj)
+                                {
+                                    Console.WriteLine("Bypass CPUID 0x40000000 && 0x40000010");
+                                    method.Body.Instructions[0] = new Instruction(OpCodes.Ldc_I4_4);
+                                    method.Body.Instructions[1] = new Instruction(OpCodes.Newarr, moduleDefMD.Import(typeof(System.Int32)));
+                                    method.Body.Instructions[2] = new Instruction(OpCodes.Dup);
+                                    method.Body.Instructions[3] = new Instruction(OpCodes.Ldc_I4_0);
+                                    method.Body.Instructions[4] = new Instruction(OpCodes.Ldc_I4, 0x206A7);
+                                    method.Body.Instructions[5] = new Instruction(OpCodes.Stelem_I4);
+                                    method.Body.Instructions[6] = new Instruction(OpCodes.Dup);
+                                    method.Body.Instructions[7] = new Instruction(OpCodes.Ldc_I4_1);
+                                    method.Body.Instructions[8] = new Instruction(OpCodes.Ldc_I4, 0x3100800);
+                                    method.Body.Instructions[9] = new Instruction(OpCodes.Stelem_I4);
+                                    method.Body.Instructions[10] = new Instruction(OpCodes.Dup);
+                                    method.Body.Instructions[11] = new Instruction(OpCodes.Ldc_I4_2);
+                                    method.Body.Instructions[12] = new Instruction(OpCodes.Ldc_I4, 0x1F9AE3BF);
+                                    method.Body.Instructions[13] = new Instruction(OpCodes.Stelem_I4);
+                                    method.Body.Instructions[14] = new Instruction(OpCodes.Dup);
+                                    method.Body.Instructions[15] = new Instruction(OpCodes.Ldc_I4_3);
+                                    method.Body.Instructions[16] = new Instruction(OpCodes.Ldc_I4, -0x40140401);
+                                    method.Body.Instructions[17] = new Instruction(OpCodes.Stelem_I4);
+                                    method.Body.Instructions[18] = new Instruction(OpCodes.Ret);
+                                    for (int indexCleaningInstruction = 19; indexCleaningInstruction < method.Body.Instructions.Count;)
+                                    {
+                                        if (method.Body.Instructions[indexCleaningInstruction] != null)
+                                        {
+                                            method.Body.Instructions.RemoveAt(indexCleaningInstruction);
+                                        }
+                                    }
+
+                                    for (int exceptionIterator = method.Body.ExceptionHandlers.Count - 1;
+                                        exceptionIterator >= 0;
+                                        exceptionIterator--)
+                                    {
+                                       method.Body.ExceptionHandlers.RemoveAt(exceptionIterator);
+                                    }
+                                    method.Body.OptimizeBranches();
+                                    method.Body.UpdateInstructionOffsets();
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+        }
+    }
+}
+
+
+================================================
+File: VMPKiller/Controller.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using dnlib.DotNet;
+
+namespace VMPKiller
+{
+    public class Controller
+    {
+        public Controller(ref ModuleDefMD moduleDef, string pathFile, int userParams)
+        {
+            var imageProtectedVanillaFile = Path.GetDirectoryName(pathFile) + @"\vmp.exe";
+            if (userParams == 1)
+            {
+                var bypassVirtualMachine = new BypassVirtualMachine(ref moduleDef);
+            }
+            else if (userParams == 2)
+            {
+                var aTricks = new AntiTricks(ref moduleDef, imageProtectedVanillaFile);
+                var tryFixCorruptMethods = new FixCorruptMethods(ref moduleDef);
+            }
+            else if (userParams == 3)
+            {
+                var aTricks = new AntiTricks(ref moduleDef, imageProtectedVanillaFile);
+                var bypassVirtualMachine = new BypassVirtualMachine(ref moduleDef);
+                var tryFixCorruptMethods = new FixCorruptMethods(ref moduleDef);
+            }
+            else if (userParams == 4)
+            {
+                var tryShowRestoreMethods = new RestoreMetadatas(ref moduleDef, pathFile);
+                Console.WriteLine("Continue?");
+                Console.ReadKey();
+            }
+            
+        }
+    }
+}
+
+
+
+================================================
+File: VMPKiller/FixCorruptMethods.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace VMPKiller
+{
+    public class FixCorruptMethods
+    {
+        private ModuleDefMD moduleDef { get; }
+        public FixCorruptMethods(ref ModuleDefMD moduleDef)
+        {
+            this.moduleDef = moduleDef;
+            FixingMethods();
+        }
+        
+        void FixingMethods()
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            foreach (var type in moduleDef.Types)
+            {
+                var ctor = type.FindDefaultConstructor();
+                if (ctor != null)
+                {
+                    if (ctor.HasBody)
+                    {
+                        // fix CRC calculate
+                        if (ctor.Body.Instructions.Count == 50)
+                        {
+                            Console.WriteLine("Fix CRC calculate");
+                            type.Methods[1].Body.Instructions.Add(Instruction.Create(OpCodes.Nop));
+                            type.Methods[1].Body.Instructions.Add(Instruction.Create(OpCodes.Nop));
+                            type.Methods[1].Body.Instructions.Add(Instruction.Create(OpCodes.Nop));
+                            type.Methods[1].Body.Instructions.Add(Instruction.Create(OpCodes.Nop));
+                            type.Methods[1].Body.Instructions.Add(Instruction.Create(OpCodes.Nop));
+                            type.Methods[1].Body.Instructions[0] = Instruction.Create(OpCodes.Ldc_I4_0);
+                            type.Methods[1].Body.Instructions[1] = Instruction.Create(OpCodes.Stloc_0);
+                            type.Methods[1].Body.Instructions[2] = Instruction.Create(OpCodes.Ldc_I4_0);
+                            type.Methods[1].Body.Instructions[3] = Instruction.Create(OpCodes.Stloc_1);
+                            type.Methods[1].Body.Instructions[4] = Instruction.Create(OpCodes.Br, type.Methods[1].Body.Instructions[27]);
+                            type.Methods[1].Body.Instructions[5] = Instruction.Create(OpCodes.Ldsfld, type.Fields[0]);
+                            type.Methods[1].Body.Instructions[6] = Instruction.Create(OpCodes.Ldarga_S, type.Methods[1].Parameters[1]);
+                            type.Methods[1].Body.Instructions[7] = Instruction.Create(OpCodes.Call, moduleDef.Import(typeof(System.IntPtr).GetMethod("ToInt64", new Type[] { })));
+                            type.Methods[1].Body.Instructions[8] = Instruction.Create(OpCodes.Ldloc_1);
+                            type.Methods[1].Body.Instructions[9] = Instruction.Create(OpCodes.Conv_I8);
+                            type.Methods[1].Body.Instructions[10] = Instruction.Create(OpCodes.Add);
+                            type.Methods[1].Body.Instructions[11] = Instruction.Create(OpCodes.Newobj, moduleDef.Import(typeof(System.IntPtr).GetConstructor(BindingFlags.Instance | BindingFlags.Public, null, CallingConventions.Standard | CallingConventions.HasThis, new Type[] { typeof(Int64) }, new []{ new ParameterModifier(),  })));
+                            type.Methods[1].Body.Instructions[12] = Instruction.Create(OpCodes.Call, moduleDef.Import(typeof(System.Runtime.InteropServices.Marshal).GetMethod("ReadByte", new Type[] { typeof(IntPtr) }))); // IntPtr == native int
+                            type.Methods[1].Body.Instructions[13] = Instruction.Create(OpCodes.Ldloc_0);
+                            type.Methods[1].Body.Instructions[14] = Instruction.Create(OpCodes.Xor);
+                            type.Methods[1].Body.Instructions[15] = Instruction.Create(OpCodes.Ldc_I4, 0xFF);
+                            type.Methods[1].Body.Instructions[16] = Instruction.Create(OpCodes.And);
+                            type.Methods[1].Body.Instructions[17] = Instruction.Create(OpCodes.Ldelem_U4);
+                            type.Methods[1].Body.Instructions[18] = Instruction.Create(OpCodes.Ldloc_0);
+                            type.Methods[1].Body.Instructions[19] = Instruction.Create(OpCodes.Ldc_I4_8);
+                            type.Methods[1].Body.Instructions[20] = Instruction.Create(OpCodes.Shr_Un);
+                            type.Methods[1].Body.Instructions[21] = Instruction.Create(OpCodes.Xor);
+                            type.Methods[1].Body.Instructions[22] = Instruction.Create(OpCodes.Stloc_0);
+                            type.Methods[1].Body.Instructions[23] = Instruction.Create(OpCodes.Ldloc_1);
+                            type.Methods[1].Body.Instructions[24] = Instruction.Create(OpCodes.Ldc_I4_1);
+                            type.Methods[1].Body.Instructions[25] = Instruction.Create(OpCodes.Add);
+                            type.Methods[1].Body.Instructions[26] = Instruction.Create(OpCodes.Stloc_1);
+                            type.Methods[1].Body.Instructions[27] = Instruction.Create(OpCodes.Ldloc_1);
+                            type.Methods[1].Body.Instructions[28] = Instruction.Create(OpCodes.Conv_I8);
+                            type.Methods[1].Body.Instructions[29] = Instruction.Create(OpCodes.Ldarg_2);
+                            type.Methods[1].Body.Instructions[30] = Instruction.Create(OpCodes.Conv_U8);
+                            type.Methods[1].Body.Instructions[31] = Instruction.Create(OpCodes.Blt, type.Methods[1].Body.Instructions[5]);
+                            type.Methods[1].Body.Instructions[32] = Instruction.Create(OpCodes.Ldloc_0);
+                            type.Methods[1].Body.Instructions[33] = Instruction.Create(OpCodes.Not);
+                            type.Methods[1].Body.Instructions[34] = Instruction.Create(OpCodes.Ret);
+                            type.Methods[1].Body.UpdateInstructionOffsets();
+                            type.Methods[1].Body.Instructions[4] = Instruction.Create(OpCodes.Br, type.Methods[1].Body.Instructions[27]);
+                        }
+                    }
+                }
+
+                foreach (var method in type.Methods)
+                {
+                    if (method.Parameters.Count == 4)
+                    {
+                        if (method.Parameters[1].Type.ToString().Contains("System.IO.Stream") &&
+                            method.Parameters[2].Type.ToString().Contains("System.IO.Stream") &&
+                            method.Parameters[3].Type.ToString().Contains("System.Int64"))
+                        {
+                            Console.WriteLine("Method-decrypt nulling...");
+                            method.MethodBody = new CilBody(true, new List<Instruction>() { Instruction.Create(OpCodes.Ret)}, new List<ExceptionHandler>(), new List<Local>());
+                        }
+                    }
+                }
+                
+                foreach (var nestedType in type.NestedTypes)
+                {
+                    foreach (var method in nestedType.Methods)
+                    {
+                        if (method.Parameters.Count == 3)
+                        {
+                            if (method.HasBody)
+                            {
+                                if (method.Body.Instructions[0].OpCode == OpCodes.Ldarg_0 &&
+                                    method.Body.Instructions[1].OpCode == OpCodes.Ldfld &&
+                                    method.Body.Instructions[2].OpCode == OpCodes.Brfalse_S &&
+                                    method.Body.Instructions[3].OpCode == OpCodes.Ldarg_0 &&
+                                    method.Body.Instructions[4].OpCode == OpCodes.Ldfld &&
+                                    method.Body.Instructions[5].OpCode == OpCodes.Ldarg_2 &&
+                                    method.Body.Instructions[6].OpCode == OpCodes.Bne_Un_S &&
+                                    method.Body.Instructions[7].OpCode == OpCodes.Ldarg_0 &&
+                                    method.Body.Instructions[8].OpCode == OpCodes.Ldfld &&
+                                    method.Body.Instructions[9].OpCode == OpCodes.Ldarg_1 &&
+                                    method.Body.Instructions[10].OpCode == OpCodes.Bne_Un_S &&
+                                    method.Body.Instructions[11].OpCode == OpCodes.Ret)
+                                {
+                                    Console.WriteLine("The restoration of the integrity cycles");
+                                    while (method.Body.Instructions.Count != 56 - 1)
+                                    {
+                                        method.Body.Instructions.Add(Instruction.Create(OpCodes.Nop));
+                                    }
+                                    MethodDef methodDefForCall = null;
+                                    for (int i = 40; i < method.Body.Instructions.Count; i++)
+                                    {
+                                        if (method.Body.Instructions[i].OpCode == OpCodes.Call)
+                                        {
+                                            methodDefForCall = (MethodDef) method.Body.Instructions[i].Operand;
+                                        }
+                                    }
+                                    method.Body.Instructions[41] = Instruction.Create(OpCodes.Ldc_I4_0);
+                                    method.Body.Instructions[42] = Instruction.Create(OpCodes.Stloc_1);
+                                    method.Body.Instructions[43] = Instruction.Create(OpCodes.Br, method.Body.Instructions[53]); // need later update
+                                    method.Body.Instructions[44] = Instruction.Create(OpCodes.Ldarg_0);
+                                    method.Body.Instructions[45] = Instruction.Create(OpCodes.Ldfld, (IField)method.Body.Instructions[40].Operand);
+                                    method.Body.Instructions[46] = Instruction.Create(OpCodes.Ldloc_1);
+                                    method.Body.Instructions[47] = Instruction.Create(OpCodes.Ldelema, (TypeDef)method.Body.Instructions[39].Operand);
+                                    method.Body.Instructions[48] = Instruction.Create(OpCodes.Call, methodDefForCall);
+                                    method.Body.Instructions[49] = Instruction.Create(OpCodes.Ldloc_1);
+                                    method.Body.Instructions[50] = Instruction.Create(OpCodes.Ldc_I4_1);
+                                    method.Body.Instructions[51] = Instruction.Create(OpCodes.Add);
+                                    method.Body.Instructions[52] = Instruction.Create(OpCodes.Stloc_1);
+                                    method.Body.Instructions[53] = Instruction.Create(OpCodes.Ldloc_1);
+                                    method.Body.Instructions[54] = Instruction.Create(OpCodes.Ldloc_0);
+                            
+                                    method.Body.UpdateInstructionOffsets();
+                                    method.Body.Instructions[43] = Instruction.Create(OpCodes.Br, method.Body.Instructions[53]);
+                                    method.Body.Instructions.Add(Instruction.Create(OpCodes.Blt_Un, method.Body.Instructions[44]));
+                                    method.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+================================================
+File: VMPKiller/PatchCRCMetadata.cs
+================================================
+ï»¿using System;
+using System.IO;
+
+namespace VMPKiller
+{
+    public class PatchCRCMetadata
+    {
+        byte[] searchPatternFirst =
+        {
+            0x02, 0x00, 0x02, 0x00, 0x02, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x42
+        }; // The array to search, if first byte != ILOnly, then patch on ILOnly
+        byte[] searchPatternSecond =
+        {
+            0x02, 0x00, 0x02, 0x00, 0x06, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x42
+        };
+
+        private byte[] searchPatternThird =
+        {
+            0x48, 0x00, 0x00, 0x00, 0x02, 0x00, 0x05, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+            0x02
+        };
+
+        public PatchCRCMetadata(string pathFile)
+        {
+            byte[] bytesData = File.ReadAllBytes(pathFile);
+            var byteILOnlyPositionF = GetPositionAfterMatch(bytesData, searchPatternFirst);
+            var byteILOnlyPositionS = GetPositionAfterMatch(bytesData, searchPatternSecond);
+            var byteILOnlyPositionT = GetPositionAfterMatch(bytesData, searchPatternThird);
+            if (byteILOnlyPositionF != 0)
+            {
+                Console.WriteLine("Found 0x02 byte! Patch .NET byte ILOnly...");
+                bytesData[byteILOnlyPositionF] = 0x03;
+                File.Delete(pathFile);
+                File.WriteAllBytes(pathFile, bytesData);
+                Console.WriteLine("Complete!");
+            }
+            else if (byteILOnlyPositionS != 0)
+            {
+                Console.WriteLine("Found 0x06 byte! Patch .NET byte");
+                bytesData[byteILOnlyPositionS] = 0x03;
+                File.Delete(pathFile);
+                File.WriteAllBytes(pathFile, bytesData);
+                Console.WriteLine("Complete!");
+            }
+            else if(byteILOnlyPositionT != 0)
+            {
+                Console.WriteLine("Found 0x02 byte! Patch .NET byte");
+                bytesData[byteILOnlyPositionT + 16] = 0x03;
+                File.Delete(pathFile);
+                File.WriteAllBytes(pathFile, bytesData);
+                Console.WriteLine("Complete!");
+            }
+            else
+            {
+                Console.WriteLine("No pattern found, patching manually!");
+            }
+        }
+        
+        int GetPositionAfterMatch(byte[] data, byte[]pattern)
+        {
+            for (int i = 0; i < data.Length - pattern.Length; i++)
+            {
+                bool match = true;
+                for (int k = 0; k < pattern.Length; k++)
+                {
+                    if (pattern[k] == 0xFF)
+                    {
+                        continue; // 0xFF byte - skip (analogue ??)
+                    }
+                    if (data[i + k] != pattern[k])
+                    {
+                        match = false;
+                        break;
+                    }
+                }
+                if (match)
+                {
+                    return i;
+                }
+            }
+            return 0;
+        }
+    }
+}
+
+
+
+================================================
+File: VMPKiller/Program.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.IO.MemoryMappedFiles;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Timers;
+using dnlib.DotNet;
+using dnlib.DotNet.MD;
+using dnlib.DotNet.Writer;
+using dnlib.IO;
+using dnlib.PE;
+
+namespace VMPKiller
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.Title = "########################";
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("[build from 20.12.2020]\nVMP.NET Killer (dev: https://github.com/DarkBullNull/)");
+            Console.WriteLine("Please see the guide before using it");
+            Console.WriteLine("If there are any errors, please create an issue");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.Write("Enter path file (drag and drop): ");
+            var pathFile =  Console.ReadLine()?.Replace("\"", "");
+            
+            Console.WriteLine("Select options:\n" +
+                              "\t 1 - Bypass anti-VM (1213 build)\n" +
+                              "\t 2 - Bypass CRC and anti-debug\n" +
+                              "\t 3 - Bypass all\n" +
+                              "\t 4 - Method Call Hiding remove\n");
+            Int32.TryParse(Console.ReadLine(), out var userParams);
+            
+            Console.ForegroundColor = ConsoleColor.Blue;
+
+            ModuleDefMD moduleDef = ModuleDefMD.Load(pathFile);
+            Controller controller = new Controller(ref moduleDef, pathFile, userParams);
+            
+            var nativeModuleWriter = new dnlib.DotNet.Writer.NativeModuleWriterOptions(moduleDef, false);
+            nativeModuleWriter.Logger = DummyLogger.NoThrowInstance;
+            nativeModuleWriter.MetadataOptions.Flags = MetadataFlags.PreserveAll |
+                                                       MetadataFlags.KeepOldMaxStack |
+                                                       MetadataFlags.PreserveExtraSignatureData |
+                                                       MetadataFlags.PreserveBlobOffsets |
+                                                       MetadataFlags.PreserveUSOffsets |
+                                                       MetadataFlags.PreserveStringsOffsets;
+            nativeModuleWriter.Cor20HeaderOptions.Flags = ComImageFlags.ILOnly;
+            
+            Console.WriteLine("Saving...");
+            var newFilePath = pathFile.Substring(0, pathFile.Length - 4) + ".justify.exe";
+            moduleDef.NativeWrite(newFilePath, nativeModuleWriter);
+
+            var patchCrcMetadata = new PatchCRCMetadata(newFilePath);
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Done!");
+            Thread.Sleep(5000);
+        }
+        
+    }
+}
+
+
+
+================================================
+File: VMPKiller/RestoreMetadatas.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using System.Reflection.Emit;
+using System.Runtime.InteropServices;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using OpCode = System.Reflection.Emit.OpCode;
+using OpCodes = dnlib.DotNet.Emit.OpCodes;
+
+namespace VMPKiller
+{
+    public class RestoreMetadatas
+    {
+        private bool VMPVersionIsOld;
+        private MethodInfo methodInfo { get; }
+        private Assembly assembly { get; }
+        private ModuleDefMD moduleDef { get; }
+        public RestoreMetadatas(ref ModuleDefMD moduleDef, string pathFile)
+        {
+            this.moduleDef = moduleDef;
+            assembly = Assembly.LoadFile(pathFile);
+            methodInfo = assembly.EntryPoint;
+            DetectVersion(ref moduleDef);
+            if (VMPVersionIsOld) // if true - version VMP is old
+            {
+                RestoreDelegatesVariant(pathFile);
+            }
+            else
+            {
+                RestoreMethodsModuleVariant(pathFile);
+            }
+            DecryptStrings();
+            InlineCallMethods();
+
+
+        }
+        void DecryptStrings()
+        {
+            int counterStrings = 0;
+            foreach (var type in moduleDef.Types)
+            {
+                foreach (var method in type.Methods)
+                {
+                    if (method.Body == null) continue;
+                    for (int instructionIndex = 0; instructionIndex < method.Body.Instructions.Count; instructionIndex++)
+                    {
+                        
+                        if (method.Body.Instructions[instructionIndex].OpCode == OpCodes.Call && method.Body.Instructions[instructionIndex].Operand is MethodDef)
+                        {
+                            var callOperand = (MethodDef) method.Body.Instructions[instructionIndex].Operand;
+                            if (callOperand.ReturnType.TypeName == "String" && callOperand.IsStatic)
+                            {
+                                if (callOperand.Body.Instructions[0].OpCode == OpCodes.Newobj &&
+                                    callOperand.Body.Instructions[2].IsLdcI4() &&
+                                    callOperand.Body.Instructions[3].OpCode == OpCodes.Call &&
+                                    (callOperand.Body.Instructions[4].OpCode == OpCodes.Castclass && callOperand.Body.Instructions[4].Operand.ToString().Contains("System.String")) &&
+                                    callOperand.Body.Instructions[5].OpCode == OpCodes.Ret)
+                                {
+                                    counterStrings++;
+                                    method.Body.Instructions[instructionIndex].OpCode = OpCodes.Ldstr;
+                                    method.Body.Instructions[instructionIndex].Operand = InvokeDecryptMethod(
+                                        callOperand.Module.Name, callOperand.DeclaringType2.Name,
+                                        callOperand.Name.String);
+
+                                }
+                            }
+                        }
+                    }
+                    method.Body.UpdateInstructionOffsets();
+                }
+            }
+            Console.WriteLine($"Decrypted strings: {counterStrings}");
+        }
+        string InvokeDecryptMethod(string moduleName, string typeName, string methodName)
+        {
+            string decryptedString;
+            var module = methodInfo.Module.Assembly.GetModule(moduleName);
+            foreach (var type in module.GetTypes())
+            {
+                if (type.Name == typeName)
+                {
+                    foreach (var methodType in type.GetRuntimeMethods())
+                    {
+                        if (methodType.Name == methodName)
+                        {
+                            decryptedString = (string)methodType.Invoke(null, new object[] {  });
+                            return decryptedString;
+                        }
+                    }
+                }
+            }
+            return "NULL";
+        }
+        void RestoreDelegatesVariant(string pathFile)
+        {
+            int delegateNumber = 0;
+            string declaringTypeName = string.Empty;
+            string fieldName = string.Empty;
+
+            foreach (var type in moduleDef.Types)
+            {
+                if (type.HasMethods && type.IsDelegate)
+                {
+                    foreach (var method in type.Methods)
+                    {
+                        if (method.HasBody)
+                        {
+                            if (method.Body.HasInstructions)
+                            {
+                                if (method.Body.Instructions[0].OpCode == OpCodes.Ldsfld &&
+                                    method.Body.Instructions[1].OpCode.ToString().Contains("ldc"))
+                                {
+                                    delegateNumber = method.Body.Instructions[1].GetLdcI4Value();
+                                    dynamic ldsfldOperand = method.Body.Instructions[0]?.Operand;
+                                    if (ldsfldOperand is FieldDef)
+                                    {
+                                        declaringTypeName = ldsfldOperand.DeclaringType.Name;
+                                        fieldName = ldsfldOperand.Name;
+                                    }
+                                }
+                            }
+
+                            object[] delegatesArray = (object[]) assembly.ManifestModule.GetType(declaringTypeName)
+                                .GetField(fieldName).GetValue(null);
+                            var currentDelegate = (Delegate) delegatesArray[delegateNumber];
+
+                            var m_owner = currentDelegate.Method
+                                .GetType()
+                                .GetField("m_owner", BindingFlags.NonPublic | BindingFlags.Instance)
+                                ?.GetValue(currentDelegate.Method);
+                            if (m_owner != null)
+                            {
+                                var m_resolver = m_owner
+                                    .GetType()
+                                    .GetField("m_resolver", BindingFlags.NonPublic | BindingFlags.Instance)
+                                    ?.GetValue(m_owner);
+                                if (m_resolver != null)
+                                {
+                                    var m_scope = m_resolver.GetType()
+                                        .GetField("m_scope", BindingFlags.NonPublic | BindingFlags.Instance)
+                                        ?.GetValue(m_resolver);
+                                    List<object> m_tokens = (List<object>) m_scope.GetType()
+                                        .GetField("m_tokens", BindingFlags.NonPublic | BindingFlags.Instance)
+                                        .GetValue(m_scope);
+                                    if (m_tokens[m_tokens.Count - 1] is RuntimeMethodHandle)
+                                    {
+                                        RuntimeMethodHandle calledMethod = (RuntimeMethodHandle) m_tokens[m_tokens.Count - 1];
+                                        dynamic calledMethodMInfo = calledMethod.GetType()
+                                            .GetField("m_value", BindingFlags.NonPublic | BindingFlags.Instance)
+                                            ?.GetValue(calledMethod);
+                                        if (calledMethodMInfo != null)
+                                        {
+                                            try
+                                            {
+                                                string fullName = calledMethodMInfo.GetType()
+                                                    .GetProperty("FullName", BindingFlags.Instance | BindingFlags.NonPublic)
+                                                    .GetValue(calledMethodMInfo).ToString();
+                                                if (fullName.Contains(".ctor") && !fullName.Contains("System.Windows.Forms.Form..ctor"))
+                                                {
+                                                    method.Body.Instructions[method.Body.Instructions.Count - 2] =
+                                                        Instruction.Create(OpCodes.Newobj, moduleDef.Import(calledMethodMInfo));
+                                                    method.Body.Instructions[0] = Instruction.Create(OpCodes.Nop);
+                                                    method.Body.Instructions[1] = Instruction.Create(OpCodes.Nop);
+                                                    method.Body.Instructions[2] = Instruction.Create(OpCodes.Nop);
+                                                    method.Body.UpdateInstructionOffsets();
+                                                }
+                                                else
+                                                {
+                                                    method.Body.Instructions[method.Body.Instructions.Count - 2] =
+                                                        Instruction.Create(OpCodes.Call, moduleDef.Import(calledMethodMInfo));
+                                                    method.Body.Instructions[0] = Instruction.Create(OpCodes.Nop);
+                                                    method.Body.Instructions[1] = Instruction.Create(OpCodes.Nop);
+                                                    method.Body.Instructions[2] = Instruction.Create(OpCodes.Nop);
+                                                    method.Body.UpdateInstructionOffsets();
+                                                }
+                                            }
+                                            catch (Exception e)
+                                            {
+
+                                            }
+                                        }
+
+                                        // * - this runtime method
+                                        Console.WriteLine(delegateNumber + "*: " + calledMethodMInfo.GetType()
+                                            .GetProperty("FullName", BindingFlags.Instance | BindingFlags.NonPublic)
+                                            .GetValue(calledMethodMInfo));
+                                    }
+                                    else if (m_tokens[m_tokens.Count - 1] is RuntimeFieldHandle)
+                                    {
+                                        RuntimeFieldHandle calledField = (RuntimeFieldHandle) m_tokens[m_tokens.Count - 1];
+                                        dynamic calledFieldFInfo = calledField.GetType()
+                                            .GetField("m_ptr", BindingFlags.NonPublic | BindingFlags.Instance)
+                                            ?.GetValue(calledField);
+                                        if (calledFieldFInfo != null)
+                                        {
+                                            method.Body.Instructions[method.Body.Instructions.Count - 2] = 
+                                                Instruction.Create(OpCodes.Ldsfld, moduleDef.Import(calledFieldFInfo));
+                                            method.Body.Instructions[0] = Instruction.Create(OpCodes.Nop);
+                                            method.Body.Instructions[1] = Instruction.Create(OpCodes.Nop);
+                                            method.Body.Instructions[2] = Instruction.Create(OpCodes.Nop);
+                                            method.Body.UpdateInstructionOffsets();
+                                        }
+                                        // * - this runtime field
+                                        Console.WriteLine(delegateNumber + "*: " + calledFieldFInfo.GetType()
+                                            .GetProperty("FullName", BindingFlags.Instance | BindingFlags.NonPublic)
+                                            .GetValue(calledFieldFInfo));
+                                    }
+                                    else
+                                    {
+                                        Console.ForegroundColor = ConsoleColor.Cyan;
+                                        Console.WriteLine("UNKNOWN");
+                                        Console.ForegroundColor = ConsoleColor.Blue;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                method.Body.Instructions[0] = Instruction.Create(OpCodes.Nop);
+                                method.Body.Instructions[1] = Instruction.Create(OpCodes.Nop);
+                                method.Body.Instructions[2] = Instruction.Create(OpCodes.Nop);
+                                method.Body.Instructions[method.Body.Instructions.Count - 2] =
+                                    Instruction.Create(OpCodes.Call, moduleDef.Import(currentDelegate.Method));
+                                method.Body.UpdateInstructionOffsets();
+                                Console.WriteLine(delegateNumber + ": " + currentDelegate.Method);
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
+
+        void RestoreMethodsModuleVariant(string pathFile)
+        {
+            int delegateNumber = 0;
+            string declaringTypeName = string.Empty;
+            string fieldName = string.Empty;
+            
+            foreach (var method in moduleDef.Types[0].Methods)
+            {
+                if (method.HasBody)
+                {
+                    if (method.Body.HasInstructions)
+                    {
+                        if (method.Body.Instructions[0].OpCode == OpCodes.Ldsfld &&
+                            method.Body.Instructions[1].OpCode.ToString().Contains("ldc"))
+                        {
+                            delegateNumber = method.Body.Instructions[1].GetLdcI4Value();
+                            dynamic ldsfldOperand = method.Body.Instructions[0]?.Operand;
+                            if (ldsfldOperand is FieldDef)
+                            {
+                                declaringTypeName = ldsfldOperand.DeclaringType.Name;
+                                fieldName = ldsfldOperand.Name;
+
+                            }
+                            var delegatesArray = (object[]) assembly.ManifestModule.GetType(declaringTypeName)
+                                .GetField(fieldName).GetValue(null);
+                            var currentDelegate = (Delegate) delegatesArray[delegateNumber];
+
+                            var m_owner = currentDelegate.Method
+                                .GetType()
+                                .GetField("m_owner", BindingFlags.NonPublic | BindingFlags.Instance)
+                                ?.GetValue(currentDelegate.Method);
+                            if (m_owner != null)
+                            {
+                                var m_resolver = m_owner
+                                    .GetType()
+                                    .GetField("m_resolver", BindingFlags.NonPublic | BindingFlags.Instance)
+                                    ?.GetValue(m_owner);
+                                if (m_resolver != null)
+                                {
+                                    var m_scope = m_resolver.GetType()
+                                        .GetField("m_scope", BindingFlags.NonPublic | BindingFlags.Instance)
+                                        ?.GetValue(m_resolver);
+                                    List<object> m_tokens = (List<object>) m_scope.GetType()
+                                        .GetField("m_tokens", BindingFlags.NonPublic | BindingFlags.Instance)
+                                        .GetValue(m_scope);
+                                    if (m_tokens[m_tokens.Count - 1] is RuntimeMethodHandle)
+                                    {
+                                        RuntimeMethodHandle calledMethod = (RuntimeMethodHandle) m_tokens[m_tokens.Count - 1];
+                                        dynamic calledMethodMInfo = calledMethod.GetType()
+                                            .GetField("m_value", BindingFlags.NonPublic | BindingFlags.Instance)
+                                            ?.GetValue(calledMethod);
+                                        if (calledMethodMInfo != null)
+                                        {
+                                            try
+                                            {
+                                                string fullName = calledMethodMInfo.GetType()
+                                                    .GetProperty("FullName", BindingFlags.Instance | BindingFlags.NonPublic)
+                                                    .GetValue(calledMethodMInfo).ToString();
+                                                
+                                                if (fullName.Contains(".ctor") && !fullName.Contains("System.Windows.Forms.Form..ctor"))
+                                                {
+                                                    method.Body.Instructions[method.Body.Instructions.Count - 2] =
+                                                        Instruction.Create(OpCodes.Newobj, moduleDef.Import(calledMethodMInfo));
+                                                    method.Body.Instructions[0] = Instruction.Create(OpCodes.Nop);
+                                                    method.Body.Instructions[1] = Instruction.Create(OpCodes.Nop);
+                                                    method.Body.Instructions[2] = Instruction.Create(OpCodes.Nop);
+                                                    method.Body.UpdateInstructionOffsets();
+                                                }
+                                                else
+                                                {
+                                                    method.Body.Instructions[method.Body.Instructions.Count - 2] =
+                                                        Instruction.Create(OpCodes.Call, moduleDef.Import(calledMethodMInfo));
+                                                    method.Body.Instructions[0] = Instruction.Create(OpCodes.Nop);
+                                                    method.Body.Instructions[1] = Instruction.Create(OpCodes.Nop);
+                                                    method.Body.Instructions[2] = Instruction.Create(OpCodes.Nop);
+                                                    method.Body.UpdateInstructionOffsets();
+                                                }
+                                            }
+                                            catch (Exception e)
+                                            {
+
+                                            }
+                                        }
+
+                                        // * - this runtime method
+                                        Console.WriteLine(delegateNumber + "*: " + calledMethodMInfo.GetType()
+                                            .GetProperty("FullName", BindingFlags.Instance | BindingFlags.NonPublic)
+                                            .GetValue(calledMethodMInfo));
+                                    }
+                                    else if (m_tokens[m_tokens.Count - 1] is RuntimeFieldHandle)
+                                    {
+                                        RuntimeFieldHandle calledField = (RuntimeFieldHandle) m_tokens[m_tokens.Count - 1];
+                                        dynamic calledFieldFInfo = calledField.GetType()
+                                            .GetField("m_ptr", BindingFlags.NonPublic | BindingFlags.Instance)
+                                            ?.GetValue(calledField);
+                                        if (calledFieldFInfo != null)
+                                        {
+                                            method.Body.Instructions[method.Body.Instructions.Count - 2] = 
+                                                Instruction.Create(OpCodes.Ldsfld,
+                                                    moduleDef.Import(calledFieldFInfo));
+                                            method.Body.Instructions[0] = Instruction.Create(OpCodes.Nop);
+                                            method.Body.Instructions[1] = Instruction.Create(OpCodes.Nop);
+                                            method.Body.Instructions[2] = Instruction.Create(OpCodes.Nop);
+                                            method.Body.UpdateInstructionOffsets();
+                                        }
+                                        // * - this runtime field
+                                        Console.WriteLine(delegateNumber + "*: " + calledFieldFInfo.GetType()
+                                            .GetProperty("FullName", BindingFlags.Instance | BindingFlags.NonPublic)
+                                            .GetValue(calledFieldFInfo));
+                                    }
+                                    else
+                                    {
+                                        Console.ForegroundColor = ConsoleColor.Cyan;
+                                        Console.WriteLine("UNKNOWN");
+                                        Console.ForegroundColor = ConsoleColor.Blue;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                method.Body.Instructions[0] = Instruction.Create(OpCodes.Nop);
+                                method.Body.Instructions[1] = Instruction.Create(OpCodes.Nop);
+                                method.Body.Instructions[2] = Instruction.Create(OpCodes.Nop);
+                                method.Body.Instructions[method.Body.Instructions.Count - 2] =
+                                    Instruction.Create(OpCodes.Call, moduleDef.Import(currentDelegate.Method));
+                                method.Body.UpdateInstructionOffsets();
+                                Console.WriteLine(delegateNumber + ": " + currentDelegate.Method);
+                            }
+                            
+                        }
+                        
+                    }
+
+                    
+                }
+            }
+        }
+
+        void InlineCallMethods()
+        {
+            int counterRestoredMetadatas = 0;
+            foreach (var type in moduleDef.Types)
+            {
+                foreach (var method in type.Methods)
+                {
+                    if (method.HasBody)
+                    {
+                        for (int instructionIndex = 0; instructionIndex < method.Body.Instructions.Count; instructionIndex++)
+                        {
+                            if (method.Body.Instructions[instructionIndex].OpCode == OpCodes.Call)
+                            {
+                                if (method.Body.Instructions[instructionIndex].Operand is MethodDef operandCall)
+                                {
+                                    if (operandCall.HasBody)
+                                    {
+                                        if (operandCall.Body.Instructions[0].OpCode == OpCodes.Nop &&
+                                            operandCall.Body.Instructions[1].OpCode == OpCodes.Nop &&
+                                            operandCall.Body.Instructions[2].OpCode == OpCodes.Nop)
+                                        {
+                                            counterRestoredMetadatas++;
+                                            var methodCall =
+                                                operandCall.Body.Instructions[operandCall.Body.Instructions.Count - 2];
+                                            method.Body.Instructions[instructionIndex].OpCode = methodCall.OpCode;
+                                            method.Body.Instructions[instructionIndex].Operand = methodCall.Operand;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            Console.WriteLine($"Restored metadatas: {counterRestoredMetadatas}");
+            
+        }
+        
+
+        void DetectVersion(ref ModuleDefMD moduleDef)
+        {
+            foreach (var type in moduleDef.Types)
+            {
+                if (type.IsDelegate)
+                {
+                    if (type.Methods.Count == 2)
+                    {
+                        VMPVersionIsOld = false;
+                        return;
+                    }
+                    else
+                    {
+                        VMPVersionIsOld = true;
+                        return;
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: VMPKiller/VMPKiller.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{A5C3C7C4-9B86-45AD-A0A7-A3D1EA9F7A57}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>VMPKiller</RootNamespace>
+    <AssemblyName>VMPKiller</AssemblyName>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32bit>false</Prefer32bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib, Version=3.3.2.0, Culture=neutral, PublicKeyToken=50e96378b6e77999, processorArchitecture=MSIL">
+      <HintPath>..\packages\dnlib.3.3.2\lib\net45\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.ExtendedReflection, Version=16.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.ExtendedReflection.Reasoning, Version=16.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Reflection.Context" />
+    <Reference Include="System.Runtime.Caching" />
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.6.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="System.Runtime.DurableInstancing" />
+    <Reference Include="System.Runtime.Remoting" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Runtime.Serialization.Formatters.Soap" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AntiTricks.cs" />
+    <Compile Include="BypassVirtualMachine.cs" />
+    <Compile Include="Controller.cs" />
+    <Compile Include="FixCorruptMethods.cs" />
+    <Compile Include="PatchCRCMetadata.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RestoreMetadatas.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+
+================================================
+File: VMPKiller/packages.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<packages>
+  <package id="dnlib" version="3.3.2" targetFramework="net48" />
+</packages>
+
+
+================================================
+File: VMPKiller/Properties/AssemblyInfo.cs
+================================================
+﻿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// Общие сведения об этой сборке предоставляются следующим набором
+// набора атрибутов. Измените значения этих атрибутов для изменения сведений,
+// связанные с этой сборкой.
+[assembly: AssemblyTitle("VMPKiller")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("VMPKiller")]
+[assembly: AssemblyCopyright("Copyright ©  2020")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Установка значения False для параметра ComVisible делает типы в этой сборке невидимыми
+// для компонентов COM. Если необходимо обратиться к типу в этой сборке через
+// из модели COM задайте для атрибута ComVisible этого типа значение true.
+[assembly: ComVisible(false)]
+
+// Следующий GUID представляет идентификатор typelib, если этот проект доступен из модели COM
+[assembly: Guid("a5c3c7c4-9b86-45ad-a0a7-a3d1ea9f7a57")]
+
+// Сведения о версии сборки состоят из указанных ниже четырех значений:
+//
+//      Основной номер версии
+//      Дополнительный номер версии
+//      Номер сборки
+//      Номер редакции
+//
+// Можно задать все значения или принять номера сборки и редакции по умолчанию 
+// используя "*", как показано ниже:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+

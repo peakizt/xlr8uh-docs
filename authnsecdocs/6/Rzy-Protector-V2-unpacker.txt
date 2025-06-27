@@ -1,0 +1,1412 @@
+Directory structure:
+└── illuzion9999-rzy-protector-v2-unpacker/
+    ├── README.md
+    ├── LICENSE
+    ├── Rzy Protector V2 Unpacker.sln
+    └── Rzy Protector V2 Unpacker/
+        ├── App.config
+        ├── Logger.cs
+        ├── Program.cs
+        ├── Rzy Protector V2 Unpacker.csproj
+        ├── Utils.cs
+        ├── packages.config
+        ├── Properties/
+        │   └── AssemblyInfo.cs
+        └── Protections/
+            ├── CallToCalli.cs
+            ├── Constants.cs
+            ├── ConstantsMutate.cs
+            ├── DoubleParse.cs
+            ├── EmptyTypes.cs
+            ├── FakeObfuscator.cs
+            ├── HideMethods.cs
+            ├── LocalToField.cs
+            ├── RemoveNops.cs
+            ├── StringProtection.cs
+            └── Antis/
+                ├── AntiDe4dot.cs
+                ├── AntiDebug.cs
+                ├── AntiDnspy.cs
+                ├── AntiDump.cs
+                ├── AntiIlDasm.cs
+                └── AntiVm.cs
+
+================================================
+File: README.md
+================================================
+# Rzy-Protector-V2-unpacker
+An **unpacker** (deobfuscator) for the protector (obfuscator) *Rzy Protector V2*.
+## Features
+- Anti De4dot
+- Anti Debug
+- Anti DnSpy
+- Anti Dump
+- Anti ILDasm
+- Anti VM
+- Call to Calli
+- Constants Mutate
+- Constants
+- Double.Parse
+- Empty Types
+- Fake Obfuscators
+- Hide Methods
+- Local To Field
+- String Protection
+### Note
+Since I don't have the obfuscator (it's paid), I couldn't have tested all the protections but I am pretty sure that everything works well.
+If something goes wrong with one protection, simply create an issue.
+
+
+================================================
+File: LICENSE
+================================================
+MIT License
+
+Copyright (c) 2020 illuZion
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+
+================================================
+File: Rzy Protector V2 Unpacker.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29519.87
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rzy Protector V2 Unpacker", "Rzy Protector V2 Unpacker\Rzy Protector V2 Unpacker.csproj", "{89F3A7AC-BEE3-43AB-B4DD-662CA4459274}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{89F3A7AC-BEE3-43AB-B4DD-662CA4459274}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89F3A7AC-BEE3-43AB-B4DD-662CA4459274}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89F3A7AC-BEE3-43AB-B4DD-662CA4459274}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89F3A7AC-BEE3-43AB-B4DD-662CA4459274}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7A2ACD75-A870-4F28-9037-16B5B1BC70D1}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: Rzy Protector V2 Unpacker/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.8" />
+    </startup>
+</configuration>
+
+
+================================================
+File: Rzy Protector V2 Unpacker/Logger.cs
+================================================
+ï»¿using System;
+
+namespace Rzy_Protector_V2_Unpacker
+{
+    internal static class Logger
+    {
+        public enum Type
+        {
+            Info,
+            Debug,
+            Error,
+            Success
+        }
+
+        public static void Write(string message, Type type = Type.Info)
+        {
+            switch (type)
+            {
+                case Type.Info:
+                    Console.ForegroundColor = ConsoleColor.Gray;
+                    Console.WriteLine($"[INFO] {message}");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    break;
+
+                case Type.Debug:
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine($"[DEBUG] {message}");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    break;
+
+                case Type.Error:
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                    Console.WriteLine($"[ERROR] {message}");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    break;
+
+                case Type.Success:
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine($"[SUCCESS] {message}");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    break;
+                
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
+            }
+        }
+
+        public static void Leave()
+        {
+            Console.WriteLine();
+            Console.WriteLine("Press enter to leave...");
+            Console.ReadLine();
+            Environment.Exit(0);
+        }
+
+        public static void WriteTitle()
+        {
+            Console.ForegroundColor = ConsoleColor.DarkMagenta;
+            Console.WriteLine(@"                                __          __                  ___                            __          ");
+            Console.WriteLine(@"  _______ __ __  ___  _______  / /____ ____/ /____  ____  _  __|_  |  __ _____  ___  ___ _____/ /_____ ____");
+            Console.WriteLine(@" / __/_ // // / / _ \/ __/ _ \/ __/ -_) __/ __/ _ \/ __/ | |/ / __/  / // / _ \/ _ \/ _ `/ __/  '_/ -_) __/");
+            Console.WriteLine(@"/_/  /__/\_, / / .__/_/  \___/\__/\__/\__/\__/\___/_/    |___/____/  \_,_/_//_/ .__/\_,_/\__/_/\_\\__/_/   ");
+            Console.WriteLine(@"        /___/ /_/                                                            /_/                           ");
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+    }
+}
+
+
+
+================================================
+File: Rzy Protector V2 Unpacker/Program.cs
+================================================
+ï»¿using System;
+using dnlib.DotNet;
+using dnlib.DotNet.Writer;
+using static Rzy_Protector_V2_Unpacker.Logger;
+using Type = Rzy_Protector_V2_Unpacker.Logger.Type;
+using System.IO;
+using Rzy_Protector_V2_Unpacker.Protections;
+using Rzy_Protector_V2_Unpacker.Protections.Antis;
+
+namespace Rzy_Protector_V2_Unpacker
+{
+    class Program
+    {
+        private static ModuleDefMD Module { get; set; }
+
+        static void Main(string[] args)
+        {
+            #region Initialize
+
+            Console.Title = "Rzy Protector V2 Unpacker - by illuZion#9999";
+            WriteTitle();
+
+            if (args.Length != 1)
+            {
+                Write("Please, drag 'n' drop the file to unpack!", Type.Error);
+                Leave();
+            }
+
+            string directory = args[0];
+            try
+            {
+                Module = ModuleDefMD.Load(directory);
+            }
+            catch
+            {
+                Write("Not a .NET Assembly...", Type.Error);
+                Leave();
+            }
+
+            #endregion Initialize
+
+            #region Unpack
+
+            HideMethods.Execute(Module);
+            CallToCalli.Execute(Module);
+            EmptyTypes.Execute(Module);
+            Maths(Module);
+            LocalToField.Execute(Module);
+            Constants.Execute(Module);
+            Maths(Module);
+            StringProtection.Execute(Module);
+
+            FakeObfuscator.Execute(Module);
+            AntiIlDasm.Execute(Module);
+            AntiDe4dot.Execute(Module);
+            AntiDnspy.Execute(Module);
+            AntiVm.Execute(Module);
+            AntiDebug.Execute(Module);
+            AntiDump.Execute(Module);
+
+            RemoveNops.Execute(Module);
+
+            #endregion Unpack
+
+            #region Save the file
+
+            Write("Saving the unpacked file...");
+
+            string text = Path.GetDirectoryName(directory);
+            if (text == null)
+                Leave();
+            // We can disable the possible null exception as the Leave method closes the program (but Resharper does not detect it).
+            // ReSharper disable once PossibleNullReferenceException
+            text += !text.EndsWith("\\") ? "\\" : null;
+            string filename =
+                $"{text}{Path.GetFileNameWithoutExtension(directory)}-Unpacked{Path.GetExtension(directory)}";
+            
+            var writerOptions = new ModuleWriterOptions(Module);
+            writerOptions.MetadataOptions.Flags |= MetadataFlags.PreserveAll;
+            writerOptions.Logger = DummyLogger.NoThrowInstance;
+            
+            var nativewriterOptions = new NativeModuleWriterOptions(Module, true);
+            nativewriterOptions.MetadataOptions.Flags |= MetadataFlags.PreserveAll;
+            nativewriterOptions.Logger = DummyLogger.NoThrowInstance;
+            
+            if (Module.IsILOnly)
+                Module.Write(filename, writerOptions);
+            else
+                Module.NativeWrite(filename, nativewriterOptions);
+
+            Write($"File saved at: {filename}", Type.Success);
+            Leave();
+
+            #endregion Save the file
+        }
+
+        private static void Maths(ModuleDefMD module)
+        {
+            DoubleParse.Execute(module);
+            ConstantsMutate.Execute(module);
+        }
+    }
+}
+
+
+
+================================================
+File: Rzy Protector V2 Unpacker/Rzy Protector V2 Unpacker.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{89F3A7AC-BEE3-43AB-B4DD-662CA4459274}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Rzy_Protector_V2_Unpacker</RootNamespace>
+    <AssemblyName>Rzy Protector V2 Unpacker</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib, Version=3.3.1.0, Culture=neutral, PublicKeyToken=50e96378b6e77999, processorArchitecture=MSIL">
+      <HintPath>..\packages\dnlib.3.3.1\lib\net45\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Logger.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Protections\Antis\AntiDe4dot.cs" />
+    <Compile Include="Protections\Antis\AntiDebug.cs" />
+    <Compile Include="Protections\Antis\AntiDnspy.cs" />
+    <Compile Include="Protections\Antis\AntiDump.cs" />
+    <Compile Include="Protections\Antis\AntiIlDasm.cs" />
+    <Compile Include="Protections\Antis\AntiVm.cs" />
+    <Compile Include="Protections\CallToCalli.cs" />
+    <Compile Include="Protections\EmptyTypes.cs" />
+    <Compile Include="Protections\FakeObfuscator.cs" />
+    <Compile Include="Protections\RemoveNops.cs" />
+    <Compile Include="Protections\ConstantsMutate.cs" />
+    <Compile Include="Protections\HideMethods.cs" />
+    <Compile Include="Protections\Constants.cs" />
+    <Compile Include="Protections\LocalToField.cs" />
+    <Compile Include="Protections\DoubleParse.cs" />
+    <Compile Include="Protections\StringProtection.cs" />
+    <Compile Include="Utils.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: Rzy Protector V2 Unpacker/Utils.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace Rzy_Protector_V2_Unpacker
+{
+    internal static class Utils
+    {
+        public static int FindInstructionsNumber(this MethodDef method, OpCode opCode, object operand)
+        {
+            var num = 0;
+            foreach (Instruction instruction in method.Body.Instructions)
+            {
+                if (instruction.OpCode != opCode) continue;
+                switch (operand)
+                {
+                    case int currentInstrOperand:
+                    {
+                        int ldcI4Value = instruction.GetLdcI4Value();
+                        if (ldcI4Value == currentInstrOperand)
+                            num++;
+
+                        break;
+                    }
+                    case string _:
+                    {
+                        var text = instruction.Operand.ToString();
+                        if (text.Contains(operand.ToString()))
+                            num++;
+
+                        break;
+                    }
+                }
+            }
+            return num;
+        }
+    }
+}
+
+
+
+================================================
+File: Rzy Protector V2 Unpacker/packages.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<packages>
+  <package id="dnlib" version="3.3.1" targetFramework="net48" />
+</packages>
+
+
+================================================
+File: Rzy Protector V2 Unpacker/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// Les informations gÃ©nÃ©rales relatives Ã  un assembly dÃ©pendent de
+// l'ensemble d'attributs suivant. Changez les valeurs de ces attributs pour modifier les informations
+// associÃ©es Ã  un assembly.
+[assembly: AssemblyTitle("Rzy Protector V2 Unpacker")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("HP Inc.")]
+[assembly: AssemblyProduct("Rzy Protector V2 Unpacker")]
+[assembly: AssemblyCopyright("Copyright Â© HP Inc. 2020")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// L'affectation de la valeur false Ã  ComVisible rend les types invisibles dans cet assembly
+// aux composants COM. Si vous devez accÃ©der Ã  un type dans cet assembly Ã  partir de
+// COM, affectez la valeur true Ã  l'attribut ComVisible sur ce type.
+[assembly: ComVisible(false)]
+
+// Le GUID suivant est pour l'ID de la typelib si ce projet est exposÃ© Ã  COM
+[assembly: Guid("89f3a7ac-bee3-43ab-b4dd-662ca4459274")]
+
+// Les informations de version pour un assembly se composent des quatre valeurs suivantes :
+//
+//      Version principale
+//      Version secondaire
+//      NumÃ©ro de build
+//      RÃ©vision
+//
+// Vous pouvez spÃ©cifier toutes les valeurs ou indiquer les numÃ©ros de build et de rÃ©vision par dÃ©faut
+// en utilisant '*', comme indiquÃ© ci-dessousÂ :
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+
+================================================
+File: Rzy Protector V2 Unpacker/Protections/CallToCalli.cs
+================================================
+ï»¿using System.Collections.Generic;
+using System.Linq;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using static Rzy_Protector_V2_Unpacker.Logger;
+using Type = Rzy_Protector_V2_Unpacker.Logger.Type;
+
+namespace Rzy_Protector_V2_Unpacker.Protections
+{
+    internal static class CallToCalli
+    {
+        public static void Execute(ModuleDefMD module)
+        {
+            Write("Fixing the Call To Calli protection..");
+
+            RemoveNops.Execute(module);
+            var callsFixed = 0;
+            foreach (TypeDef type in module.GetTypes().Where(t => t.HasMethods))
+            {
+                foreach (MethodDef method in type.Methods.Where(m => m.HasBody && m.Body.HasInstructions))
+                {
+                    IList<Instruction> instr = method.Body.Instructions;
+                    for (var i = 0; i < instr.Count; i++)
+                    {
+                        if (instr[i].OpCode != OpCodes.Ldftn || instr[i + 1].OpCode != OpCodes.Calli) continue;
+                        
+                        instr[i + 1].OpCode = OpCodes.Nop;
+                        instr[i].OpCode = OpCodes.Call;
+
+                        callsFixed++;
+                        Write($"Fixed the call in method: {method.Name} at offset: {instr[i].Offset}", Type.Debug);
+                    }
+                }
+            }
+
+            Write(callsFixed == 0 ? "No Call To Calli found !" :
+                  callsFixed == 1 ? $"Fixed {callsFixed} call !" :
+                  callsFixed > 1 ? $"Fixed {callsFixed} calls !" : "", Type.Success);
+        }
+    }
+}
+
+
+
+================================================
+File: Rzy Protector V2 Unpacker/Protections/Constants.cs
+================================================
+ï»¿using System.Collections.Generic;
+using System.Linq;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using static Rzy_Protector_V2_Unpacker.Logger;
+using Type = Rzy_Protector_V2_Unpacker.Logger.Type;
+
+namespace Rzy_Protector_V2_Unpacker.Protections
+{
+    internal static class Constants
+    {
+        public static void Execute(ModuleDefMD module)
+        {
+            Write("Decrypting the constants...");
+
+            RemoveNops.Execute(module);
+            var decrypted = 0;
+            MethodDef decryptionMethod = null;
+            foreach (TypeDef type in module.GetTypes().Where(t => t.HasMethods))
+            {
+                foreach (MethodDef method in type.Methods.Where(m => m.HasBody && m.Body.HasInstructions))
+                {
+                    IList<Instruction> instr = method.Body.Instructions;
+                    for (var i = 0; i < instr.Count; i++)
+                    {
+                        if (instr[i].OpCode != OpCodes.Ldc_I4 || instr[i + 1].OpCode != OpCodes.Ldc_I4 ||
+                            instr[i + 2].OpCode != OpCodes.Call) continue;
+                        
+                        decryptionMethod = instr[i + 2].Operand as MethodDef;
+                        if (decryptionMethod == null) continue;
+                        if (decryptionMethod.DeclaringType != module.GlobalType) continue;
+                        
+                        int decodedInt = (int) instr[i].Operand ^ (int) instr[i + 1].Operand;
+                        instr[i].OpCode = OpCodes.Nop;
+                        instr[i + 1].OpCode = OpCodes.Nop;
+                        instr[i + 2] = Instruction.CreateLdcI4(decodedInt);
+
+                        decrypted++;
+                        Write($"Decrypted: {decodedInt.ToString()} in method: {method.Name} at offset: {instr[i + 2].Offset}", Type.Debug);
+                    }
+                }
+            }
+            if (decryptionMethod != null)
+            {
+                module.GlobalType.Remove(decryptionMethod);
+                Write("Removed the decryption method", Type.Success);
+            }
+
+            Write(decrypted == 0 ? "No constants protection found !" :
+                  decrypted == 1 ? $"Decrypted {decrypted} constant !" :
+                  decrypted > 1 ? $"Decrypted {decrypted} constants !" : "", Type.Success);
+        }
+    }
+}
+
+
+
+================================================
+File: Rzy Protector V2 Unpacker/Protections/ConstantsMutate.cs
+================================================
+ï»¿using System.Collections.Generic;
+using System.Linq;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using static Rzy_Protector_V2_Unpacker.Logger;
+using Type = Rzy_Protector_V2_Unpacker.Logger.Type;
+
+namespace Rzy_Protector_V2_Unpacker.Protections
+{
+    internal static class ConstantsMutate
+    {
+        public static void Execute(ModuleDefMD module)
+        {
+            Write("Removing the Constants Mutate...");
+
+            RemoveNops.Execute(module);
+            var removed = 0;
+            foreach (TypeDef type in module.Types.Where(t => t.HasMethods))
+            {
+                foreach (MethodDef method in type.Methods.Where(m => m.HasBody && m.Body.HasInstructions))
+                {
+                    IList<Instruction> instr = method.Body.Instructions;
+                    for (var i = 0; i < instr.Count; ++i)
+                    {
+                        if (instr[i].OpCode == OpCodes.Add && instr[i - 1].IsLdcI4() && instr[i - 2].IsLdcI4())
+                        {
+                            int num = instr[i - 2].GetLdcI4Value() + instr[i - 1].GetLdcI4Value();
+                            instr[i] = Instruction.CreateLdcI4(num);
+                            instr[i - 2].OpCode = OpCodes.Nop;
+                            instr[i - 1].OpCode = OpCodes.Nop;
+
+                            removed++;
+                            Write($"Removed a constant mutate [ADD] in method: {method.Name} at offset: {instr[i].Offset}", Type.Debug);
+                        }
+                        else if (instr[i].OpCode == OpCodes.Sub && instr[i - 1].IsLdcI4() && instr[i - 2].IsLdcI4())
+                        {
+                            int num = instr[i - 2].GetLdcI4Value() - instr[i - 1].GetLdcI4Value();
+                            instr[i] = Instruction.CreateLdcI4(num);
+                            instr[i - 2].OpCode = OpCodes.Nop;
+                            instr[i - 1].OpCode = OpCodes.Nop;
+
+                            removed++;
+
+                            Write($"Removed a constant mutate [SUB] in method: {method.Name} at offset: {instr[i].Offset}", Type.Debug);
+                        }
+                        else if (instr[i].OpCode == OpCodes.Mul && instr[i - 1].IsLdcI4() && instr[i - 2].IsLdcI4())
+                        {
+                            int num = instr[i - 2].GetLdcI4Value() * instr[i - 1].GetLdcI4Value();
+                            instr[i] = Instruction.CreateLdcI4(num);
+                            instr[i - 2].OpCode = OpCodes.Nop;
+                            instr[i - 1].OpCode = OpCodes.Nop;
+
+                            removed++;
+
+                            Write($"Removed a constant mutate [MUL] in method: {method.Name} at offset: {instr[i].Offset}", Type.Debug);
+                        }
+                        else if (instr[i].OpCode == OpCodes.Div && instr[i - 1].IsLdcI4() && instr[i - 2].IsLdcI4())
+                        {
+                            int num = instr[i - 2].GetLdcI4Value() / instr[i - 1].GetLdcI4Value();
+                            instr[i].OpCode = OpCodes.Ldc_I4;
+                            instr[i].Operand = num;
+                            instr[i - 2].OpCode = OpCodes.Nop;
+                            instr[i - 1].OpCode = OpCodes.Nop;
+
+                            removed++;
+
+                            Write($"Removed a constant mutate [DIV] in method: {method.Name} at offset: {instr[i].Offset}", Type.Debug);
+                        }
+                    }
+                }
+            }
+
+            Write(removed == 0 ? "No Constants Mutate found !" :
+                  removed == 1 ? $"Removed {removed} constant mutate" :
+                  removed > 1 ? $"Removed {removed} constants mutate !" : "", Type.Success);
+        }
+    }
+}
+
+
+
+================================================
+File: Rzy Protector V2 Unpacker/Protections/DoubleParse.cs
+================================================
+ï»¿using System.Collections.Generic;
+using System.Linq;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using static Rzy_Protector_V2_Unpacker.Logger;
+using Type = Rzy_Protector_V2_Unpacker.Logger.Type;
+
+namespace Rzy_Protector_V2_Unpacker.Protections
+{
+    internal static class DoubleParse
+    {
+        public static void Execute(ModuleDefMD module)
+        {
+            Write("Removing the Double.Parse..");
+
+            RemoveNops.Execute(module);
+            var mutationsFixed = 0;
+            foreach (TypeDef type in module.GetTypes().Where(t => t.HasMethods))
+            {
+                foreach (MethodDef method in type.Methods.Where(m => m.HasBody && m.Body.HasInstructions))
+                {
+                    IList<Instruction> instr = method.Body.Instructions;
+                    for (var i = 0; i < instr.Count; i++)
+                    {
+                        if (instr[i].OpCode != OpCodes.Ldstr || !instr[i].Operand.ToString().Contains(",") ||
+                            instr[i + 1].OpCode != OpCodes.Call ||
+                            !instr[i + 1].Operand.ToString().Contains("System.Double::Parse") ||
+                            instr[i + 2].OpCode != OpCodes.Conv_I4) continue;
+                        
+                        var result = (int)double.Parse(instr[i].Operand.ToString());
+
+                        instr[i] = Instruction.CreateLdcI4(result);
+                        instr[i + 1].OpCode = OpCodes.Nop;
+                        instr[i + 2].OpCode = OpCodes.Nop;
+
+                        mutationsFixed++;
+                        Write($"Removed a Double.Parse in method: {method.Name} at offset: {instr[i].Offset}", Type.Debug);
+                    }
+                }
+            }
+
+            Write(mutationsFixed == 0 ? "No Double.Parse found !" :
+                  mutationsFixed == 1 ? $"Fixed {mutationsFixed} Double.Parse !" :
+                  mutationsFixed > 1 ? $"Fixed {mutationsFixed} Double.Parse !" : "", Type.Success);
+        }
+    }
+}
+
+
+
+================================================
+File: Rzy Protector V2 Unpacker/Protections/EmptyTypes.cs
+================================================
+ï»¿using System.Collections.Generic;
+using System.Linq;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using static Rzy_Protector_V2_Unpacker.Logger;
+using Type = Rzy_Protector_V2_Unpacker.Logger.Type;
+
+namespace Rzy_Protector_V2_Unpacker.Protections
+{
+    internal static class EmptyTypes
+    {
+        public static void Execute(ModuleDefMD module)
+        {
+            Write("Fixing the Empty Types protection..");
+
+            RemoveNops.Execute(module);
+            var emptyTypesFixed = 0;
+            foreach (TypeDef type in module.GetTypes().Where(t => t.HasMethods))
+            {
+                foreach (MethodDef method in type.Methods.Where(m => m.HasBody && m.Body.HasInstructions))
+                {
+                    IList<Instruction> instr = method.Body.Instructions;
+                    for (var i = 1; i < instr.Count; i++)
+                    {
+                        if (instr[i].OpCode != OpCodes.Ldlen || instr[i - 1].OpCode != OpCodes.Ldsfld) continue;
+                        if (!(instr[i - 1].Operand is MemberRef memberRef) || memberRef.Name != "EmptyTypes") continue;
+                        
+                        instr[i - 1] = Instruction.Create(OpCodes.Nop);
+                        instr[i] = Instruction.Create(OpCodes.Ldc_I4_0);
+                        
+                        emptyTypesFixed++;
+                        Write($"Fixed the empty types in method: {method.Name} at offset: {instr[i].Offset}", Type.Debug);
+                    }
+                }
+            }
+
+            Write(emptyTypesFixed == 0 ? "No Empty Types found !" : $"Fixed {emptyTypesFixed} empty types protection !", Type.Success);
+        }
+    }
+}
+
+
+
+================================================
+File: Rzy Protector V2 Unpacker/Protections/FakeObfuscator.cs
+================================================
+ï»¿using System.Collections.Generic;
+using System.Linq;
+using dnlib.DotNet;
+using static Rzy_Protector_V2_Unpacker.Logger;
+using Type = Rzy_Protector_V2_Unpacker.Logger.Type;
+
+namespace Rzy_Protector_V2_Unpacker.Protections
+{
+    internal static class FakeObfuscator
+    {
+        private static readonly List<string> FakeObfuscators = new List<string>()
+        {
+            "DotNetPatcherObfuscatorAttribute",
+            "DotNetPatcherPackerAttribute",
+            "DotfuscatorAttribute",
+            "ObfuscatedByGoliath",
+            "dotNetProtector",
+            "PoweredByAttribute",
+            "AssemblyInfoAttribute",
+            "BabelAttribute",
+            "CryptoObfuscator.ProtectedWithCryptoObfuscatorAttribute",
+            "Xenocode.Client.Attributes.AssemblyAttributes.ProcessedByXenocode",
+            "NineRays.Obfuscator.Evaluation",
+            "YanoAttribute",
+            "SmartAssembly.Attributes.PoweredByAttribute",
+            "NetGuard",
+        };
+
+        public static void Execute(ModuleDefMD module)
+        {
+            Write("Removing the Fake Obfuscators...");
+
+            RemoveNops.Execute(module);
+            var removed = 0;
+            foreach (TypeDef type in module.Types.ToList().Where(t => FakeObfuscators.Contains(t.Name)))
+            {
+                module.Types.Remove(type);
+
+                removed++;
+                Write($"Removed the fake obfuscator type: {type.Name}", Type.Debug);
+            }
+
+            Write(removed == 0 ? "No Fake Obfscators found !" :
+                  removed == 1 ? $"Removed {removed} fake obfuscator type !" :
+                  removed > 1 ? $"Removed {removed} fake obfuscator types !" : "", Type.Success);
+        }
+    }
+}
+
+
+
+================================================
+File: Rzy Protector V2 Unpacker/Protections/HideMethods.cs
+================================================
+ï»¿using System.Collections.Generic;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using static Rzy_Protector_V2_Unpacker.Logger;
+using Type = Rzy_Protector_V2_Unpacker.Logger.Type;
+
+namespace Rzy_Protector_V2_Unpacker.Protections
+{
+    internal static class HideMethods
+    {
+        public static void Execute(ModuleDefMD module)
+        {
+            Write("Fixing the Hide Methods..");
+
+            RemoveNops.Execute(module);
+            var methodsFixed = 0;
+            if (module.EntryPoint.HasBody && module.EntryPoint.Body.HasInstructions)
+            {
+                IList<Instruction> instr = module.EntryPoint.Body.Instructions;
+                for (var i = 0; i < instr.Count; i++)
+                {
+                    if (!instr[0].IsLdcI4() || !instr[1].IsStloc() || !instr[2].IsBr() || !instr[3].IsLdloc() ||
+                        !instr[4].IsLdcI4() || instr[5].OpCode != OpCodes.Ceq || !instr[6].IsLdcI4() ||
+                        instr[7].OpCode != OpCodes.Ceq || !instr[8].IsStloc() || !instr[9].IsLdloc() ||
+                        !instr[10].IsBrtrue() || instr[11].OpCode != OpCodes.Ret || instr[12].OpCode != OpCodes.Calli ||
+                        instr[13].OpCode != OpCodes.Sizeof) continue;
+                    
+                    for (var j = 0; j < 4; j++)
+                        instr.RemoveAt(instr.Count - 1);
+
+                    for (var j = 0; j < 13; j++)
+                        instr.RemoveAt(0);
+
+                    methodsFixed++;
+                }
+            }
+
+            Write(methodsFixed == 1 ? "Fixed Hide Method !" : "No Hide Methods found !", Type.Success);
+        }
+    }
+}
+
+
+
+================================================
+File: Rzy Protector V2 Unpacker/Protections/LocalToField.cs
+================================================
+ï»¿using System.Collections.Generic;
+using System.Linq;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using static Rzy_Protector_V2_Unpacker.Logger;
+using Type = Rzy_Protector_V2_Unpacker.Logger.Type;
+
+namespace Rzy_Protector_V2_Unpacker.Protections
+{
+    internal static class LocalToField
+    {
+        private static readonly Dictionary<FieldDef, int> ProxyInt = new Dictionary<FieldDef, int>();
+        private static readonly Dictionary<FieldDef, string> ProxyString = new Dictionary<FieldDef, string>();
+        private static int LocalsFixed { get; set; }
+
+        public static void Execute(ModuleDefMD module)
+        {
+            Write("Fixing the local to field...");
+
+            RemoveNops.Execute(module);
+            LocalsFixed = 0;
+
+            try
+            {
+                GrabFieldValues(module);
+
+                if (ProxyInt != null)
+                    ReplaceProxyInt(module);
+                else
+                    Write("Could not find fields values ! Aborting...", Type.Error);
+            }
+            catch
+            {
+                // Ignored.
+            }
+
+            Write(LocalsFixed == 0 ? "No Local to Field found !" :
+                  LocalsFixed == 1 ? $"Fixed {LocalsFixed} local !" :
+                  LocalsFixed > 1 ? $"Fixed {LocalsFixed} locals !" : "", Type.Success);
+        }
+
+        private static void GrabFieldValues(ModuleDef module)
+        {
+            MethodDef globalTypeConstructor = module.GlobalType.FindStaticConstructor();
+
+            IList<Instruction> instr = globalTypeConstructor.Body.Instructions;
+
+            for (var i = 0; i < instr.Count; i++)
+            {
+                if (instr[i].IsLdcI4() && instr[i + 1].OpCode == OpCodes.Stsfld)
+                {
+                    int intValue = instr[i].GetLdcI4Value();
+                    var field = instr[i + 1].Operand as FieldDef;
+                    if (field == null) continue;
+
+                    ProxyInt.Add(field, intValue);
+                    Write($"Grabbed int Field: {field.Name} with value: {intValue} in method: {globalTypeConstructor.Name} at offset: {instr[i].Offset}", Type.Debug);
+                }
+
+                if (instr[i].OpCode != OpCodes.Ldstr || instr[i + 1].OpCode != OpCodes.Stsfld) continue;
+                {
+                    var stringValue = (string)instr[i].Operand;
+                    var field = instr[i + 1].Operand as FieldDef;
+                    if (field == null) continue;
+
+                    ProxyString.Add(field, stringValue);
+                    Write($"Grabbed string Field: {field.Name} with value: {stringValue} in method: {globalTypeConstructor.Name} at offset: {instr[i].Offset}", Type.Debug);
+                }
+            }
+        }
+
+        private static void ReplaceProxyInt(ModuleDef module)
+        {
+            foreach (TypeDef type in module.Types.Where(t => !t.IsGlobalModuleType && t.HasMethods))
+            {
+                foreach (MethodDef method in type.Methods.Where(m => m.HasBody && m.Body.HasInstructions))
+                {
+                    IList<Instruction> instr = method.Body.Instructions;
+
+                    foreach (Instruction instruction in instr)
+                    {
+                        if (instruction.OpCode != OpCodes.Ldsfld) continue;
+                        
+                        var field = instruction.Operand as FieldDef;
+                        if (field == null) continue;
+                        if (ProxyInt.TryGetValue(field, out int intValue))
+                        {
+                            instruction.OpCode = OpCodes.Ldc_I4;
+                            instruction.Operand = intValue;
+
+                            LocalsFixed++;
+                            Write($"Fixed int field: {field.Name} to: {intValue} in method: {method.Name} at offset: {instruction.Offset}", Type.Debug);
+                        }
+
+                        if (!ProxyString.TryGetValue(field, out string stringValue)) continue;
+                        
+                        instruction.OpCode = OpCodes.Ldstr;
+                        instruction.Operand = stringValue;
+
+                        LocalsFixed++;
+                        Write($"Fixed string field: {field.Name} to: {stringValue} in method: {method.Name} at offset: {instruction.Offset}", Type.Debug);
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: Rzy Protector V2 Unpacker/Protections/RemoveNops.cs
+================================================
+ï»¿using System.Collections.Generic;
+using System.Linq;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace Rzy_Protector_V2_Unpacker.Protections
+{
+    internal static class RemoveNops
+    {
+        public static void Execute(ModuleDefMD module)
+        {
+            foreach (TypeDef type in module.Types.Where(t => t.HasMethods))
+            {
+                foreach (MethodDef method in type.Methods.Where(m => m.HasBody && m.Body.HasInstructions))
+                {
+                    IList<Instruction> instr = method.Body.Instructions;
+                    for (var i = 0; i < instr.Count; i++)
+                    {
+                        if (instr[i].OpCode != OpCodes.Nop || IsNopBranchTarget(method, instr[i]) ||
+                            IsNopSwitchTarget(method, instr[i]) ||
+                            IsNopExceptionHandlerTarget(method, instr[i])) continue;
+                        
+                        instr.RemoveAt(i);
+                        i--;
+                    }
+                }
+            }
+        }
+
+        private static bool IsNopBranchTarget(MethodDef method, Instruction nopInstr)
+        {
+            return (from instr in method.Body.Instructions
+                where instr.OpCode.OperandType == OperandType.InlineBrTarget ||
+                      instr.OpCode.OperandType == OperandType.ShortInlineBrTarget && instr.Operand != null
+                select (Instruction) instr.Operand).Any(instruction2 => instruction2 == nopInstr);
+        }
+
+        private static bool IsNopSwitchTarget(MethodDef method, Instruction nopInstr)
+        {
+            return (from t in method.Body.Instructions
+                where t.OpCode.OperandType == OperandType.InlineSwitch && t.Operand != null
+                select (Instruction[]) t.Operand).Any(source => source.Contains(nopInstr));
+        }
+
+        private static bool IsNopExceptionHandlerTarget(MethodDef method, Instruction nopInstr)
+        {
+            if (!method.Body.HasExceptionHandlers) return false;
+            return method.Body.ExceptionHandlers.Any(exceptionHandler => exceptionHandler.FilterStart == nopInstr ||
+                                                                         exceptionHandler.HandlerEnd == nopInstr ||
+                                                                         exceptionHandler.HandlerStart == nopInstr ||
+                                                                         exceptionHandler.TryEnd == nopInstr ||
+                                                                         exceptionHandler.TryStart == nopInstr);
+        }
+    }
+}
+
+
+
+================================================
+File: Rzy Protector V2 Unpacker/Protections/StringProtection.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using static Rzy_Protector_V2_Unpacker.Logger;
+using Type = Rzy_Protector_V2_Unpacker.Logger.Type;
+
+namespace Rzy_Protector_V2_Unpacker.Protections
+{
+    internal static class StringProtection
+    {
+        public static void Execute(ModuleDefMD module)
+        {
+            Write("Decrypting the strings..");
+
+            RemoveNops.Execute(module);
+            var decrypted = 0;
+            foreach (TypeDef type in module.GetTypes().Where(t => t.HasMethods))
+            {
+                foreach (MethodDef method in type.Methods.Where(m => m.HasBody && m.Body.HasInstructions))
+                {
+                    IList<Instruction> instr = method.Body.Instructions;
+                    for (var i = 0; i < instr.Count; i++)
+                    {
+                        if (instr[i].OpCode != OpCodes.Call || !instr[i].Operand.ToString().Contains("get_UTF8") ||
+                            instr[i + 1].OpCode != OpCodes.Ldstr || instr[i + 2].OpCode != OpCodes.Call ||
+                            !instr[i + 2].Operand.ToString().Contains("FromBase64String") ||
+                            instr[i + 3].OpCode != OpCodes.Callvirt ||
+                            !instr[i + 3].Operand.ToString().Contains("GetString")) continue;
+                        
+                        string decryptedString = Encoding.UTF8.GetString(Convert.FromBase64String((string)instr[i + 1].Operand));
+
+                        instr[i].OpCode = OpCodes.Nop;
+                        instr[i + 1].OpCode = OpCodes.Nop;
+                        instr[i + 2].OpCode = OpCodes.Nop;
+                        instr[i + 3] = Instruction.Create(OpCodes.Ldstr, decryptedString);
+
+                        decrypted++;
+                        Write($"Decrypted: {decryptedString} in method: {method.Name} at offset: {instr[i + 3].Offset}", Type.Debug);
+
+                    }
+
+                }
+            }
+
+            Write(decrypted == 0 ? "No String Protection found !" :
+                  decrypted == 1 ? $"Decrypted {decrypted} string !" :
+                  decrypted > 1 ? $"Decrypted {decrypted} strings !" : "", Type.Success);
+        }
+    }
+}
+
+
+
+================================================
+File: Rzy Protector V2 Unpacker/Protections/Antis/AntiDe4dot.cs
+================================================
+ï»¿using System.Linq;
+using dnlib.DotNet;
+using static Rzy_Protector_V2_Unpacker.Logger;
+using Type = Rzy_Protector_V2_Unpacker.Logger.Type;
+
+namespace Rzy_Protector_V2_Unpacker.Protections.Antis
+{
+    internal static class AntiDe4dot
+    {
+        public static void Execute(ModuleDefMD module)
+        {
+
+            Write("Removing the Anti De4dot...");
+            
+            RemoveNops.Execute(module);
+            var removed = 0;
+            foreach (TypeDef type in module.Types.ToList().Where(t => t.HasInterfaces))
+            {
+                foreach (InterfaceImpl currentInterface in type.Interfaces)
+                {
+                    if (!currentInterface.Interface.Name.Contains(type.Name) &&
+                        !type.Name.Contains(currentInterface.Interface.Name)) continue;
+                    
+                    module.Types.Remove(type);
+
+                    removed++;
+                    Write($"Removed: {type.Name}", Type.Debug);
+                }
+            }
+
+            Write(removed == 0 ? "No Anti De4dot found !" :
+                  removed == 1 ? "Anti De4dot removed !" :
+                  removed > 1 ? $"Fixed {removed} anti de4dot methods !" : "", Type.Success);
+        }
+    }
+}
+
+
+
+================================================
+File: Rzy Protector V2 Unpacker/Protections/Antis/AntiDebug.cs
+================================================
+ï»¿using System.Linq;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using static Rzy_Protector_V2_Unpacker.Logger;
+using Type = Rzy_Protector_V2_Unpacker.Logger.Type;
+
+namespace Rzy_Protector_V2_Unpacker.Protections.Antis
+{
+    internal static class AntiDebug
+    {
+        public static void Execute(ModuleDefMD module)
+        {
+            Write("Removing the Anti Debug...");
+
+            RemoveNops.Execute(module);
+            var removed = 0;
+            foreach (Instruction instr in module.GlobalType.FindOrCreateStaticConstructor().Body.Instructions.Where(i => i.OpCode == OpCodes.Call))
+            {
+                if (instr.OpCode != OpCodes.Call || !(instr.Operand is MethodDef debuggerMethod) ||
+                    !debuggerMethod.DeclaringType.IsGlobalModuleType ||
+                    debuggerMethod.FindInstructionsNumber(OpCodes.Ldstr, "ENABLE_PROFILING") != 1 ||
+                    debuggerMethod.FindInstructionsNumber(OpCodes.Ldstr, "GetEnvironmentVariable") != 1 ||
+                    debuggerMethod.FindInstructionsNumber(OpCodes.Ldstr, "COR") != 1 ||
+                    debuggerMethod.FindInstructionsNumber(OpCodes.Call,
+                        "System.Environment::FailFast(System.String)") != 1) continue;
+                
+                instr.OpCode = OpCodes.Nop;
+                Write($"Removed an Anti Debug call at offset: {instr.Offset}", Type.Debug);
+
+                module.GlobalType.Remove(debuggerMethod);
+
+                removed++;
+
+                Write($"Removed an Anti Debug method: {debuggerMethod.Name}", Type.Debug);
+            }
+            foreach (MethodDef method in module.GlobalType.Methods.Where(m => m.HasBody))
+            {
+                if (method.FindInstructionsNumber(OpCodes.Ldc_I4, 500) != 1 ||
+                    method.FindInstructionsNumber(OpCodes.Ldc_I4, 1000) != 1 ||
+                    method.FindInstructionsNumber(OpCodes.Call, "System.Environment::FailFast(System.String)") <= 1 ||
+                    method.Attributes !=
+                    (MethodAttributes.Private | MethodAttributes.Static | MethodAttributes.HideBySig)) continue;
+                
+                module.GlobalType.Remove(method);
+
+                removed++;
+
+                Write($"Removed an Anti Debug method: {method.Name}", Type.Debug);
+            }
+
+            Write(removed == 0 ? "No Anti Debug found !" :
+                  removed == 1 ? "Removed Anti Debug !" :
+                  removed > 1 ? $"Removed {removed} Anti Debug methods !" : "", Type.Success);
+        }
+    }
+}
+
+
+
+================================================
+File: Rzy Protector V2 Unpacker/Protections/Antis/AntiDnspy.cs
+================================================
+ï»¿using System.Collections.Generic;
+using System.Linq;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using static Rzy_Protector_V2_Unpacker.Logger;
+using Type = Rzy_Protector_V2_Unpacker.Logger.Type;
+
+namespace Rzy_Protector_V2_Unpacker.Protections.Antis
+{
+    internal static class AntiDnspy
+    {
+        public static void Execute(ModuleDefMD module)
+        {
+            Write("Removing the Anti DnSpy...");
+
+            RemoveNops.Execute(module);
+            var removed = 0;
+            foreach (Instruction instruction in module.GlobalType.FindOrCreateStaticConstructor().Body.Instructions.Where(i => i.OpCode == OpCodes.Call))
+            {
+                var method = instruction.Operand as MethodDef;
+                if (method == null) continue;
+                IList<Instruction> instr = method.Body.Instructions;
+
+                if (instr.Count != 1 || instr[0].OpCode != OpCodes.Call ||
+                    !instr[0].Operand.ToString().Contains("::Read")) continue;
+                
+                var antiDnSpyMethod = instr[0].Operand as MethodDef;
+                if (antiDnSpyMethod == null) continue;
+                instr[0].OpCode = OpCodes.Nop;
+                instruction.OpCode = OpCodes.Nop;
+                Write($"Removed an Anti Dump call at offset: {instruction.Offset}", Type.Debug);
+
+                for (var i = 0; i < antiDnSpyMethod.Body.Instructions.Count; i++)
+                    antiDnSpyMethod.Body.Instructions.RemoveAt(i);
+
+                removed++;
+
+                Write($"Removed an Anti DnSpy method: {method.Name}", Type.Debug);
+            }
+
+            Write(removed == 0 ? "No Anti DnSpy found !" :
+                  removed == 1 ? "Removed Anti DnSpy !" :
+                  removed > 1 ? $"Removed {removed} Anti DnSpy methods !" : "", Type.Success);
+        }
+    }
+}
+
+
+
+================================================
+File: Rzy Protector V2 Unpacker/Protections/Antis/AntiDump.cs
+================================================
+ï»¿using System.Collections.Generic;
+using System.Linq;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using static Rzy_Protector_V2_Unpacker.Logger;
+using Type = Rzy_Protector_V2_Unpacker.Logger.Type;
+using static Rzy_Protector_V2_Unpacker.Utils;
+
+namespace Rzy_Protector_V2_Unpacker.Protections.Antis
+{
+    internal static class AntiDump
+    {
+        public static void Execute(ModuleDefMD module)
+        {
+            Write("Removing the Anti Dump...");
+
+            RemoveNops.Execute(module);
+            var removed = 0;
+            foreach (Instruction instruction in module.GlobalType.FindOrCreateStaticConstructor().Body.Instructions.Where(i => i.OpCode == OpCodes.Call))
+            {
+                var method = instruction.Operand as MethodDef;
+                if (method == null) continue;
+                IList<Instruction> instr = method.Body.Instructions;
+
+                if (instr.Count <= 140 || instr.Count >= 160 ||
+                    method.FindInstructionsNumber(OpCodes.Call,
+                        "native int [mscorlib]System.Runtime.InteropServices.Marshal::GetHINSTANCE(class [mscorlib]System.Reflection.Module)") !=
+                    1 || method.FindInstructionsNumber(OpCodes.Call,
+                        "::VirtualProtect(uint8*, int32, uint32, uint32&)") != 1) continue;
+                
+                instruction.OpCode = OpCodes.Nop;
+                Write($"Removed an Anti Dump call at offset: {instruction.Offset}", Type.Debug);
+
+                for (var i = 0; i < instr.Count; i++)
+                    instr.RemoveAt(0);
+
+                removed++;
+
+                Write($"Removed an Anti Dump method: {method.Name}", Type.Debug);
+            }
+
+            Write(removed == 0 ? "No Anti Dump found !" :
+                  removed == 1 ? "Removed Anti Dump !" :
+                  removed > 1 ? $"Removed {removed} Anti Dump methods !" : "", Type.Success);
+        }
+    }
+}
+
+
+
+================================================
+File: Rzy Protector V2 Unpacker/Protections/Antis/AntiIlDasm.cs
+================================================
+ï»¿using dnlib.DotNet;
+using static Rzy_Protector_V2_Unpacker.Logger;
+using Type = Rzy_Protector_V2_Unpacker.Logger.Type;
+
+namespace Rzy_Protector_V2_Unpacker.Protections.Antis
+{
+    internal static class AntiIlDasm
+    {
+        public static void Execute(ModuleDefMD module)
+        {
+            Write("Removing the Anti ILDasm...");
+
+            var removed = 0;
+            CustomAttribute antiIlDasmAttribute = module.CustomAttributes.Find(module.CorLibTypes.GetTypeRef("System.Runtime.CompilerServices", "SuppressIldasmAttribute"));
+            if (antiIlDasmAttribute != null)
+            {
+                module.CustomAttributes.Remove(antiIlDasmAttribute);
+                removed++;
+            }
+
+            Write(removed == 1 ? "Anti ILDasm removed !": "No Anti ILDasm found !", Type.Success);
+        }
+    }
+}
+
+
+
+================================================
+File: Rzy Protector V2 Unpacker/Protections/Antis/AntiVm.cs
+================================================
+ï»¿using System.Collections.Generic;
+using System.Linq;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using static Rzy_Protector_V2_Unpacker.Logger;
+using Type = Rzy_Protector_V2_Unpacker.Logger.Type;
+
+namespace Rzy_Protector_V2_Unpacker.Protections.Antis
+{
+    internal static class AntiVm
+    {
+        public static void Execute(ModuleDefMD module)
+        {
+            Write("Removing the Anti VM...");
+
+            RemoveNops.Execute(module);
+            var removed = 0;
+            foreach (Instruction instruction in module.GlobalType.FindOrCreateStaticConstructor().Body.Instructions.Where(i => i.OpCode == OpCodes.Call))
+            {
+                var method = instruction.Operand as MethodDef;
+                if (method == null) continue;
+                IList<Instruction> instr = method.Body.Instructions;
+
+                if (instr[0].OpCode != OpCodes.Call || !instr[1].IsStloc() || !instr[2].IsLdloc() ||
+                    !instr[3].IsBrfalse() || instr[4].OpCode != OpCodes.Ldstr ||
+                    instr[4].Operand.ToString() != "VirtualMachine detected. Exiting..." ||
+                    instr[5].OpCode != OpCodes.Ldstr || instr[5].Operand.ToString() != "Rzy Protector" ||
+                    !instr[6].IsLdcI4() || !instr[7].IsLdcI4() || (int) instr[7].Operand != 0x40 ||
+                    instr[8].OpCode != OpCodes.Call ||
+                    instr[8].Operand.ToString() !=
+                    "valuetype [System.Windows.Forms]System.Windows.Forms.DialogResult [System.Windows.Forms]System.Windows.Forms.MessageBox::Show(string, string, valuetype [System.Windows.Forms]System.Windows.Forms.MessageBoxButtons, valuetype [System.Windows.Forms]System.Windows.Forms.MessageBoxIcon)" ||
+                    instr[9].OpCode != OpCodes.Pop || instr[10].OpCode != OpCodes.Call ||
+                    instr[10].Operand.ToString() !=
+                    "class [System]System.Diagnostics.Process [System]System.Diagnostics.Process::GetCurrentProcess()" ||
+                    instr[11].OpCode != OpCodes.Callvirt ||
+                    instr[11].Operand.ToString() != "instance void [System]System.Diagnostics.Process::Kill()" ||
+                    instr[12].OpCode != OpCodes.Ret) continue;
+                
+                instruction.OpCode = OpCodes.Nop;
+                Write($"Removed an Anti VM call at offset: {instruction.Offset}", Type.Debug);
+
+                for (var i = 0; i < instr.Count; i++)
+                    instr.RemoveAt(i);
+
+                removed++;
+                Write($"Removed an Anti VM method: {method.Name}", Type.Debug);
+            }
+
+            Write(removed == 0 ? "No Anti VM found !" :
+                  removed == 1 ? "Removed Anti VM !" :
+                  removed > 1 ? $"Removed {removed} Anti VM methods !" : "", Type.Success);
+        }
+    }
+}
+
+

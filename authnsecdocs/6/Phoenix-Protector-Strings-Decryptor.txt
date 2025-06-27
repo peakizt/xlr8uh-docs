@@ -1,0 +1,288 @@
+Directory structure:
+└── illuzion9999-phoenix-protector-strings-decryptor/
+    ├── README.md
+    ├── LICENSE
+    ├── Phoenix Protector Strings Decryptor.sln
+    ├── global.json
+    └── Phoenix Protector Strings Decryptor/
+        ├── Phoenix Protector Strings Decryptor.csproj
+        ├── Program.cs
+        ├── StringsDecryptor.cs
+        └── Dependencies/
+
+================================================
+File: README.md
+================================================
+# Phoenix-Protector-Strings-Decryptor
+A strings decryptor for Phoenix Protector using the stack thanks to https://github.com/MindSystemm/StackYenoDeobfuscator.
+
+
+
+================================================
+File: LICENSE
+================================================
+MIT License
+
+Copyright (c) 2020 illuZion
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+
+================================================
+File: Phoenix Protector Strings Decryptor.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix Protector Strings Decryptor", "Phoenix Protector Strings Decryptor\Phoenix Protector Strings Decryptor.csproj", "{C72ED157-D445-4D9E-B969-D4CA570A9A7A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C72ED157-D445-4D9E-B969-D4CA570A9A7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C72ED157-D445-4D9E-B969-D4CA570A9A7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C72ED157-D445-4D9E-B969-D4CA570A9A7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C72ED157-D445-4D9E-B969-D4CA570A9A7A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: global.json
+================================================
+{
+  "sdk": {
+    "version": "3.1.300"
+  }
+}
+
+
+================================================
+File: Phoenix Protector Strings Decryptor/Phoenix Protector Strings Decryptor.csproj
+================================================
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <RootNamespace>Phoenix_Protector_Strings_Decryptor</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Reference Include="dnlib, Version=3.3.2.0, Culture=neutral, PublicKeyToken=50e96378b6e77999">
+        <HintPath>Dependencies\dnlib.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Colorful.Console" Version="1.2.10" />
+    </ItemGroup>
+
+</Project>
+
+
+
+================================================
+File: Phoenix Protector Strings Decryptor/Program.cs
+================================================
+ï»¿using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Net.Mime;
+using Colorful;
+using dnlib.DotNet;
+using dnlib.DotNet.Writer;
+using Console = Colorful.Console;
+
+namespace Phoenix_Protector_Strings_Decryptor
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.Title = "Phoenix Protector Strings Decryptor by illuZion";
+            Console.WriteAscii("Phoenix Protector", Color.Red);
+            Console.WriteAscii("Strings Decryptor", Color.Orange);
+            Console.WriteLine("v1.0 by illuZion ", Color.Blue);
+
+            var targetFilePath = string.Empty;
+            if (args.Length < 1)
+            {
+                while (targetFilePath == string.Empty || !File.Exists(targetFilePath))
+                {
+                    Console.Write("Path of the file: ");
+                    targetFilePath = Path.GetFullPath(Console.ReadLine().Replace("\"", string.Empty));
+                }
+            }
+            else
+                targetFilePath = Path.GetFullPath(args[0]);
+            
+            ModuleDefMD module = null;
+            try
+            {
+                module = ModuleDefMD.Load(targetFilePath);
+            }
+            catch (Exception ex)
+            {
+                throw new BadImageFormatException("Module couldn't have been loaded.", ex);
+            }
+            if (module == null)
+                throw new BadImageFormatException("Module couldn't have been loaded.");
+            
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            
+            int decryptedCount = StringsDecryptor.DecryptStrings(module);
+            
+            stopwatch.Stop();
+            Console.WriteLine($"\n[+] Decrypted {decryptedCount} strings ! Elapsed time: {stopwatch.Elapsed.TotalSeconds}", Color.Green);
+            Console.WriteLine("[$] Saving the file...", Color.Aqua);
+
+            string outputFilePath = $"{Path.GetDirectoryName(targetFilePath)}\\{Path.GetFileNameWithoutExtension(targetFilePath)}-decrypted{Path.GetExtension(targetFilePath)}";
+            ModuleWriterOptionsBase moduleWriterOptionsBase = module.IsILOnly
+                ? new ModuleWriterOptions(module)
+                : (ModuleWriterOptionsBase) new NativeModuleWriterOptions(module, true);
+            
+            moduleWriterOptionsBase.MetadataOptions.Flags |= MetadataFlags.PreserveAll;
+            // Prevents dnlib from throwing non-important errors.
+            moduleWriterOptionsBase.Logger = DummyLogger.NoThrowInstance;
+            moduleWriterOptionsBase.MetadataLogger = DummyLogger.NoThrowInstance;
+
+            // Saves the output (unpacked) module.
+            if (moduleWriterOptionsBase is NativeModuleWriterOptions nativeModuleWriterOptions)
+                module.NativeWrite(outputFilePath, nativeModuleWriterOptions);
+            else
+                module.Write(outputFilePath, moduleWriterOptionsBase as ModuleWriterOptions);
+            
+            Console.WriteLine($"[+] File saved at {outputFilePath}", Color.Green);
+            
+            Console.ReadKey();
+            Environment.Exit(0);
+        }
+    }
+}
+
+
+================================================
+File: Phoenix Protector Strings Decryptor/StringsDecryptor.cs
+================================================
+ï»¿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using Console = Colorful.Console;
+
+namespace Phoenix_Protector_Strings_Decryptor
+{
+    public static class StringsDecryptor
+    {
+        public static int DecryptStrings(ModuleDefMD module)
+        {
+            MethodDef decryptionMethod = FindDecryptionMethod(module);
+            if (decryptionMethod == null)
+                return 0;
+
+            var decryptedCount = 0;
+            var stack = new Stack();
+            foreach (TypeDef type in module.Types.Where(t => t.HasMethods))
+            {
+                foreach (MethodDef method in type.Methods.Where(m => m.HasBody && m.Body.HasInstructions))
+                {
+                    IList<Instruction> instr = method.Body.Instructions;
+                    for (var i = 0; i < instr.Count; i++)
+                    {
+                        if (instr[i].OpCode == OpCodes.Ldstr)
+                        {
+                            var encryptedString = new Tuple<string, int>((string) instr[i].Operand, i);
+                            stack.Push(encryptedString);
+                        }
+                        else if (instr[i].OpCode == OpCodes.Call && instr[i].Operand is MethodDef callMethod &&
+                                 callMethod == decryptionMethod)
+                        {
+                            (string encryptedString, int index) = (Tuple<string, int>) stack.Pop();
+                            string decryptedString = Decrypt(encryptedString);
+                            instr[index].OpCode = OpCodes.Nop;
+                            instr[i] = Instruction.Create(OpCodes.Ldstr, decryptedString);
+                            
+                            Console.WriteLine($"[$] Decrypted {decryptedString}", Color.Purple);
+                            decryptedCount++;
+                        }
+                    }
+                }
+            }
+
+            return decryptedCount;
+        }
+
+        private static MethodDef FindDecryptionMethod(ModuleDef module)
+        {
+            foreach (TypeDef type in module.Types.Where(t => t.HasMethods))
+            {
+                foreach (MethodDef method in type.Methods.Where(m => m.HasBody && m.Body.HasInstructions))
+                {
+                    if (!string.IsNullOrWhiteSpace(method.DeclaringType.Namespace) ||
+                        method.ReturnType != module.CorLibTypes.String || method.GetParamCount() != 1 ||
+                        method.Parameters[0].Type != module.CorLibTypes.String) continue;
+                    // Stores all the calls in a list to avoid loop.
+                    List<Instruction> callInstrs = method.Body.Instructions.Where(i => i.OpCode == OpCodes.Call || i.OpCode == OpCodes.Callvirt).ToList();
+                    List<Instruction> getLength = callInstrs.FindAll(o => o.Operand.ToString().Contains("get_Length") &&
+                                                                          o.Operand is MemberRef getLengthCall &&
+                                                                          getLengthCall.ReturnType == module.CorLibTypes.Int32 &&
+                                                                          !getLengthCall.HasParams());
+                    List<Instruction> getChars = callInstrs.FindAll(o => o.Operand.ToString().Contains("get_Chars") &&
+                                                                         o.Operand is MemberRef getCharsCall &&
+                                                                         getCharsCall.ReturnType == module.CorLibTypes.Char &&
+                                                                         getCharsCall.HasParams() &&
+                                                                         getCharsCall.GetParamCount() == 1 &&
+                                                                         getCharsCall.GetParams()[0].ToTypeDefOrRefSig() == module.CorLibTypes.Int32);
+                    List<Instruction> intern = callInstrs.FindAll(o => o.Operand.ToString().Contains("Intern") &&
+                                                                       o.Operand is MemberRef internCall &&
+                                                                       internCall.ReturnType == module.CorLibTypes.String &&
+                                                                       internCall.HasParams() &&
+                                                                       internCall.GetParamCount() == 1 &&
+                                                                       internCall.GetParams()[0].ToTypeDefOrRefSig() == module.CorLibTypes.String);
+                    // If instruction found, then we're almost sure it's the correct decryption method.
+                    if (getLength.Count != 1 || getChars.Count != 1 || intern.Count != 1) continue;
+                    
+                    return method;
+                }
+            }
+
+            return null;
+        }
+
+        private static string Decrypt(string encryptedString)
+        {
+            var array = new char[encryptedString.Length];
+            for (var i = 0; i < array.Length; i++)
+                array[i] = (char)((byte)(encryptedString[i] >> 8 ^ i) << 8 | (byte)(encryptedString[i] ^ encryptedString.Length - i));
+            return string.Intern(new string(array));
+        }
+    }
+}
+
+

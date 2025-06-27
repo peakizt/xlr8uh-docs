@@ -1,0 +1,1025 @@
+Directory structure:
+└── holly-hacker-eazfixer/
+    ├── README.md
+    ├── EazFixer.sln
+    ├── LICENSE
+    ├── appveyor.yml
+    ├── EazFixer/
+    │   ├── App.config
+    │   ├── EazContext.cs
+    │   ├── EazFixer.csproj
+    │   ├── Flags.cs
+    │   ├── Options.cs
+    │   ├── Program.cs
+    │   ├── StacktracePatcher.cs
+    │   ├── StringFixUtils.cs
+    │   ├── Utils.cs
+    │   └── Processors/
+    │       ├── AssemblyResolver.cs
+    │       ├── ProcessorBase.cs
+    │       ├── ResourceResolver.cs
+    │       └── StringFixer.cs
+    └── .github/
+        └── ISSUE_TEMPLATE/
+            ├── bug-report.md
+            └── other-issue.md
+
+================================================
+File: README.md
+================================================
+# EazFixer [![Build status](https://ci.appveyor.com/api/projects/status/5i5m8d7qv97ywgmc?svg=true)](https://ci.appveyor.com/project/HoLLy-HaCKeR/eazfixer)
+A deobfuscation tool for Eazfuscator.
+
+## Downloading
+You can download the latest master build at [AppVeyor](https://ci.appveyor.com/project/HoLLy-HaCKeR/eazfixer/build/artifacts). If there was no commit in the last 6 months, you will have to build it yourself. Please do not open issues asking for me to build it for you.
+
+## Description
+EazFixer is a deobfuscation tool for [Eazfuscator](https://www.gapotchenko.com/eazfuscator.net), a commercial .NET obfuscator. For a list of features, see the list below.
+
+### Implemented fixes:
+* String encryption
+* Resource encryption
+* Assembly embedding
+
+### Not implemented, may be added in the future:
+* Entrypoint obfuscation
+* Data virtualization
+
+### Out of scope:
+* Code virtualization (consider using [EazyDevirt](https://github.com/puff/EazyDevirt))
+* Symbol renaming (symbol names are either unrecoverable or encrypted. For symbol decryption in case of a known key, see [EazDecode](https://github.com/HoLLy-HaCKeR/EazDecode))
+* Automatic code optimization (not an anti-feature!)
+* Code control flow obfuscation (I didn't have any problems with my samples in dnSpy)
+* Assemblies merging (doesn't seem probable, especially with symbol renaming)
+* Control flow obfuscation (use de4dot)
+
+## Usage
+Call from the command line or drag and drop the file on and let it run or use the command line flag `--file`.
+
+If your assembly is protected with control-flow obfuscation, run it through [de4dot](https://github.com/0xd4d/de4dot) with the
+`--only-cflow-deob` flag first.
+
+* --file path
+* --keep-types
+* --virt-fix
+
+The flag `--file` is used for the input file.
+The flag `--keep-types` is similar to the de4dot flag, Keeps obfuscator types and assemblies.
+The flag `--virt-fix` keeps certain parts obfuscated to stay working with [virtualized](https://help.gapotchenko.com/eazfuscator.net/30/virtualization) assemblies.
+
+example: `EazFixer.exe --file test.exe --keep-types`
+
+## Building
+Clone the repository and use the latest version of Visual Studio (2019, at the time of writing).
+
+## Support
+EazFixer is (and will always be) targeted at the latest version of Eazfuscator. If your version is not supported, try a more universal 
+deobfuscator like [de4dot](https://github.com/0xd4d/de4dot). If your version is newer than what this tool supports, create an issue only 
+**after** verifying with the latest version of Eazfuscator.
+
+Also, I will not help you use this program. Consider it for advanced users only. If you do run into a problem and are sure it is a bug, 
+feel free to submit an issue but I cannot guarantee I will fix it.
+
+## Related projects
+- [EazDecode](https://github.com/HoLLy-HaCKeR/EazDecode), for decrypting encrypted symbol names in case of a known encryption key.
+- [eazdevirt](https://github.com/saneki/eazdevirt), a tool for devirtualizing older version of EazFuscator.
+- [eazdevirt fork](https://github.com/HoLLy-HaCKeR/eazdevirt), my abandoned fork of eazdevirt, may work slightly better on newer samples.
+
+## Credits
+This tool uses the following (open source) software:
+* [dnlib](https://github.com/0xd4d/dnlib) by [0xd4d](https://github.com/0xd4d), licensed under the MIT license, for reading/writing assemblies.
+* [Harmony](https://github.com/pardeike/Harmony) by [Andreas Pardeike](https://github.com/pardeike), licensed under the MIT license, for patching the stacktrace which allows for reflection invocation to be used.
+
+
+
+================================================
+File: EazFixer.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30011.22
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EazFixer", "EazFixer\EazFixer.csproj", "{4E87DFAB-1C03-4E8A-97D4-829593F61FDA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4E87DFAB-1C03-4E8A-97D4-829593F61FDA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E87DFAB-1C03-4E8A-97D4-829593F61FDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E87DFAB-1C03-4E8A-97D4-829593F61FDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E87DFAB-1C03-4E8A-97D4-829593F61FDA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AFDADE67-17BB-4C26-8B02-F26AD9C5E174}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: LICENSE
+================================================
+MIT License
+
+Copyright (c) 2017 HoLLy
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+
+================================================
+File: appveyor.yml
+================================================
+version: b{build}
+image: Visual Studio 2019
+configuration: Release
+platform: Any CPU
+before_build:
+- cmd: nuget restore
+build:
+  verbosity: minimal
+artifacts:
+- path: EazFixer\bin\Release\net472
+  name: net472
+  type: zip
+- path: EazFixer\bin\Release\netcoreapp3.1
+  name: netcoreapp31
+  type: zip
+
+
+================================================
+File: EazFixer/App.config
+================================================
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.6.2"/>
+    </startup>
+</configuration>
+
+
+
+================================================
+File: EazFixer/EazContext.cs
+================================================
+ï»¿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using dnlib.DotNet;
+using EazFixer.Processors;
+
+namespace EazFixer
+{
+    internal class EazContext : IEnumerable<ProcessorBase>
+    {
+        public ModuleDef Module;
+        public Assembly Assembly;
+        public ProcessorBase[] Processors;
+
+        public EazContext(string file, ProcessorBase[] procs)
+        {
+            if (!File.Exists(file)) throw new Exception($"Failed (File: {file} does not exist)");
+
+            Module = ModuleDefMD.Load(file);
+            Assembly = Assembly.LoadFile(file);
+            Processors = procs;
+        }
+
+        //allow enumerating Processors
+        public IEnumerator<ProcessorBase> GetEnumerator() => Processors.AsEnumerable().GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        //allow easily getting other processors by type
+        public T Get<T>() where T : ProcessorBase => (T)this[typeof(T)];
+        public ProcessorBase this[Type index] => Processors.Single(a => a.GetType() == index);
+    }
+}
+
+
+
+================================================
+File: EazFixer/EazFixer.csproj
+================================================
+ï»¿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <Copyright>Copyright Â© HoLLy</Copyright>
+    <TargetFrameworks>net472;netcoreapp3.1</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="CommandLineParser" Version="2.8.0" />
+    <PackageReference Include="dnlib" Version="3.3.2" />
+    <PackageReference Include="Lib.Harmony" Version="2.0.2" />
+  </ItemGroup>
+</Project>
+
+
+================================================
+File: EazFixer/Flags.cs
+================================================
+namespace EazFixer {
+    internal class Flags
+    {
+        public static string InFile;
+        public static string OutFile;
+
+        public static bool   KeepTypes;
+        public static bool   VirtFix;
+    }
+}
+
+
+
+================================================
+File: EazFixer/Options.cs
+================================================
+ï»¿using CommandLine;
+
+namespace EazFixer
+{
+    class Options
+    {
+        [Option("file",
+            Default = false,
+            Required = true)]
+        public string InFile { get; set; }
+
+        [Option("out")]
+        public string OutFile { get; set; }
+
+        [Option("keep-types")]
+        public bool KeepTypes { get; set; }
+
+        [Option("virt-fix")]
+        public bool VirtFix { get; set; }
+    }
+}
+
+
+
+================================================
+File: EazFixer/Program.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using CommandLine;
+using EazFixer.Processors;
+
+namespace EazFixer
+{
+    internal class Program
+    {
+        private static int Main(string[] args)
+        {
+            try
+            {
+                Parser.Default.ParseArguments<Options>(args)
+                    .WithParsed(handleOptions)
+                    .WithNotParsed(handleParsingError);
+
+                //order is important! AssemblyResolver has to be after StringFixer and ResourceResolver
+                var ctx = new EazContext(!string.IsNullOrEmpty(Flags.InFile) ? Flags.InFile : throw new Exception("Filepath not defined!"), 
+                    new ProcessorBase[] {new StringFixer(), new ResourceResolver(), new AssemblyResolver()});
+
+                Console.WriteLine("Executing memory patches...");
+                StacktracePatcher.Patch();
+
+                Console.WriteLine("Initializing modules...");
+                foreach (ProcessorBase proc in ctx)
+                    proc.Initialize(ctx);
+
+                Console.WriteLine("Processing...");
+                foreach (ProcessorBase proc in ctx.Where(a => a.Initialized))
+                    proc.Process();
+
+                Console.WriteLine("Cleanup...");
+                foreach (ProcessorBase proc in ctx.Where(a => a.Processed))
+                    proc.Cleanup();
+
+                //write success/failure
+                Console.WriteLine();
+                Console.WriteLine("Applied patches:");
+                var cc = Console.ForegroundColor;
+                foreach (ProcessorBase p in ctx)
+                {
+                    Console.Write(p.GetType().Name + ": ");
+
+                    if (p.CleanedUp)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine("Success");
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"Failed ({p.ErrorMessage})");
+                    }
+
+                    Console.ForegroundColor = cc;
+                }
+
+                Console.WriteLine();
+
+                Console.WriteLine("Writing new assembly...");
+                ctx.Module.Write(Flags.OutFile);
+
+#if DEBUG
+                return Exit("DONE", true);
+#else
+                return Exit("Done.");
+#endif
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.ReadKey();
+                return 0;
+            }
+        }
+
+        private static int Exit(string reason, bool askForInput = false)
+        {
+            Console.WriteLine(reason);
+            if (askForInput)
+            {
+                Console.Write("Press any key to exit... ");
+                Console.ReadKey();
+            }
+            return 0;
+        }
+
+        private static void handleOptions(Options args)
+        {
+            Flags.InFile = args.InFile;
+            Flags.KeepTypes = args.KeepTypes;
+            Flags.VirtFix = args.VirtFix;
+
+            if (args.OutFile != default)
+            {
+                Flags.OutFile = args.OutFile;
+                return;
+            }
+
+            // Determine the output path if not given
+            Flags.OutFile = Path.Combine(Path.GetDirectoryName(Flags.InFile) ?? "", 
+                Path.GetFileNameWithoutExtension(Flags.InFile) + "-eazfix" + Path.GetExtension(Flags.InFile));
+        }
+        private static void handleParsingError(IEnumerable<Error> obj)
+        {
+            throw new FormatException();
+        }
+    }
+}
+
+
+
+================================================
+File: EazFixer/StacktracePatcher.cs
+================================================
+ï»¿using System;
+using System.Diagnostics;
+using System.Reflection;
+using HarmonyLib;
+
+namespace EazFixer
+{
+    public static class StacktracePatcher
+    {
+        private const string HarmonyId = "holly.eazfixer.stacktrace";
+        private static Harmony _harmony;
+
+        public static void Patch()
+        {
+            _harmony = new Harmony(HarmonyId);
+            _harmony.PatchAll(Assembly.GetExecutingAssembly());
+        }
+
+        public static void UnPatch()
+        {
+            _harmony?.UnpatchAll(_harmony.Id);
+            _harmony = null;
+        }
+
+        [HarmonyPatch(typeof(StackFrame), "GetMethod")]
+        public class PatchStackTraceGetMethod
+        {
+            public static MethodInfo MethodToReplace;
+
+            public static void Postfix(ref MethodBase __result)
+            {
+                if (__result.DeclaringType == typeof(RuntimeMethodHandle))
+                {
+                    //just replace it with a method
+                    __result = MethodToReplace ?? MethodBase.GetCurrentMethod();
+                    Debug.WriteLine("[D] Patched stacktrace entry");
+                }
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: EazFixer/StringFixUtils.cs
+================================================
+ï»¿using System.Linq;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace EazFixer
+{
+    public static class StringFixUtils
+    {
+        public static MethodDef FindStringDecryptMethod(ModuleDef module)
+        {
+            return Utils.GetMethodsRecursive(module).SingleOrDefault(CanBeStringMethod);
+        }
+
+        private static bool CanBeStringMethod(MethodDef method)
+        {
+            //internal and static
+            if (!method.IsStatic || !method.IsAssembly)
+                return false;
+
+            //takes int, returns string
+            if (method.MethodSig.ToString() != "System.String (System.Int32)")
+                return false;
+
+            //actually a proper method, not abstract or from an interface
+            if (!method.HasBody || !method.Body.HasInstructions)
+                return false;
+
+            //calls the second resolve method (used if string isn't in cache)
+            if (!method.Body.Instructions.Any(a => a.OpCode.Code == Code.Call && a.Operand is MethodDef m
+                                                                              && m.MethodSig.ToString() == "System.String (System.Int32,System.Boolean)"))
+                return false;
+                
+            //is not private or public
+            if (method.IsPrivate || method.IsPublic)
+                return false;
+
+
+            return true;
+        }
+    }
+}
+
+
+================================================
+File: EazFixer/Utils.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using dnlib.DotNet;
+
+namespace EazFixer
+{
+    public static class Utils
+    {
+        public static IEnumerable<MethodDef> GetMethodsRecursive(ModuleDef t) => t.Types.SelectMany(GetMethodsRecursive);
+        public static IEnumerable<MethodDef> GetMethodsRecursive(TypeDef type)
+        {
+            //return all methods in this type
+            foreach (MethodDef m in type.Methods)
+                yield return m;
+
+            //go through nested types
+            foreach (TypeDef t in type.NestedTypes)
+            foreach (MethodDef m in GetMethodsRecursive(t))
+                yield return m;
+        }
+
+        public static MethodInfo FindMethod(Assembly ass, MethodDef meth, Type[] args)
+        {
+            var flags = BindingFlags.Default;
+            flags |= meth.IsPublic ? BindingFlags.Public : BindingFlags.NonPublic;
+            flags |= meth.IsStatic ? BindingFlags.Static : BindingFlags.Instance;
+
+            //BUG: this can fail
+            Type type = ass.GetType(meth.DeclaringType.ReflectionFullName);
+            return type?.GetMethod(meth.Name, flags, null, args, null);
+        }
+
+        public static bool LookForReferences(ModuleDef mod, MethodDef meth) //methoddef can be generalized
+        {
+            //Why LINQ you may ask? Because I can :)
+            return GetMethodsRecursive(mod)
+                .Where(m => m.HasBody && m.Body.HasInstructions)
+                .SelectMany(m => m.Body.Instructions)
+                .Any(i => i.Operand != null && i.Operand == meth);
+        }
+    }
+}
+
+
+
+================================================
+File: EazFixer/Processors/AssemblyResolver.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace EazFixer.Processors
+{
+    internal class AssemblyResolver : ProcessorBase
+    {
+        private TypeDef _assemblyResolver;
+        private MethodDef _moveNext;
+        private List<EmbeddedAssemblyInfo> _assemblies;
+        private MethodInfo _decrypter;
+        private MethodInfo _decompressor;
+
+        protected override void InitializeInternal()
+        {
+            //try to find the embedded assemblies string, which is located in 
+            //the iterator in the EnumerateEmbeddedAssemblies function
+            _assemblyResolver = Ctx.Module.Types.SingleOrDefault(CanBeAssemblyResolver)
+                                ?? throw new Exception("Could not find resolver type");
+            var extractionApi = _assemblyResolver.NestedTypes.SingleOrDefault(CanBeExtractionApi)
+                                ?? throw new Exception("Could not find assembly extraction helper");
+            var enumerable = extractionApi.NestedTypes.SingleOrDefault(CanBeEnumerable)
+                                ?? throw new Exception("Could not find EnumerateEmbeddedAssemblies iterator");
+            _moveNext = enumerable.Methods.SingleOrDefault(CanBeMoveNext)
+                                ?? throw new Exception("Could not find EnumerateEmbeddedAssemblies's MoveNext");
+
+            //find the decryption methods
+            var dec1 = _assemblyResolver.Methods.SingleOrDefault(CanBeDecryptionMethod1)
+                                ?? throw new Exception("Could not find decryption method");
+            _decrypter = Utils.FindMethod(Ctx.Assembly, dec1, new[] {typeof(byte[])}) 
+                ?? throw new Exception("Couldn't find decrypter through reflection");
+
+            var dec2 = _assemblyResolver.Methods.SingleOrDefault(CanBeDecompressionMethod);       //this one may be null
+            if (dec2 != null)
+                _decompressor = Utils.FindMethod(Ctx.Assembly, dec2, new[] {typeof(byte[])})
+                                 ?? throw new Exception("Couldn't find prefix remover through reflection");
+        }
+
+        protected override void ProcessInternal()
+        {
+            //get path to write to
+            var path = Path.GetDirectoryName(Ctx.Assembly.Location);
+
+            //get assemblies
+            //this happens here because we need string to be decrypted
+            if (!Ctx.Get<StringFixer>().Processed) throw new Exception("StringFixer is required!");
+            var str = _moveNext.Body.Instructions.SingleOrDefault(a => a.OpCode.Code == Code.Ldstr)?.Operand as string
+                      ?? throw new Exception("Could not find assembly list");
+            _assemblies = EnumerateEmbeddedAssemblies(str).Where(a => !a.Fullname.StartsWith("#A,A,")).ToList();    //TODO: investigate prefix
+
+            //get the resource resolver and figure out which assemblies we shouldn't extract
+            var res = Ctx.Get<ResourceResolver>();
+            IEnumerable<EmbeddedAssemblyInfo> asmEnumerator = res.Initialized
+                ? _assemblies.Where(a => res.ResourceAssemblies.All(b => !string.Equals(b.GetName().Name, new AssemblyName(a.Fullname).Name, StringComparison.CurrentCultureIgnoreCase)))
+                : _assemblies;
+
+            foreach (var assembly in asmEnumerator)
+            {
+                //get the resource containing the assembly
+                string resName = assembly.ResourceName;
+                var stream = Ctx.Assembly.GetManifestResourceStream(resName);    //not sure if reflection is the best way
+                byte[] buffer = new byte[stream.Length];
+                stream.Read(buffer, 0, (int)stream.Length);
+
+                //if the assembly is encrypted: decrypt it
+                if (assembly.Encrypted) {
+                    _decrypter.Invoke(null, new object[] {buffer});
+                }
+                //if the assembly is prefixed: remove it
+                if (assembly.Compressed) {
+                    if (_decompressor == null) throw new Exception("Assembly is compressed, but couldn't find decompressor method");
+                    _decompressor.Invoke(null, new object[] {buffer});
+                }
+
+                File.WriteAllBytes(Path.Combine(path, assembly.Filename), buffer);
+            }
+        }
+
+        protected override void CleanupInternal()
+        {
+            //remove the call to the method that sets OnAssemblyResolve
+            var modType = Ctx.Module.GlobalType ?? throw new Exception("Could not find <Module>");
+            var instructions = modType.FindStaticConstructor()?.Body?.Instructions ?? throw new Exception("Missing <Module> .cctor");
+            foreach (Instruction instr in instructions)
+            {
+                if (instr.OpCode.Code != Code.Call) continue;
+                if (!(instr.Operand is MethodDef md)) continue;
+
+                if (md.DeclaringType == _assemblyResolver)
+                    instr.OpCode = OpCodes.Nop;
+            }
+
+            //remove types
+            if (_decompressor == null) //if it is present, more stuff is going on that I don't know about (better be safe)
+                Ctx.Module.Types.Remove(_assemblyResolver);
+
+            //remove resources
+            foreach (var assembly in _assemblies)
+                Ctx.Module.Resources.Remove(Ctx.Module.Resources.SingleOrDefault(a => a.Name == assembly.ResourceName)
+                                            ?? throw new Exception("Resource name not unique (or present)"));
+        }
+
+        private bool CanBeAssemblyResolver(TypeDef t)
+        {
+            if (t.Methods.Count(a => a.IsPinvokeImpl) != 1) return false;   //MoveFileEx
+            if (t.NestedTypes.Count < 4) return false; //AssemblyCache, AssemblyRepresentation, ExtractionApi, RNG
+
+            foreach (MethodDef m in t.Methods.Where(a => a.HasBody && a.Body.HasInstructions)) {
+                //adds AssemblyResolver
+                bool addsResolver = m.Body.Instructions.Any(i => i.OpCode.Code == Code.Callvirt && i.Operand is MemberRef mr && mr.Name == "add_AssemblyResolve");
+                if (addsResolver)
+                    return true;
+            }
+
+            return false;
+        }
+
+        private bool CanBeExtractionApi(TypeDef t) => t.HasNestedTypes && t.IsAbstract && t.IsSealed && t.NestedTypes.Any(CanBeEnumerable);
+        private bool CanBeEnumerable(TypeDef t) => t.HasInterfaces && t.Interfaces.Any(a => a.Interface.Name == "IEnumerable");
+        private bool CanBeMoveNext(MethodDef m) => m.Overrides.Any(a => a.MethodDeclaration.FullName == "System.Boolean System.Collections.IEnumerator::MoveNext()");
+
+        private bool CanBeDecryptionMethod1(MethodDef m) => m.MethodSig.ToString() == "System.Byte[] (System.Byte[])" && m.IsNoInlining;
+        private bool CanBeDecompressionMethod(MethodDef m) => m.MethodSig.ToString() == "System.Byte[] (System.Byte[])" && !m.IsNoInlining;
+
+        private static IEnumerable<EmbeddedAssemblyInfo> EnumerateEmbeddedAssemblies(string text)
+        {
+            var split = text.Split(',');
+
+            for (int i = 0; i < split.Length; i += 4)
+            {
+                string b64 = split[i];
+                string resName = split[i + 1];
+                var asm = new EmbeddedAssemblyInfo { FullnameBase64 = b64 };
+
+                //check flags
+                int posPipe = resName.IndexOf('|');
+                if (posPipe >= 0)
+                {
+                    string flags = resName.Substring(0, posPipe);
+                    resName = resName.Substring(posPipe + 1);
+
+                    asm.Encrypted = flags.IndexOf('a') != -1;
+                    asm.Compressed = flags.IndexOf('b') != -1;
+                    asm.MustLoadfromDisk = flags.IndexOf('c') != -1;
+                }
+                asm.ResourceName = resName;
+                asm.FilenameBase64 = split[i + 2];
+
+                yield return asm;
+            }
+        }
+
+        [DebuggerDisplay("{" + nameof(Fullname) + "}")]
+        internal class EmbeddedAssemblyInfo
+        {
+            public string Fullname {
+                get {
+                    if (_fullname != null) return _fullname;
+                    byte[] array = Convert.FromBase64String(FullnameBase64);
+                    return _fullname = Encoding.UTF8.GetString(array, 0, array.Length);
+                }
+            }
+
+            public string Filename {
+                get {
+                    if (_filename != null) return _filename;
+                    byte[] array = Convert.FromBase64String(FilenameBase64);
+                    return _filename = Encoding.UTF8.GetString(array, 0, array.Length);
+                }
+            }
+
+            public string FullnameBase64;
+            public string ResourceName;
+            public bool Encrypted;
+            public bool Compressed;
+            public bool MustLoadfromDisk;
+            public string FilenameBase64;
+            private string _fullname;
+            private string _filename;
+        }
+    }
+}
+
+
+
+================================================
+File: EazFixer/Processors/ProcessorBase.cs
+================================================
+ï»¿using System;
+
+namespace EazFixer.Processors
+{
+    internal abstract class ProcessorBase
+    {
+        public bool Initialized => _errorInitialized == null;
+        public bool Processed => Initialized && _errorProcessed == null;
+        public bool CleanedUp => Processed && _errorCleanup == null;
+
+        public string ErrorMessage => _errorInitialized ?? _errorProcessed ?? _errorCleanup;
+
+        protected EazContext Ctx;
+
+        private string _errorInitialized;
+        private string _errorProcessed;
+        private string _errorCleanup;
+
+        public void Initialize(EazContext ctx)
+        {
+            Ctx = ctx;
+
+            try {
+                InitializeInternal();
+            } catch (Exception e) {
+                _errorInitialized = "Init error: " + e.Message;
+            }
+        }
+
+        public void Process()
+        {
+            try {
+                ProcessInternal();
+            } catch (Exception e) {
+                _errorProcessed = e.Message;
+            }
+        }
+
+        public void Cleanup()
+        {
+            try {
+                if (!Flags.KeepTypes) CleanupInternal();
+            } catch (Exception e) {
+                _errorCleanup = "Cleanup error: " + e.Message;
+            }
+        }
+
+        protected abstract void InitializeInternal();
+        protected abstract void ProcessInternal();
+        protected abstract void CleanupInternal();
+    }
+}
+
+
+
+================================================
+File: EazFixer/Processors/ResourceResolver.cs
+================================================
+ï»¿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace EazFixer.Processors
+{
+    internal class ResourceResolver : ProcessorBase
+    {
+        public List<Assembly> ResourceAssemblies;
+        private TypeDef _resourceResolver;
+        private MethodDef _initMethod;
+
+        protected override void InitializeInternal()
+        {
+            //find all "Resources" classes, and store them for later use
+            _resourceResolver = Ctx.Module.Types.SingleOrDefault(CanBeResourceResolver) 
+                ?? throw new Exception("Could not find resolver type");
+            _initMethod = _resourceResolver.Methods.SingleOrDefault(CanBeInitMethod) 
+                ?? throw new Exception("Could not find init method");
+        }
+
+        protected override void ProcessInternal()
+        {
+            //initialize all the resources
+            var mi = Utils.FindMethod(Ctx.Assembly, _initMethod, new Type[0]) ?? throw new Exception("Could not find init method through reflection");
+            mi.Invoke(null, new object[0]);
+
+            //get the dictionary we just initialized
+            FieldInfo dictionaryField = mi.DeclaringType.GetFields(BindingFlags.Static | BindingFlags.NonPublic).Single(a => a.FieldType != typeof(Assembly));
+            object dictionaryValue = dictionaryField.GetValue(null);
+            if (dictionaryValue.GetType().Name != "Dictionary`2") Debug.Fail("not a dictionary");
+            var dictionary = (IDictionary)dictionaryValue;
+
+            //extract the assemblies through reflection
+            ResourceAssemblies = new List<Assembly>();
+            foreach (object obj in dictionary.Values) {
+                var methods = obj.GetType().GetMethods(BindingFlags.NonPublic | BindingFlags.Instance).ToList();
+                var assembly = (Assembly) methods.Single(a => !a.IsConstructor && a.ReturnParameter?.ParameterType == typeof(Assembly)).Invoke(obj, new object[0]);
+                if (!ResourceAssemblies.Contains(assembly))
+                    ResourceAssemblies.Add(assembly);
+            }
+
+            //extract the resources and add them to the module
+            foreach (var assembly in ResourceAssemblies) {
+                foreach (Module module in assembly.Modules) {
+                    Debug.WriteLine("[D] Loading module for ResourceResolver...");
+                    var md = ModuleDefMD.Load(module);
+
+                    foreach (Resource resource in md.Resources)
+                        Ctx.Module.Resources.Add(resource);
+                }
+            }
+        }
+
+        protected override void CleanupInternal()
+        {
+            //remove the call to the method that sets OnResourceResolve
+            var modType = Ctx.Module.GlobalType ?? throw new Exception("Could not find <Module>");
+            var instructions = modType.FindStaticConstructor()?.Body?.Instructions ?? throw new Exception("Missing <Module> .cctor");
+            foreach (Instruction instr in instructions) {
+                if (instr.OpCode.Code != Code.Call) continue;
+                if (!(instr.Operand is MethodDef md)) continue;
+
+                if (md.DeclaringType == _resourceResolver)
+                    instr.OpCode = OpCodes.Nop;
+            }
+
+            Ctx.Module.Types.Remove(_resourceResolver);
+        }
+
+        private static bool CanBeResourceResolver(TypeDef t)
+        {
+            if (t.Fields.Count != 2) return false;
+            if (t.NestedTypes.Count != 1) return false;
+
+            foreach (MethodDef m in t.Methods.Where(a => a.HasBody && a.Body.HasInstructions)) {
+                //adds ResourceResolver
+                bool addsResolver = m.Body.Instructions.Any(i => i.OpCode.Code == Code.Callvirt && i.Operand is MemberRef mr && mr.Name == "add_ResourceResolve");
+                if (addsResolver) return true;
+            }
+
+            return false;
+        }
+
+        private static bool CanBeInitMethod(MethodDef a)
+        {
+            if (!a.HasBody || !a.Body.HasInstructions) return false;
+
+            if (a.MethodSig.ToString() != "System.Void ()") return false;
+            
+            //might get outdated soon, watch this
+            return a.Body.Instructions.First().OpCode.Code == Code.Volatile;
+        }
+    }
+}
+
+
+
+================================================
+File: EazFixer/Processors/StringFixer.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace EazFixer.Processors
+{
+    internal class StringFixer : ProcessorBase
+    {
+        private MethodDef _decrypterMethod;
+
+        protected override void InitializeInternal()
+        {
+            //find method
+            _decrypterMethod = StringFixUtils.FindStringDecryptMethod(Ctx.Module) ??
+                               throw new Exception("Could not find decrypter method");
+        }
+
+        protected override void ProcessInternal()
+        {
+            //a dictionary to cache all strings
+            var dictionary = new Dictionary<int, string>();
+
+            //get the decrypter method in a way in which we can invoke it
+            var decrypter = Utils.FindMethod(Ctx.Assembly, _decrypterMethod, new[] { typeof(int) }) ?? throw new Exception("Couldn't find decrypter method through reflection");
+
+            //store it so we can use it in the stacktrace patch
+            StacktracePatcher.PatchStackTraceGetMethod.MethodToReplace = decrypter;
+
+            //for every method with a body...
+            foreach (MethodDef meth in Utils.GetMethodsRecursive(Ctx.Module).Where(a => a.HasBody && a.Body.HasInstructions))
+            {
+                //.. and every instruction (starting at the second one) ...
+                for (int i = 1; i < meth.Body.Instructions.Count; i++)
+                {
+                    //get this instruction and the previous
+                    var prev = meth.Body.Instructions[i - 1];
+                    var curr = meth.Body.Instructions[i];
+
+                    //if they invoke the string decrypter method with an int parameter
+                    if (prev.IsLdcI4() && curr.Operand != null && curr.Operand is MethodDef md && md.MDToken == _decrypterMethod.MDToken)
+                    {
+                        //get the int parameter, and get the resulting string from either cache or invoking the decrypter method
+                        int val = prev.GetLdcI4Value();
+                        if (!dictionary.ContainsKey(val))
+                            dictionary[val] = (string) decrypter.Invoke(null, new object[] {val});
+                            
+                        // check if str == .ctor due to eaz using string decryptor to call constructors
+                        if (dictionary[val] == ".ctor" && Flags.VirtFix) continue;
+
+                        //replace the instructions with the string
+                        prev.OpCode = OpCodes.Nop;
+                        curr.OpCode = OpCodes.Ldstr;
+                        curr.Operand = dictionary[val];
+                    }
+                }
+            }
+        }
+
+        protected override void CleanupInternal()
+        {
+            //check if virtfix is active so ignore cleaning
+            if (Flags.VirtFix)
+                throw new Exception("VirtFix enabled, Cannot remove method");
+
+            //ensure that the string decryptor isn't called anywhere
+            if (Utils.LookForReferences(Ctx.Module, _decrypterMethod))
+                throw new Exception("String decrypter is still being called");
+
+            //remove the string decryptor class
+            var stringType = _decrypterMethod.DeclaringType;
+            Ctx.Module.Types.Remove(stringType);
+        }
+    }
+}
+
+
+
+================================================
+File: .github/ISSUE_TEMPLATE/bug-report.md
+================================================
+---
+name: Bug Report
+about: EazFixer failed to deobfuscate your file
+title: ''
+labels: bug
+assignees: ''
+
+---
+
+<!--
+Before submitting a bug report, please check the following boxes (by replacing [ ] with [x]).
+-->
+**Checklist**:
+- [ ] I have checked that I am dealing with an EazFuscator binary, and believe that it can't be another obfuscator such as ConfuserEx.
+- [ ] I understand that an error message may mean that a certain protection was not present.
+- [ ] I can share a sample that can reproduce the bug
+
+
+
+================================================
+File: .github/ISSUE_TEMPLATE/other-issue.md
+================================================
+---
+name: Other issue
+about: Feature requests/suggestions, other bug reports, ...
+title: ''
+labels: ''
+assignees: ''
+
+---
+
+
+
+

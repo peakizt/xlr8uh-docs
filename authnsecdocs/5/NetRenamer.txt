@@ -1,0 +1,826 @@
+Directory structure:
+└── zenixas-netrenamer/
+    ├── README.md
+    ├── NetRenamer.csproj
+    ├── Program.cs
+    ├── Config/
+    │   └── List.cs
+    ├── Preview/
+    ├── Rename/
+    │   └── Rename.cs
+    ├── Selection/
+    │   ├── deselect.cs
+    │   └── select.cs
+    └── UI/
+        ├── Form1.Designer.cs
+        ├── Form1.cs
+        └── Form1.resx
+
+================================================
+File: README.md
+================================================
+# NetRenamer
+Simple tool to obfuscate/rename .NET module's methods, fields, classes and more using [AsmResolver](https://github.com/Washi1337/AsmResolver).
+
+# Features
+- Rename Methods, Fields, Properties, Events, Classes.
+- Change Module's name and version.
+- Add custom watermark to renaming.
+- Exclude specific types to not rename.
+  
+# UI
+![image](./Preview/HrrsOx88q.png)
+
+# Credits
+- [AsmResolver](https://github.com/Washi1337/AsmResolver) - (Washi)
+
+
+================================================
+File: NetRenamer.csproj
+================================================
+ï»¿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AsmResolver.DotNet" Version="4.7.1" />
+  </ItemGroup>
+
+</Project>
+
+
+================================================
+File: Program.cs
+================================================
+using System;
+using System.Windows.Forms;
+
+namespace NetRenamer
+{
+    internal static class Program
+    {
+        [STAThread]
+        private static void Main()
+        {
+            ApplicationConfiguration.Initialize();
+            Application.Run(new Form1());
+        }
+    }
+}
+
+
+================================================
+File: Config/List.cs
+================================================
+ï»¿using System.Collections.Generic;
+using System.Windows.Forms;
+
+namespace NetRenamer
+{
+    internal class List
+    {
+        public static string WaterMark = "NetRenamer";
+        public static List<CheckedListBox> tcb = new List<CheckedListBox>();
+        public static bool renameClasses = false;
+
+        public static bool watermark = false;
+        // config file here later -_-
+    }
+}
+
+
+
+================================================
+File: Rename/Rename.cs
+================================================
+﻿using System;
+using System.Linq;
+using AsmResolver.DotNet;
+
+namespace NetRenamer
+{
+    internal class Rename
+    {
+        private static readonly Random random = new Random();
+
+        public static string RandomString(int length)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const string nums = "0123456789";
+            const string foreign =
+                "䂥䂀䂁䂀䂀䁿䁾䁽䂌䂋䂎䃞䃝䃜䃛䃫䃬䃮䃰䃱䃲䃳䃴䃵䃶䃷䃸䃹䃺䃪䃩䃙䄣䄢䄡䄠䄟䒐䒏䒎䒍䒌䒋䑬䑽䑼䑾䒀䒂䑳䄞䄝䄜䄛䄋䃻䃫䃬䃭䃮䃯䃰䃱䃲䃳䃴䃵䃶䃷䃸䃹䃺䆴䇀䇁䆱䇟䇮䇯䇱䇝䇜䇍䉶䉱䉲䉢䉣䊃䊅䊖䊦䊥䊐䊞䊟䌵䌴䌳䍦䍥䍷䍷䍹";
+            const string special =
+                "ƀƁƂƄƅƆƈƉƋƍƎƏƐƑƒƓƔƕƖƗƘƙƜƛơƣƥƪƩƱƲƳƴǍǎǢǣǤǥǭȄȜȞȣȮփռպֆӸӂҿҧͲͳʹͶͷͻͼͽΆΙΘΗΖΕΔΓΒΑΐΏΎΌΉΈΛάέήίΰαβϡϠϝϞϜϛϦФЯЮПЎЍЌЫЬЭЮйЩШЙЉЊϪϚѤѬѭѮѰѹ҈҉ҘѾүҾӁ";
+
+            return List.watermark
+                ? List.WaterMark + new string(Enumerable.Repeat(foreign, length)
+                    .Select(s => s[random.Next(s.Length)]).ToArray())
+                : new string(Enumerable.Repeat(foreign, length)
+                    .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+
+        public static void rename(ModuleDefinition module)
+        {
+            foreach (var type in module.GetAllTypes())
+            {
+                foreach (var method in type.Methods)
+                {
+                    foreach (var obj in List.tcb.ElementAt(0).CheckedItems)
+                    {
+                        if (obj.ToString() == method.FullName)
+                            method.Name = RandomString(22);
+                    }
+                }
+
+                foreach (var field in type.Fields)
+                {
+                    foreach (var obj in List.tcb.ElementAt(1).CheckedItems)
+                    {
+                        if (obj.ToString() == field.FullName)
+                            field.Name = RandomString(22);
+                    }
+                }
+
+                foreach (var property in type.Fields)
+                {
+                    foreach (var obj in List.tcb.ElementAt(2).CheckedItems)
+                    {
+                        if (obj.ToString() == property.FullName)
+                            property.Name = RandomString(22);
+                    }
+                }
+
+                foreach (var eventt in type.Events)
+                {
+                    foreach (var obj in List.tcb.ElementAt(3).CheckedItems)
+                    {
+                        if (obj.ToString() == eventt.FullName)
+                            eventt.Name = RandomString(22);
+                    }
+                }
+
+                if (type.IsClass && List.renameClasses)
+                    type.Name = RandomString(22);
+            }
+        }
+    }
+}
+
+
+================================================
+File: Selection/deselect.cs
+================================================
+ï»¿using System.Linq;
+
+namespace NetRenamer.Selection
+{
+    internal class deselect
+    {
+        public static void all()
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < List.tcb.ElementAt(i).Items.Count; j++)
+                {
+                    List.tcb.ElementAt(i).SetItemChecked(j, false);
+                }
+            }
+        }
+
+        public static void current(int selectedtab)
+        {
+            for (int i = 0; i < List.tcb.ElementAt(selectedtab).Items.Count; i++)
+            {
+                List.tcb.ElementAt(selectedtab).SetItemChecked(i, false);
+            }
+        }
+    }
+}
+
+
+================================================
+File: Selection/select.cs
+================================================
+ï»¿using System.Linq;
+
+namespace NetRenamer.Selection
+{
+    internal class select
+    {
+        public static void all()
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < List.tcb.ElementAt(i).Items.Count; j++)
+                {
+                    List.tcb.ElementAt(i).SetItemChecked(j, true);
+                }
+            }
+        }
+
+        public static void current(int selectedtab)
+        {
+            for (int i = 0; i < List.tcb.ElementAt(selectedtab).Items.Count; i++)
+            {
+                List.tcb.ElementAt(selectedtab).SetItemChecked(i, true);
+            }
+        }
+    }
+}
+
+
+================================================
+File: UI/Form1.Designer.cs
+================================================
+ï»¿namespace NetRenamer
+{
+    partial class Form1
+    {
+        /// <summary>
+        ///  Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        ///  Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        ///  Required method for Designer support - do not modify
+        ///  the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            this.LoadModuleButton = new System.Windows.Forms.Button();
+            this.ModulePathTextBox = new System.Windows.Forms.TextBox();
+            this.RenameButton = new System.Windows.Forms.Button();
+            this.Types = new System.Windows.Forms.TabControl();
+            this.MainPage = new System.Windows.Forms.TabPage();
+            this.WatermarkCheckBox = new System.Windows.Forms.CheckBox();
+            this.RenameClassesCheckBox = new System.Windows.Forms.CheckBox();
+            this.WaterMarkTextBox = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.ModuleVersionTextBox = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.ModuleANameTextBox = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.ModuleNameTextBox = new System.Windows.Forms.TextBox();
+            this.Methods = new System.Windows.Forms.TabPage();
+            this.MethodCheckedListBox = new System.Windows.Forms.CheckedListBox();
+            this.Fields = new System.Windows.Forms.TabPage();
+            this.FieldCheckedListBox = new System.Windows.Forms.CheckedListBox();
+            this.Properties = new System.Windows.Forms.TabPage();
+            this.PropertyCheckedListBox = new System.Windows.Forms.CheckedListBox();
+            this.Events = new System.Windows.Forms.TabPage();
+            this.EventCheckedListBox = new System.Windows.Forms.CheckedListBox();
+            this.SelectAllButton = new System.Windows.Forms.Button();
+            this.SelectCurrentButton = new System.Windows.Forms.Button();
+            this.DeSelectCurrentButton = new System.Windows.Forms.Button();
+            this.DeSelectAllButton = new System.Windows.Forms.Button();
+            this.Types.SuspendLayout();
+            this.MainPage.SuspendLayout();
+            this.Methods.SuspendLayout();
+            this.Fields.SuspendLayout();
+            this.Properties.SuspendLayout();
+            this.Events.SuspendLayout();
+            this.SuspendLayout();
+            // 
+            // LoadModuleButton
+            // 
+            this.LoadModuleButton.Location = new System.Drawing.Point(597, 25);
+            this.LoadModuleButton.Name = "LoadModuleButton";
+            this.LoadModuleButton.Size = new System.Drawing.Size(113, 23);
+            this.LoadModuleButton.TabIndex = 0;
+            this.LoadModuleButton.Text = "Load Module";
+            this.LoadModuleButton.UseVisualStyleBackColor = true;
+            this.LoadModuleButton.Click += new System.EventHandler(this.LoadModuleButton_Click);
+            // 
+            // ModulePathTextBox
+            // 
+            this.ModulePathTextBox.Location = new System.Drawing.Point(12, 25);
+            this.ModulePathTextBox.Name = "ModulePathTextBox";
+            this.ModulePathTextBox.Size = new System.Drawing.Size(581, 23);
+            this.ModulePathTextBox.TabIndex = 1;
+            // 
+            // RenameButton
+            // 
+            this.RenameButton.Location = new System.Drawing.Point(494, 373);
+            this.RenameButton.Name = "RenameButton";
+            this.RenameButton.Size = new System.Drawing.Size(212, 40);
+            this.RenameButton.TabIndex = 6;
+            this.RenameButton.Text = "Build";
+            this.RenameButton.UseVisualStyleBackColor = true;
+            this.RenameButton.Click += new System.EventHandler(this.RenameButton_Click);
+            // 
+            // Types
+            // 
+            this.Types.Controls.Add(this.MainPage);
+            this.Types.Controls.Add(this.Methods);
+            this.Types.Controls.Add(this.Fields);
+            this.Types.Controls.Add(this.Properties);
+            this.Types.Controls.Add(this.Events);
+            this.Types.Location = new System.Drawing.Point(12, 54);
+            this.Types.Name = "Types";
+            this.Types.SelectedIndex = 0;
+            this.Types.Size = new System.Drawing.Size(698, 271);
+            this.Types.TabIndex = 7;
+            this.Types.SelectedIndexChanged += new System.EventHandler(this.Types_SelectedIndexChanged);
+            // 
+            // MainPage
+            // 
+            this.MainPage.Controls.Add(this.WatermarkCheckBox);
+            this.MainPage.Controls.Add(this.RenameClassesCheckBox);
+            this.MainPage.Controls.Add(this.WaterMarkTextBox);
+            this.MainPage.Controls.Add(this.label3);
+            this.MainPage.Controls.Add(this.ModuleVersionTextBox);
+            this.MainPage.Controls.Add(this.label2);
+            this.MainPage.Controls.Add(this.ModuleANameTextBox);
+            this.MainPage.Controls.Add(this.label1);
+            this.MainPage.Controls.Add(this.ModuleNameTextBox);
+            this.MainPage.Location = new System.Drawing.Point(4, 24);
+            this.MainPage.Name = "MainPage";
+            this.MainPage.Padding = new System.Windows.Forms.Padding(3);
+            this.MainPage.Size = new System.Drawing.Size(690, 243);
+            this.MainPage.TabIndex = 4;
+            this.MainPage.Text = "Main";
+            this.MainPage.UseVisualStyleBackColor = true;
+            // 
+            // WatermarkCheckBox
+            // 
+            this.WatermarkCheckBox.AutoSize = true;
+            this.WatermarkCheckBox.Location = new System.Drawing.Point(349, 59);
+            this.WatermarkCheckBox.Name = "WatermarkCheckBox";
+            this.WatermarkCheckBox.Size = new System.Drawing.Size(170, 19);
+            this.WatermarkCheckBox.TabIndex = 10;
+            this.WatermarkCheckBox.Text = "Enable Custom Watermark:";
+            this.WatermarkCheckBox.UseVisualStyleBackColor = true;
+            this.WatermarkCheckBox.CheckedChanged += new System.EventHandler(this.WatermarkCheckBox_CheckedChanged);
+            // 
+            // RenameClassesCheckBox
+            // 
+            this.RenameClassesCheckBox.AutoSize = true;
+            this.RenameClassesCheckBox.Location = new System.Drawing.Point(349, 128);
+            this.RenameClassesCheckBox.Name = "RenameClassesCheckBox";
+            this.RenameClassesCheckBox.Size = new System.Drawing.Size(110, 19);
+            this.RenameClassesCheckBox.TabIndex = 9;
+            this.RenameClassesCheckBox.Text = "Rename Classes";
+            this.RenameClassesCheckBox.UseVisualStyleBackColor = true;
+            this.RenameClassesCheckBox.CheckedChanged += new System.EventHandler(this.RenameClassesCheckBox_CheckedChanged);
+            // 
+            // WaterMarkTextBox
+            // 
+            this.WaterMarkTextBox.Location = new System.Drawing.Point(333, 84);
+            this.WaterMarkTextBox.Name = "WaterMarkTextBox";
+            this.WaterMarkTextBox.Size = new System.Drawing.Size(321, 23);
+            this.WaterMarkTextBox.TabIndex = 8;
+            this.WaterMarkTextBox.Text = "NetRenamer";
+            this.WaterMarkTextBox.TextChanged += new System.EventHandler(this.WaterMarkTextBox_TextChanged);
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(22, 66);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(92, 15);
+            this.label3.TabIndex = 5;
+            this.label3.Text = "Module Version:";
+            // 
+            // ModuleVersionTextBox
+            // 
+            this.ModuleVersionTextBox.Location = new System.Drawing.Point(6, 84);
+            this.ModuleVersionTextBox.Name = "ModuleVersionTextBox";
+            this.ModuleVersionTextBox.Size = new System.Drawing.Size(321, 23);
+            this.ModuleVersionTextBox.TabIndex = 4;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(349, 10);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(140, 15);
+            this.label2.TabIndex = 3;
+            this.label2.Text = "Module Assembly Name:";
+            // 
+            // ModuleANameTextBox
+            // 
+            this.ModuleANameTextBox.Location = new System.Drawing.Point(333, 28);
+            this.ModuleANameTextBox.Name = "ModuleANameTextBox";
+            this.ModuleANameTextBox.Size = new System.Drawing.Size(321, 23);
+            this.ModuleANameTextBox.TabIndex = 2;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(22, 10);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(86, 15);
+            this.label1.TabIndex = 1;
+            this.label1.Text = "Module Name:";
+            // 
+            // ModuleNameTextBox
+            // 
+            this.ModuleNameTextBox.Location = new System.Drawing.Point(6, 28);
+            this.ModuleNameTextBox.Name = "ModuleNameTextBox";
+            this.ModuleNameTextBox.Size = new System.Drawing.Size(321, 23);
+            this.ModuleNameTextBox.TabIndex = 0;
+            // 
+            // Methods
+            // 
+            this.Methods.Controls.Add(this.MethodCheckedListBox);
+            this.Methods.Location = new System.Drawing.Point(4, 24);
+            this.Methods.Name = "Methods";
+            this.Methods.Padding = new System.Windows.Forms.Padding(3);
+            this.Methods.Size = new System.Drawing.Size(690, 243);
+            this.Methods.TabIndex = 0;
+            this.Methods.Text = "Methods";
+            this.Methods.UseVisualStyleBackColor = true;
+            // 
+            // MethodCheckedListBox
+            // 
+            this.MethodCheckedListBox.FormattingEnabled = true;
+            this.MethodCheckedListBox.Location = new System.Drawing.Point(3, 3);
+            this.MethodCheckedListBox.Name = "MethodCheckedListBox";
+            this.MethodCheckedListBox.Size = new System.Drawing.Size(681, 238);
+            this.MethodCheckedListBox.TabIndex = 0;
+            // 
+            // Fields
+            // 
+            this.Fields.Controls.Add(this.FieldCheckedListBox);
+            this.Fields.Location = new System.Drawing.Point(4, 24);
+            this.Fields.Name = "Fields";
+            this.Fields.Padding = new System.Windows.Forms.Padding(3);
+            this.Fields.Size = new System.Drawing.Size(690, 243);
+            this.Fields.TabIndex = 1;
+            this.Fields.Text = "Fields";
+            this.Fields.UseVisualStyleBackColor = true;
+            // 
+            // FieldCheckedListBox
+            // 
+            this.FieldCheckedListBox.FormattingEnabled = true;
+            this.FieldCheckedListBox.Location = new System.Drawing.Point(3, 3);
+            this.FieldCheckedListBox.Name = "FieldCheckedListBox";
+            this.FieldCheckedListBox.Size = new System.Drawing.Size(681, 238);
+            this.FieldCheckedListBox.TabIndex = 0;
+            // 
+            // Properties
+            // 
+            this.Properties.Controls.Add(this.PropertyCheckedListBox);
+            this.Properties.Location = new System.Drawing.Point(4, 24);
+            this.Properties.Name = "Properties";
+            this.Properties.Padding = new System.Windows.Forms.Padding(3);
+            this.Properties.Size = new System.Drawing.Size(690, 243);
+            this.Properties.TabIndex = 2;
+            this.Properties.Text = "Properties";
+            this.Properties.UseVisualStyleBackColor = true;
+            // 
+            // PropertyCheckedListBox
+            // 
+            this.PropertyCheckedListBox.FormattingEnabled = true;
+            this.PropertyCheckedListBox.Location = new System.Drawing.Point(3, 3);
+            this.PropertyCheckedListBox.Name = "PropertyCheckedListBox";
+            this.PropertyCheckedListBox.Size = new System.Drawing.Size(681, 238);
+            this.PropertyCheckedListBox.TabIndex = 0;
+            // 
+            // Events
+            // 
+            this.Events.Controls.Add(this.EventCheckedListBox);
+            this.Events.Location = new System.Drawing.Point(4, 24);
+            this.Events.Name = "Events";
+            this.Events.Padding = new System.Windows.Forms.Padding(3);
+            this.Events.Size = new System.Drawing.Size(690, 243);
+            this.Events.TabIndex = 3;
+            this.Events.Text = "Events";
+            this.Events.UseVisualStyleBackColor = true;
+            // 
+            // EventCheckedListBox
+            // 
+            this.EventCheckedListBox.FormattingEnabled = true;
+            this.EventCheckedListBox.Location = new System.Drawing.Point(3, 3);
+            this.EventCheckedListBox.Name = "EventCheckedListBox";
+            this.EventCheckedListBox.Size = new System.Drawing.Size(681, 238);
+            this.EventCheckedListBox.TabIndex = 0;
+            // 
+            // SelectAllButton
+            // 
+            this.SelectAllButton.Location = new System.Drawing.Point(12, 373);
+            this.SelectAllButton.Name = "SelectAllButton";
+            this.SelectAllButton.Size = new System.Drawing.Size(212, 40);
+            this.SelectAllButton.TabIndex = 8;
+            this.SelectAllButton.Text = "Select All";
+            this.SelectAllButton.UseVisualStyleBackColor = true;
+            this.SelectAllButton.Click += new System.EventHandler(this.SelectAllButton_Click);
+            // 
+            // SelectCurrentButton
+            // 
+            this.SelectCurrentButton.Location = new System.Drawing.Point(12, 327);
+            this.SelectCurrentButton.Name = "SelectCurrentButton";
+            this.SelectCurrentButton.Size = new System.Drawing.Size(212, 40);
+            this.SelectCurrentButton.TabIndex = 9;
+            this.SelectCurrentButton.Text = "Select All In Current Tab";
+            this.SelectCurrentButton.UseVisualStyleBackColor = true;
+            this.SelectCurrentButton.Click += new System.EventHandler(this.SelectCurrentButton_Click);
+            // 
+            // DeSelectCurrentButton
+            // 
+            this.DeSelectCurrentButton.Location = new System.Drawing.Point(230, 327);
+            this.DeSelectCurrentButton.Name = "DeSelectCurrentButton";
+            this.DeSelectCurrentButton.Size = new System.Drawing.Size(212, 40);
+            this.DeSelectCurrentButton.TabIndex = 10;
+            this.DeSelectCurrentButton.Text = "DeSelect All In Current Tab";
+            this.DeSelectCurrentButton.UseVisualStyleBackColor = true;
+            this.DeSelectCurrentButton.Click += new System.EventHandler(this.DeSelectCurrentButton_Click);
+            // 
+            // DeSelectAllButton
+            // 
+            this.DeSelectAllButton.Location = new System.Drawing.Point(230, 373);
+            this.DeSelectAllButton.Name = "DeSelectAllButton";
+            this.DeSelectAllButton.Size = new System.Drawing.Size(212, 40);
+            this.DeSelectAllButton.TabIndex = 11;
+            this.DeSelectAllButton.Text = "Deselect All";
+            this.DeSelectAllButton.UseVisualStyleBackColor = true;
+            this.DeSelectAllButton.Click += new System.EventHandler(this.DeSelectAllButton_Click);
+            // 
+            // Form1
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(718, 438);
+            this.Controls.Add(this.Types);
+            this.Controls.Add(this.DeSelectAllButton);
+            this.Controls.Add(this.DeSelectCurrentButton);
+            this.Controls.Add(this.SelectCurrentButton);
+            this.Controls.Add(this.SelectAllButton);
+            this.Controls.Add(this.RenameButton);
+            this.Controls.Add(this.ModulePathTextBox);
+            this.Controls.Add(this.LoadModuleButton);
+            this.Name = "Form1";
+            this.Text = "NetRenamer";
+            this.Types.ResumeLayout(false);
+            this.MainPage.ResumeLayout(false);
+            this.MainPage.PerformLayout();
+            this.Methods.ResumeLayout(false);
+            this.Fields.ResumeLayout(false);
+            this.Properties.ResumeLayout(false);
+            this.Events.ResumeLayout(false);
+            this.ResumeLayout(false);
+            this.PerformLayout();
+
+        }
+
+        #endregion
+
+        private System.Windows.Forms.Button LoadModuleButton;
+        private System.Windows.Forms.TextBox ModulePathTextBox;
+        private System.Windows.Forms.Button RenameButton;
+        private System.Windows.Forms.TabControl Types;
+        private System.Windows.Forms.TabPage Methods;
+        private System.Windows.Forms.CheckedListBox MethodCheckedListBox;
+        private System.Windows.Forms.TabPage Fields;
+        private System.Windows.Forms.CheckedListBox FieldCheckedListBox;
+        private System.Windows.Forms.TabPage Properties;
+        private System.Windows.Forms.CheckedListBox PropertyCheckedListBox;
+        private System.Windows.Forms.TabPage Events;
+        private System.Windows.Forms.CheckedListBox EventCheckedListBox;
+        private System.Windows.Forms.Button SelectAllButton;
+        private System.Windows.Forms.Button SelectCurrentButton;
+        private System.Windows.Forms.Button DeSelectCurrentButton;
+        private System.Windows.Forms.Button DeSelectAllButton;
+        private System.Windows.Forms.TabPage MainPage;
+        private System.Windows.Forms.TextBox ModuleNameTextBox;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox ModuleANameTextBox;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.TextBox ModuleVersionTextBox;
+        private System.Windows.Forms.TextBox WaterMarkTextBox;
+        private System.Windows.Forms.CheckBox RenameClassesCheckBox;
+        private System.Windows.Forms.CheckBox WatermarkCheckBox;
+    }
+}
+
+
+
+
+================================================
+File: UI/Form1.cs
+================================================
+ï»¿using System;
+using System.Windows.Forms;
+using NetRenamer.Selection;
+using AsmResolver.DotNet;
+
+namespace NetRenamer
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private static ModuleDefinition module { get; set; }
+
+        private void LoadModuleButton_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            {
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    string filePath = openFileDialog.FileName;
+                    ModulePathTextBox.Text = filePath;
+                    module = ModuleDefinition.FromFile(filePath);
+                }
+            }
+
+            loadlist();
+        }
+
+        private void loadlist()
+        {
+            foreach (var m in module.GetAllTypes())
+            {
+                foreach (var x in m.Methods)
+                    MethodCheckedListBox.Items.Add(x);
+                foreach (var x in m.Fields)
+                    FieldCheckedListBox.Items.Add(x);
+                foreach (var x in m.Properties)
+                    PropertyCheckedListBox.Items.Add(x);
+                foreach (var x in m.Events)
+                    EventCheckedListBox.Items.Add(x);
+            }
+
+            List.tcb.Add(MethodCheckedListBox);
+            List.tcb.Add(FieldCheckedListBox);
+            List.tcb.Add(PropertyCheckedListBox);
+            List.tcb.Add(EventCheckedListBox);
+
+            ModuleNameTextBox.Text = module.Name;
+            ModuleANameTextBox.Text = module.Assembly.Name;
+            ModuleVersionTextBox.Text = module.Assembly.Version.ToString();
+        }
+
+        private void RenameButton_Click(object sender, EventArgs e)
+        {
+            module = ModuleDefinition.FromFile(ModulePathTextBox.Text);
+
+            Rename.rename(module);
+
+            obfuscate();
+        }
+
+        private void RenameClassesCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            List.renameClasses = RenameClassesCheckBox.Checked;
+        }
+
+        private void obfuscate()
+        {
+            module.Name = ModuleNameTextBox.Text;
+            module.Assembly.Name = ModuleANameTextBox.Text;
+            module.Assembly.Version = Version.Parse(ModuleVersionTextBox.Text);
+
+            module.Write(ModulePathTextBox.Text.Replace(".exe", "-Renamed.exe"));
+        }
+
+        #region selection
+
+        private void SelectAllButton_Click(object sender, EventArgs e)
+        {
+            @select.all();
+        }
+
+        private void SelectCurrentButton_Click(object sender, EventArgs e)
+        {
+            @select.current(Types.SelectedIndex);
+        }
+
+        #endregion
+
+        #region deselection
+
+        private void DeSelectCurrentButton_Click(object sender, EventArgs e)
+        {
+            deselect.current(Types.SelectedIndex);
+        }
+
+        private void DeSelectAllButton_Click(object sender, EventArgs e)
+        {
+            deselect.all();
+        }
+
+        #endregion
+
+        #region watermark
+
+        private void WaterMarkTextBox_TextChanged(object sender, EventArgs e)
+        {
+            List.WaterMark = WaterMarkTextBox.Text;
+        }
+
+        private void WatermarkCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            List.watermark = WatermarkCheckBox.Checked;
+        }
+
+        #endregion
+
+        private void Types_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if(Types.SelectedIndex != 0)
+            {
+                SelectCurrentButton.Enabled = true;
+                DeSelectCurrentButton.Enabled = true;
+                SelectCurrentButton.Text = $"Select All {Types.SelectedTab.Text}";
+                DeSelectCurrentButton.Text = $"DeSelect All {Types.SelectedTab.Text}";
+            }
+            else
+            {
+                SelectCurrentButton.Enabled = false;
+                DeSelectCurrentButton.Enabled = false;
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: UI/Form1.resx
+================================================
+ï»¿<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+</root>
+

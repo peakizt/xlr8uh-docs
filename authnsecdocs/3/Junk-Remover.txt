@@ -1,0 +1,713 @@
+Directory structure:
+└── devt02-junk-remover/
+    ├── README.md
+    ├── Junk Remover.sln
+    └── JunkRemover/
+        ├── App.config
+        ├── Junk Remover.csproj
+        ├── Program.cs
+        ├── Properties/
+        │   └── AssemblyInfo.cs
+        ├── bin/
+        │   └── Debug/
+        │       └── Junk Remover.config
+        └── obj/
+            └── Debug/
+                ├── ConsoleAppLmao.csproj.CopyComplete
+                ├── ConsoleAppLmao.csproj.CoreCompileInputs.cache
+                ├── ConsoleAppLmao.csproj.FileListAbsolute.txt
+                ├── DesignTimeResolveAssemblyReferencesInput.cache
+                ├── Junk Remover.csproj.CopyComplete
+                ├── Junk Remover.csproj.CoreCompileInputs.cache
+                ├── Junk Remover.csproj.FileListAbsolute.txt
+                ├── TemporaryGeneratedFile_036C0B5B-1481-4323-8D20-8F5ADCB23D92.cs
+                ├── TemporaryGeneratedFile_5937a670-0e60-4077-877b-f7221da3dda1.cs
+                └── TemporaryGeneratedFile_E7A71F73-0F8D-4B9B-B56E-8E70B10BC5D3.cs
+
+================================================
+File: README.md
+================================================
+# Junk-Remover
+.NET attributes cleaner/Junk remover for obfuscation. Credits to Prab + Illuzion, code is pretty much theirs haha.
+
+# Help
+Drag and drop your file into the executable
+
+
+
+
+================================================
+File: Junk Remover.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2046
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Junk Remover", "ConsoleAppLmao\Junk Remover.csproj", "{50B79818-1AED-42EF-B710-222236948B01}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{50B79818-1AED-42EF-B710-222236948B01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50B79818-1AED-42EF-B710-222236948B01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50B79818-1AED-42EF-B710-222236948B01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50B79818-1AED-42EF-B710-222236948B01}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9FC9802B-9BA2-4E42-BF5E-BC9817BC354F}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: JunkRemover/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.6" />
+    </startup>
+</configuration>
+
+
+================================================
+File: JunkRemover/Junk Remover.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{50B79818-1AED-42EF-B710-222236948B01}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>ConsoleAppLmao</RootNamespace>
+    <AssemblyName>ConsoleAppLmao</AssemblyName>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib">
+      <HintPath>..\..\..\..\Desktop\Deobfuscators\USE THIS BAFOON\KrawkUnpacker\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: JunkRemover/Program.cs
+================================================
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using dnlib.DotNet.Writer;
+using System.Windows.Forms;
+namespace Anti_De4dot_remover
+{
+    internal class Program
+    {
+        public static int countofths = 0;
+        private static void Main(string[] args)
+        {
+            Console.Title = "Junk Remover by OFF_LINE";
+            Console.ForegroundColor = ConsoleColor.Red;
+            string text = args[0];
+            bool preserveEverything = true;
+            string[] shit = File.ReadAllLines(AppDomain.CurrentDomain.BaseDirectory + "\\settings.txt");
+            if (!shit[0].Contains("true"))
+                preserveEverything = false;            
+            try
+            {
+                Program.module = ModuleDefMD.Load(text);
+                Program.asm = Assembly.LoadFrom(text);
+                Program.Asmpath = text;
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Not .NET Assembly...");
+            }
+            string text2 = Path.GetDirectoryName(text);
+            bool flag = !text2.EndsWith("\\");
+            bool flag2 = flag;
+            if (flag2)
+            {
+                text2 += "\\";
+            }
+            try
+            {
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                string sb = @"
+     ____.             __     __________                                          
+    |    |__ __  ____ |  | __ \______   \ ____   _____   _______  __ ___________  
+    |    |  |  \/    \|  |/ /  |       _// __ \ /     \ /  _ \  \/ // __ \_  __ \ 
+/\__|    |  |  /   |  \    <   |    |   \  ___/|  Y Y  (  <_> )   /\  ___/|  | \/  
+\________|____/|___|  /__|_ \  |____|_  /\___  >__|_|  /\____/ \_/  \___  >__|    
+                    \/     \/         \/     \/      \/                 \/                        ";
+                Console.WriteLine(sb);
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine("[!] Credit: Prab + illuZion");
+                Console.WriteLine("[!] Removing useless nop instructions..");
+                Execute(module);
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("[!] Removed " + removed +  " useless nop instructions!");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine("[!] Removing fake attributes..");
+                removeshit();
+                removeshit();
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("[!] Anti-De4dot remover has caught an exception. Original message: " + ex.ToString());
+            }
+            string text3 = string.Format("{0}{1}_noJunk{2}", text2, Path.GetFileNameWithoutExtension(text), Path.GetExtension(text));
+            ModuleWriterOptions moduleWriterOptions = new ModuleWriterOptions(Program.module);
+            if (preserveEverything)
+            {
+                moduleWriterOptions.MetaDataOptions.Flags |= MetaDataFlags.PreserveAll;
+            }
+            moduleWriterOptions.Logger = DummyLogger.NoThrowInstance;
+            NativeModuleWriterOptions nativeModuleWriterOptions = new NativeModuleWriterOptions(Program.module);
+            if (preserveEverything) {
+                nativeModuleWriterOptions.MetaDataOptions.Flags |= MetaDataFlags.PreserveAll;
+            }
+            nativeModuleWriterOptions.Logger = DummyLogger.NoThrowInstance;
+            bool isILOnly = Program.module.IsILOnly;
+            if (isILOnly)
+            {
+                Program.module.Write(text3, moduleWriterOptions);
+            }
+            else
+            {
+                Program.module.NativeWrite(text3, nativeModuleWriterOptions);
+            }
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("[!] Removed " + countofths + " FakeAttributes/AntiDe4dot cases");
+            Console.ReadLine();
+        }
+        private static IList<TypeDef> lista(ModuleDef A_0)
+        {
+            return A_0.Types;
+        }
+        public static void removeshit()
+        {
+            for (int i = 0; i < Program.module.Types.Count; i++)
+            {
+                TypeDef typeDef = Program.module.Types[i];
+                if (typeDef.HasInterfaces)
+                {
+                    for (int jic = 0; jic < typeDef.Interfaces.Count; jic++)
+                    {
+                        if (typeDef.Interfaces[jic].Interface != null)
+                        {
+                            if (typeDef.Interfaces[jic].Interface.Name.Contains(typeDef.Name) || typeDef.Name.Contains(typeDef.Interfaces[jic].Interface.Name))
+                            {
+                                Program.module.Types.RemoveAt(i);
+                                countofths++;
+                            }
+                        }
+                    }
+                }
+            }
+            for (int i = 0; i < module.CustomAttributes.Count; i++)
+            {
+                CustomAttribute attribute = module.CustomAttributes[i];
+                bool flag = attribute == null;
+                if (!flag)
+                {
+                    TypeDef type = attribute.AttributeType.ResolveTypeDef();
+                    bool flag2 = type == null;
+                    if (!flag2)
+                    {
+
+                        bool flag23123321 = type.Name == "ConfusedByAttribute";
+                        if (flag23123321)
+                        {
+                            lista(module).Remove(type);
+                            module.CustomAttributes.Remove(attribute);
+                            countofths++;
+                        }
+                        bool flag2123132123123213 = type.Name == "ZYXDNGuarder";
+                        if (flag2123132123123213)
+                        {
+                            lista(module).Remove(type);
+                            module.CustomAttributes.Remove(attribute);
+                            countofths++;
+                        }
+                        bool flag3 = type.Name == "YanoAttribute";
+                        if (flag3)
+                        {
+                            lista(module).Remove(type);
+                            module.CustomAttributes.Remove(attribute);
+                            countofths++;
+                        }
+                        bool flag4 = type.Name == "Xenocode.Client.Attributes.AssemblyAttributes.ProcessedByXenocode";
+                        if (flag4)
+                        {
+                            lista(module).Remove(type);
+                            module.CustomAttributes.Remove(attribute);
+                            countofths++;
+                        }
+                        bool flag5 = type.Name == "SmartAssembly.Attributes.PoweredByAttribute";
+                        if (flag5)
+                        {
+                            lista(module).Remove(type);
+                            module.CustomAttributes.Remove(attribute);
+                            countofths++;
+                        }
+                        bool flag6 = type.Name == "SecureTeam.Attributes.ObfuscatedByAgileDotNetAttribute";
+                        if (flag6)
+                        {
+                            lista(module).Remove(type);
+                            module.CustomAttributes.Remove(attribute);
+                            countofths++;
+                        }
+                        bool flag7 = type.Name == "ObfuscatedByGoliath";
+                        if (flag7)
+                        {
+                            lista(module).Remove(type);
+                            module.CustomAttributes.Remove(attribute);
+                            countofths++;
+                        }
+                        bool flag8 = type.Name == "NineRays.Obfuscator.Evaluation";
+                        if (flag8)
+                        {
+                            lista(module).Remove(type);
+                            module.CustomAttributes.Remove(attribute);
+                            countofths++;
+                        }
+                        bool flag9 = type.Name == "EMyPID_8234_";
+                        if (flag9)
+                        {
+                            lista(module).Remove(type);
+                            module.CustomAttributes.Remove(attribute);
+                            countofths++;
+                        }
+                        bool flag10 = type.Name == "DotfuscatorAttribute";
+                        if (flag10)
+                        {
+                            lista(module).Remove(type);
+                            module.CustomAttributes.Remove(attribute);
+                            countofths++;
+                        }
+                        bool flag11 = type.Name == "CryptoObfuscator.ProtectedWithCryptoObfuscatorAttribute";
+                        if (flag11)
+                        {
+                            lista(module).Remove(type);
+                            module.CustomAttributes.Remove(attribute);
+                            countofths++;
+                        }
+                        bool flag12 = type.Name == "BabelObfuscatorAttribute";
+                        if (flag12)
+                        {
+                            lista(module).Remove(type);
+                            module.CustomAttributes.Remove(attribute);
+                            countofths++;
+                        }
+                        bool flag13 = type.Name == ".NETGuard";
+                        if (flag13)
+                        {
+                            lista(module).Remove(type);
+                            module.CustomAttributes.Remove(attribute);
+                            countofths++;
+                        }
+                        bool flag14 = type.Name == "OrangeHeapAttribute";
+                        if (flag14)
+                        {
+                            lista(module).Remove(type);
+                            module.CustomAttributes.Remove(attribute);
+                            countofths++;
+                        }
+                        bool flag15 = type.Name == "WTF";
+                        if (flag15)
+                        {
+                            lista(module).Remove(type);
+                            module.CustomAttributes.Remove(attribute);
+                            countofths++;
+                        }
+                        bool flag16 = type.Name == "<ObfuscatedByDotNetPatcher>";
+                        if (flag16)
+                        {
+                            lista(module).Remove(type);
+                            module.CustomAttributes.Remove(attribute);
+                            countofths++;
+                        }
+                        bool duwggdyq3e6f7yqwsdas = type.Name == "SecureTeam.Attributes.ObfuscatedByCliSecureAttribute";
+                        if (duwggdyq3e6f7yqwsdas)
+                        {
+                            lista(module).Remove(type);
+                            module.CustomAttributes.Remove(attribute);
+                            countofths++;
+                        }
+                        bool sajdha8edy7128 = type.Name == "SmartAssembly.Attributes.PoweredByAttribute";
+                        if (sajdha8edy7128)
+                        {
+                            lista(module).Remove(type);
+                            module.CustomAttributes.Remove(attribute);
+                            countofths++;
+                        }
+                        bool flag1208312983 = type.Name == "Xenocode.Client.Attributes.AssemblyAttributes.ProcessedByXenocode";
+                        if (flag1208312983)
+                        {
+                            lista(module).Remove(type);
+                            module.CustomAttributes.Remove(attribute);
+                            countofths++;
+                        }
+                        if (type.Name == "OiCuntJollyGoodDayYeHavin_____________________________________________________")
+                        {
+                            lista(module).Remove(type);
+                            module.CustomAttributes.Remove(attribute);
+                            countofths++;
+                        }
+                        if (type.Name == "ProtectedWithCryptoObfuscatorAttribute")
+                        {
+                            lista(module).Remove(type);
+                            module.CustomAttributes.Remove(attribute);
+                            countofths++;
+                        }
+                        if (type.Name == "NetGuard")
+                        {
+                            lista(module).Remove(type);
+                            module.CustomAttributes.Remove(attribute);
+                            countofths++;
+                        }
+                        if (type.Name == "ZYXDNGuarder")
+                        {
+                            lista(module).Remove(type);
+                            module.CustomAttributes.Remove(attribute);
+                            countofths++;
+                        }
+                        if (type.Name == "DotfuscatorAttribute")
+                        {
+                            lista(module).Remove(type);
+                            module.CustomAttributes.Remove(attribute);
+                            countofths++;
+                        }
+                        if (type.Name == "SecureTeam.Attributes.ObfuscatedByAgileDotNetAttribute")
+                        {
+                            lista(module).Remove(type);
+                            module.CustomAttributes.Remove(attribute);
+                            countofths++;
+                        }
+                    }
+                }
+            }
+            foreach (var type in module.Types.ToList().Where(t => t.HasInterfaces))
+            {
+                for (var i = 0; i < type.Interfaces.Count; i++)
+                {
+                    if (type.Interfaces[i].Interface.Name.Contains(type.Name) || type.Name.Contains(type.Interfaces[i].Interface.Name))
+                    {
+                        module.Types.Remove(type);
+                        countofths++;
+                    }
+                }
+            }
+
+            List<string> fakeObfuscators = new List<string>()
+            {
+                "DotNetPatcherObfuscatorAttribute",
+                "DotNetPatcherPackerAttribute",
+                "DotfuscatorAttribute",
+                "ObfuscatedByGoliath",
+                "dotNetProtector",
+                "PoweredByAttribute",
+                "AssemblyInfoAttribute",
+                "BabelAttribute",
+                "CryptoObfuscator.ProtectedWithCryptoObfuscatorAttribute",
+                "Xenocode.Client.Attributes.AssemblyAttributes.ProcessedByXenocode",
+                "NineRays.Obfuscator.Evaluation",
+                "YanoAttribute",
+                "SmartAssembly.Attributes.PoweredByAttribute",
+                "NetGuard",
+                "SecureTeam.Attributes.ObfuscatedByCliSecureAttribute",
+                "Reactor",
+                "ZYXDNGuarder",
+                "CryptoObfuscator",
+                "MaxtoCodeAttribute",
+                ".NETReactorAttribute",
+                "BabelObfuscatorAttribute"
+            };
+            for (int i = 0; i < module.Types.ToList().Count; i++)
+            {
+                if (fakeObfuscators.Contains(module.Types[i].Name))
+                { 
+                     //UInt32 a = module.Types[i].MDToken.Raw;
+                     //TypeDef type = module.ResolveTypeDef(MDToken.ToRID(a));
+                     module.Types.Remove(module.Types[i]);              
+                     countofths++;
+                }
+            }
+        }
+        private static bool IsNopBranchTarget(MethodDef method, Instruction nopInstr)
+        {
+            var instr = method.Body.Instructions;
+            for (int i = 0; i < instr.Count; i++)
+            {
+                if (instr[i].OpCode.OperandType == OperandType.InlineBrTarget || instr[i].OpCode.OperandType == OperandType.ShortInlineBrTarget && instr[i].Operand != null)
+                {
+                    Instruction instruction2 = (Instruction)instr[i].Operand;
+                    if (instruction2 == nopInstr)
+                        return true;
+                }
+            }
+            return false;
+        }
+        public static int removed = 0;
+        public static void Execute(ModuleDefMD module)
+        {
+            foreach (var type in module.Types.Where(t => t.HasMethods))
+            {
+                foreach (var method in type.Methods.Where(m => m.HasBody && m.Body.HasInstructions))
+                {
+                    if (method.HasBody)
+                    {
+                        var instr = method.Body.Instructions;
+                        for (int i = 0; i < instr.Count; i++)
+                        {
+                            if (instr[i].OpCode == OpCodes.Nop &&
+                                !IsNopBranchTarget(method, instr[i]) &&
+                                !IsNopSwitchTarget(method, instr[i]) &&
+                                !IsNopExceptionHandlerTarget(method, instr[i]))
+                            {
+                                instr.RemoveAt(i);
+
+                                removed++;
+                                i--;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private static bool IsNopSwitchTarget(MethodDef method, Instruction nopInstr)
+        {
+            var instr = method.Body.Instructions;
+            for (int i = 0; i < instr.Count; i++)
+            {
+                if (instr[i].OpCode.OperandType == OperandType.InlineSwitch && instr[i].Operand != null)
+                {
+                    Instruction[] source = (Instruction[])instr[i].Operand;
+                    if (source.Contains(nopInstr))
+                        return true;
+                }
+            }
+            return false;
+        }
+
+        private static bool IsNopExceptionHandlerTarget(MethodDef method, Instruction nopInstr)
+        {
+            bool result;
+            if (!method.Body.HasExceptionHandlers)
+                result = false;
+            else
+            {
+                var exceptionHandlers = method.Body.ExceptionHandlers;
+                foreach (var exceptionHandler in exceptionHandlers)
+                {
+                    if (exceptionHandler.FilterStart == nopInstr ||
+                        exceptionHandler.HandlerEnd == nopInstr ||
+                        exceptionHandler.HandlerStart == nopInstr ||
+                        exceptionHandler.TryEnd == nopInstr ||
+                        exceptionHandler.TryStart == nopInstr)
+                        return true;
+                }
+                result = false;
+            }
+            return result;
+        }
+
+        // Token: 0x04000002 RID: 2
+        public static string Asmpath;
+
+        // Token: 0x04000003 RID: 3
+        public static ModuleDefMD module;
+
+        // Token: 0x04000004 RID: 4
+        public static Assembly asm;
+
+    }
+}
+
+
+
+================================================
+File: JunkRemover/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("Junk Remover")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("Junk Remover")]
+[assembly: AssemblyCopyright("Copyright Â©  2020")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Setting ComVisible to false makes the types in this assembly not visible
+// to COM components.  If you need to access a type in this assembly from
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("50b79818-1aed-42ef-b710-222236948b01")]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+
+================================================
+File: JunkRemover/bin/Debug/Junk Remover.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.6" />
+    </startup>
+</configuration>
+
+
+================================================
+File: JunkRemover/obj/Debug/ConsoleAppLmao.csproj.CopyComplete
+================================================
+
+
+
+================================================
+File: JunkRemover/obj/Debug/ConsoleAppLmao.csproj.CoreCompileInputs.cache
+================================================
+84448243cee3942cb5014aa1f41b5d99cebd8608
+
+
+
+================================================
+File: JunkRemover/obj/Debug/ConsoleAppLmao.csproj.FileListAbsolute.txt
+================================================
+C:\Users\devli\source\repos\Junk-Remover\JunkRemover\bin\Debug\ConsoleAppLmao.exe.config
+C:\Users\devli\source\repos\ConsoleAppLmao\JunkRemover\bin\Debug\ConsoleAppLmao.exe
+C:\Users\devli\source\repos\ConsoleAppLmao\JunkRemover\bin\Debug\ConsoleAppLmao.pdb
+C:\Users\devli\source\repos\ConsoleAppLmao\JunkRemover\bin\Debug\dnlib.dll
+C:\Users\devli\source\repos\ConsoleAppLmao\JunkRemover\obj\Debug\ConsoleAppLmao.csproj.CoreCompileInputs.cache
+C:\Users\devli\source\repos\ConsoleAppLmao\JunkRemover\obj\Debug\ConsoleAppLmao.csproj.CopyComplete
+C:\Users\devli\source\repos\ConsoleAppLmao\JunkRemover\obj\Debug\ConsoleAppLmao.exe
+C:\Users\devli\source\repos\ConsoleAppLmao\ConsoleAppLmao\obj\Debug\ConsoleAppLmao.pdb
+
+
+
+================================================
+File: JunkRemover/obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache
+================================================
+[Non-text file]
+
+
+================================================
+File: JunkRemover/obj/Debug/Junk Remover.csproj.CopyComplete
+================================================
+
+
+
+================================================
+File: JunkRemover/obj/Debug/Junk Remover.csproj.CoreCompileInputs.cache
+================================================
+52bf091efaacd2c95bf4148aacd432c944f4f044
+
+
+
+================================================
+File: JunkRemover/obj/Debug/Junk Remover.csproj.FileListAbsolute.txt
+================================================
+C:\Users\devli\source\repos\Junk Remover\Junk Remover\obj\Debug\Junk Remover.csproj.CoreCompileInputs.cache
+C:\Users\devli\source\repos\Junk Remover\Junk Remover\obj\Debug\Junk Remover.exe
+C:\Users\devli\source\repos\Junk Remover\Junk Remover\obj\Debug\Junk Remover.pdb
+C:\Users\devli\source\repos\Junk Remover\Junk Remover\bin\Debug\Junk Remover.exe.config
+C:\Users\devli\source\repos\Junk Remover\Junk Remover\bin\Debug\Junk Remover.exe
+C:\Users\devli\source\repos\Junk Remover\Junk Remover\bin\Debug\Junk Remover.pdb
+C:\Users\devli\source\repos\Junk Remover\Junk Remover\bin\Debug\dnlib.dll
+C:\Users\devli\source\repos\Junk Remover\Junk Remover\obj\Debug\Junk Remover.csproj.CopyComplete
+
+
+
+================================================
+File: JunkRemover/obj/Debug/TemporaryGeneratedFile_036C0B5B-1481-4323-8D20-8F5ADCB23D92.cs
+================================================
+
+
+
+================================================
+File: JunkRemover/obj/Debug/TemporaryGeneratedFile_5937a670-0e60-4077-877b-f7221da3dda1.cs
+================================================
+
+
+
+================================================
+File: JunkRemover/obj/Debug/TemporaryGeneratedFile_E7A71F73-0F8D-4B9B-B56E-8E70B10BC5D3.cs
+================================================
+
+

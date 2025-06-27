@@ -1,0 +1,221 @@
+Directory structure:
+└── ioncodes-beeless/
+    ├── beeless.sln
+    └── beeless/
+        ├── App.config
+        ├── Program.cs
+        ├── beeless.csproj
+        └── Properties/
+            └── AssemblyInfo.cs
+
+================================================
+File: beeless.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "beeless", "beeless\beeless.csproj", "{22BC5FEF-7573-4A3F-8D35-BA2870F274B8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{22BC5FEF-7573-4A3F-8D35-BA2870F274B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22BC5FEF-7573-4A3F-8D35-BA2870F274B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22BC5FEF-7573-4A3F-8D35-BA2870F274B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22BC5FEF-7573-4A3F-8D35-BA2870F274B8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: beeless/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.5.2" />
+    </startup>
+</configuration>
+
+
+================================================
+File: beeless/Program.cs
+================================================
+using dnlib.DotNet;
+using System.IO;
+using System.Linq;
+
+namespace BeelessTest
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            ModuleDefMD module = ModuleDefMD.Load(args[0]);
+            int fields = 0;
+            int properties = 0;
+            foreach (var type in module.Types)
+            {
+                var methods = 0;
+                foreach (var method in type.Methods)
+                {
+                    if (!method.Name.String.Any(char.IsLower))
+                    {
+                        method.Name = "method_" + methods;
+                        methods++;
+                    }
+
+                    var paramaters = 0;
+                    foreach (var paramater in method.Parameters)
+                    {
+                        if (!paramater.Name.Any(char.IsLower))
+                        {
+                            paramater.Name = "param_" + paramaters;
+                            paramaters++;
+                        }
+                    }
+                }
+
+                foreach (var field in type.Fields)
+                {
+                    if (!field.Name.String.Any(char.IsLower))
+                    {
+                        field.Name = "field_" + fields;
+                        fields++;
+                    }
+                }
+
+                foreach (var property in type.Properties)
+                {
+                    if (!property.Name.String.Any(char.IsLower))
+                    {
+                        property.Name = "property_" + properties;
+                        properties++;
+                    }
+                }
+            }
+            module.Write(Path.GetFileNameWithoutExtension(args[0]) + "_cleaned" + Path.GetExtension(args[0]));
+        }
+    }
+}
+
+
+
+================================================
+File: beeless/beeless.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{22BC5FEF-7573-4A3F-8D35-BA2870F274B8}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>beeless</RootNamespace>
+    <AssemblyName>beeless</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib">
+      <HintPath>..\..\dnpatch\Libraries\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
+
+
+================================================
+File: beeless/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following 
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("beeless")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("beeless")]
+[assembly: AssemblyCopyright("Copyright Â©  2017")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Setting ComVisible to false makes the types in this assembly not visible 
+// to COM components.  If you need to access a type in this assembly from 
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("22bc5fef-7573-4a3f-8d35-ba2870f274b8")]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version 
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers 
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+

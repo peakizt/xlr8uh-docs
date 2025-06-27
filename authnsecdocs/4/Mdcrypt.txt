@@ -1,0 +1,984 @@
+Directory structure:
+└── wwh1004-mdcrypt/
+    ├── README.md
+    ├── Mdcrypt.sln
+    ├── .editorconfig
+    └── Mdcrypt/
+        ├── Mdcrypt.csproj
+        ├── MdcryptContext.cs
+        ├── MdcryptEngine.cs
+        ├── MdcryptException.cs
+        ├── MdcryptUtils.cs
+        ├── Protection.cs
+        ├── ProtectionParameters.cs
+        ├── ProtectionPhase.cs
+        ├── ProtectionPipeline.cs
+        └── UnreachableException.cs
+
+================================================
+File: README.md
+================================================
+# Mdcrypt
+[WIP] A next-generation protector for .NET applications (.NET Framework, .NET Core, and more)
+
+## 特性（暂定）
+|名称|强度|开源|
+|:------|:---|:----|
+|代码虚拟化|★★★★★|?|
+|高级JIT保护|★★★★★|×|
+|代码抽取|★★★★|√|
+|类型粉碎|★★★★|√|
+|高级垃圾代码|★★★|√|
+|高级控制流混淆|★★★|√|
+|反调试|★★★|?|
+|名称混淆|★★|√|
+|反转储|★★|√|
+
+为保证不被静态还原，部分组件将闭源！
+
+暂定暑期开工。
+
+
+
+================================================
+File: Mdcrypt.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29709.97
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mdcrypt", "Mdcrypt\Mdcrypt.csproj", "{8066C081-3E88-4A80-B0E1-1565EF21BF73}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8066C081-3E88-4A80-B0E1-1565EF21BF73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8066C081-3E88-4A80-B0E1-1565EF21BF73}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8066C081-3E88-4A80-B0E1-1565EF21BF73}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8066C081-3E88-4A80-B0E1-1565EF21BF73}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F888BC70-BC95-4A80-A80B-7E1DF5BC61F3}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: .editorconfig
+================================================
+# Remove the line below if you want to inherit .editorconfig settings from higher directories
+root = true
+
+[*]
+charset = utf-8
+end_of_line = crlf  
+indent_style = tab
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.xaml]
+indent_style = space
+
+# C# files
+[*.cs]
+
+#### .NET Coding Conventions ####
+
+# this. and Me. preferences
+dotnet_style_qualification_for_event = false:silent
+dotnet_style_qualification_for_field = false:silent
+dotnet_style_qualification_for_method = false:silent
+dotnet_style_qualification_for_property = false:silent
+
+# Language keywords vs BCL types preferences
+dotnet_style_predefined_type_for_locals_parameters_members = true:silent
+dotnet_style_predefined_type_for_member_access = true:silent
+
+# Parentheses preferences
+dotnet_style_parentheses_in_arithmetic_binary_operators = always_for_clarity:silent
+dotnet_style_parentheses_in_other_binary_operators = always_for_clarity:silent
+dotnet_style_parentheses_in_other_operators = never_if_unnecessary:silent
+dotnet_style_parentheses_in_relational_binary_operators = always_for_clarity:silent
+
+# Modifier preferences
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:silent
+
+# Expression-level preferences
+csharp_style_deconstructed_variable_declaration = true:suggestion
+csharp_style_inlined_variable_declaration = false:suggestion
+csharp_style_throw_expression = false:suggestion
+dotnet_style_coalesce_expression = true:suggestion
+dotnet_style_collection_initializer = true:suggestion
+dotnet_style_explicit_tuple_names = true:suggestion
+dotnet_style_null_propagation = true:suggestion
+dotnet_style_object_initializer = true:suggestion
+dotnet_style_prefer_auto_properties = false:silent
+dotnet_style_prefer_conditional_expression_over_assignment = true:silent
+dotnet_style_prefer_conditional_expression_over_return = true:silent
+dotnet_style_prefer_inferred_anonymous_type_member_names = true:suggestion
+dotnet_style_prefer_inferred_tuple_names = true:suggestion
+dotnet_style_prefer_is_null_check_over_reference_equality_method = true:suggestion
+
+# Field preferences
+dotnet_style_readonly_field = true:suggestion
+
+#### C# Coding Conventions ####
+
+# var preferences
+csharp_style_var_elsewhere = false:silent
+csharp_style_var_for_built_in_types = false:silent
+csharp_style_var_when_type_is_apparent = false:silent
+
+# Expression-bodied members
+csharp_style_expression_bodied_accessors = true:silent
+csharp_style_expression_bodied_constructors = false:silent
+csharp_style_expression_bodied_indexers = true:silent
+csharp_style_expression_bodied_lambdas = true:silent
+csharp_style_expression_bodied_methods = false:silent
+csharp_style_expression_bodied_operators = false:silent
+csharp_style_expression_bodied_properties = true:silent
+
+# Pattern matching preferences
+csharp_style_pattern_matching_over_as_with_null_check = false:suggestion
+csharp_style_pattern_matching_over_is_with_cast_check = false:suggestion
+
+# Null-checking preferences
+csharp_style_conditional_delegate_call = true:suggestion
+
+# Modifier preferences
+csharp_preferred_modifier_order = public,private,protected,internal,static,extern,new,virtual,abstract,sealed,override,readonly,unsafe,volatile,async
+
+# Code-block preferences
+csharp_prefer_braces = false:silent
+
+# Expression-level preferences
+csharp_prefer_simple_default_expression = true:suggestion
+csharp_style_pattern_local_over_anonymous_function = true:suggestion
+
+#### C# Formatting Rules ####
+
+# New line preferences
+csharp_new_line_before_catch = true
+csharp_new_line_before_else = true
+csharp_new_line_before_finally = true
+csharp_new_line_before_members_in_anonymous_types = true
+csharp_new_line_before_members_in_object_initializers = true
+csharp_new_line_before_open_brace = none
+csharp_new_line_between_query_expression_clauses = false
+
+# Indentation preferences
+csharp_indent_block_contents = true
+csharp_indent_braces = false
+csharp_indent_case_contents = true
+csharp_indent_case_contents_when_block = true
+csharp_indent_labels = one_less_than_current
+csharp_indent_switch_labels = false
+
+# Space preferences
+csharp_space_after_cast = false
+csharp_space_after_colon_in_inheritance_clause = true
+csharp_space_after_comma = true
+csharp_space_after_dot = false
+csharp_space_after_keywords_in_control_flow_statements = true
+csharp_space_after_semicolon_in_for_statement = true
+csharp_space_around_binary_operators = before_and_after
+csharp_space_around_declaration_statements = false
+csharp_space_before_colon_in_inheritance_clause = true
+csharp_space_before_comma = false
+csharp_space_before_dot = false
+csharp_space_before_open_square_brackets = false
+csharp_space_before_semicolon_in_for_statement = false
+csharp_space_between_empty_square_brackets = false
+csharp_space_between_method_call_empty_parameter_list_parentheses = false
+csharp_space_between_method_call_name_and_opening_parenthesis = false
+csharp_space_between_method_call_parameter_list_parentheses = false
+csharp_space_between_method_declaration_empty_parameter_list_parentheses = false
+csharp_space_between_method_declaration_name_and_open_parenthesis = false
+csharp_space_between_method_declaration_parameter_list_parentheses = false
+csharp_space_between_parentheses = false
+csharp_space_between_square_brackets = false
+
+# Wrapping preferences
+csharp_preserve_single_line_blocks = true
+csharp_preserve_single_line_statements = true
+
+
+
+================================================
+File: Mdcrypt/Mdcrypt.csproj
+================================================
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<Title>$(ProjectName)</Title>
+		<Version>1.0.0.0</Version>
+		<Copyright>Copyright Â© 2020 Wwh</Copyright>
+	</PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>netstandard2.1</TargetFramework>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<Nullable>enable</Nullable>
+		<OutputPath>..\bin\$(Configuration)</OutputPath>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="dnlib" Version="3.3.1" />
+	</ItemGroup>
+</Project>
+
+
+
+================================================
+File: Mdcrypt/MdcryptContext.cs
+================================================
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using dnlib.DotNet;
+
+namespace Mdcrypt {
+	/// <summary>
+	/// Mdcrypt context
+	/// </summary>
+	public sealed class MdcryptContext {
+		/// <summary>
+		/// Manifest assembly
+		/// </summary>
+		public AssemblyDef Assembly { get; }
+
+		/// <summary>
+		/// Manifest module in <see cref="Assembly"/>
+		/// </summary>
+		public ModuleDefMD ManifestModule => (ModuleDefMD)Assembly.ManifestModule;
+
+		/// <summary>
+		/// Additional assemblies, which will be merged or embedded
+		/// </summary>
+		public IList<AssemblyDef> AdditionalAssemblies { get; } = new List<AssemblyDef>();
+
+		/// <summary>
+		/// Gets the current processing pipeline.
+		/// </summary>
+		public ProtectionPipeline Pipeline { get;  }
+
+		/// <summary>
+		///	Gets the token used to indicate cancellation
+		/// </summary>
+		public CancellationToken CancellationToken { get; }
+
+		/// <summary>
+		/// Constructor
+		/// </summary>
+		/// <param name="module">The module to obfuscate and encrypt</param>
+		/// <param name="cancellationToken">Cancellation token</param>
+		public MdcryptContext(ModuleDefMD module, CancellationToken cancellationToken) {
+			if (module is null)
+				throw new ArgumentNullException(nameof(module));
+
+			Assembly = module.Assembly;
+			Pipeline = new ProtectionPipeline();
+			CancellationToken = cancellationToken;
+		}
+
+		/// <summary>
+		/// Throws a System.OperationCanceledException if protection process has been canceled.
+		/// </summary>
+		/// <exception cref="OperationCanceledException">The protection process is canceled.</exception>
+		public void CheckCancellation() {
+			CancellationToken.ThrowIfCancellationRequested();
+		}
+	}
+}
+
+
+
+================================================
+File: Mdcrypt/MdcryptEngine.cs
+================================================
+using System;
+
+namespace Mdcrypt {
+	/// <summary>
+	/// Mdcrypt engine
+	/// </summary>
+	public sealed class MdcryptEngine {
+		/// <summary>
+		/// Context
+		/// </summary>
+		public MdcryptContext Context { get; }
+
+		/// <summary>
+		/// Constructor
+		/// </summary>
+		/// <param name="context">Context for engine</param>
+		public MdcryptEngine(MdcryptContext context) {
+			if (context is null)
+				throw new ArgumentNullException(nameof(context));
+
+			Context = context;
+		}
+	}
+}
+
+
+
+================================================
+File: Mdcrypt/MdcryptException.cs
+================================================
+/*
+	Copyright (c) 2015 Ki
+
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included in
+	all copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+	THE SOFTWARE.
+*/
+
+using System;
+
+namespace Mdcrypt {
+	/// <summary>
+	/// The exception that is thrown when a handled error occurred during the protection process.
+	/// </summary>
+#pragma warning disable CA1032 // Implement standard exception constructors
+	public class MdcryptException : Exception {
+#pragma warning restore CA1032 // Implement standard exception constructors
+		/// <summary>
+		///     Initializes a new instance of the <see cref="MdcryptException" /> class.
+		/// </summary>
+		/// <param name="innerException">The inner exception, or null if no exception is associated with the error.</param>
+		public MdcryptException(Exception innerException) : base("Exception occurred during the protection process.", innerException) {
+		}
+	}
+}
+
+
+
+================================================
+File: Mdcrypt/MdcryptUtils.cs
+================================================
+using dnlib.DotNet;
+
+namespace Mdcrypt {
+	/// <summary>
+	/// Mdcrypt utilities
+	/// </summary>
+	public static class MdcryptUtils {
+		/// <summary>
+		/// Load <see cref="ModuleDefMD"/>
+		/// </summary>
+		/// <param name="data">.NET module/assembly</param>
+		/// <param name="assemblyResolver">Assembly resolver</param>
+		/// <returns></returns>
+		public static ModuleDefMD LoadModule(byte[] data, out AssemblyResolver assemblyResolver) {
+			assemblyResolver = new AssemblyResolver();
+			var context = new ModuleContext(assemblyResolver);
+			assemblyResolver.EnableTypeDefCache = false;
+			assemblyResolver.DefaultModuleContext = context;
+			var options = new ModuleCreationOptions() {
+				Context = context,
+				TryToLoadPdbFromDisk = false
+			};
+			return ModuleDefMD.Load(data, options);
+		}
+	}
+}
+
+
+
+================================================
+File: Mdcrypt/Protection.cs
+================================================
+/*
+	Copyright (c) 2015 Ki
+
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included in
+	all copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+	THE SOFTWARE.
+*/
+
+using System;
+
+namespace Mdcrypt {
+	/// <summary>
+	/// Various presets of protections.
+	/// </summary>
+	public enum ProtectionPreset {
+		/// <summary> The protection does not belong to any preset. </summary>
+		None = 0,
+
+		/// <summary> The protection provides basic security. </summary>
+		Minimum = 1,
+
+		/// <summary> The protection provides normal security for public release. </summary>
+		Normal = 2,
+
+		/// <summary> The protection provides better security with observable performance impact. </summary>
+		Aggressive = 3,
+
+		/// <summary> The protection provides strongest security with possible incompatibility. </summary>
+		Maximum = 4
+	}
+
+	/// <summary>
+	/// Indicates the <see cref="Protection" /> must initialize before the specified protections.
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Class)]
+	public sealed class BeforeProtectionAttribute : Attribute {
+		/// <summary>
+		/// Gets the full IDs of the specified protections.
+		/// </summary>
+		/// <value>The IDs of protections.</value>
+		public string[] Ids { get; }
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="BeforeProtectionAttribute" /> class.
+		/// </summary>
+		/// <param name="ids">The full IDs of the specified protections.</param>
+		public BeforeProtectionAttribute(params string[] ids) {
+			Ids = ids;
+		}
+	}
+
+	/// <summary>
+	/// Indicates the <see cref="Protection" /> must initialize after the specified protections.
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Class)]
+	public sealed class AfterProtectionAttribute : Attribute {
+		/// <summary>
+		/// Gets the full IDs of the specified protections.
+		/// </summary>
+		/// <value>The IDs of protections.</value>
+		public string[] Ids { get; }
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="BeforeProtectionAttribute" /> class.
+		/// </summary>
+		/// <param name="ids">The full IDs of the specified protections.</param>
+		public AfterProtectionAttribute(params string[] ids) {
+			Ids = ids;
+		}
+	}
+
+	/// <summary>
+	/// Base class of Mdcrypt protections.
+	/// </summary>
+	/// <remarks>
+	/// A parameterless constructor must exists in derived classes to enable plugin discovery.
+	/// </remarks>
+	public abstract class Protection {
+		/// <summary>
+		/// Gets the identifier of component used by users.
+		/// </summary>
+		/// <value>The identifier of component.</value>
+		public abstract string Id { get; }
+
+		/// <summary>
+		/// Gets the name of component.
+		/// </summary>
+		/// <value>The name of component.</value>
+		public abstract string Name { get; }
+
+		/// <summary>
+		/// Gets the description of component.
+		/// </summary>
+		/// <value>The description of component.</value>
+		public abstract string Description { get; }
+
+		/// <summary>
+		/// Gets the preset this protection is in.
+		/// </summary>
+		/// <value>The protection's preset.</value>
+		public abstract ProtectionPreset Preset { get; }
+	}
+}
+
+
+
+================================================
+File: Mdcrypt/ProtectionParameters.cs
+================================================
+/*
+	Copyright (c) 2015 Ki
+
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included in
+	all copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+	THE SOFTWARE.
+*/
+
+using System;
+using System.Collections.Generic;
+using dnlib.DotNet;
+
+namespace Mdcrypt {
+	/// <summary>
+	/// Identifies a member that is a setting item.
+	/// </summary>
+	public sealed class ProtectionSettingAttribute : Attribute {
+	}
+
+	/// <summary>
+	/// Protection settings for a certain component
+	/// </summary>
+	public abstract class ProtectionSettings {
+	}
+
+	/// <summary>
+	/// Parameters of <see cref="Protection" />.
+	/// </summary>
+	public sealed class ProtectionParameters {
+		/// <summary>
+		/// Gets the targets of protection.
+		/// Possible targets are module, types, methods, fields, events, properties.
+		/// </summary>
+		/// <value>A list of protection targets.</value>
+		public IList<IDnlibDef> Targets { get; }
+
+		/// <summary>
+		/// Get default settings of the protection.
+		/// </summary>
+		public ProtectionSettings DefaultSettings { get; }
+
+		/// <summary>
+		/// Get overridden settings of the specified target.
+		/// </summary>
+		public IDictionary<IDnlibDef, ProtectionSettings> OverrideSettings { get; }
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ProtectionParameters" /> class.
+		/// </summary>
+		/// <param name="targets">The protection targets.</param>
+		/// <param name="defaultSettings">The protection default settings</param>
+		internal ProtectionParameters(IList<IDnlibDef> targets, ProtectionSettings defaultSettings) {
+			if (targets is null)
+				throw new ArgumentNullException(nameof(targets));
+			if (defaultSettings is null)
+				throw new ArgumentNullException(nameof(defaultSettings));
+
+			Targets = targets;
+			DefaultSettings = defaultSettings;
+			OverrideSettings = new Dictionary<IDnlibDef, ProtectionSettings>();
+		}
+	}
+}
+
+
+
+================================================
+File: Mdcrypt/ProtectionPhase.cs
+================================================
+/*
+	Copyright (c) 2015 Ki
+
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included in
+	all copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+	THE SOFTWARE.
+*/
+
+using System;
+
+namespace Mdcrypt {
+	/// <summary>
+	/// Targets of protection.
+	/// </summary>
+	[Flags]
+	public enum ProtectionTargets {
+		/// <summary> Type definitions. </summary>
+		Types = 1,
+
+		/// <summary> Method definitions. </summary>
+		Methods = 2,
+
+		/// <summary> Field definitions. </summary>
+		Fields = 4,
+
+		/// <summary> Event definitions. </summary>
+		Events = 8,
+
+		/// <summary> Property definitions. </summary>
+		Properties = 16,
+
+		/// <summary> All member definitions (i.e. type, methods, fields, events and properties). </summary>
+		AllMembers = Types | Methods | Fields | Events | Properties,
+
+		/// <summary> Module definitions. </summary>
+		Modules = 32,
+
+		/// <summary> All definitions (i.e. All member definitions and modules). </summary>
+		AllDefinitions = AllMembers | Modules
+	}
+
+	/// <summary>
+	/// Base class of protection phases.
+	/// </summary>
+	public abstract class ProtectionPhase {
+		/// <summary>
+		/// Gets the parent component.
+		/// </summary>
+		/// <value>The parent component.</value>
+		public Protection Parent { get; }
+
+		/// <summary>
+		/// Gets the name of the phase.
+		/// </summary>
+		/// <value>The name of phase.</value>
+		public abstract string Name { get; }
+
+		/// <summary>
+		/// Gets the targets of protection.
+		/// </summary>
+		/// <value>The protection targets.</value>
+		public abstract ProtectionTargets Targets { get; }
+
+		/// <summary>
+		/// Gets a value indicating whether this phase process all targets, not just the targets that requires the component.
+		/// </summary>
+		/// <value><c>true</c> if this phase process all targets; otherwise, <c>false</c>.</value>
+		public virtual bool ProcessAll => false;
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ProtectionPhase" /> class.
+		/// </summary>
+		/// <param name="parent">The parent component of this phase.</param>
+		protected ProtectionPhase(Protection parent) {
+			Parent = parent;
+		}
+
+		/// <summary>
+		/// Executes the protection phase.
+		/// </summary>
+		/// <param name="context">The working context.</param>
+		/// <param name="parameters">The parameters of protection.</param>
+		protected abstract void Execute(MdcryptContext context, ProtectionParameters parameters);
+	}
+}
+
+
+
+================================================
+File: Mdcrypt/ProtectionPipeline.cs
+================================================
+/*
+	Copyright (c) 2015 Ki
+
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included in
+	all copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+	THE SOFTWARE.
+*/
+
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using dnlib.DotNet;
+
+namespace Mdcrypt {
+	/// <summary>
+	/// Various stages in <see cref="ProtectionPipeline" />.
+	/// </summary>
+	public enum PipelineStage {
+		/// <summary>
+		/// Mdcrypt engine inspects the loaded modules and makes necessary changes.
+		/// This stage occurs only once per pipeline run.
+		/// </summary>
+		Inspection,
+
+		/// <summary>
+		/// Mdcrypt engine merges the assemblies if merger is present.
+		/// This stage occurs only once per pipeline run.
+		/// </summary>
+		Merge,
+
+		/// <summary>
+		/// Mdcrypt engine begins to process a module.
+		/// This stage occurs once per module.
+		/// </summary>
+		BeginModule,
+
+		/// <summary>
+		/// Mdcrypt engine processes a module.
+		/// This stage occurs once per module.
+		/// </summary>
+		ProcessModule,
+
+		/// <summary>
+		/// Mdcrypt engine optimizes opcodes of the method bodys.
+		/// This stage occurs once per module.
+		/// </summary>
+		OptimizeMethods,
+
+		/// <summary>
+		/// Mdcrypt engine finishes processing a module.
+		/// This stage occurs once per module.
+		/// </summary>
+		EndModule,
+
+		/// <summary>
+		/// Mdcrypt engine writes the module to byte array.
+		/// This stage occurs once per module, after all processing of modules are completed.
+		/// </summary>
+		WriteModule,
+
+		///// <summary>
+		///// Mdcrypt engine generates debug symbols.
+		///// This stage occurs only once per pipeline run.
+		///// </summary>
+		//Debug,
+
+		/// <summary>
+		/// Mdcrypt engine packs up the output if packer is present.
+		/// This stage occurs only once per pipeline run.
+		/// </summary>
+		Pack,
+
+		/// <summary>
+		/// Mdcrypt engine saves the output.
+		/// This stage occurs only once per pipeline run.
+		/// </summary>
+		SaveModule
+	}
+
+	/// <summary>
+	/// Protection processing pipeline.
+	/// </summary>
+	public class ProtectionPipeline {
+		private readonly Dictionary<PipelineStage, List<ProtectionPhase>> postStage;
+		private readonly Dictionary<PipelineStage, List<ProtectionPhase>> preStage;
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ProtectionPipeline" /> class.
+		/// </summary>
+		internal ProtectionPipeline() {
+			var stages = (PipelineStage[])Enum.GetValues(typeof(PipelineStage));
+			preStage = stages.ToDictionary(stage => stage, _ => new List<ProtectionPhase>());
+			postStage = stages.ToDictionary(stage => stage, _ => new List<ProtectionPhase>());
+		}
+
+		/// <summary>
+		/// Inserts the phase into pre-processing pipeline of the specified stage.
+		/// </summary>
+		/// <param name="stage">The pipeline stage.</param>
+		/// <param name="phase">The protection phase.</param>
+		public void InsertPreStage(PipelineStage stage, ProtectionPhase phase) {
+			preStage[stage].Add(phase);
+		}
+
+		/// <summary>
+		/// Inserts the phase into post-processing pipeline of the specified stage.
+		/// </summary>
+		/// <param name="stage">The pipeline stage.</param>
+		/// <param name="phase">The protection phase.</param>
+		public void InsertPostStage(PipelineStage stage, ProtectionPhase phase) {
+			postStage[stage].Add(phase);
+		}
+
+		/// <summary>
+		/// Gets the phase with the specified type in the pipeline.
+		/// </summary>
+		/// <typeparam name="T">The type of the phase.</typeparam>
+		/// <param name="phase">The phase with specified type in the pipeline.</param>
+		/// <returns></returns>
+		public bool TryGetPhase<T>([NotNullWhen(true)] out T? phase) where T : ProtectionPhase {
+			foreach (var phases in preStage.Values)
+				foreach (ProtectionPhase item in phases) {
+					if (item is T t) {
+						phase = t;
+						return true;
+					}
+				}
+			foreach (var phases in postStage.Values)
+				foreach (ProtectionPhase item in phases) {
+					if (item is T t) {
+						phase = t;
+						return true;
+					}
+				}
+			phase = default;
+			return false;
+		}
+
+		///// <summary>
+		///// Execute the specified pipeline stage with pre-processing and post-processing.
+		///// </summary>
+		///// <param name="stage">The pipeline stage.</param>
+		///// <param name="func">The stage function.</param>
+		///// <param name="targets">The target list of the stage.</param>
+		///// <param name="context">The working context.</param>
+		//internal void ExecuteStage(PipelineStage stage, Action<MdcryptContext> func, Func<IList<IDnlibDef>> targets, MdcryptContext context) {
+		//	foreach (ProtectionPhase pre in preStage[stage]) {
+		//		context.CheckCancellation();
+		//		context.Logger.DebugFormat("Executing '{0}' phase...", pre.Name);
+		//		pre.Execute(context, new ProtectionParameters(pre.Parent, Filter(context, targets(), pre)));
+		//	}
+		//	context.CheckCancellation();
+		//	func(context);
+		//	context.CheckCancellation();
+		//	foreach (ProtectionPhase post in postStage[stage]) {
+		//		context.Logger.DebugFormat("Executing '{0}' phase...", post.Name);
+		//		post.Execute(context, new ProtectionParameters(post.Parent, Filter(context, targets(), post)));
+		//		context.CheckCancellation();
+		//	}
+		//}
+
+		///// <summary>
+		///// Returns only the targets with the specified type and used by specified component.
+		///// </summary>
+		///// <param name="context">The working context.</param>
+		///// <param name="targets">List of targets.</param>
+		///// <param name="phase">The component phase.</param>
+		///// <returns>Filtered targets.</returns>
+		//private static IList<IDnlibDef> Filter(MdcryptContext context, IList<IDnlibDef> targets, ProtectionPhase phase) {
+		//	ProtectionTargets targetType = phase.Targets;
+
+		//	IEnumerable<IDnlibDef> filter = targets;
+		//	if ((targetType & ProtectionTargets.Modules) == 0)
+		//		filter = filter.Where(def => !(def is ModuleDef));
+		//	if ((targetType & ProtectionTargets.Types) == 0)
+		//		filter = filter.Where(def => !(def is TypeDef));
+		//	if ((targetType & ProtectionTargets.Methods) == 0)
+		//		filter = filter.Where(def => !(def is MethodDef));
+		//	if ((targetType & ProtectionTargets.Fields) == 0)
+		//		filter = filter.Where(def => !(def is FieldDef));
+		//	if ((targetType & ProtectionTargets.Properties) == 0)
+		//		filter = filter.Where(def => !(def is PropertyDef));
+		//	if ((targetType & ProtectionTargets.Events) == 0)
+		//		filter = filter.Where(def => !(def is EventDef));
+
+		//	if (phase.ProcessAll)
+		//		return filter.ToList();
+		//	return filter.Where(def => {
+		//		ProtectionSettings parameters = ProtectionParameters.GetParameters(context, def);
+		//		Debug.Assert(parameters != null);
+		//		if (parameters == null) {
+		//			context.Logger.ErrorFormat("'{0}' not marked for obfuscation, possibly a bug.", def);
+		//			throw new MdcryptException(null);
+		//		}
+		//		return parameters.ContainsKey(phase.Parent);
+		//	}).ToList();
+		//}
+	}
+}
+
+
+
+================================================
+File: Mdcrypt/UnreachableException.cs
+================================================
+/*
+	Copyright (c) 2015 Ki
+
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included in
+	all copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+	THE SOFTWARE.
+*/
+
+using System;
+
+namespace Mdcrypt {
+	/// <summary>
+	/// The exception that is thrown when supposedly unreachable code is executed.
+	/// </summary>
+#pragma warning disable CA1032 // Implement standard exception constructors
+	public sealed class UnreachableException : SystemException {
+#pragma warning restore CA1032 // Implement standard exception constructors
+		/// <summary>
+		/// Initializes a new instance of the <see cref="UnreachableException" /> class.
+		/// </summary>
+		public UnreachableException() : base("Unreachable code reached.") {
+		}
+	}
+}
+
+

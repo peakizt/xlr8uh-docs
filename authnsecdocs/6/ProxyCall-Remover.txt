@@ -1,0 +1,1423 @@
+Directory structure:
+└── kaidoz-proxycall-remover/
+    ├── README.md
+    ├── ProxyCall-Remover.sln
+    └── ProxyCall-Remover/
+        ├── App.config
+        ├── App.xaml
+        ├── App.xaml.cs
+        ├── MainWindow.xaml
+        ├── MainWindow.xaml.cs
+        ├── OptionsUnpack.cs
+        ├── ProxyCall-Remover.csproj
+        ├── packages.config
+        ├── Deobfuscation/
+        │   ├── AdvancedProxyCall.cs
+        │   ├── IDeobfuscator.cs
+        │   └── ProxyCallRemover.cs
+        └── Properties/
+            ├── AssemblyInfo.cs
+            ├── Resources.Designer.cs
+            ├── Resources.resx
+            ├── Settings.Designer.cs
+            └── Settings.settings
+
+================================================
+File: README.md
+================================================
+# ProxyCall-Remover
+Deobfuscator for remove proxy calls methods
+
+How work:
+1) Deobfuscation ctrl flow and other(de4dot maybe)
+2) Drop assembly and unpack proxy calls
+
+Differences from Proxy Call Fixer from Davi Kore:
+1) Works without error - catch more proxy calls methods
+2) Well-designed code design for any changes
+3) Dark theme:)
+
+
+
+================================================
+File: ProxyCall-Remover.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30413.136
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProxyCall-Remover", "ProxyCall-Remover\ProxyCall-Remover.csproj", "{09D5E76F-C557-4E1F-8CD0-80FB3711A066}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{09D5E76F-C557-4E1F-8CD0-80FB3711A066}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09D5E76F-C557-4E1F-8CD0-80FB3711A066}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09D5E76F-C557-4E1F-8CD0-80FB3711A066}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09D5E76F-C557-4E1F-8CD0-80FB3711A066}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D3CB2F64-B014-4946-BAA1-3736862F3505}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: ProxyCall-Remover/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.8" />
+    </startup>
+  <runtime>
+    <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
+      <dependentAssembly>
+        <assemblyIdentity name="Microsoft.Xaml.Behaviors" publicKeyToken="b03f5f7f11d50a3a" culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-1.1.0.0" newVersion="1.1.0.0" />
+      </dependentAssembly>
+    </assemblyBinding>
+  </runtime>
+</configuration>
+
+
+
+================================================
+File: ProxyCall-Remover/App.xaml
+================================================
+ï»¿<Application x:Class="ProxyCall_Remover.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:ProxyCall_Remover"
+             Startup="Application_Startup"
+    xmlns:wpfPlus="clr-namespace:WpfPlus;assembly=WpfPlus">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <wpfPlus:DarkTheme />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
+
+
+================================================
+File: ProxyCall-Remover/App.xaml.cs
+================================================
+﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Data;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
+
+namespace ProxyCall_Remover
+{
+    /// <summary>
+    /// Логика взаимодействия для App.xaml
+    /// </summary>
+    public partial class App : Application
+    {
+        private void Application_Startup(object sender, StartupEventArgs e)
+        {
+            new MainWindow().ShowDialog();
+        }
+    }
+}
+
+
+================================================
+File: ProxyCall-Remover/MainWindow.xaml
+================================================
+ï»¿<Window x:Class="ProxyCall_Remover.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ProxyCall_Remover"
+        mc:Ignorable="d"
+        Title="Proxy Call Remover by Kaidoz" Height="250" Width="400" Style="{DynamicResource FlatWindowStyle}" ResizeMode="NoResize" AllowDrop="True" Drop="Window_Drop">
+    <Grid>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition Height="3*" />
+            </Grid.RowDefinitions>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="350" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <TextBox x:Name="textBoxPath" Height="25" HorizontalAlignment="Center" VerticalAlignment="Center" Width="340" />
+                <Button x:Name="ButtonSelectPath" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Width="25" Height="25" Content="..." Click="ButtonSelectPath_Click" />
+                <Rectangle x:Name="RectangleDrop" Fill="#00000000" Drop="Window_Drop" />
+            </Grid>
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <CheckBox Content="Remove junk codes" HorizontalAlignment="Center" VerticalAlignment="Center" Click="CheckBox_Click" />
+                <Button x:Name="ButtonUnpack" Grid.Column="1" Width="100" Height="30" Content="Unpack" Click="ButtonUnpack_Click" />
+            </Grid>
+            <Grid Grid.Row="2">
+                <ScrollViewer>
+                    <StackPanel x:Name="StackPanelOutput" VerticalAlignment="Top">
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>
+
+
+================================================
+File: ProxyCall-Remover/MainWindow.xaml.cs
+================================================
+﻿using dnlib.DotNet;
+using dnlib.DotNet.Writer;
+using Microsoft.Win32;
+using ProxyCall_Remover.Deobfuscation;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+
+namespace ProxyCall_Remover
+{
+    /// <summary>
+    /// Логика взаимодействия для MainWindow.xaml
+    /// </summary>
+    public partial class MainWindow : Window
+    {
+        public MainWindow()
+        {
+            _instance = this;
+
+            InitializeComponent();
+        }
+
+        private string _path;
+
+        private ModuleDef _module;
+
+        private readonly List<IDeobfuscator> Deobfuscators = new List<IDeobfuscator>()
+        {
+            new ProxyCallRemover()
+        };
+
+        internal static MainWindow _instance;
+
+        internal static void Output(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return;
+
+            TextBlock textBlock = new TextBlock()
+            {
+                VerticalAlignment = VerticalAlignment.Top,
+                Text = text
+            };
+
+            _instance.StackPanelOutput.Children.Add(textBlock);
+            _instance.StackPanelOutput.UpdateLayout();
+            //_instance.TextBoxOutput.Scrol
+            //_instance.TextBoxOutput.Text += ;
+        }
+
+        private void ButtonSelectPath_Click(object sender, RoutedEventArgs e)
+        {
+            if (ShowDialogPath() == false)
+                return;
+        }
+
+        private void ButtonUnpack_Click(object sender, RoutedEventArgs e)
+        {
+            if (CheckModule() == false)
+                return;
+
+            DoDeobfuscate();
+
+            SaveModule();
+        }
+
+        private void DoDeobfuscate()
+        {
+            foreach (var deobfuscator in Deobfuscators)
+            {
+                Output("Step: " + deobfuscator.Name);
+                deobfuscator.RemoveProtection(_module);
+
+                Output("Removed proxy calls: " + deobfuscator.GetResult());
+
+                deobfuscator.Dispose();
+                //MessageBox.Show(deobfuscator.GetResult().ToString());
+            }
+        }
+
+        private void SaveModule()
+        {
+            string output_path = string.Empty;
+
+            if (GetOutputPath(ref output_path) == false)
+                return;
+
+            DoSaveModule(output_path);
+        }
+
+        private void DoSaveModule(string path)
+        {
+            try
+            {
+                _module.Write(path);
+            }
+            catch (ModuleWriterException)
+            {
+                _module.Write(path, new ModuleWriterOptions(_module)
+                {
+                    Logger = DummyLogger.NoThrowInstance
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString(), "Error");
+            }
+        }
+
+        private bool CheckModule()
+        {
+            try
+            {
+                _module = ModuleDefMD.Load(_path);
+            }
+            catch (BadImageFormatException)
+            {
+                MessageBox.Show("File is not valid");
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool ShowDialogPath()
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Filter = "Assembly (*.exe;*.dll)|*.exe;*.dll",
+                CheckFileExists = true,
+                Multiselect = false
+            };
+            if (openFileDialog.ShowDialog() == true)
+            {
+                if (File.Exists(openFileDialog.FileName))
+                {
+                    _path = openFileDialog.FileName;
+                    textBoxPath.Text = _path;
+                    return true;
+                }
+                else
+                {
+                    MessageBox.Show("The file does not exist");
+                }
+            }
+            return false;
+        }
+
+        private bool GetOutputPath(ref string output_path)
+        {
+            string path = System.IO.Path.GetDirectoryName(_path);
+            try
+            {
+                path += "\\Unpacked";
+
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
+
+                path += "\\" + Path.GetFileNameWithoutExtension(_path) + "_unpacked" + Path.GetExtension(_path);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                MessageBox.Show("UnauthorizedAccessException", "Error");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString(), "Error");
+            }
+
+            output_path = path;
+
+            return true;
+        }
+
+        private void Window_Drop(object sender, DragEventArgs e)
+        {
+            e.Handled = true;
+
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+                if (files.Length < 1)
+                    return;
+
+                string file = files[0];
+
+                string ext = Path.GetExtension(file).ToLower();
+
+                switch (ext)
+                {
+                    case ".exe":
+                    case ".dll":
+                        _path = file;
+                        textBoxPath.Text = file;
+                        e.Effects = DragDropEffects.Move;
+                        return;
+
+                    default:
+                        e.Effects = DragDropEffects.None;
+                        break;
+                }
+            }
+            else
+            {
+                e.Effects = DragDropEffects.None;
+            }
+        }
+
+        private void CheckBox_Click(object sender, RoutedEventArgs e)
+        {
+            OptionsUnpack.IsEnabledRemoveJunks = !OptionsUnpack.IsEnabledRemoveJunks;
+        }
+    }
+}
+
+
+================================================
+File: ProxyCall-Remover/OptionsUnpack.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ProxyCall_Remover
+{
+    internal static class OptionsUnpack
+    {
+        public static bool IsEnabledRemoveJunks = false;
+    }
+}
+
+
+================================================
+File: ProxyCall-Remover/ProxyCall-Remover.csproj
+================================================
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\ILRepack.2.0.18\build\ILRepack.props" Condition="Exists('..\packages\ILRepack.2.0.18\build\ILRepack.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{09D5E76F-C557-4E1F-8CD0-80FB3711A066}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>ProxyCall_Remover</RootNamespace>
+    <AssemblyName>ProxyCall-Remover</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib, Version=3.6.0.0, Culture=neutral, PublicKeyToken=50e96378b6e77999, processorArchitecture=MSIL">
+      <HintPath>..\packages\dnlib.3.6.0\lib\net45\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Xaml.Behaviors, Version=1.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Xaml.Behaviors.Wpf.1.1.39\lib\net45\Microsoft.Xaml.Behaviors.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="WpfPlus, Version=1.2.8.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\WpfPlus.Plus.1.2.8\lib\net45\WpfPlus.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Page Include="MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Deobfuscation\AdvancedProxyCall.cs" />
+    <Compile Include="Deobfuscation\IDeobfuscator.cs" />
+    <Compile Include="Deobfuscation\ProxyCallRemover.cs" />
+    <Compile Include="MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="OptionsUnpack.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>Данный проект ссылается на пакеты NuGet, отсутствующие на этом компьютере. Используйте восстановление пакетов NuGet, чтобы скачать их.  Дополнительную информацию см. по адресу: http://go.microsoft.com/fwlink/?LinkID=322105. Отсутствует следующий файл: {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\ILRepack.2.0.18\build\ILRepack.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ILRepack.2.0.18\build\ILRepack.props'))" />
+  </Target>
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>
+
+
+================================================
+File: ProxyCall-Remover/packages.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<packages>
+  <package id="dnlib" version="3.6.0" targetFramework="net48" />
+  <package id="ILRepack" version="2.0.18" targetFramework="net472" />
+  <package id="Microsoft.Xaml.Behaviors.Wpf" version="1.1.39" targetFramework="net48" />
+  <package id="WpfPlus.Plus" version="1.2.8" targetFramework="net48" />
+</packages>
+
+
+================================================
+File: ProxyCall-Remover/Deobfuscation/AdvancedProxyCall.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ProxyCall_Remover.Deobfuscation
+{
+    internal class AdvancedProxyCall : IDeobfuscator
+    {
+        string IDeobfuscator.Name => "Proxy Call Remover";
+
+        private int RemovedProxyCalls = 0;
+
+        private readonly Dictionary<TypeDef, List<MethodDef>> JunksMethods = new Dictionary<TypeDef, List<MethodDef>>();
+
+        private ModuleDef _module;
+
+        int IDeobfuscator.GetResult()
+        {
+            return RemovedProxyCalls;
+        }
+
+        void IDeobfuscator.RemoveProtection(ModuleDef module)
+        {
+            _module = module;
+
+            RemoveProxyCalls();
+
+            RemoveJunksMethods();
+        }
+
+        void IDeobfuscator.Dispose()
+        {
+            _module = null;
+            JunksMethods.Clear();
+            RemovedProxyCalls = 0;
+        }
+
+        private void RemoveProxyCalls()
+        {
+            foreach (TypeDef typeDef in _module.GetTypes())
+            {
+                foreach (MethodDef methodDef in typeDef.Methods)
+                {
+                    if (methodDef.HasBody)
+                    {
+                        ProcessMethod(typeDef, methodDef);
+                    }
+                }
+            }
+        }
+
+        private void RemoveJunksMethods()
+        {
+            if (OptionsUnpack.IsEnabledRemoveJunks)
+            {
+                foreach (TypeDef typeDef in _module.GetTypes())
+                {
+                    if (JunksMethods.ContainsKey(typeDef))
+                    {
+                        var list = JunksMethods[typeDef];
+                        foreach (var method in list)
+                        {
+                            typeDef.Remove(method);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void ProcessMethod(TypeDef typeDef, MethodDef method)
+        {
+            IList<Instruction> instructions = method.Body.Instructions;
+            for (int i = 0; i < instructions.Count; i++)
+            {
+                try
+                {
+                    Instruction instruction = instructions[i];
+                    if (instruction.OpCode.Equals(OpCodes.Call))
+                    {
+                        MethodDef methodDef2 = instruction.Operand as MethodDef;
+                        if (IsProxyCallMethod(typeDef, methodDef2))
+                        {
+                            bool IsValid = GetProxyData(methodDef2, out OpCode opCode, out object operand);
+                            if (IsValid)
+                            {
+                                //method.Body.Instructions.
+                                instruction.OpCode = opCode;
+                                instruction.Operand = operand;
+
+                                RemovedProxyCalls++;
+
+                                if (!JunksMethods.ContainsKey(typeDef))
+                                    JunksMethods.Add(typeDef, new List<MethodDef>());
+
+                                var list = JunksMethods[typeDef];
+                                if (!list.Contains(methodDef2))
+                                    list.Add(methodDef2);
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MainWindow.Output(method.Name + " " + ex);
+                }
+            }
+        }
+
+        private bool GetProxyData(MethodDef method, out OpCode opCode, out object operand)
+        {
+            opCode = null;
+            operand = null;
+            if (!method.HasBody)
+            {
+                return false;
+            }
+            Instruction[] array = method.Body.Instructions.ToArray();
+            int num = array.Length;
+            if (array.Length <= 3)
+            {
+                return false;
+            }
+            try
+            {
+                if (array[num - 2].OpCode.Equals(OpCodes.Newobj))
+                {
+                    opCode = array[num - 2].OpCode;
+                    operand = array[num - 2].Operand;
+                }
+                if (array[num - 2].OpCode.Equals(OpCodes.Call))
+                {
+                    opCode = array[num - 2].OpCode;
+                    operand = array[num - 2].Operand;
+                }
+                if (array[num - 2].OpCode.Equals(OpCodes.Callvirt))
+                {
+                    opCode = array[num - 2].OpCode;
+                    operand = array[num - 2].Operand;
+                }
+                if (array[num - 1].OpCode.Code == Code.Ret)
+                {
+                    if (num != method.Parameters.Count + 2)
+                    {
+                        return false;
+                    }
+                    opCode = array[num - 2].OpCode;
+                    operand = array[num - 2].Operand;
+                }
+
+                if (opCode != null)
+                    return true;
+            }
+            catch
+            {
+            }
+            return false;
+        }
+
+        private bool IsProxyCallMethod(TypeDef typeDef, MethodDef method)
+        {
+            return method?.IsStatic == true && typeDef.Methods.Contains(method);
+        }
+    }
+}
+
+
+
+================================================
+File: ProxyCall-Remover/Deobfuscation/IDeobfuscator.cs
+================================================
+ï»¿using dnlib.DotNet;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ProxyCall_Remover.Deobfuscation
+{
+    internal interface IDeobfuscator
+    {
+        string Name { get; }
+
+        void RemoveProtection(ModuleDef module);
+
+        int GetResult();
+
+        void Dispose();
+    }
+}
+
+
+================================================
+File: ProxyCall-Remover/Deobfuscation/ProxyCallRemover.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+
+namespace ProxyCall_Remover.Deobfuscation
+{
+    internal class ProxyCallRemover : IDeobfuscator
+    {
+        string IDeobfuscator.Name => "Proxy Call Remover";
+
+        private bool IsAdvanced = true;
+
+        private int RemovedProxyCalls = 0;
+
+        private readonly Dictionary<TypeDef, List<MethodDef>> JunksMethods = new Dictionary<TypeDef, List<MethodDef>>();
+
+        private ModuleDef _module;
+
+        int IDeobfuscator.GetResult()
+        {
+            return RemovedProxyCalls;
+        }
+
+        void IDeobfuscator.RemoveProtection(ModuleDef module)
+        {
+            _module = module;
+
+            RemoveProxyCalls();
+
+            RemoveJunksMethods();
+        }
+
+        void IDeobfuscator.Dispose()
+        {
+            _module = null;
+            JunksMethods.Clear();
+            RemovedProxyCalls = 0;
+        }
+
+        private void RemoveProxyCalls()
+        {
+            int currentCount = 0;
+
+        repeat:
+            foreach (TypeDef typeDef in _module.GetTypes())
+            {
+                foreach (MethodDef methodDef in typeDef.Methods)
+                {
+                    if (methodDef.HasBody)
+                    {
+                        ProcessMethod(typeDef, methodDef);
+                    }
+                }
+            }
+
+            if (currentCount == 0 && currentCount != RemovedProxyCalls)
+            {
+                currentCount = RemovedProxyCalls;
+                goto repeat;
+            }
+        }
+
+        private void RemoveJunksMethods()
+        {
+            if (OptionsUnpack.IsEnabledRemoveJunks)
+            {
+                foreach (TypeDef typeDef in _module.GetTypes())
+                {
+                    if (JunksMethods.ContainsKey(typeDef))
+                    {
+                        var list = JunksMethods[typeDef];
+                        foreach (var method in list)
+                        {
+                            typeDef.Remove(method);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void ProcessMethod(TypeDef typeDef, MethodDef method)
+        {
+            IList<Instruction> instructions = method.Body.Instructions;
+            for (int i = 0; i < instructions.Count; i++)
+            {
+#if !DEBUG
+                try
+                {
+#endif
+                Instruction instruction = instructions[i];
+                if (instruction.OpCode.Equals(OpCodes.Call))
+                {
+                    MethodDef methodDef2 = instruction.Operand as MethodDef;
+                    if (IsProxyCallMethod(typeDef, methodDef2))
+                    {
+                        bool IsValid = GetProxyData(typeDef, methodDef2, out OpCode opCode, out object operand);
+                        if (IsValid)
+                        {
+                            instruction.OpCode = opCode;
+                            instruction.Operand = operand;
+
+                            method.Body.KeepOldMaxStack = true;
+
+                            RemovedProxyCalls++;
+
+                            AddJunkMethod(typeDef, methodDef2);
+                        }
+                    }
+                }
+#if !DEBUG
+            }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex);
+                    MainWindow.Output(method.Name + " " + ex);
+                }
+#endif
+            }
+
+        }
+
+        private void AddJunkMethod(TypeDef type, MethodDef method)
+        {
+            if (!JunksMethods.ContainsKey(type))
+                JunksMethods.Add(type, new List<MethodDef>());
+
+            var list = JunksMethods[type];
+            if (!list.Contains(method))
+                list.Add(method);
+        }
+
+        private bool GetProxyData(TypeDef type, MethodDef method, out OpCode opCode, out object operand)
+        {
+            int arguments = method.Parameters.Count;
+            opCode = null;
+            operand = null;
+
+            if (!method.HasBody)
+            {
+                return false;
+            }
+
+            Instruction[] array = method.Body.Instructions.ToArray();
+
+            int length = array.Length;
+
+            if (length <= 1)
+            {
+                return false;
+            }
+
+            if (IsProxyCallMethod(type, method) == false)
+            {
+                Debug.Assert(false);
+            }
+
+
+            if (GetData(type, method, array, out opCode, out operand))
+            {
+                return true;
+            }
+
+            else if (IsAdvanced == true)
+            {
+                Instruction arg1;
+                Instruction arg2;
+                Instruction call;
+
+                for (int a = arguments; a < method.Body.Instructions.Count; a++)
+                {
+                    call = method.Body.Instructions[a];
+
+                    if (arguments == 2)
+                    {
+                        arg1 = method.Body.Instructions[a - 2];
+                        arg2 = method.Body.Instructions[a - 1];
+
+                        if (GetDataWithInst(type, method, array, call, out opCode, out operand))
+                        {
+                            return true;
+                        }
+                    }
+                    else if (arguments == 1)
+                    {
+                        arg1 = method.Body.Instructions[a - 1];
+
+                        if (GetDataWithInst(type, method, array, call, out opCode, out operand))
+                        {
+                            return true;
+                        }
+
+                    }
+                    else
+                    {
+                        if (GetDataWithInst(type, method, array, call, out opCode, out operand))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+
+            if (opCode != null)
+                return true;
+
+            return false;
+        }
+
+        private bool GetData(TypeDef type, MethodDef method, Instruction[] array, out OpCode opCode, out object operand)
+        {
+            opCode = null;
+            operand = null;
+            int length = array.Length;
+
+            if (array[length - 2].OpCode.Equals(OpCodes.Newobj))
+            {
+                opCode = array[length - 2].OpCode;
+                operand = array[length - 2].Operand;
+            }
+            else if (array[length - 2].OpCode.Equals(OpCodes.Call))
+            {
+                var secondMethod = array[length - 2].Operand as MethodDef;
+
+                if (IsProxyCallMethod(type, secondMethod))
+                {
+                    bool IsValid = GetProxyData(type, secondMethod, out opCode, out operand);
+                    if (IsValid)
+                    {
+                        AddJunkMethod(type, secondMethod);
+                        return true;
+                    }
+                }
+                else
+                {
+                    opCode = array[length - 2].OpCode;
+                    operand = array[length - 2].Operand;
+                    return true;
+                }
+
+            }
+            else if (array[length - 2].OpCode.Equals(OpCodes.Callvirt))
+            {
+                opCode = array[length - 2].OpCode;
+                operand = array[length - 2].Operand;
+            }
+            else if (array[length - 1].OpCode.Code == Code.Ret)
+            {
+                if (length != method.Parameters.Count + 2)
+                {
+                    return false;
+                }
+                opCode = array[length - 2].OpCode;
+                operand = array[length - 2].Operand;
+            }
+
+            Debug.Assert(opCode != OpCodes.Nop);
+
+            if (opCode != null)
+                return true;
+
+            return false;
+        }
+
+        private bool GetDataWithInst(TypeDef type, MethodDef method, Instruction[] array, Instruction inst, out OpCode opCode, out object operand)
+        {
+            opCode = null;
+            operand = null;
+            int length = array.Length;
+
+            if (IsProxyCallMethod(type, method) == false)
+            {
+                Debug.Assert(false);
+            }
+
+            if (inst.OpCode.Equals(OpCodes.Newobj))
+            {
+                opCode = inst.OpCode;
+                operand = inst.Operand;
+            }
+            else if (inst.OpCode.Equals(OpCodes.Call))
+            {
+                var secondMethod = inst.Operand as MethodDef;
+
+                if (IsProxyCallMethod(type, secondMethod))
+                {
+                    bool IsValid = GetProxyData(type, secondMethod, out opCode, out operand);
+                    if (IsValid)
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    opCode = inst.OpCode;
+                    operand = inst.Operand;
+                    return true;
+                }
+
+            }
+            else if (inst.OpCode.Equals(OpCodes.Callvirt))
+            {
+                opCode = inst.OpCode;
+                operand = inst.Operand;
+            }
+
+
+
+            if (opCode != null)
+                return true;
+
+            return false;
+        }
+
+        private bool IsProxyCallMethod(TypeDef typeDef, MethodDef method)
+        {
+            if (method == null || method.HasBody == false)
+                return false;
+
+            int countLogics = method.Body.Instructions.Count(x => x.OpCode == OpCodes.Call || x.OpCode == OpCodes.Newobj || x.OpCode == OpCodes.Callvirt);
+
+            if (countLogics > 1)
+                return false;
+
+            bool NotStatic = method?.IsStatic == false && typeDef.IsAbstract == false && typeDef.IsSealed == false;
+
+            return method?.IsStatic == true || NotStatic && typeDef.Methods.Contains(method);
+        }
+    }
+}
+
+
+================================================
+File: ProxyCall-Remover/Properties/AssemblyInfo.cs
+================================================
+﻿using System.Reflection;
+using System.Resources;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Windows;
+
+// Общие сведения об этой сборке предоставляются следующим набором
+// набор атрибутов. Измените значения этих атрибутов, чтобы изменить сведения,
+// связанные со сборкой.
+[assembly: AssemblyTitle("ProxyCall-Fixer")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("ProxyCall-Fixer")]
+[assembly: AssemblyCopyright("Copyright ©  2020")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Установка значения False для параметра ComVisible делает типы в этой сборке невидимыми
+// для компонентов COM. Если необходимо обратиться к типу в этой сборке через
+// из модели COM, установите атрибут ComVisible для этого типа в значение true.
+[assembly: ComVisible(false)]
+
+//Чтобы начать создание локализуемых приложений, задайте
+//<UICulture>CultureYouAreCodingWith</UICulture> в файле .csproj
+//в <PropertyGroup>. Например, при использовании английского (США)
+//в своих исходных файлах установите <UICulture> в en-US.  Затем отмените преобразование в комментарий
+//атрибута NeutralResourceLanguage ниже.  Обновите "en-US" в
+//строка внизу для обеспечения соответствия настройки UICulture в файле проекта.
+
+//[assembly: NeutralResourcesLanguage("en-US", UltimateResourceFallbackLocation.Satellite)]
+
+
+[assembly: ThemeInfo(
+    ResourceDictionaryLocation.None, //где расположены словари ресурсов по конкретным тематикам
+                                     //(используется, если ресурс не найден на странице,
+                                     // или в словарях ресурсов приложения)
+    ResourceDictionaryLocation.SourceAssembly //где расположен словарь универсальных ресурсов
+                                              //(используется, если ресурс не найден на странице,
+                                              // в приложении или в каких-либо словарях ресурсов для конкретной темы)
+)]
+
+
+// Сведения о версии для сборки включают четыре следующих значения:
+//
+//      Основной номер версии
+//      Дополнительный номер версии
+//      Номер сборки
+//      Номер редакции
+//
+// Можно задать все значения или принять номера сборки и редакции по умолчанию 
+// используя "*", как показано ниже:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+
+================================================
+File: ProxyCall-Remover/Properties/Resources.Designer.cs
+================================================
+﻿//------------------------------------------------------------------------------
+// <auto-generated>
+//     Этот код создан программой.
+//     Исполняемая версия:4.0.30319.42000
+//
+//     Изменения в этом файле могут привести к неправильной работе и будут потеряны в случае
+//     повторной генерации кода.
+// </auto-generated>
+//------------------------------------------------------------------------------
+
+namespace ProxyCall_Remover.Properties {
+    using System;
+    
+    
+    /// <summary>
+    ///   Класс ресурса со строгой типизацией для поиска локализованных строк и т.д.
+    /// </summary>
+    // Этот класс создан автоматически классом StronglyTypedResourceBuilder
+    // с помощью такого средства, как ResGen или Visual Studio.
+    // Чтобы добавить или удалить член, измените файл .ResX и снова запустите ResGen
+    // с параметром /str или перестройте свой проект VS.
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    internal class Resources {
+        
+        private static global::System.Resources.ResourceManager resourceMan;
+        
+        private static global::System.Globalization.CultureInfo resourceCulture;
+        
+        [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+        internal Resources() {
+        }
+        
+        /// <summary>
+        ///   Возвращает кэшированный экземпляр ResourceManager, использованный этим классом.
+        /// </summary>
+        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
+        internal static global::System.Resources.ResourceManager ResourceManager {
+            get {
+                if (object.ReferenceEquals(resourceMan, null)) {
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ProxyCall_Remover.Properties.Resources", typeof(Resources).Assembly);
+                    resourceMan = temp;
+                }
+                return resourceMan;
+            }
+        }
+        
+        /// <summary>
+        ///   Перезаписывает свойство CurrentUICulture текущего потока для всех
+        ///   обращений к ресурсу с помощью этого класса ресурса со строгой типизацией.
+        /// </summary>
+        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
+        internal static global::System.Globalization.CultureInfo Culture {
+            get {
+                return resourceCulture;
+            }
+            set {
+                resourceCulture = value;
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: ProxyCall-Remover/Properties/Resources.resx
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+</root>
+
+
+================================================
+File: ProxyCall-Remover/Properties/Settings.Designer.cs
+================================================
+﻿//------------------------------------------------------------------------------
+// <auto-generated>
+//     Этот код создан программой.
+//     Исполняемая версия:4.0.30319.42000
+//
+//     Изменения в этом файле могут привести к неправильной работе и будут потеряны в случае
+//     повторной генерации кода.
+// </auto-generated>
+//------------------------------------------------------------------------------
+
+namespace ProxyCall_Remover.Properties {
+    
+    
+    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.4.0.0")]
+    internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
+        
+        private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
+        
+        public static Settings Default {
+            get {
+                return defaultInstance;
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: ProxyCall-Remover/Properties/Settings.settings
+================================================
+ï»¿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="uri:settings" CurrentProfile="(Default)">
+  <Profiles>
+    <Profile Name="(Default)" />
+  </Profiles>
+  <Settings />
+</SettingsFile>
+

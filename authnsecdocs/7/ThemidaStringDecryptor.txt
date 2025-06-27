@@ -1,0 +1,132 @@
+Directory structure:
+└── osumatrix-themidastringdecryptor/
+    ├── ThemidaStringDecryptor.sln
+    └── ThemidaStringDecryptor/
+        ├── Program.cs
+        └── ThemidaStringDecryptor.csproj
+
+================================================
+File: ThemidaStringDecryptor.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31112.23
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThemidaStringDecryptor", "ThemidaStringDecryptor\ThemidaStringDecryptor.csproj", "{51447483-4ED7-4BF8-A584-6AF40CAD74F2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{51447483-4ED7-4BF8-A584-6AF40CAD74F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51447483-4ED7-4BF8-A584-6AF40CAD74F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51447483-4ED7-4BF8-A584-6AF40CAD74F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51447483-4ED7-4BF8-A584-6AF40CAD74F2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4CA715F4-E50C-4E51-BECB-223E0C787E2C}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: ThemidaStringDecryptor/Program.cs
+================================================
+ï»¿using AsmResolver;
+using AsmResolver.DotNet;
+using AsmResolver.DotNet.Builder;
+using AsmResolver.DotNet.Code.Cil;
+using AsmResolver.PE.DotNet.Builder;
+using AsmResolver.PE.DotNet.Cil;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using System;
+using System.Linq;
+using System.Text;
+
+namespace ThemidaStringDecryptor
+{
+    internal class Program
+    {
+        private static int ResolveArithmethics(CilCode code, int a, int b)
+        {
+            return code switch
+            {
+                CilCode.And => a & b,
+                CilCode.Or => a | b,
+                _ => a ^ b,
+            };
+        }
+        static void Main(string[] args)
+        {
+            ModuleDefinition module = ModuleDefinition.FromFile(args[0]);
+            System.Collections.Generic.IEnumerable<TypeDefinition> types = module.GetAllTypes();
+            TypeDefinition stringDecryptType = types.FirstOrDefault(x => x.FullName.Contains("PrivateImpl"));
+         
+            int resolveStringMethod = stringDecryptType.Methods.FirstOrDefault(x => x.Parameters.Count == 3).MetadataToken.ToInt32();
+
+            CilInstructionCollection stringDecryptTypeCtorInstructions = stringDecryptType.GetStaticConstructor().CilMethodBody.Instructions;
+
+            byte[] decryptArray = ((DataSegment)((FieldDefinition)stringDecryptTypeCtorInstructions[6].Operand).FieldRva).ToArray();
+
+            var firsArithmetic = stringDecryptTypeCtorInstructions[18].OpCode.Code;
+            var secondNumber = stringDecryptTypeCtorInstructions[19].GetLdcI4Constant();
+            var secondArithmetic = stringDecryptTypeCtorInstructions[20].OpCode.Code;
+
+            for (int i = 0; i < decryptArray.Length; i++)
+            {
+                decryptArray[i] = (byte)(ResolveArithmethics(secondArithmetic , ResolveArithmethics(firsArithmetic, decryptArray[i], i), secondNumber) );
+			}
+
+            foreach (var moduleMethods in types.SelectMany(type => type.Methods.Where(md => md.HasMethodBody)))
+            {
+                for (int i = 0; i < moduleMethods.CilMethodBody.Instructions.Count; i++)
+                {
+                    CilInstruction methodInstructions = moduleMethods.CilMethodBody.Instructions[i];
+                    if (methodInstructions.OpCode.Code != CilCode.Call  || methodInstructions.Operand is not MethodDefinition)
+                        continue;
+
+                    MethodDefinition proxyMethod = (MethodDefinition)methodInstructions.Operand;
+                    if (proxyMethod.Signature.ReturnType.ElementType != ElementType.String)
+                        continue;
+
+                    CilInstructionCollection proxyMethodInstructions = (proxyMethod).CilMethodBody.Instructions;
+                    if (proxyMethodInstructions.Count != 11 || ((MethodDefinition)proxyMethodInstructions[9].Operand).MetadataToken.ToInt32() != resolveStringMethod)
+                        continue;
+
+                    moduleMethods.CilMethodBody.Instructions[i] = new CilInstruction(CilOpCodes.Ldstr, Encoding.UTF8.GetString(decryptArray,  proxyMethodInstructions[7].GetLdcI4Constant(), proxyMethodInstructions[8].GetLdcI4Constant()));
+                    Console.WriteLine(moduleMethods.CilMethodBody.Instructions[i]);
+                }
+            }
+            new ManagedPEFileBuilder().CreateFile(new ManagedPEImageBuilder().CreateImage(module).ConstructedImage).Write("out.exe");
+        }
+
+    }
+}
+
+
+
+================================================
+File: ThemidaStringDecryptor/ThemidaStringDecryptor.csproj
+================================================
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AsmResolver" Version="4.4.0" />
+    <PackageReference Include="AsmResolver.DotNet" Version="4.4.0" />
+  </ItemGroup>
+
+</Project>
+
+

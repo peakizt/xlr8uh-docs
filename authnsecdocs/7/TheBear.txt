@@ -1,0 +1,1522 @@
+Directory structure:
+└── gabteix-thebear/
+    ├── README.md
+    ├── LICENSE
+    ├── TheBear.sln
+    ├── TheBear/
+    │   ├── App.config
+    │   ├── Program.cs
+    │   ├── TheBear.csproj
+    │   ├── packages.config
+    │   └── Properties/
+    │       └── AssemblyInfo.cs
+    ├── TheBear.Core/
+    │   ├── FileContext.cs
+    │   ├── Logger.cs
+    │   ├── TheBear.Core.csproj
+    │   ├── Utils.cs
+    │   ├── packages.config
+    │   └── Properties/
+    │       └── AssemblyInfo.cs
+    └── TheBear.Pipeline/
+        ├── Devirtualizer.cs
+        ├── IHandler.cs
+        ├── Restorer.cs
+        ├── Stage.cs
+        ├── TheBear.Pipeline.csproj
+        ├── VirtualizedMethod.cs
+        ├── packages.config
+        ├── Handlers/
+        │   ├── Br.cs
+        │   ├── Brfalse.cs
+        │   ├── Brtrue.cs
+        │   ├── Call.cs
+        │   ├── Castclass.cs
+        │   ├── Dup.cs
+        │   ├── Ldarg.cs
+        │   ├── Ldc_I4.cs
+        │   ├── Ldftn.cs
+        │   ├── Ldloc.cs
+        │   ├── Ldsfld.cs
+        │   ├── Ldstr.cs
+        │   ├── Newarr.cs
+        │   ├── Newobj.cs
+        │   ├── Nop.cs
+        │   ├── Pop.cs
+        │   ├── Ret.cs
+        │   ├── Stloc.cs
+        │   └── Stsfld.cs
+        ├── Properties/
+        │   └── AssemblyInfo.cs
+        └── Stages/
+            ├── Associating.cs
+            ├── Mapping.cs
+            └── Restoring.cs
+
+================================================
+File: README.md
+================================================
+# TheBear
+.NET Devirtualizer for NashaVM that I made for nothing.
+
+## How to use?
+Just drag and drop the file in TheBear.exe
+
+## Why TheBear?
+I associate Nasha to Masha, and masha reminds the the drawing I saw in childhood, masha and the bear.
+
+## Why did you make this project?
+Just because I have nothing better to do
+
+## Will have updates?
+Yes, I will update it when I want, but probably I will update each time they update.
+
+## Credits:
+[0xd4d](https://github.com/0xd4d) for dnlib.
+
+
+
+================================================
+File: LICENSE
+================================================
+MIT License
+
+Copyright (c) 2020 GabTeix
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+
+================================================
+File: TheBear.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30413.136
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheBear", "TheBear\TheBear.csproj", "{5845281E-4788-494B-864A-76BF2E3373AE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheBear.Core", "TheBear.Core\TheBear.Core.csproj", "{5DA5F0EB-3D6B-44AE-A044-C4041D9FBF6C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheBear.Pipeline", "TheBear.Pipeline\TheBear.Pipeline.csproj", "{9B8E707B-7F8E-4C89-8CC8-700FB9B04BAA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5845281E-4788-494B-864A-76BF2E3373AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5845281E-4788-494B-864A-76BF2E3373AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5845281E-4788-494B-864A-76BF2E3373AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5845281E-4788-494B-864A-76BF2E3373AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5DA5F0EB-3D6B-44AE-A044-C4041D9FBF6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5DA5F0EB-3D6B-44AE-A044-C4041D9FBF6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5DA5F0EB-3D6B-44AE-A044-C4041D9FBF6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5DA5F0EB-3D6B-44AE-A044-C4041D9FBF6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B8E707B-7F8E-4C89-8CC8-700FB9B04BAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B8E707B-7F8E-4C89-8CC8-700FB9B04BAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B8E707B-7F8E-4C89-8CC8-700FB9B04BAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B8E707B-7F8E-4C89-8CC8-700FB9B04BAA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A8A29BF5-629A-4702-BC2F-CF68127584AF}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: TheBear/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.7.2" />
+    </startup>
+</configuration>
+
+
+================================================
+File: TheBear/Program.cs
+================================================
+ï»¿
+using TheBear.Core;
+using TheBear.Pipeline;
+
+namespace TheBear
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Logger.PrintLogo();
+
+            if (args.Length != 1)
+            {
+                Logger.PrintError("Invalid usage, just drag and drop the file.");
+                Logger.ReadLine();
+                return;
+            }
+
+            var context = new FileContext(args[0]);
+
+            new Devirtualizer(context).Execute();
+
+            context.Save();
+        }
+    }
+}
+
+
+
+================================================
+File: TheBear/TheBear.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{5845281E-4788-494B-864A-76BF2E3373AE}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>TheBear</RootNamespace>
+    <AssemblyName>TheBear</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib, Version=3.3.2.0, Culture=neutral, PublicKeyToken=50e96378b6e77999, processorArchitecture=MSIL">
+      <HintPath>..\packages\dnlib.3.3.2\lib\net45\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TheBear.Core\TheBear.Core.csproj">
+      <Project>{5da5f0eb-3d6b-44ae-a044-c4041d9fbf6c}</Project>
+      <Name>TheBear.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TheBear.Pipeline\TheBear.Pipeline.csproj">
+      <Project>{9b8e707b-7f8e-4c89-8cc8-700fb9b04baa}</Project>
+      <Name>TheBear.Pipeline</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: TheBear/packages.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<packages>
+  <package id="dnlib" version="3.3.2" targetFramework="net472" />
+</packages>
+
+
+================================================
+File: TheBear/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// As informaÃ§Ãµes gerais sobre um assembly sÃ£o controladas por
+// conjunto de atributos. Altere estes valores de atributo para modificar as informaÃ§Ãµes
+// associadas a um assembly.
+[assembly: AssemblyTitle("TheBear")]
+[assembly: AssemblyDescription(".NET Devirtualizer for NashaVM")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("TheBear")]
+[assembly: AssemblyCopyright("Copyright Â© Gabriel Teix 2020")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Definir ComVisible como false torna os tipos neste assembly invisÃ­veis
+// para componentes COM. Caso precise acessar um tipo neste assembly de
+// COM, defina o atributo ComVisible como true nesse tipo.
+[assembly: ComVisible(false)]
+
+// O GUID a seguir serÃ¡ destinado Ã  ID de typelib se este projeto for exposto para COM
+[assembly: Guid("5845281e-4788-494b-864a-76bf2e3373ae")]
+
+// As informaÃ§Ãµes da versÃ£o de um assembly consistem nos quatro valores a seguir:
+//
+//      VersÃ£o Principal
+//      VersÃ£o SecundÃ¡ria 
+//      NÃºmero da VersÃ£o
+//      RevisÃ£o
+//
+// Ã‰ possÃ­vel especificar todos os valores ou usar como padrÃ£o os NÃºmeros de Build e da RevisÃ£o
+// usando o "*" como mostrado abaixo:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+
+================================================
+File: TheBear.Core/FileContext.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Writer;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace TheBear.Core
+{
+    public class FileContext
+    {
+        public string Path { get; }
+        public ModuleDefMD Module { get; }
+        public FileContext(string path)
+        {
+            Path = path;
+            Module = ModuleDefMD.Load(path);
+
+            LoadReferences();
+        }
+
+        private void LoadReferences()
+        {
+            var asmResolver = new AssemblyResolver { EnableTypeDefCache = true };
+            var modCtx = new ModuleContext(asmResolver);
+            asmResolver.DefaultModuleContext = modCtx;
+            var asmRefs = Module.GetAssemblyRefs().ToList();
+            Module.Context = modCtx;
+            foreach (var asmRef in asmRefs)
+            {
+                try
+                {
+                    if (asmRef == null)
+                        continue;
+                    var asm = asmResolver.Resolve(asmRef.FullName, Module);
+                    if (asm == null)
+                        continue;
+                    Logger.PrintInfo("Reference : " + asm.FullName);
+                    (Module.Context.AssemblyResolver as AssemblyResolver).AddToCache(asm);
+
+                }
+                catch
+                {
+
+                }
+
+            }
+        }
+
+        public byte[] ReadSection(string name)
+        {
+            var peImage = Module.Metadata.PEImage;
+            var section = peImage.ImageSectionHeaders.Single(x => x.DisplayName == name);
+            var reader = peImage.CreateReader();
+            reader.Position = section.PointerToRawData;
+            return reader.ReadBytes((int)section.SizeOfRawData);
+        }
+
+        public void Save()
+        {
+            var options = new ModuleWriterOptions(Module)
+            {
+                Logger = DummyLogger.NoThrowInstance,
+            };
+            options.MetadataOptions.Flags = MetadataFlags.PreserveAll;
+
+            string output = Path.Replace(".exe", ".thebear.exe");
+            Module.Write(output, options);
+
+            Logger.Blank();
+            Logger.PrintSuccess(output);
+            Logger.ReadLine();
+        }
+    }
+}
+
+
+
+================================================
+File: TheBear.Core/Logger.cs
+================================================
+ï»¿
+using System;
+
+namespace TheBear.Core
+{
+    public static class Logger
+    {
+        private static void Print(string text, string tag, ConsoleColor tagColor)
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write("[");
+            Console.ForegroundColor = tagColor;
+            Console.Write(tag);
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("] " + text);
+        }
+        private static void PrinAligned(string text)
+        {
+            Console.CursorLeft = 10;
+            Console.WriteLine(text);
+        }
+
+        public static void PrintLogo()
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            PrinAligned(@" __         __  ");
+            PrinAligned(@"/  \.-'''-./  \ ");
+            PrinAligned(@"\    -   -    / ");
+            PrinAligned(@" |   o   o   |  ");
+            PrinAligned(@" \  .-'''-.  /  ");
+            PrinAligned(@"  '-\__Y__/-'   ");
+            PrinAligned(@"     `---`      ");
+            Console.WriteLine();
+        }
+        public static void PrintInfo(string text) => Print(text, "i", ConsoleColor.Blue);
+        public static void PrintWarn(string text) => Print(text, "!", ConsoleColor.Yellow);
+        public static void PrintError(string text) => Print(text, "x", ConsoleColor.Red);
+        public static void PrintSuccess(string text) => Print(text, "+", ConsoleColor.Green);
+
+        public static void Blank() => Console.WriteLine();
+        public static void ReadLine() => Console.ReadLine();
+
+    }
+}
+
+
+
+================================================
+File: TheBear.Core/TheBear.Core.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{5DA5F0EB-3D6B-44AE-A044-C4041D9FBF6C}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TheBear.Core</RootNamespace>
+    <AssemblyName>TheBear.Core</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib, Version=3.3.2.0, Culture=neutral, PublicKeyToken=50e96378b6e77999, processorArchitecture=MSIL">
+      <HintPath>..\packages\dnlib.3.3.2\lib\net45\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="FileContext.cs" />
+    <Compile Include="Logger.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: TheBear.Core/Utils.cs
+================================================
+ï»¿
+using dnlib.DotNet.Emit;
+
+using System.Collections.Generic;
+
+namespace TheBear.Core
+{
+    public static class Utils
+    {
+        public static bool FindPattern(List<Instruction> instrs, OpCode[] opCodes, int sub = 0)
+        {
+            if (instrs.Count < opCodes.Length)
+                return false;
+
+            int index = instrs.Count - opCodes.Length - sub;
+
+            for (int i =0; i < opCodes.Length; i++)
+            {
+                if (instrs[i + index].OpCode != opCodes[i])
+                    return false;
+            }
+
+            return true;
+        }
+    }
+}
+
+
+
+================================================
+File: TheBear.Core/packages.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<packages>
+  <package id="dnlib" version="3.3.2" targetFramework="net472" />
+</packages>
+
+
+================================================
+File: TheBear.Core/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// As informaÃ§Ãµes gerais sobre um assembly sÃ£o controladas por
+// conjunto de atributos. Altere estes valores de atributo para modificar as informaÃ§Ãµes
+// associada a um assembly.
+[assembly: AssemblyTitle("TheBear.Core")]
+[assembly: AssemblyDescription("TheBear's Core Library")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("TheBear.Core")]
+[assembly: AssemblyCopyright("Copyright Â© Gabriel Teix 2020")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Definir ComVisible como false torna os tipos neste assembly invisÃ­veis
+// para componentes COM. Caso precise acessar um tipo neste assembly de
+// COM, defina o atributo ComVisible como true nesse tipo.
+[assembly: ComVisible(false)]
+
+// O GUID a seguir serÃ¡ destinado Ã  ID de typelib se este projeto for exposto para COM
+[assembly: Guid("5da5f0eb-3d6b-44ae-a044-c4041d9fbf6c")]
+
+// As informaÃ§Ãµes da versÃ£o de um assembly consistem nos quatro valores a seguir:
+//
+//      VersÃ£o Principal
+//      VersÃ£o SecundÃ¡ria 
+//      NÃºmero da VersÃ£o
+//      RevisÃ£o
+//
+// Ã‰ possÃ­vel especificar todos os valores ou usar como padrÃ£o os NÃºmeros de Build e da RevisÃ£o
+// usando o "*" como mostrado abaixo:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+
+================================================
+File: TheBear.Pipeline/Devirtualizer.cs
+================================================
+ï»¿
+using System.IO;
+using System.IO.Compression;
+using System.Collections.Generic;
+
+using TheBear.Core;
+using TheBear.Pipeline.Stages;
+using System;
+
+namespace TheBear.Pipeline
+{
+    public class Devirtualizer
+    {
+        public FileContext Context { get; }
+        public List<VirtualizedMethod> Methods { get; }
+        public Dictionary<int, IHandler> Handlers { get; set; }
+        public Devirtualizer(FileContext context)
+        {
+            Context = context;
+            Methods = new List<VirtualizedMethod>();
+            Handlers = GetHandlers();
+        }
+
+        public Stage[] Stages = new Stage[]
+        {
+            new Mapping(),
+            new Associating(),
+            new Restoring()
+        };
+        public void Execute()
+        {
+            Logger.Blank();
+            foreach (var stage in Stages)
+            {
+                Logger.PrintInfo($"Executing {stage.Name} stage...");
+
+                stage.Execute(this);
+            }
+        }
+
+        public byte[] Decompress(byte[] arr)
+        {
+            MemoryStream ms = new MemoryStream(arr);
+            MemoryStream nMS = new MemoryStream();
+
+            var def = new DeflateStream(ms, CompressionMode.Decompress);
+            def.CopyTo(nMS);
+
+            return nMS.ToArray();
+        }
+
+        private Dictionary<int, IHandler> GetHandlers()
+        {
+            var result = new Dictionary<int, IHandler>();
+            foreach (var type in typeof(IHandler).Assembly.DefinedTypes)
+            {
+                if (type.IsInterface)
+                    continue;
+
+                if (!typeof(IHandler).IsAssignableFrom(type))
+                    continue;
+
+                var instance = (IHandler)Activator.CreateInstance(type);
+
+                result.Add(instance.ID, instance);
+            }
+            return result;
+        }
+    }
+}
+
+
+
+================================================
+File: TheBear.Pipeline/IHandler.cs
+================================================
+ï»¿
+using dnlib.DotNet.Emit;
+
+namespace TheBear.Pipeline
+{
+    public interface IHandler
+    {
+        int ID { get; }
+        Code ILCode { get; }
+        object ResolveOperand(Restorer restorer);
+    }
+}
+
+
+
+================================================
+File: TheBear.Pipeline/Restorer.cs
+================================================
+ï»¿
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System;
+using System.Collections.Generic;
+using System.IO;
+
+using TheBear.Core;
+
+namespace TheBear.Pipeline
+{
+    public class Restorer
+    {
+        public ModuleDefMD Module { get; }
+        public BinaryReader Reader { get; }
+        public Dictionary<int, IHandler> Handlers { get; }
+        public VirtualizedMethod CurrentMethod { get; set; }
+        public Restorer(Devirtualizer devirtualizer)
+        {
+            Module = devirtualizer.Context.Module;
+
+            var sectionBytes = devirtualizer.Decompress(devirtualizer.Context.ReadSection(".Nasha0"));
+            Reader = new BinaryReader(new MemoryStream(sectionBytes));
+            Handlers = devirtualizer.Handlers;
+        }
+
+        public void RestoreMethod(VirtualizedMethod method)
+        {
+            CurrentMethod = method;
+            Reader.BaseStream.Position = method.Offset;
+
+            var count = Reader.ReadInt32();
+
+            for (int i =0; i < count; i++)
+            {
+                var handlerID = Reader.ReadByte();
+                if (!Handlers.ContainsKey(handlerID))
+                {
+                    CurrentMethod.Instructions.Add(OpCodes.Nop.ToInstruction());
+                    continue;
+                }
+                var handler = Handlers[handlerID];
+                var instruction = new Instruction()
+                {
+                    OpCode = handler.ILCode.ToOpCode(),
+                    Operand = handler.ResolveOperand(this)
+                };
+                CurrentMethod.Instructions.Add(instruction);
+            }
+            CurrentMethod.RestoreBody();
+            CurrentMethod.RestoreTargets();
+
+            Logger.PrintSuccess($"Restored Method {method.Method.Name}.");
+        }
+        public void AddTarget(int target) => CurrentMethod.Targets.Add(CurrentMethod.Instructions.Count, target);
+        public IField ResolveField(int token) => Module.ResolveToken(token) as IField;
+        public IMethod ResolveMethod(int token) => Module.ResolveToken(token) as IMethod;
+        public ITypeDefOrRef ResolveType(int token) => Module.ResolveToken(token) as ITypeDefOrRef;
+    }
+}
+
+
+
+================================================
+File: TheBear.Pipeline/Stage.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace TheBear.Pipeline
+{
+    public abstract class Stage
+    {
+        public abstract string Name { get; }
+        public abstract string Description { get; }
+        public abstract void Execute(Devirtualizer devirtualizer);
+    }
+}
+
+
+
+================================================
+File: TheBear.Pipeline/TheBear.Pipeline.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{9B8E707B-7F8E-4C89-8CC8-700FB9B04BAA}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TheBear.Pipeline</RootNamespace>
+    <AssemblyName>TheBear.Pipeline</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib, Version=3.3.2.0, Culture=neutral, PublicKeyToken=50e96378b6e77999, processorArchitecture=MSIL">
+      <HintPath>..\packages\dnlib.3.3.2\lib\net45\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Devirtualizer.cs" />
+    <Compile Include="Handlers\Br.cs" />
+    <Compile Include="Handlers\Brfalse.cs" />
+    <Compile Include="Handlers\Brtrue.cs" />
+    <Compile Include="Handlers\Call.cs" />
+    <Compile Include="Handlers\Castclass.cs" />
+    <Compile Include="Handlers\Dup.cs" />
+    <Compile Include="Handlers\Ldarg.cs" />
+    <Compile Include="Handlers\Ldc_I4.cs" />
+    <Compile Include="Handlers\Ldftn.cs" />
+    <Compile Include="Handlers\Ldloc.cs" />
+    <Compile Include="Handlers\Ldsfld.cs" />
+    <Compile Include="Handlers\Ldstr.cs" />
+    <Compile Include="Handlers\Newarr.cs" />
+    <Compile Include="Handlers\Newobj.cs" />
+    <Compile Include="Handlers\Nop.cs" />
+    <Compile Include="Handlers\Pop.cs" />
+    <Compile Include="Handlers\Ret.cs" />
+    <Compile Include="Handlers\Stloc.cs" />
+    <Compile Include="Handlers\Stsfld.cs" />
+    <Compile Include="IHandler.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Restorer.cs" />
+    <Compile Include="Stage.cs" />
+    <Compile Include="Stages\Associating.cs" />
+    <Compile Include="Stages\Mapping.cs" />
+    <Compile Include="Stages\Restoring.cs" />
+    <Compile Include="VirtualizedMethod.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TheBear.Core\TheBear.Core.csproj">
+      <Project>{5da5f0eb-3d6b-44ae-a044-c4041d9fbf6c}</Project>
+      <Name>TheBear.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: TheBear.Pipeline/VirtualizedMethod.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace TheBear.Pipeline
+{
+    public class VirtualizedMethod
+    {
+        public MethodDef Method { get; }
+        public int Offset { get; }
+        public List<Instruction> Instructions { get; }
+        public Dictionary<int, Local> Locals { get; }
+        public Dictionary<int, int> Targets { get; }
+        public VirtualizedMethod(MethodDef method, int offset)
+        {
+            Method = method;
+            Offset = offset;
+            Instructions = new List<Instruction>();
+            Locals = new Dictionary<int, Local>();
+            Targets = new Dictionary<int, int>();
+        }
+
+        public void RestoreBody()
+        {
+            Method.Body.Instructions.Clear();
+            Method.Body.Variables.Clear();
+
+            foreach (Local local in Locals.Values)
+                Method.Body.Variables.Add(local);
+
+            foreach (Instruction instr in Instructions)
+                Method.Body.Instructions.Add(instr);
+        }
+
+        public void RestoreTargets()
+        {
+            if (Targets.Count < 1)
+                return;
+
+            foreach (var entry in Targets)
+            {
+                var current = entry.Key;
+                var target = entry.Value;
+
+                Instructions[current].Operand = Instructions[target];
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: TheBear.Pipeline/packages.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<packages>
+  <package id="dnlib" version="3.3.2" targetFramework="net472" />
+</packages>
+
+
+================================================
+File: TheBear.Pipeline/Handlers/Br.cs
+================================================
+ï»¿
+using dnlib.DotNet.Emit;
+
+namespace TheBear.Pipeline.Handlers
+{
+    public class Br : IHandler
+    {
+        public int ID => 10;
+        public Code ILCode => Code.Br_S;
+        public object ResolveOperand(Restorer restorer)
+        {
+            restorer.AddTarget(restorer.Reader.ReadInt32());
+            return OpCodes.Nop.ToInstruction();
+        }
+    }
+}
+
+
+
+================================================
+File: TheBear.Pipeline/Handlers/Brfalse.cs
+================================================
+ï»¿
+using dnlib.DotNet.Emit;
+
+namespace TheBear.Pipeline.Handlers
+{
+    public class Brfalse : IHandler
+    {
+        public int ID => 8;
+        public Code ILCode => Code.Brfalse_S;
+        public object ResolveOperand(Restorer restorer)
+        {
+            restorer.AddTarget(restorer.Reader.ReadInt32());
+            return OpCodes.Nop.ToInstruction();
+        }
+    }
+}
+
+
+
+================================================
+File: TheBear.Pipeline/Handlers/Brtrue.cs
+================================================
+ï»¿
+using dnlib.DotNet.Emit;
+
+namespace TheBear.Pipeline.Handlers
+{
+    public class Brtrue : IHandler
+    {
+        public int ID => 9;
+        public Code ILCode => Code.Brtrue_S;
+        public object ResolveOperand(Restorer restorer)
+        {
+            restorer.AddTarget(restorer.Reader.ReadInt32());
+            return OpCodes.Nop.ToInstruction();
+        }
+    }
+}
+
+
+
+================================================
+File: TheBear.Pipeline/Handlers/Call.cs
+================================================
+ï»¿
+using dnlib.DotNet.Emit;
+
+namespace TheBear.Pipeline.Handlers
+{
+    public class Call : IHandler
+    {
+        public int ID => 3;
+        public Code ILCode => Code.Call;
+        public object ResolveOperand(Restorer restorer)
+        {
+            restorer.Reader.ReadInt16();
+            return restorer.ResolveMethod(restorer.Reader.ReadInt32());
+        }
+    }
+}
+
+
+
+================================================
+File: TheBear.Pipeline/Handlers/Castclass.cs
+================================================
+ï»¿
+using dnlib.DotNet.Emit;
+
+namespace TheBear.Pipeline.Handlers
+{
+    public class Castclass : IHandler
+    {
+        public int ID => 15;
+        public Code ILCode => Code.Castclass;
+        public object ResolveOperand(Restorer restorer)
+        {
+            restorer.Reader.ReadInt16();
+            return restorer.ResolveType(restorer.Reader.ReadInt32());
+        }
+    }
+}
+
+
+
+
+================================================
+File: TheBear.Pipeline/Handlers/Dup.cs
+================================================
+ï»¿
+using dnlib.DotNet.Emit;
+
+namespace TheBear.Pipeline.Handlers
+{
+    public class Dup : IHandler
+    {
+        public int ID => 17;
+        public Code ILCode => Code.Dup;
+        public object ResolveOperand(Restorer restorer) => null;
+    }
+}
+
+
+
+================================================
+File: TheBear.Pipeline/Handlers/Ldarg.cs
+================================================
+ï»¿
+using dnlib.DotNet.Emit;
+
+namespace TheBear.Pipeline.Handlers
+{
+    public class Ldarg : IHandler
+    {
+        public int ID => 13;
+        public Code ILCode => Code.Ldarg;
+        public object ResolveOperand(Restorer restorer)
+        {
+            var index = restorer.Reader.ReadInt16();
+            var method = restorer.CurrentMethod.Method;
+            return method.Parameters[index];
+        }
+    }
+}
+
+
+
+================================================
+File: TheBear.Pipeline/Handlers/Ldc_I4.cs
+================================================
+ï»¿
+using dnlib.DotNet.Emit;
+
+namespace TheBear.Pipeline.Handlers
+{
+    public class Ldc_I4 : IHandler
+    {
+        public int ID => 1;
+        public Code ILCode => Code.Ldc_I4;
+        public object ResolveOperand(Restorer restorer) => restorer.Reader.ReadInt32();
+    }
+}
+
+
+
+================================================
+File: TheBear.Pipeline/Handlers/Ldftn.cs
+================================================
+ï»¿
+using dnlib.DotNet.Emit;
+
+namespace TheBear.Pipeline.Handlers
+{
+    public class Ldftn : IHandler
+    {
+        public int ID => 18;
+        public Code ILCode => Code.Ldftn;
+        public object ResolveOperand(Restorer restorer)
+        {
+            restorer.Reader.ReadInt16();
+            return restorer.ResolveMethod(restorer.Reader.ReadInt32());
+        }
+    }
+}
+
+
+
+================================================
+File: TheBear.Pipeline/Handlers/Ldloc.cs
+================================================
+ï»¿
+using dnlib.DotNet.Emit;
+
+namespace TheBear.Pipeline.Handlers
+{
+    public class Ldloc : IHandler
+    {
+        public int ID => 11;
+        public Code ILCode => Code.Ldloc_S;
+        public object ResolveOperand(Restorer restorer)
+        {
+            var index = restorer.Reader.ReadInt32();
+            var method = restorer.CurrentMethod;
+            if (method.Locals.ContainsKey(index))
+                return method.Locals[index];
+            var local = new Local(restorer.Module.ImportAsTypeSig(typeof(object)));
+            method.Locals.Add(index, local);
+            return local;
+        }
+    }
+}
+
+
+
+================================================
+File: TheBear.Pipeline/Handlers/Ldsfld.cs
+================================================
+ï»¿
+using dnlib.DotNet.Emit;
+
+namespace TheBear.Pipeline.Handlers
+{
+    public class Ldsfld : IHandler
+    {
+        public int ID => 6;
+        public Code ILCode => Code.Ldsfld;
+        public object ResolveOperand(Restorer restorer) 
+        {
+            restorer.Reader.ReadBoolean();
+            restorer.Reader.ReadInt16();
+            return restorer.ResolveField(restorer.Reader.ReadInt32());
+        }
+
+    }
+}
+
+
+
+================================================
+File: TheBear.Pipeline/Handlers/Ldstr.cs
+================================================
+ï»¿
+using dnlib.DotNet.Emit;
+
+using System.Text;
+
+namespace TheBear.Pipeline.Handlers
+{
+    public class Ldstr : IHandler
+    {
+        public int ID => 2;
+        public Code ILCode => Code.Ldstr;
+        public object ResolveOperand(Restorer restorer)
+        {
+            var len = restorer.Reader.ReadInt32();
+            var bytes = restorer.Reader.ReadBytes(len);
+            return Encoding.UTF8.GetString(bytes);
+        }
+    }
+}
+
+
+
+================================================
+File: TheBear.Pipeline/Handlers/Newarr.cs
+================================================
+ï»¿
+using dnlib.DotNet.Emit;
+
+namespace TheBear.Pipeline.Handlers
+{
+    public class Newarr : IHandler
+    {
+        public int ID => 14;
+        public Code ILCode => Code.Newarr;
+        public object ResolveOperand(Restorer restorer)
+        {
+            restorer.Reader.ReadInt16();
+            return restorer.ResolveType(restorer.Reader.ReadInt32());
+        }
+    }
+}
+
+
+
+
+================================================
+File: TheBear.Pipeline/Handlers/Newobj.cs
+================================================
+ï»¿
+using dnlib.DotNet.Emit;
+
+namespace TheBear.Pipeline.Handlers
+{
+    public class Newobj : IHandler
+    {
+        public int ID => 16;
+        public Code ILCode => Code.Newobj;
+        public object ResolveOperand(Restorer restorer)
+        {
+            restorer.Reader.ReadInt16();
+            return restorer.ResolveMethod(restorer.Reader.ReadInt32());
+        }
+    }
+}
+
+
+
+================================================
+File: TheBear.Pipeline/Handlers/Nop.cs
+================================================
+ï»¿
+using dnlib.DotNet.Emit;
+
+namespace TheBear.Pipeline.Handlers
+{
+    public class Nop : IHandler
+    {
+        public int ID => 4;
+        public Code ILCode => Code.Nop;
+        public object ResolveOperand(Restorer restorer) => null;
+    }
+}
+
+
+
+================================================
+File: TheBear.Pipeline/Handlers/Pop.cs
+================================================
+ï»¿
+using dnlib.DotNet.Emit;
+
+namespace TheBear.Pipeline.Handlers
+{
+    public class Pop : IHandler
+    {
+        public int ID => 5;
+        public Code ILCode => Code.Pop;
+        public object ResolveOperand(Restorer restorer) => null;
+    }
+}
+
+
+
+================================================
+File: TheBear.Pipeline/Handlers/Ret.cs
+================================================
+ï»¿
+using dnlib.DotNet.Emit;
+
+namespace TheBear.Pipeline.Handlers
+{
+    public class Ret : IHandler
+    {
+        public int ID => 0;
+        public Code ILCode => Code.Ret;
+        public object ResolveOperand(Restorer restorer) => null;
+    }
+}
+
+
+
+================================================
+File: TheBear.Pipeline/Handlers/Stloc.cs
+================================================
+ï»¿
+using dnlib.DotNet.Emit;
+
+namespace TheBear.Pipeline.Handlers
+{
+    public class Stloc : IHandler
+    {
+        public int ID => 12;
+        public Code ILCode => Code.Stloc_S;
+        public object ResolveOperand(Restorer restorer)
+        {
+            var index = restorer.Reader.ReadInt32();
+            var method = restorer.CurrentMethod;
+            if (method.Locals.ContainsKey(index))
+                return method.Locals[index];
+            var local = new Local(restorer.Module.ImportAsTypeSig(typeof(object)));
+            method.Locals.Add(index, local);
+            return local;
+        }
+    }
+}
+
+
+
+================================================
+File: TheBear.Pipeline/Handlers/Stsfld.cs
+================================================
+ï»¿
+using dnlib.DotNet.Emit;
+
+namespace TheBear.Pipeline.Handlers
+{
+    public class Stsfld : IHandler
+    {
+        public int ID => 7;
+        public Code ILCode => Code.Stsfld;
+        public object ResolveOperand(Restorer restorer)
+        {
+            restorer.Reader.ReadBoolean();
+            restorer.Reader.ReadInt16();
+            return restorer.ResolveField(restorer.Reader.ReadInt32());
+        }
+    }
+}
+
+
+
+================================================
+File: TheBear.Pipeline/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// As informaÃ§Ãµes gerais sobre um assembly sÃ£o controladas por
+// conjunto de atributos. Altere estes valores de atributo para modificar as informaÃ§Ãµes
+// associada a um assembly.
+[assembly: AssemblyTitle("TheBear.Pipeline")]
+[assembly: AssemblyDescription("TheBear's Pipeline Library")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("TheBear.Pipeline")]
+[assembly: AssemblyCopyright("Copyright Â© Gabriel Teix 2020")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Definir ComVisible como false torna os tipos neste assembly invisÃ­veis
+// para componentes COM. Caso precise acessar um tipo neste assembly de
+// COM, defina o atributo ComVisible como true nesse tipo.
+[assembly: ComVisible(false)]
+
+// O GUID a seguir serÃ¡ destinado Ã  ID de typelib se este projeto for exposto para COM
+[assembly: Guid("9b8e707b-7f8e-4c89-8cc8-700fb9b04baa")]
+
+// As informaÃ§Ãµes da versÃ£o de um assembly consistem nos quatro valores a seguir:
+//
+//      VersÃ£o Principal
+//      VersÃ£o SecundÃ¡ria 
+//      NÃºmero da VersÃ£o
+//      RevisÃ£o
+//
+// Ã‰ possÃ­vel especificar todos os valores ou usar como padrÃ£o os NÃºmeros de Build e da RevisÃ£o
+// usando o "*" como mostrado abaixo:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+
+================================================
+File: TheBear.Pipeline/Stages/Associating.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace TheBear.Pipeline.Stages
+{
+    public class Associating : Stage
+    {
+        public override string Name => "Associating";
+        public override string Description => "Associates handlers to his new value.";
+        public override void Execute(Devirtualizer devirtualizer)
+        {
+            var section = devirtualizer.Context.ReadSection(".Nasha2");
+            var reader = new BinaryReader(new MemoryStream(section));
+            var handlers = devirtualizer.Handlers;
+            var newHandlers = new Dictionary<int, IHandler>();
+
+            reader.ReadInt32();
+            reader.ReadInt32();
+
+            for (int i = 0; i < handlers.Count; i++)
+            {
+                reader.ReadInt32();
+
+                var id = reader.ReadInt32();
+
+                if (id > 255)
+                    break;
+
+                var handler = handlers[id];
+
+                reader.ReadInt32();
+
+                var newID = reader.ReadInt32(); 
+
+                reader.ReadInt32();
+                reader.ReadInt32();
+                newHandlers.Add(newID, handler);
+            }
+
+            devirtualizer.Handlers = newHandlers;
+        }
+    }
+}
+
+
+
+================================================
+File: TheBear.Pipeline/Stages/Mapping.cs
+================================================
+ï»¿
+using dnlib.DotNet.Emit;
+using System.Linq;
+using TheBear.Core;
+
+namespace TheBear.Pipeline.Stages
+{
+    public class Mapping : Stage
+    {
+        public override string Name => "Mapping";
+        public override string Description => "Map all the virtualized methods.";
+        public override void Execute(Devirtualizer devirtualizer)
+        {
+            var module = devirtualizer.Context.Module;
+
+            foreach (var type in module.GetTypes())
+            {
+                foreach (var method in type.Methods)
+                {
+                    if (!method.HasBody || !method.Body.HasInstructions)
+                        continue;
+
+                    method.Body.SimplifyMacros(method.Parameters);
+
+                    var instrs = method.Body.Instructions;
+
+                    if (instrs.Count < 6)
+                        continue;
+                    if (instrs[0].OpCode != OpCodes.Newobj)
+                        continue;
+                    if (instrs[instrs.Count - 5].OpCode != OpCodes.Ldc_I4)
+                        continue;
+                    if (instrs[instrs.Count - 4].OpCode != OpCodes.Ldsfld)
+                        continue;
+                    if (instrs[instrs.Count - 3].OpCode != OpCodes.Call)
+                        continue;
+
+                    var offset = instrs[instrs.Count - 5].GetLdcI4Value();
+
+                    devirtualizer.Methods.Add(new VirtualizedMethod(method, offset));
+                }
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: TheBear.Pipeline/Stages/Restoring.cs
+================================================
+ï»¿
+using TheBear.Core;
+
+namespace TheBear.Pipeline.Stages
+{
+    public class Restoring : Stage
+    {
+        public override string Name => "Restoring";
+        public override string Description => "Restore the VMIL Bodies back to IL Bodies.";
+        public override void Execute(Devirtualizer devirtualizer)
+        {
+            var restorer = new Restorer(devirtualizer);
+
+            Logger.Blank();
+
+            foreach (var method in devirtualizer.Methods)
+            {
+                restorer.RestoreMethod(method);
+            }
+
+        }
+    }
+}
+
+

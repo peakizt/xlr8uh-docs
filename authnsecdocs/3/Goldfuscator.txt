@@ -1,0 +1,881 @@
+Directory structure:
+└── anerruption-goldfuscator/
+    ├── README.md
+    ├── Goldfuscator.sln
+    └── SimpleObfuscator/
+        ├── App.config
+        ├── Goldfuscator.csproj
+        ├── Program.cs
+        ├── packages.config
+        ├── Core/
+        │   ├── Protections/
+        │   │   ├── AddRandoms/
+        │   │   │   └── RandomOutlinedMethods.cs
+        │   │   ├── MetaStrip/
+        │   │   │   └── MetaStrip.cs
+        │   │   ├── Renamer/
+        │   │   │   ├── Renamer.cs
+        │   │   │   └── Analyzer/
+        │   │   │       ├── EventDefAnalyzer.cs
+        │   │   │       ├── FieldDefAnalyzer.cs
+        │   │   │       ├── MethodDefAnalyzer.cs
+        │   │   │       ├── TypeDefAnalyzer.cs
+        │   │   │       └── iAnalyze.cs
+        │   │   └── StringEncrypt/
+        │   │       ├── OBAdder.cs
+        │   │       └── StringEncryption.cs
+        │   └── Utils/
+        │       ├── Reference.cs
+        │       └── SecureRandoms.cs
+        └── Properties/
+            └── AssemblyInfo.cs
+
+================================================
+File: README.md
+================================================
+<p align="center">
+    <img width="350" height="350" src="https://i.ibb.co/LCXnRLy/Logo-definitivo-notaccursed-Rotondo-min.png" alt="SimpleObfuscator">
+    <br>
+    <br>
+    <br>
+</p>
+
+<p align="center">
+    <a href="https://github.com/AnErrupTion/Goldfuscator/wiki/Home--Simple-Obfuscator">What is Goldfuscator?</a>&nbsp;&nbsp;&nbsp;
+    <a href="https://github.com/AnErrupTion/Goldfuscator/issues">Contribution guide</a>&nbsp;&nbsp;&nbsp;
+    <a href="https://mwsoftobf.xyz/">Get a premium obfuscator</a>&nbsp;&nbsp;&nbsp;
+    <a href="https://twitter.com/NAccursed">NotAccursed's Twitter</a>&nbsp;&nbsp;&nbsp;
+</p>
+<br>
+
+<p align="center">
+    <h2>This is only basic obfuscation. For better obfuscation, see LoGiC.NET :D</h2>
+</p>
+<br>
+
+<p align="center">
+    <h2>Before :</h2>
+    <img src="https://i.imgur.com/LvN1Mvw.png">
+    <h2>After :</h2>
+    <img src="https://i.imgur.com/hj081IC.png">
+</p>
+<br>
+
+<p align="center">
+  <sub>The fork of the simple obfuscator. Built with ❤︎ by <a href="https://twitter.com/NAccursed">NotAccursed</a> and forked by AnErrupTion.</sub>
+    <h2>You MUST install dnlib from NuGet, so you MUST use Visual Studio 2019 and MUST have .NET Framework v4.6.1 installed on your PC.</h2>
+</p>
+<br>
+
+# Goldfuscator [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://erruption.mit-license.org/)
+
+
+# 📜 Why do you need Goldfuscator?
+
+You can learn from it, it's just a fork (an amelioration) of the original project, making it easier to learn even more things!
+
+# 💥 What does it do?
+
+- [x] Support all .NET Frameworks
+- [x] Support all .NET Core
+- [x] Updated dnlib version
+- [x] Protect names of methods and classes
+- [x] Secure cryptographical randoms
+- [x] Add junk methods
+- [x] Removes custom attributes
+- [x] Obfuscates .NET DLL and EXE files
+
+# 📚 Credits 
+
+<a href="https://github.com/0xd4d/dnlib">0xd4d's dnlib</a>&nbsp;&nbsp;&nbsp;
+<a href="https://github.com/NotAccursed/SimpleObfuscator">NotAccursed's SimpleObfuscator</a>&nbsp;&nbsp;&nbsp;
+
+
+
+================================================
+File: Goldfuscator.sln
+================================================
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.202
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Goldfuscator", "SimpleObfuscator\Goldfuscator.csproj", "{EF333E26-CEB4-4886-AB46-0C2CEB285097}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EF333E26-CEB4-4886-AB46-0C2CEB285097}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF333E26-CEB4-4886-AB46-0C2CEB285097}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF333E26-CEB4-4886-AB46-0C2CEB285097}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF333E26-CEB4-4886-AB46-0C2CEB285097}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CBC66CDC-2BC7-496D-92DD-BA89A6B222A7}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: SimpleObfuscator/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup>
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.6.1" />
+    </startup>
+</configuration>
+
+
+================================================
+File: SimpleObfuscator/Goldfuscator.csproj
+================================================
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{EF333E26-CEB4-4886-AB46-0C2CEB285097}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Goldfuscator</RootNamespace>
+    <AssemblyName>Goldfuscator</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib, Version=3.2.0.0, Culture=neutral, PublicKeyToken=50e96378b6e77999, processorArchitecture=MSIL">
+      <HintPath>..\packages\dnlib.3.2.0\lib\net45\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Core\Protections\AddRandoms\RandomOutlinedMethods.cs" />
+    <Compile Include="Core\Protections\MetaStrip\MetaStrip.cs" />
+    <Compile Include="Core\Protections\Renamer\Analyzer\EventDefAnalyzer.cs" />
+    <Compile Include="Core\Protections\Renamer\Analyzer\FieldDefAnalyzer.cs" />
+    <Compile Include="Core\Protections\Renamer\Analyzer\iAnalyze.cs" />
+    <Compile Include="Core\Protections\Renamer\Analyzer\MethodDefAnalyzer.cs" />
+    <Compile Include="Core\Protections\Renamer\Analyzer\TypeDefAnalyzer.cs" />
+    <Compile Include="Core\Protections\Renamer\Renamer.cs" />
+    <Compile Include="Core\Protections\StringEncrypt\StringEncryption.cs" />
+    <Compile Include="Core\Utils\OBAdder.cs" />
+    <Compile Include="Core\Utils\SecureRandoms.cs" />
+    <Compile Include="Core\Utils\Reference.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+
+================================================
+File: SimpleObfuscator/Program.cs
+================================================
+using dnlib.DotNet;
+using dnlib.DotNet.Writer;
+using Goldfuscator.Core.Protections;
+using Goldfuscator.Core.Protections.AddRandoms;
+using Goldfuscator.Core.Protections.MetaStrip;
+using Goldfuscator.Core.Protections.ProxyAdder;
+using Goldfuscator.Core.Utils;
+using System;
+using System.IO;
+
+internal class Program
+{
+    public static bool IsWinForms = false;
+    public static string FileExtension = string.Empty;
+
+    /// <summary>
+    /// ModuleDefMD module = ModuleDefMD.Load(Console.ReadLine()); || We are getting the file path by reading the console.
+    /// Execute(module); || We are obfuscating the file.
+    /// module.Write(Environment.CurrentDirectory + @"\protected.exe"); || We are rewriting the file in the current directory.
+    /// </summary>
+    private static void Main()
+	{
+        Console.Title = Reference.Name + " v" + Reference.Version;
+
+        Console.WriteLine("Drag & drop your file here :");
+        string file = Console.ReadLine().Replace("\"", "");
+
+        FileExtension = Path.GetExtension(file);
+        if (FileExtension.Contains("exe"))
+        {
+            Console.Clear();
+            Console.WriteLine("Is your file a Windows Forms app (true) or Console app (false)?");
+            IsWinForms = Convert.ToBoolean(Console.ReadLine());
+        }
+
+        Console.Clear();
+
+        ModuleDefMD module = ModuleDefMD.Load(file);
+        string fileName = Path.GetFileNameWithoutExtension(file);
+
+        Console.WriteLine("-----------------------------------------------------------------");
+        Console.WriteLine(Reference.Prefix + "Loaded : " + module.Assembly.FullName);
+        Console.WriteLine(Reference.Prefix + "Has Resources : " + module.HasResources);
+        if (FileExtension.Contains("exe"))
+        {
+            Console.WriteLine(Reference.Prefix + "Is Windows Forms : " + IsWinForms);
+        }
+        Console.WriteLine(Reference.Prefix + "File Extension : " + FileExtension.Replace(".", "").ToUpper());
+        Console.WriteLine("-----------------------------------------------------------------");
+        Console.WriteLine();
+        Console.WriteLine("Press any key to continue...");
+        Console.ReadKey();
+
+        Console.Clear();
+
+        Execute(module);
+        Console.WriteLine(Reference.Prefix + "Saving file...");
+
+        var opts = new ModuleWriterOptions(module);
+        opts.Logger = DummyLogger.NoThrowInstance;
+        module.Write(@"C:\Users\" + Environment.UserName + @"\Desktop\" + fileName + "_protected" + FileExtension, opts);
+
+        Console.WriteLine(Reference.Prefix + "Done!");
+        Console.ReadKey();
+    }
+
+    /// <summary>
+    /// Renamer.Execute(module); || We are executing the obfuscation method 'Renamer'.
+    /// RandomOutlinedMethods.Execute(module); || We are executing the obfuscation method 'RandomOutlinedMethods'.
+    /// MetaStrip.Execute(module); || We are executing the obfuscation method 'MetaStrip'.
+    /// OBAdder.Execute(module); || We are executing the obfuscation method 'OBAdder'.
+    /// ProxyAdder.Execute(module); || We are executing the obfuscation method 'ProxyAdder'.
+    /// </summary>
+    private static void Execute(ModuleDefMD module)
+	{
+        Console.WriteLine(Reference.Prefix + "Applying 'Renamer' obfuscation...");
+		Renamer.Execute(module: module);
+        Console.WriteLine(Reference.Prefix + "Applying 'RandomOutlinedMethods' obfuscation...");
+        RandomOutlinedMethods.Execute(module: module);
+        Console.WriteLine(Reference.Prefix + "Applying 'MetaStrip' obfuscation...");
+        MetaStrip.Execute(module: module);
+        Console.WriteLine(Reference.Prefix + "Applying 'OBAdder' obfuscation...");
+        OBAdder.Execute(module: module);
+        Console.WriteLine(Reference.Prefix + "Applying 'ProxyAdder' obfuscation...");
+        ProxyAdder.Execute(module: module);
+    }
+}
+
+
+
+================================================
+File: SimpleObfuscator/packages.config
+================================================
+<?xml version="1.0" encoding="utf-8"?>
+<packages>
+  <package id="dnlib" version="3.2.0" targetFramework="net461" />
+</packages>
+
+
+
+================================================
+File: SimpleObfuscator/Core/Protections/AddRandoms/RandomOutlinedMethods.cs
+================================================
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using Goldfuscator.Core.Utils;
+using System.Linq;
+using System;
+
+namespace Goldfuscator.Core.Protections.AddRandoms
+{
+	internal class RandomOutlinedMethods : SecureRandoms
+	{
+		/// <summary>
+		/// We are executing the method 'RandomOutlinedMethods'. RandomOutlinedMethods will add random methods to Types.
+		/// </summary>
+		public static void Execute(ModuleDef module)
+		{
+			foreach (var type in module.Types)
+			{
+				foreach (var method in type.Methods.ToArray())
+				{
+					MethodDef strings = CreateReturnMethodDef(GenerateRandomString(Next(50, 70)), method);
+					MethodDef ints = CreateReturnMethodDef(Next(11111, 999999999), method);
+                    Console.WriteLine($"  [ROM] Adding junk string method \"{strings.Name}\" in \"{method.Name}\" ({type.Name})...");
+                    type.Methods.Add(strings);
+                    Console.WriteLine($"  [ROM] Adding junk integer method \"{strings.Name}\" in \"{method.Name}\" ({type.Name})...");
+                    type.Methods.Add(ints);
+                }
+			}
+		}
+
+		/// <summary>
+		/// We are making the return value for the randomly generated method. The return value can be an Integer, a Double or a String.
+		/// </summary>
+		public static MethodDef CreateReturnMethodDef(object value, MethodDef source_method)
+		{
+			CorLibTypeSig corlib = null;
+
+            if (value is int)
+                corlib = source_method.Module.CorLibTypes.Int32;
+            else if (value is string)
+                corlib = source_method.Module.CorLibTypes.String;
+            MethodDef newMethod = new MethodDefUser(GenerateRandomString(50),
+					MethodSig.CreateStatic(corlib),
+					MethodImplAttributes.IL | MethodImplAttributes.Managed,
+					MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.HideBySig)
+			{
+				Body = new CilBody()
+			};
+			if (value is int)
+				newMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldc_I4, (int)value));
+			else if (value is string)
+				newMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldstr, (string)value));
+            newMethod.Body.Instructions.Add(new Instruction(OpCodes.Ret));
+			return newMethod;
+		}
+    }
+}
+
+
+
+================================================
+File: SimpleObfuscator/Core/Protections/MetaStrip/MetaStrip.cs
+================================================
+using dnlib.DotNet;
+using System;
+
+namespace Goldfuscator.Core.Protections.MetaStrip
+{
+    internal class MetaStrip
+    {
+        public static void Execute(ModuleDefMD module)
+        {
+            foreach (var attr in module.Assembly.CustomAttributes)
+            {
+                if(Renamer.CanRename(attr))
+                {
+                    Console.WriteLine($"  [METASTRIP] Removing \"{module.Assembly.Name}\"'s custom attribute \"{attr}\"...");
+                    module.Assembly.CustomAttributes.Remove(attr);
+                }
+            }
+
+            Console.WriteLine($"  [METASTRIP] Removing \"{module.Name}\"'s Mvid \"{module.Mvid}\"...");
+            module.Mvid = null;
+            Console.WriteLine($"  [METASTRIP] Removing \"{module.Name}\"'s Name...");
+            module.Name = null;
+
+            foreach (var type in module.Types)
+            {
+                foreach (var attr in type.CustomAttributes)
+                {
+                    if (Renamer.CanRename(attr))
+                    {
+                        Console.WriteLine($"  [METASTRIP] Removing \"{type.Name}\"'s custom attribute \"{attr}\"...");
+                        type.CustomAttributes.Remove(attr);
+                    }
+                }
+
+                foreach (var m in type.Methods)
+                {
+                    foreach (var attr in m.CustomAttributes)
+                    {
+                        if (Renamer.CanRename(attr))
+                        {
+                            Console.WriteLine($"  [METASTRIP] Removing \"{m.Name}\"'s custom attribute \"{attr}\"...");
+                            m.CustomAttributes.Remove(attr);
+                        }
+                    }
+                }
+
+                foreach (var p in type.Properties)
+                {
+                    foreach (var attr in p.CustomAttributes)
+                    {
+                        if (Renamer.CanRename(attr))
+                        {
+                            Console.WriteLine($"  [METASTRIP] Removing \"{p.Name}\"'s custom attribute \"{attr}\"...");
+                            p.CustomAttributes.Remove(attr);
+                        }
+                    }
+                }
+
+                foreach (var field in type.Fields)
+                {
+                    foreach (var attr in field.CustomAttributes)
+                    {
+                        if (Renamer.CanRename(attr))
+                        {
+                            Console.WriteLine($"  [METASTRIP] Removing \"{field.Name}\"'s custom attribute \"{attr}\"...");
+                            field.CustomAttributes.Remove(attr);
+                        }
+                    }
+                }
+
+                foreach (var e in type.Events)
+                {
+                    foreach (var attr in e.CustomAttributes)
+                    {
+                        if (Renamer.CanRename(attr))
+                        {
+                            Console.WriteLine($"  [METASTRIP] Removing \"{e.Name}\"'s custom attribute \"{attr}\"...");
+                            e.CustomAttributes.Remove(attr);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: SimpleObfuscator/Core/Protections/Renamer/Renamer.cs
+================================================
+using dnlib.DotNet;
+using Goldfuscator.Core.Protections.Analyzer;
+using Goldfuscator.Core.Utils;
+using System;
+
+namespace Goldfuscator.Core.Protections
+{
+	internal class Renamer : SecureRandoms
+	{
+        /// <summary>
+        /// We are executing the method 'Renamer'. The Renamer will rename name of { Types, Methods, Parameters, Properties, Fields, Events }.
+        /// </summary>
+        public static void Execute(ModuleDefMD module)
+		{
+            foreach (var type in module.Types)
+			{
+				if (CanRename(type) && !Program.IsWinForms && !Program.FileExtension.Contains("dll") && !module.HasResources)
+                {
+                    Console.WriteLine($"  [RENAMER] Renaming Type Name \"{type.Name}\"...");
+                    type.Name = GenerateRandomString(Next(50, 70));
+                    Console.WriteLine($"  [RENAMER] Renaming Type Namespace \"{type.Namespace}\"...");
+                    type.Namespace = GenerateRandomString(Next(50, 70));
+                }
+
+                foreach (var m in type.Methods)
+                {
+                    if (CanRename(m) && !Program.IsWinForms && !Program.FileExtension.Contains("dll"))
+                    {
+                        Console.WriteLine($"  [RENAMER] Renaming method \"{m.Name}\"...");
+                        m.Name = GenerateRandomString(Next(50, 70));
+                    }
+
+                    foreach (var para in m.Parameters)
+                    {
+                        Console.WriteLine($"  [RENAMER] Renaming method \"{m.Name}\"'s parameter \"{para.Name}\"...");
+                        para.Name = GenerateRandomString(Next(50, 70));
+                    }
+                }
+
+                foreach (var p in type.Properties)
+                {
+                    if (CanRename(p))
+                    {
+                        Console.WriteLine($"  [RENAMER] Renaming property \"{p.Name}\"...");
+                        p.Name = GenerateRandomString(Next(50, 70));
+                    }
+                }
+
+                foreach (var field in type.Fields)
+                {
+                    if (CanRename(field))
+                    {
+                        Console.WriteLine($"  [RENAMER] Renaming field \"{field.Name}\"...");
+                        field.Name = GenerateRandomString(Next(50, 70));
+                    } 
+                }
+
+                foreach (var e in type.Events)
+                {
+                    if (CanRename(e))
+                    {
+                        Console.WriteLine($"  [RENAMER] Renaming event \"{e.Name}\"...");
+                        e.Name = GenerateRandomString(Next(50, 70));
+                    }
+                }
+            }
+		}
+
+		/// <summary>
+		/// We are checking with some Analyzers if it is possible to modify a determinate { TypeDef, MethodDef, EventDef, FieldDef }.
+		/// return analyze.Execute(obj); || We are returning the execution of the renamer after checking if it is possible to modify a determinate { TypeDef, MethodDef, EventDef, FieldDef }.
+		/// </summary>
+		public static bool CanRename(object obj)
+		{
+			iAnalyze analyze = null;
+			if (obj is TypeDef)
+				analyze = new TypeDefAnalyzer();
+			else if (obj is MethodDef)
+				analyze = new MethodDefAnalyzer();
+			else if (obj is EventDef)
+				analyze = new EventDefAnalyzer();
+			else if (obj is FieldDef)
+				analyze = new FieldDefAnalyzer();
+			if (analyze == null)
+				return false;
+			return analyze.Execute(obj);
+		}
+	}
+}
+
+
+
+================================================
+File: SimpleObfuscator/Core/Protections/Renamer/Analyzer/EventDefAnalyzer.cs
+================================================
+using dnlib.DotNet;
+
+namespace Goldfuscator.Core.Protections.Analyzer
+{
+	public class EventDefAnalyzer : iAnalyze
+	{
+		public override bool Execute(object context)
+		{
+			EventDef ev = (EventDef)context;
+			if (ev.IsRuntimeSpecialName)
+				return false;
+			return true;
+		}
+	}
+}
+
+
+
+================================================
+File: SimpleObfuscator/Core/Protections/Renamer/Analyzer/FieldDefAnalyzer.cs
+================================================
+using dnlib.DotNet;
+
+namespace Goldfuscator.Core.Protections.Analyzer
+{
+	public class FieldDefAnalyzer : iAnalyze
+	{
+		public override bool Execute(object context)
+		{
+			FieldDef field = (FieldDef)context;
+			if (field.IsRuntimeSpecialName)
+				return false;
+			if (field.IsLiteral && field.DeclaringType.IsEnum)
+				return false;
+			return true;
+		}
+	}
+}
+
+
+
+================================================
+File: SimpleObfuscator/Core/Protections/Renamer/Analyzer/MethodDefAnalyzer.cs
+================================================
+using dnlib.DotNet;
+
+namespace Goldfuscator.Core.Protections.Analyzer
+{
+	public class MethodDefAnalyzer : iAnalyze
+	{
+		public override bool Execute(object context)
+		{
+			MethodDef method = (MethodDef)context;
+			if (method.IsRuntimeSpecialName)
+				return false;
+			if (method.DeclaringType.IsForwarder)
+				return false;
+			return true;
+		}
+	}
+}
+
+
+
+================================================
+File: SimpleObfuscator/Core/Protections/Renamer/Analyzer/TypeDefAnalyzer.cs
+================================================
+using dnlib.DotNet;
+
+namespace Goldfuscator.Core.Protections.Analyzer
+{
+	public class TypeDefAnalyzer : iAnalyze
+	{
+		public override bool Execute(object context)
+		{
+			TypeDef type = (TypeDef)context;
+			if (type.IsRuntimeSpecialName)
+				return false;
+			if (type.IsGlobalModuleType)
+				return false;
+			return true;
+		}
+	}
+}
+
+
+
+================================================
+File: SimpleObfuscator/Core/Protections/Renamer/Analyzer/iAnalyze.cs
+================================================
+namespace Goldfuscator.Core.Protections.Analyzer
+{
+	public abstract class iAnalyze
+	{
+		public abstract bool Execute(object context);
+	}
+}
+
+
+
+================================================
+File: SimpleObfuscator/Core/Protections/StringEncrypt/OBAdder.cs
+================================================
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System;
+
+namespace Goldfuscator.Core.Utils
+{
+    internal class OBAdder
+    {
+        /// <summary>
+        /// The 'OBAdder' obfuscation will add a function everywhere (including the global type) that returns "Obfuscated with *appName* v*appVersion*."
+        /// </summary>
+
+        // Special credits to Sir-_-MaGeLanD for some code.
+
+        public static void Execute(ModuleDefMD module)
+        {
+            MethodDef cctor = module.GlobalType.FindOrCreateStaticConstructor();
+            string value = "Obfuscated with " + Reference.Name + " v" + Reference.Version;
+            MethodDef strings = CreateReturnMethodDef(value, cctor);
+            Console.WriteLine($"  [OBADDER] Adding method \"{strings.Name}\" in \"{cctor.Name}\"...");
+            module.GlobalType.Methods.Add(strings);
+        }
+
+        private static MethodDef CreateReturnMethodDef(string value, MethodDef source_method)
+        {
+            CorLibTypeSig corlib = source_method.Module.CorLibTypes.String;
+            MethodDef newMethod = new MethodDefUser("Goldfuscation",
+                    MethodSig.CreateStatic(corlib),
+                    MethodImplAttributes.IL | MethodImplAttributes.Managed,
+                    MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.HideBySig)
+            {
+                Body = new CilBody()
+            };
+
+            newMethod.Body.Instructions.Add(Instruction.Create(OpCodes.Ldstr, value));
+            newMethod.Body.Instructions.Add(new Instruction(OpCodes.Ret));
+            return newMethod;
+        }
+    }
+}
+
+
+
+================================================
+File: SimpleObfuscator/Core/Protections/StringEncrypt/StringEncryption.cs
+================================================
+using dnlib.DotNet;
+using System.Text;
+using System;
+using dnlib.DotNet.Emit;
+
+namespace Goldfuscator.Core.Protections.StringEncrypt
+{
+    internal class StringEncryption
+    {
+        /// <summary>
+        /// In construction.
+        /// </summary>
+        public static void Execute(ModuleDefMD module)
+        {
+            MethodDef cctor = module.GlobalType.FindOrCreateStaticConstructor();
+            MethodDef strings = CreateReturnMethodDef(Encoding.UTF8.GetString(Convert.FromBase64String("dGVzdA==")), cctor);
+            Console.WriteLine($"  [STRINGENCRYPTION] Adding method \"{strings.Name}\" in \"{cctor.Name}\"...");
+            module.GlobalType.Methods.Add(strings);
+        }
+
+        private static MethodDef CreateReturnMethodDef(string value, MethodDef sourceMethod)
+        {
+            MethodDef newMethod = new MethodDefUser("Decrypt",
+                    MethodSig.CreateStatic(sourceMethod.Module.CorLibTypes.String),
+                    MethodImplAttributes.IL | MethodImplAttributes.Managed,
+                    MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.HideBySig)
+            { Body = new CilBody() };
+
+            newMethod.Body.Instructions.Add(OpCodes.Ldstr.ToInstruction(value));
+            newMethod.Body.Instructions.Add(OpCodes.Ret.ToInstruction());
+            return newMethod;
+        }
+    }
+}
+
+
+
+================================================
+File: SimpleObfuscator/Core/Utils/Reference.cs
+================================================
+namespace Goldfuscator.Core.Utils
+{
+    public class Reference
+    {
+        public static string Name = "Goldfuscator";
+        public static string Prefix = "[" + Name.ToUpper() + "] ";
+        public static string Version = "1.4";
+    }
+}
+
+
+
+================================================
+File: SimpleObfuscator/Core/Utils/SecureRandoms.cs
+================================================
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Goldfuscator.Core.Utils
+{
+    public class SecureRandoms
+    {
+        static readonly RNGCryptoServiceProvider csp = new RNGCryptoServiceProvider();
+        internal static readonly char[] chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".ToCharArray();
+
+        public static int Next(int minValue, int maxExclusiveValue)
+        {
+            if (minValue >= maxExclusiveValue)
+                throw new ArgumentOutOfRangeException("minValue must be lower than maxExclusiveValue");
+
+            long diff = (long)maxExclusiveValue - minValue;
+            long upperBound = uint.MaxValue / diff * diff;
+
+            uint ui;
+            do
+            {
+                ui = GetRandomUInt();
+            } while (ui >= upperBound);
+
+            return (int)(minValue + (ui % diff));
+        }
+
+        private static uint GetRandomUInt()
+        {
+            var randomBytes = GenerateRandomBytes(sizeof(uint));
+            return BitConverter.ToUInt32(randomBytes, 0);
+        }
+
+        private static byte[] GenerateRandomBytes(int bytesNumber)
+        {
+            byte[] buffer = new byte[bytesNumber];
+            csp.GetBytes(buffer);
+            return buffer;
+        }
+
+        public static string GenerateRandomString(int size)
+        {
+            byte[] data = new byte[4 * size];
+
+            using (RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider())
+            {
+                crypto.GetBytes(data);
+            }
+
+            StringBuilder result = new StringBuilder(size);
+            for (int i = 0; i < size; i++)
+            {
+                var rnd = BitConverter.ToUInt32(data, i * 4);
+                var idx = rnd % chars.Length;
+
+                result.Append(chars[idx]);
+            }
+
+            return result.ToString();
+        }
+    }
+}
+
+
+
+================================================
+File: SimpleObfuscator/Properties/AssemblyInfo.cs
+================================================
+using System.Resources;
+using System.Reflection;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("A free .NET obfuscator based on the 'SimpleObfuscator' open-source project.")]
+[assembly: AssemblyDescription("Goldfuscator")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("Goldfuscator")]
+[assembly: AssemblyCopyright("Â© AnErrupTion 2019")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Setting ComVisible to false makes the types in this assembly not visible
+// to COM components.  If you need to access a type in this assembly from
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(true)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("ef333e26-ceb4-4886-ab46-0c2ceb285097")]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: NeutralResourcesLanguage("en-US")]
+
+
+

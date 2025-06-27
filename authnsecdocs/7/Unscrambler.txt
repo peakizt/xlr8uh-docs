@@ -1,0 +1,1097 @@
+Directory structure:
+└── dr4k0nia-unscrambler/
+    ├── README.md
+    ├── Unscrambler.sln
+    └── Unscrambler/
+        ├── Logger.cs
+        ├── Program.cs
+        ├── Unscrambler.csproj
+        ├── packages.config
+        ├── Features/
+        │   ├── IFeature.cs
+        │   ├── InterfaceLoopRemover.cs
+        │   ├── LocalsToFieldRemover.cs
+        │   ├── Utils.cs
+        │   └── MethodFeatures/
+        │       ├── CalliReplace.cs
+        │       ├── ConvertToIntReplace.cs
+        │       ├── DoubleParseReplace.cs
+        │       ├── EmptyTypeReplace.cs
+        │       ├── HideCallsRemover.cs
+        │       ├── MathReplace.cs
+        │       ├── NopRemover.cs
+        │       └── SizeOfReplace.cs
+        └── Properties/
+            └── AssemblyInfo.cs
+
+================================================
+File: README.md
+================================================
+# Unscrambler
+**Universal unpacker and fixer for a number of modded ConfuserEx protections**
+
+Dealing with simple modded protections like sizeof() mutations can be annoying. Unscrambler is meant to be used as an addition to de4dot fixing a number of protections not supported by de4dot.
+
+## Features
+Unscrambler can remove/fix the following:
+- System.Math Mutations*
+- Double.Parse() Mutations*
+- Sizeof Mutations
+- EmptyType Mutations
+- Convert.ToInt32(Double) Mutations (only basic support)
+- HideCalls
+- Anti de4dot (using interface loop)
+- Locals To Fields
+
+> Due to the use of reflection these can fail if your target apps has a different framework, a fix is in the works.
+
+## Usage
+Either Drag&Drop your file onto unscrambler or use command line arguments like shown below:
+
+       Unscrambler.exe <file>
+
+## Credits / Thanks to
+-  [AnonymooseRE](https://github.com/anonymoosere) For helping out with Unscrambler and answering a lot of my questions
+-  [Washi](https://github.com/Washi1337/AsmResolver) For AsmResolver and answering my questions
+- A ton of public ConfuserEx forks used as reference material
+
+
+
+================================================
+File: Unscrambler.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unscrambler", "Unscrambler\Unscrambler.csproj", "{7C991BDB-9437-4488-972B-46C5C4200DD8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7C991BDB-9437-4488-972B-46C5C4200DD8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C991BDB-9437-4488-972B-46C5C4200DD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C991BDB-9437-4488-972B-46C5C4200DD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C991BDB-9437-4488-972B-46C5C4200DD8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: Unscrambler/Logger.cs
+================================================
+ï»¿using System;
+using System.Drawing;
+using Colorful;
+using Console = Colorful.Console;
+
+namespace Unscrambler
+{
+    public static class Logger
+    {
+        public static void Log( string text, LogType type )
+        {
+            const string template = "{0} {1}";
+            switch ( type )
+            {
+                case LogType.Success:
+                {
+                    Formatter[] success =
+                    {
+                        new Formatter( "[success]:", Color.LimeGreen ),
+                        new Formatter( text, Color.White )
+                    };
+                    Console.WriteLineFormatted( template, Color.Gray, success );
+                    break;
+                }
+                case LogType.Debug:
+                {
+                    Formatter[] info =
+                    {
+                        new Formatter( "[debug]:", Color.DodgerBlue ),
+                        new Formatter( text, Color.White )
+                    };
+                    Console.WriteLineFormatted( template, Color.Gray, info );
+                    break;
+                }
+                case LogType.Error:
+                {
+                    Formatter[] error =
+                    {
+                        new Formatter( "[error]:", Color.Red ),
+                        new Formatter( text, Color.Crimson )
+                    };
+                    Console.WriteLineFormatted( template, Color.Gray, error );
+                    break;
+                }
+                default:
+                    throw new ArgumentOutOfRangeException( nameof(type), type, null );
+            }
+        }
+
+        public enum LogType
+        {
+            Success = 0,
+            Debug = 1,
+            Error = 3
+        }
+    }
+}
+
+
+================================================
+File: Unscrambler/Program.cs
+================================================
+ï»¿using System.Drawing;
+using System.IO;
+using System.Linq;
+using AsmResolver.DotNet;
+using Unscrambler.Features;
+using Unscrambler.Features.MethodFeatures;
+using Console = Colorful.Console;
+
+namespace Unscrambler
+{
+    internal static class Program
+    {
+        private static readonly IFeature[] Features =
+        {
+            new MethodProcessor
+            {
+                Features =
+                {
+                    new HideCallsRemover(), new NopRemover(), new CalliReplace(),
+                    new MathReplace(), new EmptyTypeReplace(),
+                    new DoubleParseReplace(),
+                    new SizeOfReplace(), new NopRemover(), new ConvertToIntReplace()
+                }
+            },
+            new InterfaceLoopRemover(),
+            new LocalsToFieldRemover(),
+        };
+
+        public static void Main( string[] args )
+        {
+            Console.WriteAscii( "Unscrambler" );
+            Console.WriteLine( "Unscrambler v1.0 by drakonia | github.com/dr4k0nia \n", Color.Gold );
+            if ( args.Length == 0 )
+            {
+                Console.WriteLine( "Usage: unscrambler.exe <file>" );
+                Console.ReadKey();
+                return;
+            }
+
+            string inputPath = args[0];
+            if ( !File.Exists( inputPath ) )
+            {
+                Logger.Log( $"Unable to find file: {inputPath}", Logger.LogType.Error );
+                Console.ReadKey();
+                return;
+            }
+
+            var module = ModuleDefinition.FromFile( inputPath );
+
+            Process( module );
+
+            WriteSummary();
+
+            string filepath = inputPath.Insert( inputPath.Length - 4, "_unscrambled" );
+            module.Write( filepath );
+            
+            Logger.Log( $"Saved unscrambled file at: {filepath}", Logger.LogType.Success );
+            Console.ReadKey();
+        }
+
+        private static void Process( ModuleDefinition module )
+        {
+            foreach ( var type in module.GetAllTypes() )
+            {
+                foreach ( var feature in Features )
+                {
+                    feature.Process( type );
+                }
+            }
+
+            foreach ( var feature in Features )
+            {
+                feature.PostProcess( module );
+            }
+        }
+
+        private static void WriteSummary()
+        {
+            foreach ( var summary in Features.SelectMany( f => f.GetSummary() ) )
+            {
+                Logger.Log( summary.Message, summary.LogType );
+            }
+        }
+    }
+}
+
+
+================================================
+File: Unscrambler/Unscrambler.csproj
+================================================
+ï»¿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net472</TargetFramework>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <LangVersion>8</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="AsmResolver.DotNet" Version="4.1.0" />
+      <PackageReference Include="Colorful.Console" Version="1.2.11.0" />
+    </ItemGroup>
+
+</Project>
+
+
+================================================
+File: Unscrambler/packages.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<packages>
+  <package id="AsmResolver" version="4.1.0" targetFramework="net48" />
+  <package id="AsmResolver.DotNet" version="4.1.0" targetFramework="net48" />
+  <package id="AsmResolver.PE" version="4.1.0" targetFramework="net48" />
+  <package id="AsmResolver.PE.File" version="4.1.0" targetFramework="net48" />
+  <package id="Colorful.Console" version="1.2.11" targetFramework="net48" />
+</packages>
+
+
+================================================
+File: Unscrambler/Features/IFeature.cs
+================================================
+ï»¿using System.Collections.Generic;
+using System.Linq;
+using AsmResolver.DotNet;
+
+namespace Unscrambler.Features
+{
+    public interface IFeature
+    {
+        void Process( TypeDefinition type );
+        void PostProcess( ModuleDefinition module );
+
+        IEnumerable<Summary> GetSummary();
+    }
+
+    public interface IMethodFeature
+    {
+        void Process( MethodDefinition method );
+
+        IEnumerable<Summary> GetSummary();
+    }
+
+    public readonly struct Summary
+    {
+        public Summary( string message, Logger.LogType logType )
+        {
+            Message = message;
+            LogType = logType;
+        }
+
+        public string Message { get; }
+        public Logger.LogType LogType { get; }
+    }
+
+    public class MethodProcessor : IFeature
+    {
+        public ICollection<IMethodFeature> Features { get; } = new List<IMethodFeature>();
+
+        public void Process( TypeDefinition type )
+        {
+            foreach ( var method in type.Methods.Where( m => m.CilMethodBody != null ) )
+            {
+                foreach ( var feature in Features )
+                    feature.Process( method );
+            }
+        }
+
+        void IFeature.PostProcess( ModuleDefinition module )
+        {
+        }
+
+        public IEnumerable<Summary> GetSummary()
+        {
+            return Features.SelectMany( feature => feature.GetSummary() );
+        }
+    }
+}
+
+
+================================================
+File: Unscrambler/Features/InterfaceLoopRemover.cs
+================================================
+ï»¿using System.Collections.Generic;
+using AsmResolver.DotNet;
+
+namespace Unscrambler.Features
+{
+    public class InterfaceLoopRemover : IFeature
+    {
+        private int _count;
+        private readonly List<TypeDefinition> _typesForRemoval = new List<TypeDefinition>();
+
+        public void Process( TypeDefinition type )
+        {
+            // Only check types with 2 or more interfaces
+            if ( type.Interfaces.Count < 2 ) return;
+
+            foreach ( var interfaceImplementation in type.Interfaces )
+            {
+                // Check if interface type matches implementation type
+                if ( interfaceImplementation.Interface != type ) 
+                    continue;
+
+                _typesForRemoval.Add( type );
+            }
+        }
+
+        public IEnumerable<Summary> GetSummary()
+        {
+            if ( _count > 0 )
+                yield return new Summary( $"Removed {_count} Interface Loop implementations", Logger.LogType.Success );
+        }
+
+        // Take the Types from the before generated list and remove the from the processed module
+        public void PostProcess( ModuleDefinition module )
+        {
+            foreach ( var type in _typesForRemoval )
+            {
+                if ( module.TopLevelTypes.Remove( type ) )
+                    _count++;
+                else
+                    Logger.Log( $"Failed to remove Type {type.Name} matched as Interface Loop", Logger.LogType.Error );
+            }
+        }
+    }
+}
+
+
+================================================
+File: Unscrambler/Features/LocalsToFieldRemover.cs
+================================================
+ï»¿using System.Collections.Generic;
+using System.Linq;
+using AsmResolver.DotNet;
+using AsmResolver.DotNet.Code.Cil;
+using AsmResolver.PE.DotNet.Cil;
+
+namespace Unscrambler.Features
+{
+    public class LocalsToFieldRemover : IFeature
+    {
+        private int _count;
+        private static readonly HashSet<FieldDefinition> FieldsInModule = new HashSet<FieldDefinition>();
+
+        private static readonly Dictionary<FieldDefinition, CilLocalVariable> CreatedLocals =
+            new Dictionary<FieldDefinition, CilLocalVariable>();
+
+        public void Process( TypeDefinition type )
+        {
+            // On first execution, grab fields from global constructor
+            if ( FieldsInModule.Count == 0 )
+            {
+                var globalType = type.Module.GetOrCreateModuleType();
+
+                foreach ( var field in globalType.Fields )
+                {
+                    // This assumes that the fields have no default value (which the forks Ive checked didnt have)
+                    if ( !field.IsStatic || field.IsPrivate || field.HasDefault )
+                        continue;
+                    
+                    CheckUsage( field, type.Module );
+                }
+            }
+
+            foreach ( var method in type.Methods.Where( m => m.CilMethodBody != null ) )
+            {
+                var instr = method.CilMethodBody.Instructions;
+                for ( int i = 0; i < instr.Count; i++ )
+                {
+                    if ( instr[i].OpCode.OperandType != CilOperandType.InlineField )
+                        continue;
+                    if ( !( instr[i].Operand is FieldDefinition field ) || !FieldsInModule.Contains( field ) )
+                        continue;
+
+                    // Check if dictionary already contains a local for the field, if not create a new one and add it to the dictionary
+                    if ( !CreatedLocals.TryGetValue( field, out var createdLocal ) )
+                    {
+                        createdLocal = new CilLocalVariable( field.Signature.FieldType );
+                        method.CilMethodBody.LocalVariables.Add( createdLocal );
+                        CreatedLocals.Add( field, createdLocal );
+                    }
+
+                    // Get local from dictionary
+                    instr[i].OpCode = GetOpCode( instr[i].OpCode.Code );
+                    instr[i].Operand = createdLocal;
+                    _count++;
+                }
+
+                instr.OptimizeMacros();
+            }
+        }
+
+        public void PostProcess( ModuleDefinition module )
+        {
+            var globalType = module.GetModuleType();
+
+            foreach ( var item in CreatedLocals )
+            {
+                globalType.Fields.Remove( item.Key );
+            }
+        }
+
+        public IEnumerable<Summary> GetSummary()
+        {
+            if ( _count > 0 )
+                yield return new Summary( $"Removed {_count} Local to Field implementations", Logger.LogType.Success );
+        }
+
+        private CilOpCode GetOpCode( CilCode opcode )
+        {
+            return opcode switch
+            {
+                CilCode.Stsfld => CilOpCodes.Stloc,
+                CilCode.Ldsfld => CilOpCodes.Ldloc,
+                CilCode.Ldsflda => CilOpCodes.Ldloca,
+                _ => CilOpCodes.Nop
+            };
+        }
+        
+        private void CheckUsage(FieldDefinition field, ModuleDefinition module)
+        {
+            int match = 0;
+            foreach ( var type in module.GetAllTypes())
+            {
+                foreach ( var method in type.Methods.Where( m => m.CilMethodBody != null ) )
+                {
+                    if ( method.CilMethodBody.Instructions.Any( i =>
+                        i.Operand is FieldDefinition matchedField && matchedField == field ) )
+                        match++;
+                }
+            }
+            if ( match == 1 )
+                FieldsInModule.Add( field );
+        }
+    }
+}
+
+
+================================================
+File: Unscrambler/Features/Utils.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using AsmResolver.PE.DotNet.Cil;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+
+namespace Unscrambler.Features
+{
+    public static class Utils
+    {
+        public static readonly List<CilOpCode> CalculationOpCodes = new List<CilOpCode>()
+            {CilOpCodes.Add, CilOpCodes.Sub, CilOpCodes.Mul, CilOpCodes.Div, CilOpCodes.Xor, CilOpCodes.Rem};
+        
+        // Ported to AsmResolver, original taken from
+        // https://github.com/wwh1004/ConfuserExTools/blob/master/ConstantKiller/ConstantKillerImpl.cs#L110
+        public static CilOpCode GetOpCode( ElementType returnType )
+        {
+            return returnType switch
+            {
+                ElementType.Boolean => CilOpCodes.Ldc_I4,
+                ElementType.Char => CilOpCodes.Ldc_I4,
+                ElementType.I1 => CilOpCodes.Ldc_I4,
+                ElementType.U1 => CilOpCodes.Ldc_I4,
+                ElementType.I2 => CilOpCodes.Ldc_I4,
+                ElementType.U2 => CilOpCodes.Ldc_I4,
+                ElementType.I4 => CilOpCodes.Ldc_I4,
+                ElementType.U4 => CilOpCodes.Ldc_I4,
+                ElementType.I8 => CilOpCodes.Ldc_I8,
+                ElementType.U8 => CilOpCodes.Ldc_I8,
+                ElementType.R4 => CilOpCodes.Ldc_R4,
+                ElementType.R8 => CilOpCodes.Ldc_R8,
+                _ => throw new InvalidOperationException()
+            };
+        }
+    }
+}
+
+
+================================================
+File: Unscrambler/Features/MethodFeatures/CalliReplace.cs
+================================================
+ï»¿using System.Collections.Generic;
+using AsmResolver.DotNet;
+using AsmResolver.PE.DotNet.Cil;
+
+namespace Unscrambler.Features.MethodFeatures
+{
+    public class CalliReplace : IMethodFeature
+    {
+        private int _count;
+        
+        public void Process( MethodDefinition method )
+        {
+            var instr = method.CilMethodBody.Instructions;
+            for ( int i = 0; i < instr.Count; i++ )
+            {
+                if ( instr[i].OpCode != CilOpCodes.Ldftn || instr[i + 1].OpCode != CilOpCodes.Calli )
+                    continue;
+                
+                // Change ldftn to call and remove the calli opcode
+                instr[i].OpCode = CilOpCodes.Call;
+                instr[i + 1].OpCode = CilOpCodes.Nop;
+
+                _count++;
+            }
+        }
+
+        public IEnumerable<Summary> GetSummary()
+        {
+            if ( _count > 0 )
+                yield return new Summary( $"Replaced {_count} Calli implementations", Logger.LogType.Success );
+        }
+    }
+}
+
+
+================================================
+File: Unscrambler/Features/MethodFeatures/ConvertToIntReplace.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using AsmResolver.DotNet;
+using AsmResolver.PE.DotNet.Cil;
+
+namespace Unscrambler.Features.MethodFeatures
+{
+    public class ConvertToIntReplace : IMethodFeature
+    {
+        private int _count;
+
+        //This is a primitive implementation, and subject to change.
+        public void Process( MethodDefinition method )
+        {
+            var instr = method.CilMethodBody.Instructions;
+            for ( int i = 0; i < instr.Count; i++ )
+            {
+                // Search for Call opcode
+                if ( instr[i].OpCode != CilOpCodes.Call ) continue;
+                if ( instr[i].Operand.ToString() != "System.Int32 System.Convert::ToInt32(Double)" )
+                    continue;
+
+                // Solve implementations like this Convert.ToInt32(-28.0 - -95.0)
+                // Doing this the ghetto way for now, plan is to use emulation in the future
+                if ( Utils.CalculationOpCodes.Contains( instr[i - 1].OpCode ) )
+                {
+                    if ( instr[i - 2].OpCode != CilOpCodes.Ldc_R8 || instr[i - 3].OpCode != CilOpCodes.Ldc_R8 )
+                        continue;
+
+                    if ( Solve( method, i ) )
+                    {
+                        instr[i - 1].OpCode = CilOpCodes.Nop;
+                        instr[i - 2].OpCode = CilOpCodes.Nop;
+                        instr[i - 3].OpCode = CilOpCodes.Nop;
+                        _count++;
+                        continue;
+                    }
+                }
+
+                if ( instr[i - 1].OpCode != CilOpCodes.Ldc_R8 ) continue;
+                instr[i].OpCode = CilOpCodes.Ldc_I4;
+                instr[i].Operand = Convert.ToInt32( (double) instr[i - 1].Operand );
+                instr[i - 1].OpCode = CilOpCodes.Nop;
+                _count++;
+            }
+        }
+
+        public IEnumerable<Summary> GetSummary()
+        {
+            if ( _count > 0 )
+                yield return new Summary( $"Replaced {_count} Convert.ToInt32() implementations",
+                    Logger.LogType.Success );
+        }
+
+
+        private static bool Solve( MethodDefinition method, int i )
+        {
+            var instr = method.CilMethodBody.Instructions;
+            double a = (double) instr[i - 3].Operand;
+            double b = (double) instr[i - 2].Operand;
+
+            if ( instr[i - 1].OpCode == CilOpCodes.Add )
+            {
+                instr[i].OpCode = CilOpCodes.Ldc_I4;
+                instr[i].Operand = Convert.ToInt32( a + b );
+                return true;
+            }
+
+            if ( instr[i - 1].OpCode == CilOpCodes.Sub )
+            {
+                instr[i].OpCode = CilOpCodes.Ldc_I4;
+                instr[i].Operand = Convert.ToInt32( a - b );
+                return true;
+            }
+
+            if ( instr[i - 1].OpCode == CilOpCodes.Mul )
+            {
+                instr[i].OpCode = CilOpCodes.Ldc_I4;
+                instr[i].Operand = Convert.ToInt32( a * b );
+                return true;
+            }
+
+            if ( instr[i - 1].OpCode == CilOpCodes.Div )
+            {
+                instr[i].OpCode = CilOpCodes.Ldc_I4;
+                instr[i].Operand = Convert.ToInt32( a / b );
+                return true;
+            }
+
+            return false;
+        }
+    }
+}
+
+
+================================================
+File: Unscrambler/Features/MethodFeatures/DoubleParseReplace.cs
+================================================
+ï»¿using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using AsmResolver.DotNet;
+using AsmResolver.DotNet.Code.Cil;
+using AsmResolver.DotNet.Signatures;
+using AsmResolver.PE.DotNet.Cil;
+
+namespace Unscrambler.Features.MethodFeatures
+{
+    public class DoubleParseReplace : IMethodFeature
+    {
+        private int _count;
+        
+        private readonly List<CilInstruction> InstructionsToRemove = new List<CilInstruction>();
+
+        public void Process( MethodDefinition method )
+        {
+            var instr = method.CilMethodBody.Instructions;
+            instr.ExpandMacros();
+            for ( int i = 0; i < instr.Count; i++ )
+            {
+                if ( !( instr[i].Operand is MemberReference memberRef ) ||
+                     !memberRef.DeclaringType.IsTypeOf( "System", "Double" ) )
+                    continue;
+
+                var methodBase =
+                    typeof(double).Assembly.ManifestModule.ResolveMethod( memberRef.Resolve().MetadataToken
+                        .ToInt32() );
+                
+                var arguments = GetArguments( methodBase, instr, i );
+
+                if ( arguments.Any(o => o is null))
+                {
+                    InstructionsToRemove.Clear();
+                    continue;
+                }
+                
+                var result = methodBase.Invoke( null, arguments );
+
+                instr[i].OpCode = CilOpCodes.Ldc_R8;
+                instr[i].Operand = result;
+                _count++;
+                
+                foreach ( var instruction in InstructionsToRemove )
+                {
+                    instruction.OpCode = CilOpCodes.Nop;
+                }
+                InstructionsToRemove.Clear();
+            }
+            instr.OptimizeMacros();
+        }
+
+        public IEnumerable<Summary> GetSummary()
+        {
+            if ( _count > 0 )
+                yield return new Summary( $"Replaced {_count} Double.Parse() implementations", Logger.LogType.Success );
+        }
+        
+        private object[] GetArguments( MethodBase methodBase, CilInstructionCollection instr, int i )
+        {
+            var arguments = new object[methodBase.GetParameters().Length];
+            for ( int j = 0; j < arguments.Length; j++ )
+            {
+                switch ( instr[i - j - 1].OpCode.OperandType )
+                {
+                    case CilOperandType.InlineMethod:
+                    case CilOperandType.InlineI:
+                    case CilOperandType.InlineString:
+                        arguments[arguments.Length - j - 1] = instr[i - j - 1].Operand;
+                        InstructionsToRemove.Add( instr[i - j - 1]  );
+                        break;
+                    default:
+                        arguments[arguments.Length - j - 1] = null;
+                        break;
+                }
+            }
+
+            return arguments;
+        }
+        
+        
+    }
+}
+
+
+================================================
+File: Unscrambler/Features/MethodFeatures/EmptyTypeReplace.cs
+================================================
+ï»¿using System.Collections.Generic;
+using AsmResolver.DotNet;
+using AsmResolver.PE.DotNet.Cil;
+
+namespace Unscrambler.Features.MethodFeatures
+{
+    public class EmptyTypeReplace : IMethodFeature
+    {
+        private int _count;
+
+        public void Process( MethodDefinition method )
+        {
+            var instr = method.CilMethodBody.Instructions;
+            for ( int i = 0; i < instr.Count; i++ )
+            {
+                // Search for Ldsfld opcode followed by Ldlen
+                if ( instr[i].OpCode != CilOpCodes.Ldsfld ||
+                     instr[i + 1].OpCode != CilOpCodes.Ldlen ||
+                     instr[i].Operand.ToString() != "System.Type[] System.Type::EmptyTypes" ) 
+                    continue;
+
+                instr[i].OpCode = CilOpCodes.Ldc_I4_0;
+                instr.RemoveAt( i + 1 );
+                i--;
+
+                _count++;
+            }
+        }
+
+        public IEnumerable<Summary> GetSummary()
+        {
+            if ( _count > 0 )
+                yield return new Summary( $"Replaced {_count} EmptyTypes implementations", Logger.LogType.Success );
+        }
+    }
+}
+
+
+================================================
+File: Unscrambler/Features/MethodFeatures/HideCallsRemover.cs
+================================================
+ï»¿using System.Collections.Generic;
+using AsmResolver.DotNet;
+using AsmResolver.DotNet.Code.Cil;
+using AsmResolver.PE.DotNet.Cil;
+
+namespace Unscrambler.Features.MethodFeatures
+{
+    public class HideCallsRemover : IMethodFeature
+    {
+        private int _count;
+
+        public void Process( MethodDefinition method )
+        {
+            // Skip all methods without exception handlers
+            if ( method.CilMethodBody.ExceptionHandlers == null )
+                return;
+
+            var instr = method.CilMethodBody.Instructions;
+            for ( int i = 0; i < instr.Count; i++ )
+            {
+                if ( instr[i].OpCode != CilOpCodes.Calli || instr[i + 1].OpCode != CilOpCodes.Sizeof ) 
+                    continue;
+                
+                //Check if instruction operand is null
+                if ( instr[i].Operand is null ) 
+                    continue;
+
+                // Search for a finally handler
+                var handlers = method.CilMethodBody.ExceptionHandlers;
+                for ( int j = 0; j < handlers.Count; j++ )
+                {
+                    if ( handlers[j].HandlerType != CilExceptionHandlerType.Finally ) 
+                        continue;
+                    handlers.RemoveAt( j );
+                    j--;
+                    _count++;
+                }
+
+                instr[i].OpCode = CilOpCodes.Nop;
+                instr[i + 1].OpCode = CilOpCodes.Nop;
+            }
+        }
+
+        public IEnumerable<Summary> GetSummary()
+        {
+            if ( _count > 0 )
+                yield return new Summary( $"Removed {_count} HideCalls implementations", Logger.LogType.Success );
+        }
+    }
+}
+
+
+================================================
+File: Unscrambler/Features/MethodFeatures/MathReplace.cs
+================================================
+ï»¿using System.Collections.Generic;
+using AsmResolver.DotNet;
+using AsmResolver.PE.DotNet.Cil;
+using System;
+using System.Linq;
+using System.Reflection;
+using AsmResolver.DotNet.Code.Cil;
+using AsmResolver.DotNet.Signatures;
+
+namespace Unscrambler.Features.MethodFeatures
+{
+    public class MathReplace : IMethodFeature
+    {
+        private int _count;
+        
+        private readonly List<CilInstruction> _instructionsToRemove = new List<CilInstruction>();
+        
+        // Thanks to Anonymoose for helping out
+        public void Process( MethodDefinition method )
+        {
+            method.CilMethodBody.Instructions.ExpandMacros();
+            var instr = method.CilMethodBody.Instructions;
+            for ( int i = 0; i < instr.Count; i++ )
+            {
+                if ( !( instr[i].Operand is MemberReference memberRef ) ||
+                     !memberRef.DeclaringType.IsTypeOf( "System", "Math" ) )
+                    continue;
+                var mathMethod =
+                    typeof(Math).Assembly.ManifestModule.ResolveMethod( memberRef.Resolve().MetadataToken
+                        .ToInt32() );
+
+                var arguments = GetArguments( mathMethod, instr, i );
+
+                if ( arguments.Any(o => o is null))
+                {
+                    _instructionsToRemove.Clear();
+                    continue;
+                }
+
+                var result = mathMethod.Invoke( null, arguments );
+                var opcode = Utils.GetOpCode( method.Module.CorLibTypeFactory.FromType(
+                    ( (MethodSignature) memberRef.Signature )
+                    .ReturnType ).ElementType );
+                instr[i].OpCode = opcode;
+                instr[i].Operand = result;
+                _count++;
+                
+                foreach ( var instruction in _instructionsToRemove )
+                {
+                    instruction.OpCode = CilOpCodes.Nop;
+                }
+                _instructionsToRemove.Clear();
+            }
+
+            method.CilMethodBody.Instructions.OptimizeMacros();
+        }
+        
+        public IEnumerable<Summary> GetSummary()
+        {
+            if ( _count > 0 )
+                yield return new Summary( $"Replaced {_count} Math implementations", Logger.LogType.Success );
+        }
+
+        private object[] GetArguments( MethodBase mathMethod, CilInstructionCollection instr, int i )
+        {
+            var arguments = new object[mathMethod.GetParameters().Length];
+            for ( int j = 0; j < arguments.Length; j++ )
+            {
+                switch ( instr[i - j - 1].OpCode.OperandType )
+                {
+                    case CilOperandType.InlineI:
+                    case CilOperandType.InlineI8:
+                    case CilOperandType.InlineR:
+                    case CilOperandType.ShortInlineR:
+                        arguments[arguments.Length - j - 1] = instr[i - j - 1].Operand;
+                        _instructionsToRemove.Add( instr[i - j - 1]  );
+                        break;
+                    default:
+                        arguments[arguments.Length - j - 1] = null;
+                        break;
+                }
+            }
+
+            return arguments;
+        }
+    }
+}
+
+
+================================================
+File: Unscrambler/Features/MethodFeatures/NopRemover.cs
+================================================
+ï»¿using System.Collections.Generic;
+using System.Linq;
+using AsmResolver.DotNet;
+using AsmResolver.PE.DotNet.Cil;
+
+namespace Unscrambler.Features.MethodFeatures
+{
+    public class NopRemover : IMethodFeature
+    {
+        private int _count;
+
+        public void Process( MethodDefinition method )
+        {
+            var targets = GetTargets( method );
+            var instr = method.CilMethodBody.Instructions;
+            for ( int i = 0; i < instr.Count; i++ )
+            {
+                if ( instr[i].OpCode != CilOpCodes.Nop ||
+                     targets.Contains( instr[i] ) )
+                    continue;
+                instr.RemoveAt( i );
+                i--;
+                _count++;
+            }
+        }
+
+        public IEnumerable<Summary> GetSummary()
+        {
+            if ( _count > 0 )
+                yield return new Summary( $"Removed {_count} additional Nop instructions", Logger.LogType.Success );
+        }
+
+        private static List<CilInstruction> GetTargets( MethodDefinition method )
+        {
+            var labels = new List<CilInstruction>();
+            foreach ( var instruction in method.CilMethodBody.Instructions )
+            {
+                switch ( instruction.Operand )
+                {
+                    case CilInstructionLabel label:
+                        labels.Add( label.Instruction );
+                        break;
+                    case IList<CilInstructionLabel> list:
+                        labels.AddRange( list.Select( t => t.Instruction ) );
+                        break;
+                }
+            }
+
+            foreach ( var handler in method.CilMethodBody.ExceptionHandlers )
+            {
+                if ( handler.FilterStart is CilInstructionLabel filterStart )
+                    labels.Add( filterStart.Instruction );
+                if ( handler.HandlerStart is CilInstructionLabel handlerStart )
+                    labels.Add( handlerStart.Instruction );
+                if ( handler.HandlerEnd is CilInstructionLabel handlerEnd )
+                    labels.Add( handlerEnd.Instruction );
+                if ( handler.TryStart is CilInstructionLabel tryStart )
+                    labels.Add( tryStart.Instruction );
+                if ( handler.TryEnd is CilInstructionLabel tryEnd )
+                    labels.Add( tryEnd.Instruction );
+            }
+
+            return labels;
+        }
+    }
+}
+
+
+================================================
+File: Unscrambler/Features/MethodFeatures/SizeOfReplace.cs
+================================================
+ï»¿using System.Collections.Generic;
+using AsmResolver.DotNet;
+using AsmResolver.DotNet.Memory;
+using AsmResolver.PE.DotNet.Cil;
+
+namespace Unscrambler.Features.MethodFeatures
+{
+    public class SizeOfReplace : IMethodFeature
+    {
+        private int _count;
+
+        public void Process( MethodDefinition method )
+        {
+            // Check if module is 32Bit, required for GetImpliedMemoryLayout()
+            bool is32Bit = method.Module.IsBit32Preferred || method.Module.IsBit32Required;
+
+            var instr = method.CilMethodBody.Instructions;
+            for ( int i = 0; i < instr.Count; i++ )
+            {
+                // Search for Sizeof opcode
+                if ( instr[i].OpCode != CilOpCodes.Sizeof )
+                    continue;
+
+                var op = (ITypeDefOrRef) instr[i].Operand;
+                // Determine integer value of operand type
+                int value = (int) op.GetImpliedMemoryLayout( is32Bit ).Size;
+
+                instr[i].OpCode = CilOpCodes.Ldc_I4;
+                instr[i].Operand = value;
+                _count++;
+
+                // Optimize IL
+                instr.OptimizeMacros();
+            }
+        }
+
+        public IEnumerable<Summary> GetSummary()
+        {
+            if ( _count > 0 )
+                yield return new Summary( $"Replaced {_count} sizeof() implementations", Logger.LogType.Success );
+        }
+    }
+}
+
+
+================================================
+File: Unscrambler/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following 
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle( "Unscrambler" )]
+[assembly: AssemblyDescription( "Universal unpacker for a variety of ConuserEx mods" )]
+[assembly: AssemblyConfiguration( "" )]
+[assembly: AssemblyCompany( "https://github.com/dr4k0nia/Unscrambler" )]
+[assembly: AssemblyProduct( "Unscrambler" )]
+[assembly: AssemblyCopyright( "Copyright Â© drakonia 2020" )]
+[assembly: AssemblyTrademark( "" )]
+[assembly: AssemblyCulture( "" )]
+
+// Setting ComVisible to false makes the types in this assembly not visible 
+// to COM components.  If you need to access a type in this assembly from 
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible( false )]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid( "7C991BDB-9437-4488-972B-46C5C4200DD8" )]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version 
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers 
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion( "1.0.0.0" )]
+[assembly: AssemblyFileVersion( "1.0.0.0" )]
+

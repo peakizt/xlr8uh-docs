@@ -1,0 +1,460 @@
+Directory structure:
+└── jomtek-phoenix-string-decryptor/
+    ├── README.md
+    ├── LICENSE
+    ├── Phoenix String Decryptor.sln
+    └── Phoenix String Decryptor/
+        ├── App.config
+        ├── Phoenix String Decryptor.csproj
+        ├── Program.cs
+        ├── StringDecryptor.cs
+        └── Properties/
+            └── AssemblyInfo.cs
+
+================================================
+File: README.md
+================================================
+# Phoenix String Decryptor
+NTCore's Phoenix Protector offers a "string encryption" feature, which, as its name tells us, protects the strings present in your program.
+
+Even after searching on the internet for ten minutes, I couldn't find a Phoenix string decryptor;<br>that's why I made one.
+
+# Static or dynamic ? Which one should I pick ?
+![enter image description here](https://i.imgur.com/phOeooD.png)
+
+If you believe the software you're analyzing may contain malware code, then you should pick static analysis, because dynamic analysis will load the assembly on your machine, causing possible damage.
+
+# How do I find a "method token" ?
+Once you'll start this decryptor, it will ask you for a "method token": it's basically just the token of the decryption method. But how do you find it ? Here's a step-by-step guide :
+<h2>1 - Open your file into DnSpy and find an encrypted string</h2>
+
+![enter image description here](https://i.imgur.com/fPLfofW.png)
+
+
+<h2>2 - Find the encryption method</h2>
+<h3>Click on the surrounded method</h3>
+
+![enter image description here](https://i.imgur.com/y3qNdx7.png)
+
+<h3> This will redirect you to the encryption-method definition</h3>
+
+![enter image description here](https://i.imgur.com/9zDmWwF.png)
+
+<h2>3 - There you go !</h3>
+
+![enter image description here](https://i.imgur.com/n1cjOZx.png)
+
+
+================================================
+File: LICENSE
+================================================
+BSD 2-Clause License
+
+Copyright (c) 2020, Jomtek
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+
+================================================
+File: Phoenix String Decryptor.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30128.74
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix String Decryptor", "Phoenix String Decryptor\Phoenix String Decryptor.csproj", "{B6716EB6-876A-4B6C-9ECD-132D2932ED98}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B6716EB6-876A-4B6C-9ECD-132D2932ED98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6716EB6-876A-4B6C-9ECD-132D2932ED98}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6716EB6-876A-4B6C-9ECD-132D2932ED98}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6716EB6-876A-4B6C-9ECD-132D2932ED98}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4A427C04-D588-454C-8ED2-434ADE86C05A}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: Phoenix String Decryptor/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.8" />
+    </startup>
+</configuration>
+
+
+================================================
+File: Phoenix String Decryptor/Phoenix String Decryptor.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{B6716EB6-876A-4B6C-9ECD-132D2932ED98}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Phoenix_String_Decryptor</RootNamespace>
+    <AssemblyName>Phoenix String Decryptor</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib">
+      <HintPath>..\..\..\..\Documents\Software cracking\Development\dnlib\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StringDecryptor.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: Phoenix String Decryptor/Program.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Threading;
+using System.Reflection;
+
+namespace Phoenix_String_Decryptor
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            while (true)
+            {
+                Console.Clear();
+                Console.Title = "Phoenix String Decryptor (by Jomtek and Mindsystemm)";
+
+                string modulePath = "";
+                string methodToken = "";
+                bool dynamicAnalysis = true;
+                Assembly assembly = null;
+
+                try
+                {
+                    modulePath = args[0];
+                }
+                catch (IndexOutOfRangeException)
+                {
+                    Console.WriteLine("Error : no module selected... press ENTER to exit.");
+                    Console.ReadLine();
+                    Environment.Exit(0);
+                }
+
+                // Huge thanks to https://github.com/MindSystemm
+                try
+                {
+                    assembly = Assembly.LoadFrom(args[0]);
+                }
+                catch
+                {
+                    Console.WriteLine("[Assembly load failed, static analysis chosen]");
+                    dynamicAnalysis = false;
+                }
+
+                if (dynamicAnalysis)
+                {
+                    Console.Write("Do you want to use dynamic analysis (Y/N): ");
+                    dynamicAnalysis = Console.ReadLine().ToUpper() == "Y";
+                    Console.Title += " (" + (dynamicAnalysis ? "dynamic" : "static") + ")";
+                }
+
+
+                Console.Write("Method token : ");
+                methodToken = Console.ReadLine().ToUpper();
+
+                if (methodToken.StartsWith("0X"))
+                    methodToken = methodToken.Substring(2);
+
+                if (methodToken.Length != 8)
+                {
+                    Console.WriteLine("Error : invalid method token...");
+                    Thread.Sleep(700);
+                    continue;
+                }
+
+                StringDecryptor myDecryptor = new StringDecryptor(modulePath, methodToken, dynamicAnalysis, assembly);
+
+                myDecryptor.OpenModule();
+
+                int totalDecryptedStrings = myDecryptor.DecryptStrings();
+                Console.WriteLine("Decrypted " + totalDecryptedStrings + " strings successfully.");
+
+                myDecryptor.SaveModule();
+
+                break;
+            }
+
+            Thread.Sleep(650);
+        }
+    }
+}
+
+
+
+================================================
+File: Phoenix String Decryptor/StringDecryptor.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using dnlib.DotNet.Pdb;
+using dnlib.DotNet.Writer;
+using Microsoft.SqlServer.Server;
+
+namespace Phoenix_String_Decryptor
+{
+    class StringDecryptor
+    {
+        private ModuleDefMD module;
+        private string modulePath;
+        private string methodToken;
+        private bool dynamicAnalysis;
+        private Assembly assembly;
+
+        public StringDecryptor(string modulePath, string methodToken, bool dynamicAnalysis, Assembly assembly)
+        {
+            this.modulePath = modulePath;
+            this.methodToken = methodToken;
+            this.dynamicAnalysis = dynamicAnalysis;
+            this.assembly = assembly;
+        }
+
+        private bool IsTypeAnalyzable(TypeDef moduleType) =>
+            moduleType.HasMethods && !moduleType.Namespace.Contains(".My");
+
+        private string PhoenixAlgorithm(string inputStr) // for static analysis
+        {
+            int length = inputStr.Length;
+            char[] array = new char[length];
+            for (int i = 0; i < array.Length; i++)
+            {
+                char c = inputStr[i];
+                byte b = (byte)((int)c ^ length - i);
+                byte b2 = (byte)((int)(c >> 8) ^ i);
+                array[i] = (char)((int)b2 << 8 | (int)b);
+            }
+            return string.Intern(new string(array));
+        }
+
+        public void OpenModule()
+        {
+            ModuleContext modCtx = ModuleDef.CreateModuleContext();
+            module = ModuleDefMD.Load(modulePath, modCtx);
+        }
+
+        private int AnalyzeMethodBody(MethodDef method)
+        {
+            if (method.Body == null) return 0;
+
+            int decryptedStrings = 0;
+            int counter = 0;
+
+            foreach (Instruction instruction in method.Body.Instructions)
+            {
+                if (instruction.OpCode == OpCodes.Call)
+                {
+                    try
+                    {
+                        MethodDef calledMethod = (MethodDef)instruction.Operand;
+                        if (calledMethod.MDToken.ToString() == methodToken)
+                        {
+                            instruction.OpCode = OpCodes.Nop;
+
+                            Instruction ldstrInstr = method.Body.Instructions[counter - 1];
+                            string encryptedString = (string)ldstrInstr.Operand;
+                            string resolvedString;
+
+                            if (dynamicAnalysis)
+                            {
+                                resolvedString =
+                                    (string)assembly.ManifestModule.ResolveMethod(calledMethod.MDToken.ToInt32()).Invoke(null, new object[] { encryptedString });
+                            } else
+                            {
+                                resolvedString = PhoenixAlgorithm(encryptedString);
+                            }
+
+                            ldstrInstr.Operand = resolvedString;
+                            decryptedStrings++;
+                        }
+                    }
+                    catch (InvalidCastException) { };
+                }
+
+                counter++;
+            }
+
+            return decryptedStrings;
+        }
+        public int DecryptStrings()
+        {
+            if (module != null)
+            {
+                int totalDecryptedStrings = 0;
+
+                for (int i = 0; i < module.Types.Count; i++)
+                {
+                    TypeDef moduleType = module.Types[i];
+                    if (IsTypeAnalyzable(moduleType))
+                    {
+                        for (int i2 = 0; i2 < moduleType.Methods.Count; i2++)
+                        {
+                            MethodDef method = moduleType.Methods[i2];
+                            totalDecryptedStrings += AnalyzeMethodBody(method);
+                            if (method.MDToken.ToString() == methodToken) moduleType.Methods.Remove(method);
+                        }
+                    }
+                }
+
+                return totalDecryptedStrings;
+            } else
+            {
+                throw new NullReferenceException();
+            }
+        }
+
+        public void SaveModule()
+        {
+            if (module != null)
+            {
+                string savePath = Path.ChangeExtension(modulePath, null);
+                var opts = new ModuleWriterOptions(module);
+                opts.MetadataOptions.Flags = MetadataFlags.KeepOldMaxStack;
+                opts.MetadataLogger = DummyLogger.NoThrowInstance;
+                module.Write(savePath + "_decrypted.exe", opts);
+            } else
+            {
+                throw new NullReferenceException();
+            }
+        }
+
+    }
+}
+
+
+================================================
+File: Phoenix String Decryptor/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("Phoenix String Decryptor")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("Phoenix String Decryptor")]
+[assembly: AssemblyCopyright("Copyright Â©  2020")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Setting ComVisible to false makes the types in this assembly not visible
+// to COM components.  If you need to access a type in this assembly from
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("b6716eb6-876a-4b6c-9ecd-132d2932ed98")]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+

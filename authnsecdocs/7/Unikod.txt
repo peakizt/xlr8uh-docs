@@ -1,0 +1,2332 @@
+Directory structure:
+└── sdskykloud-unikod/
+    ├── README.md
+    ├── LICENSE
+    ├── Unikod.sln
+    ├── appveyor.yml
+    ├── .editorconfig
+    ├── Unikod/
+    │   ├── Styler.cs
+    │   ├── Unikod.csproj
+    │   ├── Utils.cs
+    │   ├── Common/
+    │   │   ├── Types.cs
+    │   │   └── UnicodeSets.cs
+    │   ├── Internal/
+    │   │   ├── EmbeddedResourceHelper.cs
+    │   │   └── GlyphSetParser.cs
+    │   └── Resources/
+    │       └── GlyphSets/
+    │           ├── Latin.json
+    │           └── Number.json
+    └── Unikod.Test/
+        ├── AnalyzeTest.cs
+        ├── OtherUnikodUtilsTest.cs
+        ├── StylizeTest.cs
+        ├── Unikod.Test.csproj
+        └── UnstylizeTest.cs
+
+================================================
+File: README.md
+================================================
+Unikod
+======
+[![Build status](https://ci.appveyor.com/api/projects/status/wpjwht0rox5hdjcr?svg=true)](https://ci.appveyor.com/project/SDSkyKlouD/unikod)  
+  
+A .NET Standard library which styles the text using Unicode characters.  
+(To be filled)
+
+
+
+================================================
+File: LICENSE
+================================================
+MIT License
+
+Copyright (c) 2019 SD SkyKlouD
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+================================================
+File: Unikod.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.271
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unikod", "Unikod\Unikod.csproj", "{D5160B1E-2508-470B-A605-425B165AD298}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C727919F-16B7-493E-A140-AA3D40CD166E}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		LICENSE = LICENSE
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unikod.Test", "Unikod.Test\Unikod.Test.csproj", "{048926E7-BC26-42D9-A3A4-28418268D4F4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D5160B1E-2508-470B-A605-425B165AD298}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5160B1E-2508-470B-A605-425B165AD298}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5160B1E-2508-470B-A605-425B165AD298}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5160B1E-2508-470B-A605-425B165AD298}.Release|Any CPU.Build.0 = Release|Any CPU
+		{048926E7-BC26-42D9-A3A4-28418268D4F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{048926E7-BC26-42D9-A3A4-28418268D4F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{048926E7-BC26-42D9-A3A4-28418268D4F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{048926E7-BC26-42D9-A3A4-28418268D4F4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3291632F-F7B9-447A-8FB6-FBB3E0260785}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: appveyor.yml
+================================================
+version: 0.0.{build}.9999
+image: Visual Studio 2019
+configuration: Release
+clone_depth: 1
+dotnet_csproj:
+  patch: true
+  file: '**\*.csproj'
+  version: '{version}'
+  package_version: '{version}'
+  assembly_version: '{version}'
+  file_version: '{version}'
+  informational_version: '{version}'
+before_build:
+- cmd: dotnet restore C:\projects\unikod\Unikod.sln
+build:
+  publish_nuget: true
+  parallel: true
+  verbosity: normal
+
+
+
+================================================
+File: .editorconfig
+================================================
+#############################################################
+# EditorConfig options for .NET project (especially for C#) #
+#                                         by SD SkyKlouD    #
+#############################################################
+
+### Common options ###
+
+# Root
+root = true
+
+# All files
+[*]
+indent_style = space
+
+# Code files
+[*.{xml,cs,vb}]
+indent_size = 4
+insert_final_newline = true
+charset = utf-8-bom
+
+
+###########################
+# .NET coding conventions #
+###########################
+
+[*.{cs,vb}]
+# Formatting: Organize usings
+dotnet_sort_system_directives_first = true
+
+# Code Style: `this.` preferences
+dotnet_style_qualification_for_field = false:warning
+dotnet_style_qualification_for_property = false:warning
+dotnet_style_qualification_for_method = false:warning
+dotnet_style_qualification_for_event = false:warning
+
+# Code Style: Language keywords vs BCL types
+dotnet_style_predefined_type_for_locals_parameters_members = true:warning
+dotnet_style_predefined_type_for_member_access = true:warning
+
+# Code Style: Modifier preferences
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:warning
+dotnet_style_readonly_field = true:warning
+
+# Code Style: Parentheses preferences
+dotnet_style_parentheses_in_arithmetic_binary_operators = always_for_clarity:warning
+dotnet_style_parentheses_in_relational_binary_operators = always_for_clarity:warning
+dotnet_style_parentheses_in_other_binary_operators = always_for_clarity:warning
+dotnet_style_parentheses_in_other_operators = never_if_unnecessary:warning
+
+# Code Style: Expression-level preferences
+dotnet_style_object_initializer = true:warning
+dotnet_style_collection_initializer = true:warning
+dotnet_style_explicit_tuple_names = true:warning
+dotnet_style_prefer_inferred_tuple_names = true:warning
+dotnet_style_prefer_inferred_anonymous_type_member_names = true:warning
+dotnet_style_prefer_auto_properties = true:warning
+dotnet_style_prefer_is_null_check_over_reference_equality_method = true:warning
+dotnet_style_prefer_conditional_expression_over_assignment = true:warning
+dotnet_style_prefer_conditional_expression_over_return = true:warning
+dotnet_style_coalesce_expression = true:warning
+dotnet_style_null_propagation = true:warning
+
+# Naming Conv: Camel-case for private fields
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+dotnet_naming_style.camel_case_field_style.required_prefix = _
+dotnet_naming_style.camel_case_field_style.capitalization = camel_case
+dotnet_naming_rule.use_camel_case_for_fields.style = camel_case_field_style
+dotnet_naming_rule.use_camel_case_for_fields.symbols = private_fields
+dotnet_naming_rule.use_camel_case_for_fields.severity = warning
+
+###########################
+#  C# coding conventions  #
+###########################
+
+[*.cs]
+# Code Style: Modifier preferences
+csharp_preferred_modifier_order = public,private,protected,internal,static,extern,new,virtual,abstract,sealed,override,readonly,unsafe,volatile,async:warning
+
+# Code Style: `var` preferences
+csharp_style_var_for_built_in_types = false:warning
+csharp_style_var_when_type_is_apparent = false:warning
+csharp_style_var_elsewhere = false:warning
+
+# Code Style: Expression-bodied members
+csharp_style_expression_bodied_methods = when_on_single_line:warning
+csharp_style_expression_bodied_constructors = when_on_single_line:warning
+csharp_style_expression_bodied_operators = when_on_single_line:warning
+csharp_style_expression_bodied_properties = when_on_single_line:warning
+csharp_style_expression_bodied_indexers = when_on_single_line:warning
+csharp_style_expression_bodied_accessors = when_on_single_line:warning
+
+# Code Style: Pattern-matching preferences
+csharp_style_pattern_matching_over_is_with_cast_check = true:warning
+csharp_style_pattern_matching_over_as_with_null_check = true:warning
+
+# Code Style: Expression-level preferences
+csharp_style_inlined_variable_declaration = true:warning
+csharp_prefer_simple_default_expression = true:warning
+csharp_style_deconstructed_variable_declaration = true:warning
+csharp_style_pattern_local_over_anonymous_function = true:warning
+csharp_prefer_braces = true:warning
+
+# Code Style: Null-checking preferences
+csharp_style_throw_expression = true:warning
+csharp_style_conditional_delegate_call = true:warning
+
+# Formatting: New line preferences
+csharp_new_line_before_open_brace = none
+csharp_new_line_before_else = false
+csharp_new_line_before_catch = false
+csharp_new_line_before_finally = false
+csharp_new_line_before_members_in_object_initializers = true
+csharp_new_line_before_members_in_anonymous_types = true
+csharp_new_line_between_query_expression_clauses = true
+
+# Formatting: Indentation preferences
+csharp_indent_case_contents = true
+csharp_indent_switch_labels = true
+csharp_indent_labels= flush_left
+
+# Space preferences
+csharp_space_after_cast = true
+csharp_space_after_keywords_in_control_flow_statements = false
+csharp_space_between_method_declaration_parameter_list_parentheses = false
+csharp_space_between_method_call_parameter_list_parentheses = false
+csharp_space_between_parentheses = false
+csharp_space_before_colon_in_inheritance_clause = true
+csharp_space_after_colon_in_inheritance_clause = true
+csharp_space_around_binary_operators = before_and_after
+csharp_space_between_method_declaration_empty_parameter_list_parentheses = false
+csharp_space_between_method_call_name_and_opening_parenthesis = false
+csharp_space_between_method_call_empty_parameter_list_parentheses = false
+
+# Wrapping preferences
+csharp_preserve_single_line_statements = false
+csharp_preserve_single_line_blocks = true
+
+
+
+================================================
+File: Unikod/Styler.cs
+================================================
+ï»¿using System;
+using System.Text;
+using SDSK.Libs.Unikod.Common;
+using SDSK.Libs.Unikod.Types;
+
+namespace SDSK.Libs.Unikod {
+    /// <summary>
+    /// A static class with some functions about text stylization
+    /// </summary>
+    public static class Styler {
+        /// <summary>
+        /// Stylize the given styled text string
+        /// </summary>
+        /// <param name="text">A string text to be stylized</param>
+        /// <param name="set">A/Some style set(s) </param>
+        /// <returns>Stylized text as `string`</returns>
+        public static string Stylize(string text, params IUnikodSet[] set) {
+            if(text == null) {
+                return null;
+            } else {
+                StringBuilder builder = new StringBuilder();
+
+                foreach(string character in text.ToUnicodeStringArray()) {
+                    if(char.TryParse(character, out char singleCharacter)) {
+                        if(char.IsControl(singleCharacter) || char.IsWhiteSpace(singleCharacter)) {
+                            builder.Append(character);
+                            continue;
+                        }
+                    }
+
+                    bool existInNormalSets = false;
+                    int index = -1;
+                    Type characterSetType = null;
+                    bool? characterIsUppercase = null;
+
+                    foreach(IUnikodSet normalSet in UnicodeSets.GetSetsByStyleType(StyleType.Normal)) {
+                        for(int i = 0, normalSetLength = normalSet.Data.Length; i < normalSetLength; i++) {
+                            if(normalSet.Data[i].Equals(character)) {
+                                index = i;
+                                existInNormalSets = true;
+                                characterSetType = normalSet.GetType();
+                                
+                                if(normalSet is AlphabetSet alphabetSet) {
+                                    characterIsUppercase = alphabetSet.LetterCaseType == LetterCaseType.Uppercase;
+                                }
+                            }
+                        }
+                    }
+
+                    if(existInNormalSets) {
+                        bool found = false;
+
+                        foreach(IUnikodSet targetSet in set) {
+                            if(characterSetType == targetSet.GetType()) {
+                                if(targetSet is AlphabetSet alphabetSet) {
+                                    if(alphabetSet.LetterCaseType == LetterCaseType.Uppercase != characterIsUppercase) {
+                                        continue;
+                                    }
+                                }
+                                
+                                if(targetSet.Data[index] != null) {
+                                    builder.Append(targetSet.Data[index]);
+                                    found = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if(!found) {
+                            builder.Append(character);
+                        }
+                    } else {
+                        builder.Append(character);
+                    }
+                }
+
+                return builder.ToString();
+            }
+        }
+
+        /// <summary>
+        /// Unstylize the given styled text string
+        /// </summary>
+        /// <param name="text">Styled string text to be unstylized</param>
+        /// <returns>Unstylized `string`. `null` if the `text` argument is null or contains only white space(s).</returns>
+        public static string Unstylize(string text) {
+            if(string.IsNullOrWhiteSpace(text)) {
+                return null;
+            } else {
+                StringBuilder normalizedBuilder = new StringBuilder();
+
+                foreach(string charToCheck in text.ToUnicodeStringArray()) {
+                    if(char.TryParse(charToCheck, out char singleCharacter)) {
+                        if(char.IsControl(singleCharacter) || char.IsWhiteSpace(singleCharacter)) {
+                            normalizedBuilder.Append(charToCheck);
+                            continue;
+                        }
+                    }
+
+                    bool hasFound = false;
+
+                    foreach(IUnikodSet set in UnicodeSets.SetListAll) {
+                        if(set != null) {
+                            int setIndex = Array.IndexOf(set.Data, charToCheck);
+
+                            if(setIndex != -1) {
+                                if(set is AlphabetSet alphabetSet) {
+                                    normalizedBuilder.Append(UnicodeSets.SetListLatin[alphabetSet.LetterCaseType == LetterCaseType.Uppercase ? 0 : 1].Data[setIndex]);
+                                } else if(set is NumberSet) {
+                                    normalizedBuilder.Append(UnicodeSets.SetListNumber[0].Data[setIndex]);
+                                }
+
+                                hasFound = true;
+                                break;
+                            }
+                        } else {
+                            continue;
+                        }
+                    }
+
+                    if(hasFound) {
+                        continue;
+                    } else {
+                        normalizedBuilder.Append(charToCheck);
+                    }
+                }
+
+                return normalizedBuilder.ToString();
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: Unikod/Unikod.csproj
+================================================
+ï»¿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net46</TargetFrameworks>
+    <OutputType>Library</OutputType>
+    <AssemblyName>SDSK.Libs.Unikod</AssemblyName>
+    <RootNamespace>SDSK.Libs.Unikod</RootNamespace>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Version>0.0.1</Version>
+    <Authors>SD SkyKlouD</Authors>
+    <Product>Unikod</Product>
+    <Company>SD SkyKlouD</Company>
+    <Description>A .NET Standard library which styles the text using Unicode characters</Description>
+    <Copyright>Copyright â“’ SD SkyKlouD, all rights reserved.</Copyright>
+    <PackageProjectUrl>https://github.com/SDSkyKlouD/Unikod</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/SDSkyKlouD/Unikod</RepositoryUrl>
+    <RepositoryType>GitHub</RepositoryType>
+    <AssemblyVersion>0.0.1.1</AssemblyVersion>
+    <FileVersion>0.0.1.1</FileVersion>
+    <PackageTags>unikod</PackageTags>
+    <SignAssembly>true</SignAssembly>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageLicenseFile>README.md</PackageLicenseFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Resources\GlyphSets\Latin.json" />
+    <None Remove="Resources\GlyphSets\Number.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\GlyphSets\Latin.json" />
+    <EmbeddedResource Include="Resources\GlyphSets\Number.json" />
+  </ItemGroup>
+</Project>
+
+
+
+================================================
+File: Unikod/Utils.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using SDSK.Libs.Unikod.Common;
+using SDSK.Libs.Unikod.Types;
+
+namespace SDSK.Libs.Unikod {
+    /// <summary>
+    /// A static class with some useful utility collections other than text styling
+    /// </summary>
+    public static class Utils {
+        /// <summary>
+        /// Analyze the given styled text string
+        /// </summary>
+        /// <param name="text">Styled string text to be analyzed</param>
+        /// <returns>A `Dictionary(name|string, char count|int)`. 'name' is the name of set which contains individual character,
+        ///          and `char count` is, literally. If the `text` argument is null or contains only white space(s), this will return `null`</returns>
+        public static Dictionary<string, int> Analyze(string text) {
+            if(string.IsNullOrEmpty(text)) {
+                return null;
+            } else {
+                Dictionary<string, int> analyzedPairs = new Dictionary<string, int>();
+
+                foreach(string charToCheck in text.ToUnicodeStringArray()) {
+                    if(char.TryParse(charToCheck, out char singleCharacter)) {
+                        if(char.IsControl(singleCharacter) || char.IsWhiteSpace(singleCharacter)) {
+                            continue;
+                        }
+                    }
+
+                    foreach(IUnikodSet set in UnicodeSets.SetListAll) {
+                        if(set != null) {
+                            int setIndex = Array.IndexOf(set.Data, charToCheck);
+
+                            if(setIndex != -1) {
+                                if(analyzedPairs.ContainsKey(set.Name)) {
+                                    analyzedPairs[set.Name] += 1;
+                                } else {
+                                    analyzedPairs.Add(set.Name, 1);
+                                }
+
+                                break;
+                            }
+                        } else {
+                            continue;
+                        }
+                    }
+                }
+
+                return analyzedPairs;
+            }
+        }
+
+        internal static IEnumerable<string> ToUnicodeStringArray(this string input) {
+            char[] textCharArray = input.ToCharArray();
+
+            for(int index = 0, length = textCharArray.Length; index < length; index++) {
+                if((index + 1) < length && char.IsSurrogatePair(textCharArray[index], textCharArray[index + 1])) {
+                    yield return textCharArray[index].ToString() + textCharArray[index + 1].ToString();
+                    index++;
+                } else {
+                    yield return textCharArray[index].ToString();
+                }
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: Unikod/Common/Types.cs
+================================================
+ï»¿namespace SDSK.Libs.Unikod.Types {
+    public enum StyleType {
+        Normal,
+        Style,
+        Obfuscation
+    }
+
+    public enum LetterCaseType {
+        Uppercase,
+        Lowercase
+    }
+
+    public interface IUnikodSet {
+        string Name { get; }
+        string[] Data { get; }
+        StyleType StyleType { get; }
+    }
+
+    public class AlphabetSet : IUnikodSet {
+        public string Name { get; }
+        public string[] Data { get; }
+        public StyleType StyleType { get; }
+        public LetterCaseType LetterCaseType { get; }
+
+        public AlphabetSet(string name, string[] data, StyleType styleType, LetterCaseType caseType) {
+            Name = name;
+            Data = data;
+            StyleType = styleType;
+            LetterCaseType = caseType;
+        }
+    }
+
+    public class NumberSet : IUnikodSet {
+        public string Name { get; }
+        public string[] Data { get; }
+        public StyleType StyleType { get; }
+
+        public NumberSet(string name, string[] data, StyleType styleType) {
+            Name = name;
+            Data = data;
+            StyleType = styleType;
+        }
+    }
+}
+
+
+
+================================================
+File: Unikod/Common/UnicodeSets.cs
+================================================
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using SDSK.Libs.Unikod.Types;
+
+namespace SDSK.Libs.Unikod.Common {
+    public static class UnicodeSets {
+        #region Shared constants
+        public static readonly List<IUnikodSet> SetListAll;
+        public static readonly List<AlphabetSet> SetListLatin;
+        public static readonly List<NumberSet> SetListNumber;
+        #endregion
+
+        #region Alphabets
+        #region Normal
+        /* Normal Latin alphabets */
+        public static readonly AlphabetSet LatinNormalUppercaseSet = new AlphabetSet("Latin Normal Uppercase", new string[] {
+            "A", "B", "C", "D", "E",
+            "F", "G", "H", "I", "J",
+            "K", "L", "M", "N", "O",
+            "P", "Q", "R", "S", "T",
+            "U", "V", "W", "X", "Y",
+            "Z"
+        }, StyleType.Normal, LetterCaseType.Uppercase);
+        public static readonly AlphabetSet LatinNormalLowercaseSet = new AlphabetSet("Latin Normal Lowercase", new string[] {
+            "a", "b", "c", "d", "e",
+            "f", "g", "h", "i", "j",
+            "k", "l", "m", "n", "o",
+            "p", "q", "r", "s", "t",
+            "u", "v", "w", "x", "y",
+            "z"
+        }, StyleType.Normal, LetterCaseType.Lowercase);
+        #endregion
+
+        #region Style
+        /* Latin bold glyphs */
+        public static readonly AlphabetSet LatinBoldUppercaseSet = new AlphabetSet("Latin Bold Uppercase", new string[] {
+            "𝐀", "𝐁", "𝐂", "𝐃", "𝐄",
+            "𝐅", "𝐆", "𝐇", "𝐈", "𝐉",
+            "𝐊", "𝐋", "𝐌", "𝐍", "𝐎",
+            "𝐏", "𝐐", "𝐑", "𝐒", "𝐓",
+            "𝐔", "𝐕", "𝐖", "𝐗", "𝐘",
+            "𝐙"
+        }, StyleType.Style, LetterCaseType.Uppercase);
+        public static readonly AlphabetSet LatinBoldLowercaseSet = new AlphabetSet("Latin Bold Lowercase", new string[] {
+            "𝐚", "𝐛", "𝐜", "𝐝", "𝐞",
+            "𝐟", "𝐠", "𝐡", "𝐢", "𝐣",
+            "𝐤", "𝐥", "𝐦", "𝐧", "𝐨",
+            "𝐩", "𝐪", "𝐫", "𝐬", "𝐭",
+            "𝐮", "𝐯", "𝐰", "𝐱", "𝐲",
+            "𝐳"
+        }, StyleType.Style, LetterCaseType.Lowercase);
+
+        /* Latin italic glyphs */
+        public static readonly AlphabetSet LatinItalicUppercaseSet = new AlphabetSet("Latin Italic Uppercase", new string[] {
+            "𝐴", "𝐵", "𝐶", "𝐷", "𝐸",
+            "𝐹", "𝐺", "𝐻", "𝐼", "𝐽",
+            "𝐾", "𝐿", "𝑀", "𝑁", "𝑂",
+            "𝑃", "𝑄", "𝑅", "𝑆", "𝑇",
+            "𝑈", "𝑉", "𝑊", "𝑋", "𝑌",
+            "𝑍"
+        }, StyleType.Style, LetterCaseType.Uppercase);
+        public static readonly AlphabetSet LatinItalicLowercaseSet = new AlphabetSet("Latin Italic Lowercase", new string[] {
+            "𝑎", "𝑏", "𝑐", "𝑑", "𝑒",
+            "𝑓", "𝑔", "ℎ", "𝑖", "𝑗",
+            "𝑘", "𝑙", "𝑚", "𝑛", "𝑜",
+            "𝑝", "𝑞", "𝑟", "𝑠", "𝑡",
+            "𝑢", "𝑣", "𝑤", "𝑥", "𝑦",
+            "𝑧"
+        }, StyleType.Style, LetterCaseType.Lowercase);
+
+        /* Latin bold italic glyphs */
+        public static readonly AlphabetSet LatinBoldItalicUppercaseSet = new AlphabetSet("Latin Bold Italic Uppercase", new string[] {
+            "𝑨", "𝑩", "𝑪", "𝑫", "𝑬",
+            "𝑭", "𝑮", "𝑯", "𝑰", "𝑱",
+            "𝑲", "𝑳", "𝑴", "𝑵", "𝑶",
+            "𝑷", "𝑸", "𝑹", "𝑺", "𝑻",
+            "𝑼", "𝑽", "𝑾", "𝑿", "𝒀",
+            "𝒁"
+        }, StyleType.Style, LetterCaseType.Uppercase);
+        public static readonly AlphabetSet LatinBoldItalicLowercaseSet = new AlphabetSet("Latin Bold Italic Lowercase", new string[] {
+            "𝒂", "𝒃", "𝒄", "𝒅", "𝒆",
+            "𝒇", "𝒈", "𝒉", "𝒊", "𝒋",
+            "𝒌", "𝒍", "𝒎", "𝒏", "𝒐",
+            "𝒑", "𝒒", "𝒓", "𝒔", "𝒕",
+            "𝒖", "𝒗", "𝒘", "𝒙", "𝒚",
+            "𝒛"
+        }, StyleType.Style, LetterCaseType.Lowercase);
+
+        /* Latin script glyphs */
+        public static readonly AlphabetSet LatinScriptUppercaseSet = new AlphabetSet("Latin Script Uppercase", new string[] {
+            "𝒜", "ℬ", "𝒞", "𝒟", "ℰ",
+            "ℱ", "𝒢", "ℋ", "ℐ", "𝒥",
+            "𝒦", "𝒧", "𝒨", "𝒩", "𝒪",
+            "𝒫", "𝒬", "ℛ", "𝒮", "𝒯",
+            "𝒰", "𝒱", "𝒲", "𝒳", "𝒴",
+            "𝒵"
+        }, StyleType.Style, LetterCaseType.Uppercase);
+        public static readonly AlphabetSet LatinScriptLowercaseSet = new AlphabetSet("Latin Script Lowercase", new string[] {
+            "𝒶", "𝒷", "𝒸", "𝒹", "ℯ",
+            "𝒻", "ℊ", "𝒽", "𝒾", "𝒿",
+            "𝓀", "𝓁", "𝓂", "𝓃", "ℴ",
+            "𝓅", "𝓆", "𝓇", "𝓈", "𝓉",
+            "𝓊", "𝓋", "𝓌", "𝓍", "𝓎",
+            "𝓏"
+        }, StyleType.Style, LetterCaseType.Lowercase);
+
+        /* Latin script bold glyphs */
+        public static readonly AlphabetSet LatinScriptBoldUppercaseSet = new AlphabetSet("Latin Script Bold Uppercase", new string[] {
+            "𝓐", "𝓑", "𝓒", "𝓓", "𝓔",
+            "𝓕", "𝓖", "𝓗", "𝓘", "𝓙",
+            "𝓚", "𝓛", "𝓜", "𝓝", "𝓞",
+            "𝓟", "𝓠", "𝓡", "𝓢", "𝓣",
+            "𝓤", "𝓥", "𝓦", "𝓧", "𝓨",
+            "𝓩"
+        }, StyleType.Style, LetterCaseType.Uppercase);
+        public static readonly AlphabetSet LatinScriptBoldLowercaseSet = new AlphabetSet("Latin Script Bold Lowercase", new string[] {
+            "𝓪", "𝓫", "𝓬", "𝓭", "𝓮",
+            "𝓯", "𝓰", "𝓱", "𝓲", "𝓳",
+            "𝓴", "𝓵", "𝓶", "𝓷", "𝓸",
+            "𝓹", "𝓺", "𝓻", "𝓼", "𝓽",
+            "𝓾", "𝓿", "𝔀", "𝔁", "𝔂",
+            "𝔃"
+        }, StyleType.Style, LetterCaseType.Lowercase);
+
+        /* Latin fraktur glyphs */
+        public static readonly AlphabetSet LatinFrakturUppercaseSet = new AlphabetSet("Latin Fraktur Uppercase", new string[] {
+            "𝔄", "𝔅", "ℭ", "𝔇", "𝔈",
+            "𝔉", "𝔊", "ℌ", "ℑ", "𝔍",
+            "𝔎", "𝔏", "𝔐", "𝔑", "𝔒",
+            "𝔓", "𝔔", "ℜ", "𝔖", "𝔗",
+            "𝔘", "𝔙", "𝔚", "𝔛", "𝔜",
+            "ℨ"
+        }, StyleType.Style, LetterCaseType.Uppercase);
+        public static readonly AlphabetSet LatinFrakturLowercaseSet = new AlphabetSet("Latin Fraktur Lowercase", new string[] {
+            "𝔞", "𝔟", "𝔠", "𝔡", "𝔢",
+            "𝔣", "𝔤", "𝔥", "𝔦", "𝔧",
+            "𝔨", "𝔩", "𝔪", "𝔫", "𝔬",
+            "𝔭", "𝔮", "𝔯", "𝔰", "𝔱",
+            "𝔲", "𝔳", "𝔴", "𝔵", "𝔶",
+            "𝔷"
+        }, StyleType.Style, LetterCaseType.Lowercase);
+
+        /* Latin fraktur bold glyphs */
+        public static readonly AlphabetSet LatinFrakturBoldUppercaseSet = new AlphabetSet("Latin Fraktur Bold Uppercase", new string[] {
+            "𝕬", "𝕭", "𝕮", "𝕯", "𝕰",
+            "𝕱", "𝕲", "𝕳", "𝕴", "𝕵",
+            "𝕶", "𝕷", "𝕸", "𝕹", "𝕺",
+            "𝕻", "𝕼", "𝕽", "𝕾", "𝕿",
+            "𝖀", "𝖁", "𝖂", "𝖃", "𝖄",
+            "𝖅"
+        }, StyleType.Style, LetterCaseType.Uppercase);
+        public static readonly AlphabetSet LatinFrakturBoldLowercaseSet = new AlphabetSet("Latin Fraktur Bold Lowercase", new string[] {
+            "𝖆", "𝖇", "𝖈", "𝖉", "𝖊",
+            "𝖋", "𝖌", "𝖍", "𝖎", "𝖏",
+            "𝖐", "𝖑", "𝖒", "𝖓", "𝖔",
+            "𝖕", "𝖖", "𝖗", "𝖘", "𝖙",
+            "𝖚", "𝖛", "𝖜", "𝖝", "𝖞",
+            "𝖟"
+        }, StyleType.Style, LetterCaseType.Lowercase);
+
+        /* Latin double-struck glyphs */
+        public static readonly AlphabetSet LatinDoubleStruckUppercaseSet = new AlphabetSet("Latin Double-Struck Uppercase", new string[] {
+            "𝔸", "𝔹", "ℂ", "𝔻", "𝔼",
+            "𝔽", "𝔾", "ℍ", "𝕀", "𝕁",
+            "𝕂", "𝕃", "𝕄", "ℕ", "𝕆",
+            "ℙ", "ℚ", "ℝ", "𝕊", "𝕋",
+            "𝕌", "𝕍", "𝕎", "𝕏", "𝕐",
+            "ℤ"
+        }, StyleType.Style, LetterCaseType.Uppercase);
+        public static readonly AlphabetSet LatinDoubleStruckLowercaseSet = new AlphabetSet("Latin Double-Struck Lowercase", new string[] {
+            "𝕒", "𝕓", "𝕔", "𝕕", "𝕖",
+            "𝕗", "𝕘", "𝕙", "𝕚", "𝕛",
+            "𝕜", "𝕝", "𝕞", "𝕟", "𝕠",
+            "𝕡", "𝕢", "𝕣", "𝕤", "𝕥",
+            "𝕦", "𝕧", "𝕨", "𝕩", "𝕪",
+            "𝕫"
+        }, StyleType.Style, LetterCaseType.Lowercase);
+
+        /* Latin sans-serif glyphs */
+        public static readonly AlphabetSet LatinSansSerifUppercaseSet = new AlphabetSet("Latin Sans-Serif Uppercase", new string[] {
+            "𝖠", "𝖡", "𝖢", "𝖣", "𝖤",
+            "𝖥", "𝖦", "𝖧", "𝖨", "𝖩",
+            "𝖪", "𝖫", "𝖬", "𝖭", "𝖮",
+            "𝖯", "𝖰", "𝖱", "𝖲", "𝖳",
+            "𝖴", "𝖵", "𝖶", "𝖷", "𝖸",
+            "𝖹"
+        }, StyleType.Style, LetterCaseType.Uppercase);
+        public static readonly AlphabetSet LatinSansSerifLowercaseSet = new AlphabetSet("Latin Sans-Serif Lowercase", new string[] {
+            "𝖺", "𝖻", "𝖼", "𝖽", "𝖾",
+            "𝖿", "𝗀", "𝗁", "𝗂", "𝗃",
+            "𝗄", "𝗅", "𝗆", "𝗇", "𝗈",
+            "𝗉", "𝗊", "𝗋", "𝗌", "𝗍",
+            "𝗎", "𝗏", "𝗐", "𝗑", "𝗒",
+            "𝗓"
+        }, StyleType.Style, LetterCaseType.Lowercase);
+
+        /* Latin sans-serif bold glyphs */
+        public static readonly AlphabetSet LatinSansSerifBoldUppercaseSet = new AlphabetSet("Latin Sans-Serif Bold Uppercase", new string[] {
+            "𝗔", "𝗕", "𝗖", "𝗗", "𝗘",
+            "𝗙", "𝗚", "𝗛", "𝗜", "𝗝",
+            "𝗞", "𝗟", "𝗠", "𝗡", "𝗢",
+            "𝗣", "𝗤", "𝗥", "𝗦", "𝗧",
+            "𝗨", "𝗩", "𝗪", "𝗫", "𝗬",
+            "𝗭"
+        }, StyleType.Style, LetterCaseType.Uppercase);
+        public static readonly AlphabetSet LatinSansSerifBoldLowercaseSet = new AlphabetSet("Latin Sans-Serif Bold Lowercase", new string[] {
+            "𝗮", "𝗯", "𝗰", "𝗱", "𝗲",
+            "𝗳", "𝗴", "𝗵", "𝗶", "𝗷",
+            "𝗸", "𝗹", "𝗺", "𝗻", "𝗼",
+            "𝗽", "𝗾", "𝗿", "𝘀", "𝘁",
+            "𝘂", "𝘃", "𝘄", "𝘅", "𝘆",
+            "𝘇"
+        }, StyleType.Style, LetterCaseType.Lowercase);
+
+        /* Latin sans-serif italic glyphs */
+        public static readonly AlphabetSet LatinSansSerifItalicUppercaseSet = new AlphabetSet("Latin Sans-Serif Italic Uppercase", new string[] {
+            "𝘈", "𝘉", "𝘊", "𝘋", "𝘌",
+            "𝘍", "𝘎", "𝘏", "𝘐", "𝘑",
+            "𝘒", "𝘓", "𝘔", "𝘕", "𝘖",
+            "𝘗", "𝘘", "𝘙", "𝘚", "𝘛",
+            "𝘜", "𝘝", "𝘞", "𝘟", "𝘠",
+            "𝘡"
+        }, StyleType.Style, LetterCaseType.Uppercase);
+        public static readonly AlphabetSet LatinSansSerifItalicLowercaseSet = new AlphabetSet("Latin Sans-Serif Italic Lowercase", new string[] {
+            "𝘢", "𝘣", "𝘤", "𝘥", "𝘦",
+            "𝘧", "𝘨", "𝘩", "𝘪", "𝘫",
+            "𝘬", "𝘭", "𝘮", "𝘯", "𝘰",
+            "𝘱", "𝘲", "𝘳", "𝘴", "𝘵",
+            "𝘶", "𝘷", "𝘸", "𝘹", "𝘺",
+            "𝘻"
+        }, StyleType.Style, LetterCaseType.Lowercase);
+
+        /* Latin sans-serif bold italic glyphs */
+        public static readonly AlphabetSet LatinSansSerifBoldItalicUppercaseSet = new AlphabetSet("Latin Sans-Serif Bold Italic Uppercase", new string[] {
+            "𝘼", "𝘽", "𝘾", "𝘿", "𝙀",
+            "𝙁", "𝙂", "𝙃", "𝙄", "𝙅",
+            "𝙆", "𝙇", "𝙈", "𝙉", "𝙊",
+            "𝙋", "𝙌", "𝙍", "𝙎", "𝙏",
+            "𝙐", "𝙑", "𝙒", "𝙓", "𝙔",
+            "𝙕"
+        }, StyleType.Style, LetterCaseType.Uppercase);
+        public static readonly AlphabetSet LatinSansSerifBoldItalicLowercaseSet = new AlphabetSet("Latin Sans-Serif Bold Italic Lowercase", new string[] {
+            "𝙖", "𝙗", "𝙘", "𝙙", "𝙚",
+            "𝙛", "𝙜", "𝙝", "𝙞", "𝙟",
+            "𝙠", "𝙡", "𝙢", "𝙣", "𝙤",
+            "𝙥", "𝙦", "𝙧", "𝙨", "𝙩",
+            "𝙪", "𝙫", "𝙬", "𝙭", "𝙮",
+            "𝙯"
+        }, StyleType.Style, LetterCaseType.Lowercase);
+
+        /* Latin monospace glyphs */
+        public static readonly AlphabetSet LatinMonospaceUppercaseSet = new AlphabetSet("Latin Monospace Uppercase", new string[] {
+            "𝙰", "𝙱", "𝙲", "𝙳", "𝙴",
+            "𝙵", "𝙶", "𝙷", "𝙸", "𝙹",
+            "𝙺", "𝙻", "𝙼", "𝙽", "𝙾",
+            "𝙿", "𝚀", "𝚁", "𝚂", "𝚃",
+            "𝚄", "𝚅", "𝚆", "𝚇", "𝚈",
+            "𝚉"
+        }, StyleType.Style, LetterCaseType.Uppercase);
+        public static readonly AlphabetSet LatinMonospaceLowercaseSet = new AlphabetSet("Latin Monospace Lowercase", new string[] {
+            "𝚊", "𝚋", "𝚌", "𝚍", "𝚎",
+            "𝚏", "𝚐", "𝚑", "𝚒", "𝚓",
+            "𝚔", "𝚕", "𝚖", "𝚗", "𝚘",
+            "𝚙", "𝚚", "𝚛", "𝚜", "𝚝",
+            "𝚞", "𝚟", "𝚠", "𝚡", "𝚢",
+            "𝚣"
+        }, StyleType.Style, LetterCaseType.Lowercase);
+
+        /* Fullwidth Latin alphabets */
+        public static readonly AlphabetSet LatinFullWidthUppercaseSet = new AlphabetSet("Latin Fullwidth Uppercase", new string[] {
+            "Ａ", "Ｂ", "Ｃ", "Ｄ", "Ｅ",
+            "Ｆ", "Ｇ", "Ｈ", "Ｉ", "Ｊ",
+            "Ｋ", "Ｌ", "Ｍ", "Ｎ", "Ｏ",
+            "Ｐ", "Ｑ", "Ｒ", "Ｓ", "Ｔ",
+            "Ｕ", "Ｖ", "Ｗ", "Ｘ", "Ｙ",
+            "Ｚ"
+        }, StyleType.Style, LetterCaseType.Uppercase);
+        public static readonly AlphabetSet LatinFullWidthLowercaseSet = new AlphabetSet("Latin Fullwidth Lowercase", new string[] {
+            "ａ", "ｂ", "ｃ", "ｄ", "ｅ",
+            "ｆ", "ｇ", "ｈ", "ｉ", "ｊ",
+            "ｋ", "ｌ", "ｍ", "ｎ", "ｏ",
+            "ｐ", "ｑ", "ｒ", "ｓ", "ｔ",
+            "ｕ", "ｖ", "ｗ", "ｘ", "ｙ",
+            "ｚ"
+        }, StyleType.Style, LetterCaseType.Lowercase);
+
+        /* Latin small alphabets */
+        public static readonly AlphabetSet LatinSmallUppercaseSet = new AlphabetSet("Latin Small Uppercase", new string[] {
+            "ᴀ", "ʙ", "ᴄ", "ᴅ", "ᴇ",
+            "ꜰ", "ɢ", "ʜ", "ɪ", "ᴊ",
+            "ᴋ", "ʟ", "ᴍ", "ɴ", "ᴏ",
+            "ᴘ", "ꞯ", "ʀ", "ꜱ", "ᴛ",
+            "ᴜ", "ᴠ", "ᴡ", null, "ʏ",
+            "ᴢ"
+        }, StyleType.Style, LetterCaseType.Uppercase);
+
+        /* Modifier(Superscript) Latin alphabets */
+        public static readonly AlphabetSet LatinModifierUppercaseSet = new AlphabetSet("Latin Modifier(Superscript) Uppercase", new string[] {
+            "ᴬ", "ᴮ", null, "ᴰ", "ᴱ",
+            null, "ᴳ", "ᴴ", "ᴵ", "ᴶ",
+            "ᴷ", "ᴸ", "ᴹ", "ᴺ", "ᴼ",
+            "ᴾ", null, "ᴿ", null, "ᵀ",
+            "ᵁ", null, "ᵂ", null, null,
+            null
+        }, StyleType.Style, LetterCaseType.Uppercase);
+        public static readonly AlphabetSet LatinModifierLowercaseSet = new AlphabetSet("Latin Modifier(Superscript) Lowercase", new string[] {
+            "ᵃ", "ᵇ", "ᶜ", "ᵈ", "ᵉ",
+            "ᶠ", "ᵍ", "ʰ", "ⁱ", "ʲ",
+            "ᵏ", "ˡ", "ᵐ", "ⁿ", "ᵒ",
+            "ᵖ", null, "ʳ", "ˢ", "ᵗ",
+            "ᵘ", "ᵛ", "ʷ", "ˣ", "ʸ",
+            "ᶻ"
+        }, StyleType.Style, LetterCaseType.Lowercase);
+
+        /* Subscript Latin alphabets */
+        public static readonly AlphabetSet LatinSubscriptLowercaseSet = new AlphabetSet("Latin Subscript Lowercase", new string[] {
+            "ₐ", null, null, null, "ₑ",
+            null, null, "ₕ", "ᵢ", "ⱼ",
+            "ₖ", "ₗ", "ₘ", "ₙ", "ₒ",
+            "ₚ", null, "ᵣ", "ₛ", "ₜ",
+            "ᵤ", "ᵥ", null, "ₓ", null,
+            null
+        }, StyleType.Style, LetterCaseType.Lowercase);
+
+        /* Parenthesized Latin alphabets */
+        public static readonly AlphabetSet LatinParenthesizedUppercaseSet = new AlphabetSet("Latin Parenthesized Uppercase", new string[] {
+            "🄐", "🄑", "🄒", "🄓", "🄔",
+            "🄕", "🄖", "🄗", "🄘", "🄙",
+            "🄚", "🄛", "🄜", "🄝", "🄞",
+            "🄟", "🄠", "🄡", "🄢", "🄣",
+            "🄤", "🄥", "🄦", "🄧", "🄨",
+            "🄩"
+        }, StyleType.Style, LetterCaseType.Uppercase);
+        public static readonly AlphabetSet LatinParenthesizedLowercaseSet = new AlphabetSet("Latin Parenthesized Lowercase", new string[] {
+            "⒜", "⒝", "⒞", "⒟", "⒠",
+            "⒡", "⒢", "⒣", "⒤", "⒥",
+            "⒦", "⒧", "⒨", "⒩", "⒪",
+            "⒫", "⒬", "⒭", "⒮", "⒯",
+            "⒰", "⒱", "⒲", "⒳", "⒴",
+            "⒵"
+        }, StyleType.Style, LetterCaseType.Lowercase);
+
+        /* Circled Latin alphabets */
+        public static readonly AlphabetSet LatinCircledUppercaseSet = new AlphabetSet("Latin Circled Uppercase", new string[] {
+            "Ⓐ", "Ⓑ", "Ⓒ", "Ⓓ", "Ⓔ",
+            "Ⓕ", "Ⓖ", "Ⓗ", "Ⓘ", "Ⓙ",
+            "Ⓚ", "Ⓛ", "Ⓜ", "Ⓝ", "Ⓞ",
+            "Ⓟ", "Ⓠ", "Ⓡ", "Ⓢ", "Ⓣ",
+            "Ⓤ", "Ⓥ", "Ⓦ", "Ⓧ", "Ⓨ",
+            "Ⓩ"
+        }, StyleType.Style, LetterCaseType.Uppercase);
+        public static readonly AlphabetSet LatinCircledLowercaseSet = new AlphabetSet("Latin Circled Lowercase", new string[] {
+            "ⓐ", "ⓑ", "ⓒ", "ⓓ", "ⓔ",
+            "ⓕ", "ⓖ", "ⓗ", "ⓘ", "ⓙ",
+            "ⓚ", "ⓛ", "ⓜ", "ⓝ", "ⓞ",
+            "ⓟ", "ⓠ", "ⓡ", "ⓢ", "ⓣ",
+            "ⓤ", "ⓥ", "ⓦ", "ⓧ", "ⓨ",
+            "ⓩ"
+        }, StyleType.Style, LetterCaseType.Lowercase);
+
+        /* Old italic letters */
+        public static readonly AlphabetSet LatinOldItalicUppercaseSet = new AlphabetSet("Latin Old Italic Uppercase", new string[] {
+            "𐌀", "𐌁", "𐌂", "𐌃", "𐌄",
+            "𐌅", null, null, "𐌆", null,
+            "𐌊", "𐌋", "𐌑", null, "𐌏",
+            "𐌓", "𐌒", null, "𐌔", "𐌕",
+            null, null, null, "𐌗", "𐌖",
+            null
+        }, StyleType.Style, LetterCaseType.Uppercase);
+        #endregion
+
+        #region Obfuscation
+        /* Cherokee glyphs */
+        public static readonly AlphabetSet CherokeeGlyphsUppercaseSet = new AlphabetSet("Cherokee Glyphs for Latin Uppercase Obfuscation", new string[] {
+            "Ꭺ", "Ᏼ", "Ꮯ", "Ꭰ", "Ꭼ",
+            null, "Ꮐ", "Ꮋ", null, "Ꭻ",
+            "Ꮶ", "Ꮮ", "Ꮇ", null, null,
+            "Ꮲ", null, "Ꭱ", "Ꮪ", "Ꭲ",
+            null, "Ꮩ", "Ꮃ", null, null,
+            "Ꮓ"
+        }, StyleType.Obfuscation, LetterCaseType.Uppercase);
+        public static readonly AlphabetSet CherokeeGlyphsLowercaseSet = new AlphabetSet("Cherokee Glyphs for Latin Lowercase Obfuscation", new string[] {
+            null, "Ꮟ", null, null, null,
+            null, null, "Ꮒ", "Ꭵ", null,
+            null, null, null, null, null,
+            null, null, null, null, null,
+            null, null, null, null, "Ꭹ",
+            null
+        }, StyleType.Obfuscation, LetterCaseType.Lowercase);
+
+        /* Cherokee small glyphs */
+        public static readonly AlphabetSet CherokeeSmallGlyphsUppercaseSet = new AlphabetSet("Cherokee Small Glyphs for Latin Uppercase Obfuscation", new string[] {
+            "ꭺ", null, "ꮯ", "ꭰ", "ꭼ",
+            null, "ꮆ", "ꮋ", "ꮖ", "ꭻ",
+            null, "ꮮ", "ꮇ", null, null,
+            "ꮲ", null, "ꭱ", "ꮪ", "ꭲ",
+            null, "ꮩ", "ꮃ", null, null,
+            "ꮓ"
+        }, StyleType.Obfuscation, LetterCaseType.Uppercase);
+        public static readonly AlphabetSet CherokeeSmallGlyphsLowercaseSet = new AlphabetSet("Cherokee Small Glyphs for Latin Lowercase Obfuscation", new string[] {
+            null, "ꮟ", null, "ꮷ", null,
+            null, null, "ꮒ", "ꭵ", null,
+            "ꮶ", null, null, null, null,
+            "ꮅ", null, "ꮁ", null, null,
+            "ꮼ", "ꮴ", "ꮤ", null, "ꮍ",
+            null
+        }, StyleType.Obfuscation, LetterCaseType.Lowercase);
+
+        /* Roman glyphs */
+        public static readonly AlphabetSet RomanGlyphsUppercaseSet = new AlphabetSet("Roman Glyphs for Latin Uppercase Obfuscation", new string[] {
+            null, null, "Ⅽ", "Ⅾ", null,
+            null, null, null, "Ⅰ", null,
+            null, "Ⅼ", "Ⅿ", null, null,
+            null, null, null, null, null,
+            null, "Ⅴ", null, "Ⅹ", null,
+            null
+        }, StyleType.Obfuscation, LetterCaseType.Uppercase);
+        public static readonly AlphabetSet RomanGlyphsLowercaseSet = new AlphabetSet("Roman Glyphs for Latin Lowercase Obfuscation", new string[] {
+            null, null, "ⅽ", "ⅾ", null,
+            null, null, null, "ⅰ", null,
+            null, "ⅼ", "ⅿ", null, null,
+            null, null, null, null, null,
+            null, "ⅴ", null, "ⅹ", null,
+            null
+        }, StyleType.Obfuscation, LetterCaseType.Lowercase);
+        
+        /* Coptic glyphs */
+        public static readonly AlphabetSet CopticGlyphsUppercaseSet = new AlphabetSet("Coptic Glyphs for Latin Uppercase Obfuscation", new string[] {
+            null, "Ⲃ", "Ⲥ", null, null,
+            null, null, "Ⲏ", "Ⲓ", null,
+            "Ⲕ", "Ⳑ", "Ⲙ", "Ⲛ", "Ⲟ",
+            "Ⲣ", null, null, null, "Ⲧ",
+            "Ⳙ", null, "Ⲱ", "Ⲭ", "Ⲩ",
+            "Ⲍ"
+        }, StyleType.Obfuscation, LetterCaseType.Uppercase);
+
+        /* Tifinagh glyphs */
+        public static readonly AlphabetSet TifinaghGlyphsUppercaseSet = new AlphabetSet("Tifinagh Glyphs for Latin Uppercase Obfuscation", new string[] {
+            "ⴷ", null, "ⵎ", null, "ⴹ",
+            null, null, null, "ⵊ", null,
+            null, null, null, null, "ⵔ",
+            null, "ⵕ", null, "ⵢ", null,
+            "ⵡ", "ⴸ", null, "ⵝ", "ⵖ",
+            null
+        }, StyleType.Obfuscation, LetterCaseType.Uppercase);
+
+        /* Lisu glyphs */
+        public static readonly AlphabetSet LisuGlyphsUppercaseSet = new AlphabetSet("Lisu Glyphs for Latin Uppercase Obfuscation", new string[] {
+            "ꓮ", "ꓐ", "ꓚ", "ꓓ", "ꓰ",
+            "ꓝ", "ꓖ", "ꓧ", "ꓲ", "ꓙ",
+            "ꓗ", "ꓡ", "ꓟ", "ꓠ", "ꓳ",
+            "ꓑ", null, "ꓣ", "ꓢ", "ꓔ",
+            "ꓴ", "ꓦ", "ꓪ", "ꓫ", "ꓬ",
+            null
+        }, StyleType.Obfuscation, LetterCaseType.Uppercase);
+
+        /* Regional indicator symbol */
+        public static readonly AlphabetSet RegionalIndicatorSymbolsUppercaseSet = new AlphabetSet("Regional Indicator Symbols for Latin Uppercase Obfuscation", new string[] {
+            "🇦","🇧","🇨","🇩","🇪",
+            "🇫","🇬","🇭","🇮","🇯",
+            "🇰","🇱","🇲","🇳","🇴",
+            "🇵","🇶","🇷","🇸","🇹",
+            "🇺","🇻","🇼","🇽","🇾",
+            "🇿"
+        }, StyleType.Obfuscation, LetterCaseType.Uppercase);
+        #endregion
+        #endregion
+
+        #region Numbers
+        #region Normal
+        /* Normal numbers */
+        public static readonly NumberSet NumberNormalSet = new NumberSet("Number Normal", new string[] {
+            "0", "1", "2", "3", "4",
+            "5", "6", "7", "8", "9"
+        }, StyleType.Normal);
+        
+        #endregion
+
+        #region Style
+        /* Fullwidth numbers */
+        public static readonly NumberSet NumberFullWidthSet = new NumberSet("Number Fullwidth", new string[] {
+            "０", "１", "２", "３", "４",
+            "５", "６", "７", "８", "９"
+        }, StyleType.Style);
+
+        /* Superscript(Upper) numbers */
+        public static readonly NumberSet NumberSuperscriptSet = new NumberSet("Number Superscript", new string[] {
+            "⁰", "¹", "²", "³", "⁴",
+            "⁵", "⁶", "⁷", "⁸", "⁹"
+        }, StyleType.Style);
+
+        /* Superscript(Lower) numbers */
+        public static readonly NumberSet NumberSubscriptSet = new NumberSet("Number Subscript", new string[] {
+            "₀", "₁", "₂", "₃", "₄",
+            "₅", "₆", "₇", "₈", "₉"
+        }, StyleType.Style);
+
+        /* Circled numbers */
+        public static readonly NumberSet NumberCircledSet = new NumberSet("Number Circled", new string[] {
+            "⓪", "①", "②", "③", "④",
+            "⑤", "⑥", "⑦", "⑧", "⑨"
+        }, StyleType.Style);
+
+        /* Parenthesized numbers */
+        public static readonly NumberSet NumberParenthesizedSet = new NumberSet("Number Parenthesized", new string[] {
+            null, "⑴", "⑵", "⑶", "⑷",
+            "⑸", "⑹", "⑺", "⑻", "⑼"
+        }, StyleType.Style);
+
+        /* Double circled numbers */
+        public static readonly NumberSet NumberDoubleCircledSet = new NumberSet("Number Double Circled", new string[] {
+            null, "⓵", "⓶", "⓷", "⓸",
+            "⓹", "⓺", "⓻", "⓼", "⓽"
+        }, StyleType.Style);
+
+        /* Negative circled numbers (dingbat) */
+        public static readonly NumberSet NumberDingbatNegativeCircledSet = new NumberSet("Number Negative Circled (Dingbat)", new string[] {
+            "⓿", "❶", "❷", "❸", "❹",
+            "❺", "❻", "❼", "❽", "❾"
+        }, StyleType.Style);
+
+        /* Circled sans-serif numbers (dingbat) */
+        public static readonly NumberSet NumberDingbatSansSerifCircledSet = new NumberSet("Number Sans-Serif Circled (Dingbat)", new string[] {
+            "🄋", "➀", "➁", "➂", "➃",
+            "➄", "➅", "➆", "➇", "➈"
+        }, StyleType.Style);
+
+        /* Negative circled sans-serif numbers (dingbat) */
+        public static readonly NumberSet NumberDingbatSansSerifNegativeCircledSet = new NumberSet("Number Sans-Serif Negative Circled (Dingbat)", new string[] {
+            "🄌", "➊", "➋", "➌", "➍",
+            "➎", "➏", "➐", "➑", "➒"
+        }, StyleType.Style);
+
+        /* Bold numbers */
+        public static readonly NumberSet NumberBoldSet = new NumberSet("Number Bold", new string[] {
+            "𝟎", "𝟏", "𝟐", "𝟑", "𝟒",
+            "𝟓", "𝟔", "𝟕", "𝟖", "𝟗"
+        }, StyleType.Style);
+
+        /* Double-struck numbers */
+        public static readonly NumberSet NumberDoubleStruckSet = new NumberSet("Number Double-Struck", new string[] {
+            "𝟘", "𝟙", "𝟚", "𝟛", "𝟜",
+            "𝟝", "𝟞", "𝟟", "𝟠", "𝟡"
+        }, StyleType.Style);
+
+        /* Sans-serif numbers */
+        public static readonly NumberSet NumberSansSerifSet = new NumberSet("Number Sans-Serif", new string[] {
+            "𝟢", "𝟣", "𝟤", "𝟥", "𝟦",
+            "𝟧", "𝟨", "𝟩", "𝟪", "𝟫"
+        }, StyleType.Style);
+
+        /* Sans-serif bold numbers */
+        public static readonly NumberSet NumberSansSerifBoldSet = new NumberSet("Number Sans-Serif Bold", new string[] {
+            "𝟬", "𝟭", "𝟮", "𝟯", "𝟰",
+            "𝟱", "𝟲", "𝟳", "𝟴", "𝟵"
+        }, StyleType.Style);
+
+        /* Monospace numbers */
+        public static readonly NumberSet NumberMonospaceSet = new NumberSet("Number Monospace", new string[] {
+            "𝟶", "𝟷", "𝟸", "𝟹", "𝟺",
+            "𝟻", "𝟼", "𝟽", "𝟾", "𝟿"
+        }, StyleType.Style);
+        #endregion
+        #endregion
+
+        #region Static constructor
+        static UnicodeSets() {
+            /* Set lists : normal sets should come first */
+            SetListLatin = new List<AlphabetSet>() {
+                /* Normal */
+                LatinNormalUppercaseSet,
+                LatinNormalLowercaseSet,
+
+                /* Style */
+                LatinBoldUppercaseSet,
+                LatinBoldLowercaseSet,
+                LatinItalicUppercaseSet,
+                LatinItalicLowercaseSet,
+                LatinBoldItalicUppercaseSet,
+                LatinBoldItalicLowercaseSet,
+                LatinScriptUppercaseSet,
+                LatinScriptLowercaseSet,
+                LatinScriptBoldUppercaseSet,
+                LatinScriptBoldLowercaseSet,
+                LatinFrakturUppercaseSet,
+                LatinFrakturLowercaseSet,
+                LatinFrakturBoldUppercaseSet,
+                LatinFrakturBoldLowercaseSet,
+                LatinDoubleStruckUppercaseSet,
+                LatinDoubleStruckLowercaseSet,
+                LatinSansSerifUppercaseSet,
+                LatinSansSerifLowercaseSet,
+                LatinSansSerifBoldUppercaseSet,
+                LatinSansSerifBoldLowercaseSet,
+                LatinSansSerifItalicUppercaseSet,
+                LatinSansSerifItalicLowercaseSet,
+                LatinSansSerifBoldItalicUppercaseSet,
+                LatinSansSerifBoldItalicLowercaseSet,
+                LatinMonospaceUppercaseSet,
+                LatinMonospaceLowercaseSet,
+                LatinFullWidthUppercaseSet,
+                LatinFullWidthLowercaseSet,
+                LatinSmallUppercaseSet,
+                LatinModifierUppercaseSet,
+                LatinModifierLowercaseSet,
+                LatinSubscriptLowercaseSet,
+                LatinParenthesizedUppercaseSet,
+                LatinParenthesizedLowercaseSet,
+                LatinCircledUppercaseSet,
+                LatinCircledLowercaseSet,
+                LatinOldItalicUppercaseSet,
+
+                /* Obfuscation */
+                CherokeeGlyphsUppercaseSet,
+                CherokeeGlyphsLowercaseSet,
+                CherokeeSmallGlyphsUppercaseSet,
+                CherokeeSmallGlyphsLowercaseSet,
+                RomanGlyphsUppercaseSet,
+                RomanGlyphsLowercaseSet,
+                CopticGlyphsUppercaseSet,
+                TifinaghGlyphsUppercaseSet,
+                LisuGlyphsUppercaseSet,
+                RegionalIndicatorSymbolsUppercaseSet
+            };
+            SetListNumber = new List<NumberSet>() {
+                /* Normal */
+                NumberNormalSet,
+
+                /* Style */
+                NumberFullWidthSet,
+                NumberSuperscriptSet,
+                NumberSubscriptSet,
+                NumberCircledSet,
+                NumberParenthesizedSet,
+                NumberDoubleCircledSet,
+                NumberDingbatNegativeCircledSet,
+                NumberDingbatSansSerifCircledSet,
+                NumberDingbatSansSerifNegativeCircledSet,
+                NumberBoldSet,
+                NumberDoubleStruckSet,
+                NumberSansSerifSet,
+                NumberSansSerifBoldSet,
+                NumberMonospaceSet
+            };
+
+            SetListAll = new List<IUnikodSet>();
+            SetListAll.AddRange(SetListLatin);
+            SetListAll.AddRange(SetListNumber);
+            SetListAll = SetListAll.OrderByDescending(x => x.StyleType == StyleType.Normal).ToList();
+        }
+        #endregion
+
+        #region Functions
+        public static IUnikodSet GetSetByName(string name) {
+            try {
+                return SetListAll.First(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            } catch(Exception exception)
+              when (exception is InvalidOperationException || exception is ArgumentNullException) {
+                return null;        // No matching found or the argument is null
+            }
+        }
+
+        public static List<IUnikodSet> GetSetsByStyleType(StyleType type)
+            => SetListAll.Where(x => x.StyleType == type).ToList();
+        #endregion
+    }
+}
+
+
+
+================================================
+File: Unikod/Internal/EmbeddedResourceHelper.cs
+================================================
+ï»¿using System.IO;
+using System.Reflection;
+using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
+
+namespace SDSK.Libs.Unikod.Internal {
+    internal static class EmbeddedResourceHelper {
+        internal static Stream GetEmbeddedResourceStream(string resourceFilePath) {
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            string path = $"{assembly.GetName()}.Resources.{resourceFilePath.Replace(" ", "_").Replace("\\", ".").Replace("/", ".")}";
+
+            return assembly.GetManifestResourceStream(path);
+        }
+
+        internal static async Task<string> ReadEmbeddedResourceAsync(string resourceFilePath) {
+            string data = null;
+
+            using(Stream stream = GetEmbeddedResourceStream(resourceFilePath)) {
+                using(StreamReader reader = new StreamReader(stream)) {
+                    data = await reader.ReadToEndAsync();
+                }
+            }
+
+            return data;
+        }
+
+        internal static async Task<JObject> ParseJsonFromEmbeddedResourceAsync(string resourceFilePath)
+            => JObject.Parse(await ReadEmbeddedResourceAsync(resourceFilePath));
+    }
+}
+
+
+
+================================================
+File: Unikod/Internal/GlyphSetParser.cs
+================================================
+ï»¿namespace SDSK.Libs.Unikod.Internal {
+    internal static class GlyphSetParser {
+        internal enum GlyphTypes {
+            Latin,
+            Number
+        }
+
+        // TODO: Parse sets from embedded JSON resource file
+    }
+}
+
+
+
+================================================
+File: Unikod/Resources/GlyphSets/Latin.json
+================================================
+﻿{
+    "normal": {
+        "name": "Latin Normal",
+        "characters": {
+            "uppercase": [
+                "A", "B", "C", "D", "E",
+                "F", "G", "H", "I", "J",
+                "K", "L", "M", "N", "O",
+                "P", "Q", "R", "S", "T",
+                "U", "V", "W", "X", "Y",
+                "Z"
+            ],
+            "lowercase": [
+                "a", "b", "c", "d", "e",
+                "f", "g", "h", "i", "j",
+                "k", "l", "m", "n", "o",
+                "p", "q", "r", "s", "t",
+                "u", "v", "w", "x", "y",
+                "z"
+            ]
+        }
+    },
+    "style": [
+        {
+            "name": "Latin Bold",
+            "characters": {
+                "uppercase": [
+                    "𝐀", "𝐁", "𝐂", "𝐃", "𝐄",
+                    "𝐅", "𝐆", "𝐇", "𝐈", "𝐉",
+                    "𝐊", "𝐋", "𝐌", "𝐍", "𝐎",
+                    "𝐏", "𝐐", "𝐑", "𝐒", "𝐓",
+                    "𝐔", "𝐕", "𝐖", "𝐗", "𝐘",
+                    "𝐙"
+                ],
+                "lowercase": [
+                    "𝐚", "𝐛", "𝐜", "𝐝", "𝐞",
+                    "𝐟", "𝐠", "𝐡", "𝐢", "𝐣",
+                    "𝐤", "𝐥", "𝐦", "𝐧", "𝐨",
+                    "𝐩", "𝐪", "𝐫", "𝐬", "𝐭",
+                    "𝐮", "𝐯", "𝐰", "𝐱", "𝐲",
+                    "𝐳"
+                ]
+            }
+        },
+        {
+            "name": "Latin Italic",
+            "characters": {
+                "uppercase": [
+                    "𝐴", "𝐵", "𝐶", "𝐷", "𝐸",
+                    "𝐹", "𝐺", "𝐻", "𝐼", "𝐽",
+                    "𝐾", "𝐿", "𝑀", "𝑁", "𝑂",
+                    "𝑃", "𝑄", "𝑅", "𝑆", "𝑇",
+                    "𝑈", "𝑉", "𝑊", "𝑋", "𝑌",
+                    "𝑍"
+                ],
+                "lowercase": [
+                    "𝑎", "𝑏", "𝑐", "𝑑", "𝑒",
+                    "𝑓", "𝑔", "ℎ", "𝑖", "𝑗",
+                    "𝑘", "𝑙", "𝑚", "𝑛", "𝑜",
+                    "𝑝", "𝑞", "𝑟", "𝑠", "𝑡",
+                    "𝑢", "𝑣", "𝑤", "𝑥", "𝑦",
+                    "𝑧"
+                ]
+            }
+        },
+        {
+            "name": "Latin Bold Italic",
+            "characters": {
+                "uppercase": [
+                    "𝑨", "𝑩", "𝑪", "𝑫", "𝑬",
+                    "𝑭", "𝑮", "𝑯", "𝑰", "𝑱",
+                    "𝑲", "𝑳", "𝑴", "𝑵", "𝑶",
+                    "𝑷", "𝑸", "𝑹", "𝑺", "𝑻",
+                    "𝑼", "𝑽", "𝑾", "𝑿", "𝒀",
+                    "𝒁"
+                ],
+                "lowercase": [
+                    "𝒂", "𝒃", "𝒄", "𝒅", "𝒆",
+                    "𝒇", "𝒈", "𝒉", "𝒊", "𝒋",
+                    "𝒌", "𝒍", "𝒎", "𝒏", "𝒐",
+                    "𝒑", "𝒒", "𝒓", "𝒔", "𝒕",
+                    "𝒖", "𝒗", "𝒘", "𝒙", "𝒚",
+                    "𝒛"
+                ]
+            }
+        },
+        {
+            "name": "Latin Script",
+            "characters": {
+                "uppercase": [
+                    "𝒜", "ℬ", "𝒞", "𝒟", "ℰ",
+                    "ℱ", "𝒢", "ℋ", "ℐ", "𝒥",
+                    "𝒦", "𝒧", "𝒨", "𝒩", "𝒪",
+                    "𝒫", "𝒬", "ℛ", "𝒮", "𝒯",
+                    "𝒰", "𝒱", "𝒲", "𝒳", "𝒴",
+                    "𝒵"
+                ],
+                "lowercase": [
+                    "𝒶", "𝒷", "𝒸", "𝒹", "ℯ",
+                    "𝒻", "ℊ", "𝒽", "𝒾", "𝒿",
+                    "𝓀", "𝓁", "𝓂", "𝓃", "ℴ",
+                    "𝓅", "𝓆", "𝓇", "𝓈", "𝓉",
+                    "𝓊", "𝓋", "𝓌", "𝓍", "𝓎",
+                    "𝓏"
+                ]
+            }
+        },
+        {
+            "name": "Latin Script Bold",
+            "characters": {
+                "uppercase": [
+                    "𝓐", "𝓑", "𝓒", "𝓓", "𝓔",
+                    "𝓕", "𝓖", "𝓗", "𝓘", "𝓙",
+                    "𝓚", "𝓛", "𝓜", "𝓝", "𝓞",
+                    "𝓟", "𝓠", "𝓡", "𝓢", "𝓣",
+                    "𝓤", "𝓥", "𝓦", "𝓧", "𝓨",
+                    "𝓩"
+                ],
+                "lowercase": [
+                    "𝓪", "𝓫", "𝓬", "𝓭", "𝓮",
+                    "𝓯", "𝓰", "𝓱", "𝓲", "𝓳",
+                    "𝓴", "𝓵", "𝓶", "𝓷", "𝓸",
+                    "𝓹", "𝓺", "𝓻", "𝓼", "𝓽",
+                    "𝓾", "𝓿", "𝔀", "𝔁", "𝔂",
+                    "𝔃"
+                ]
+            }
+        },
+        {
+            "name": "Latin Fraktur",
+            "characters": {
+                "uppercase": [
+                    "𝔄", "𝔅", "ℭ", "𝔇", "𝔈",
+                    "𝔉", "𝔊", "ℌ", "ℑ", "𝔍",
+                    "𝔎", "𝔏", "𝔐", "𝔑", "𝔒",
+                    "𝔓", "𝔔", "ℜ", "𝔖", "𝔗",
+                    "𝔘", "𝔙", "𝔚", "𝔛", "𝔜",
+                    "ℨ"
+                ],
+                "lowercase": [
+                    "𝔞", "𝔟", "𝔠", "𝔡", "𝔢",
+                    "𝔣", "𝔤", "𝔥", "𝔦", "𝔧",
+                    "𝔨", "𝔩", "𝔪", "𝔫", "𝔬",
+                    "𝔭", "𝔮", "𝔯", "𝔰", "𝔱",
+                    "𝔲", "𝔳", "𝔴", "𝔵", "𝔶",
+                    "𝔷"
+                ]
+            }
+        },
+        {
+            "name": "Latin Fraktur Bold",
+            "characters": {
+                "uppercase": [
+                    "𝕬", "𝕭", "𝕮", "𝕯", "𝕰",
+                    "𝕱", "𝕲", "𝕳", "𝕴", "𝕵",
+                    "𝕶", "𝕷", "𝕸", "𝕹", "𝕺",
+                    "𝕻", "𝕼", "𝕽", "𝕾", "𝕿",
+                    "𝖀", "𝖁", "𝖂", "𝖃", "𝖄",
+                    "𝖅"
+                ],
+                "lowercase": [
+                    "𝖆", "𝖇", "𝖈", "𝖉", "𝖊",
+                    "𝖋", "𝖌", "𝖍", "𝖎", "𝖏",
+                    "𝖐", "𝖑", "𝖒", "𝖓", "𝖔",
+                    "𝖕", "𝖖", "𝖗", "𝖘", "𝖙",
+                    "𝖚", "𝖛", "𝖜", "𝖝", "𝖞",
+                    "𝖟"
+                ]
+            }
+        },
+        {
+            "name": "Latin Double Struck",
+            "characters": {
+                "uppercase": [
+                    "𝔸", "𝔹", "ℂ", "𝔻", "𝔼",
+                    "𝔽", "𝔾", "ℍ", "𝕀", "𝕁",
+                    "𝕂", "𝕃", "𝕄", "ℕ", "𝕆",
+                    "ℙ", "ℚ", "ℝ", "𝕊", "𝕋",
+                    "𝕌", "𝕍", "𝕎", "𝕏", "𝕐",
+                    "ℤ" 
+                ],
+                "lowercase": [
+                    "𝕒", "𝕓", "𝕔", "𝕕", "𝕖",
+                    "𝕗", "𝕘", "𝕙", "𝕚", "𝕛",
+                    "𝕜", "𝕝", "𝕞", "𝕟", "𝕠",
+                    "𝕡", "𝕢", "𝕣", "𝕤", "𝕥",
+                    "𝕦", "𝕧", "𝕨", "𝕩", "𝕪",
+                    "𝕫"
+                ]
+            }
+        },
+        {
+            "name": "Latin Sans Serif",
+            "characters": {
+                "uppercase": [
+                    "𝖠", "𝖡", "𝖢", "𝖣", "𝖤",
+                    "𝖥", "𝖦", "𝖧", "𝖨", "𝖩",
+                    "𝖪", "𝖫", "𝖬", "𝖭", "𝖮",
+                    "𝖯", "𝖰", "𝖱", "𝖲", "𝖳",
+                    "𝖴", "𝖵", "𝖶", "𝖷", "𝖸",
+                    "𝖹"
+                ],
+                "lowercase": [
+                    "𝖺", "𝖻", "𝖼", "𝖽", "𝖾",
+                    "𝖿", "𝗀", "𝗁", "𝗂", "𝗃",
+                    "𝗄", "𝗅", "𝗆", "𝗇", "𝗈",
+                    "𝗉", "𝗊", "𝗋", "𝗌", "𝗍",
+                    "𝗎", "𝗏", "𝗐", "𝗑", "𝗒",
+                    "𝗓"
+                ]
+            }
+        },
+        {
+            "name": "Latin Sans Serif Bold",
+            "characters": {
+                "uppercase": [
+                    "𝗔", "𝗕", "𝗖", "𝗗", "𝗘",
+                    "𝗙", "𝗚", "𝗛", "𝗜", "𝗝",
+                    "𝗞", "𝗟", "𝗠", "𝗡", "𝗢",
+                    "𝗣", "𝗤", "𝗥", "𝗦", "𝗧",
+                    "𝗨", "𝗩", "𝗪", "𝗫", "𝗬",
+                    "𝗭"
+                ],
+                "lowercase": [
+                    "𝗮", "𝗯", "𝗰", "𝗱", "𝗲",
+                    "𝗳", "𝗴", "𝗵", "𝗶", "𝗷",
+                    "𝗸", "𝗹", "𝗺", "𝗻", "𝗼",
+                    "𝗽", "𝗾", "𝗿", "𝘀", "𝘁",
+                    "𝘂", "𝘃", "𝘄", "𝘅", "𝘆",
+                    "𝘇"
+                ]
+            }
+        },
+        {
+            "name": "Latin Sans Serif Italic",
+            "characters": {
+                "uppercase": [
+                    "𝘈", "𝘉", "𝘊", "𝘋", "𝘌",
+                    "𝘍", "𝘎", "𝘏", "𝘐", "𝘑",
+                    "𝘒", "𝘓", "𝘔", "𝘕", "𝘖",
+                    "𝘗", "𝘘", "𝘙", "𝘚", "𝘛",
+                    "𝘜", "𝘝", "𝘞", "𝘟", "𝘠",
+                    "𝘡"
+                ],
+                "lowercase": [
+                    "𝘢", "𝘣", "𝘤", "𝘥", "𝘦",
+                    "𝘧", "𝘨", "𝘩", "𝘪", "𝘫",
+                    "𝘬", "𝘭", "𝘮", "𝘯", "𝘰",
+                    "𝘱", "𝘲", "𝘳", "𝘴", "𝘵",
+                    "𝘶", "𝘷", "𝘸", "𝘹", "𝘺",
+                    "𝘻"
+                ]
+            }
+        },
+        {
+            "name": "Latin Sans Serif Bold Italic",
+            "characters": {
+                "uppercase": [
+                    "𝘼", "𝘽", "𝘾", "𝘿", "𝙀",
+                    "𝙁", "𝙂", "𝙃", "𝙄", "𝙅",
+                    "𝙆", "𝙇", "𝙈", "𝙉", "𝙊",
+                    "𝙋", "𝙌", "𝙍", "𝙎", "𝙏",
+                    "𝙐", "𝙑", "𝙒", "𝙓", "𝙔",
+                    "𝙕"
+                ],
+                "lowercase": [
+                    "𝙖", "𝙗", "𝙘", "𝙙", "𝙚",
+                    "𝙛", "𝙜", "𝙝", "𝙞", "𝙟",
+                    "𝙠", "𝙡", "𝙢", "𝙣", "𝙤",
+                    "𝙥", "𝙦", "𝙧", "𝙨", "𝙩",
+                    "𝙪", "𝙫", "𝙬", "𝙭", "𝙮",
+                    "𝙯"
+                ]
+            }
+        },
+        {
+            "name": "Latin Monospace",
+            "characters": {
+                "uppercase": [
+                    "𝙰", "𝙱", "𝙲", "𝙳", "𝙴",
+                    "𝙵", "𝙶", "𝙷", "𝙸", "𝙹",
+                    "𝙺", "𝙻", "𝙼", "𝙽", "𝙾",
+                    "𝙿", "𝚀", "𝚁", "𝚂", "𝚃",
+                    "𝚄", "𝚅", "𝚆", "𝚇", "𝚈",
+                    "𝚉"
+                ],
+                "lowercase": [
+                    "𝚊", "𝚋", "𝚌", "𝚍", "𝚎",
+                    "𝚏", "𝚐", "𝚑", "𝚒", "𝚓",
+                    "𝚔", "𝚕", "𝚖", "𝚗", "𝚘",
+                    "𝚙", "𝚚", "𝚛", "𝚜", "𝚝",
+                    "𝚞", "𝚟", "𝚠", "𝚡", "𝚢",
+                    "𝚣"
+                ]
+            }
+        },
+        {
+            "name": "Latin Fullwidth",
+            "characters": {
+                "uppercase": [
+                    "Ａ", "Ｂ", "Ｃ", "Ｄ", "Ｅ",
+                    "Ｆ", "Ｇ", "Ｈ", "Ｉ", "Ｊ",
+                    "Ｋ", "Ｌ", "Ｍ", "Ｎ", "Ｏ",
+                    "Ｐ", "Ｑ", "Ｒ", "Ｓ", "Ｔ",
+                    "Ｕ", "Ｖ", "Ｗ", "Ｘ", "Ｙ",
+                    "Ｚ"
+                ],
+                "lowercase": [
+                    "ａ", "ｂ", "ｃ", "ｄ", "ｅ",
+                    "ｆ", "ｇ", "ｈ", "ｉ", "ｊ",
+                    "ｋ", "ｌ", "ｍ", "ｎ", "ｏ",
+                    "ｐ", "ｑ", "ｒ", "ｓ", "ｔ",
+                    "ｕ", "ｖ", "ｗ", "ｘ", "ｙ",
+                    "ｚ"
+                ]
+            }
+        },
+        {
+            "name": "Latin Small",
+            "characters": {
+                "uppercase": [
+                    "ᴀ", "ʙ", "ᴄ", "ᴅ", "ᴇ",
+                    "ꜰ", "ɢ", "ʜ", "ɪ", "ᴊ",
+                    "ᴋ", "ʟ", "ᴍ", "ɴ", "ᴏ",
+                    "ᴘ", "ꞯ", "ʀ", "ꜱ", "ᴛ",
+                    "ᴜ", "ᴠ", "ᴡ", null, "ʏ",
+                    "ᴢ"
+                ]
+            }
+        },
+        {
+            "name": "Latin Superscript",
+            "characters": {
+                "uppercase": [
+                    "ᴬ", "ᴮ", null, "ᴰ", "ᴱ",
+                    null, "ᴳ", "ᴴ", "ᴵ", "ᴶ",
+                    "ᴷ", "ᴸ", "ᴹ", "ᴺ", "ᴼ",
+                    "ᴾ", null, "ᴿ", null, "ᵀ",
+                    "ᵁ", null, "ᵂ", null, null,
+                    null
+                ],
+                "lowercase": [
+                    "ᵃ", "ᵇ", "ᶜ", "ᵈ", "ᵉ",
+                    "ᶠ", "ᵍ", "ʰ", "ⁱ", "ʲ",
+                    "ᵏ", "ˡ", "ᵐ", "ⁿ", "ᵒ",
+                    "ᵖ", null, "ʳ", "ˢ", "ᵗ",
+                    "ᵘ", "ᵛ", "ʷ", "ˣ", "ʸ",
+                    "ᶻ"
+                ]
+            }
+        },
+        {
+            "name": "Latin Subscript",
+            "characters": {
+                "lowercase": [
+                    "ₐ", null, null, null, "ₑ",
+                    null, null, "ₕ", "ᵢ", "ⱼ",
+                    "ₖ", "ₗ", "ₘ", "ₙ", "ₒ",
+                    "ₚ", null, "ᵣ", "ₛ", "ₜ",
+                    "ᵤ", "ᵥ", null, "ₓ", null,
+                    null
+                ]
+            }
+        },
+        {
+            "name": "Latin Parenthesized",
+            "characters": {
+                "uppercase": [
+                    "🄐", "🄑", "🄒", "🄓", "🄔",
+                    "🄕", "🄖", "🄗", "🄘", "🄙",
+                    "🄚", "🄛", "🄜", "🄝", "🄞",
+                    "🄟", "🄠", "🄡", "🄢", "🄣",
+                    "🄤", "🄥", "🄦", "🄧", "🄨",
+                    "🄩"
+                ],
+                "lowercase": [
+                    "⒜", "⒝", "⒞", "⒟", "⒠",
+                    "⒡", "⒢", "⒣", "⒤", "⒥",
+                    "⒦", "⒧", "⒨", "⒩", "⒪",
+                    "⒫", "⒬", "⒭", "⒮", "⒯",
+                    "⒰", "⒱", "⒲", "⒳", "⒴",
+                    "⒵"
+                ]
+            }
+        },
+        {
+            "name": "Latin Circled",
+            "characters": {
+                "uppercase": [
+                    "Ⓐ", "Ⓑ", "Ⓒ", "Ⓓ", "Ⓔ",
+                    "Ⓕ", "Ⓖ", "Ⓗ", "Ⓘ", "Ⓙ",
+                    "Ⓚ", "Ⓛ", "Ⓜ", "Ⓝ", "Ⓞ",
+                    "Ⓟ", "Ⓠ", "Ⓡ", "Ⓢ", "Ⓣ",
+                    "Ⓤ", "Ⓥ", "Ⓦ", "Ⓧ", "Ⓨ",
+                    "Ⓩ"
+                ],
+                "lowercase": [
+                    "ⓐ", "ⓑ", "ⓒ", "ⓓ", "ⓔ",
+                    "ⓕ", "ⓖ", "ⓗ", "ⓘ", "ⓙ",
+                    "ⓚ", "ⓛ", "ⓜ", "ⓝ", "ⓞ",
+                    "ⓟ", "ⓠ", "ⓡ", "ⓢ", "ⓣ",
+                    "ⓤ", "ⓥ", "ⓦ", "ⓧ", "ⓨ",
+                    "ⓩ"
+                ]
+            }
+        },
+        {
+            "name": "Latin Old Italic",
+            "characters": {
+                "uppercase": [
+                    "𐌀", "𐌁", "𐌂", "𐌃", "𐌄",
+                    "𐌅", null, null, "𐌆", null,
+                    "𐌊", "𐌋", "𐌑", null, "𐌏",
+                    "𐌓", "𐌒", null, "𐌔", "𐌕",
+                    null, null, null, "𐌗", "𐌖",
+                    null
+                ]
+            }
+        }
+    ],
+    "obfuscation": [
+        {
+            "name": "Cherokee Glyphs",
+            "characters": {
+                "uppercase": [
+                    "Ꭺ", "Ᏼ", "Ꮯ", "Ꭰ", "Ꭼ",
+                    null, "Ꮐ", "Ꮋ", null, "Ꭻ",
+                    "Ꮶ", "Ꮮ", "Ꮇ", null, null,
+                    "Ꮲ", null, "Ꭱ", "Ꮪ", "Ꭲ",
+                    null, "Ꮩ", "Ꮃ", null, null,
+                    "Ꮓ"
+                ],
+                "lowercase": [
+                    null, "Ꮟ", null, null, null,
+                    null, null, "Ꮒ", "Ꭵ", null,
+                    null, null, null, null, null,
+                    null, null, null, null, null,
+                    null, null, null, null, "Ꭹ",
+                    null
+                ]
+            }
+        },
+        {
+            "name": "Cherokee Small Glyphs",
+            "characters": {
+                "uppercase": [
+                    "ꭺ", null, "ꮯ", "ꭰ", "ꭼ",
+                    null, "ꮆ", "ꮋ", "ꮖ", "ꭻ",
+                    null, "ꮮ", "ꮇ", null, null,
+                    "ꮲ", null, "ꭱ", "ꮪ", "ꭲ",
+                    null, "ꮩ", "ꮃ", null, null,
+                    "ꮓ"
+                ],
+                "lowercase": [
+                    null, "ꮟ", null, "ꮷ", null,
+                    null, null, "ꮒ", "ꭵ", null,
+                    "ꮶ", null, null, null, null,
+                    "ꮅ", null, "ꮁ", null, null,
+                    "ꮼ", "ꮴ", "ꮤ", null, "ꮍ",
+                    null
+                ]
+            }
+        },
+        {
+            "name": "Roman Glyphs",
+            "characters": {
+                "uppercase": [
+                    null, null, "Ⅽ", "Ⅾ", null,
+                    null, null, null, "Ⅰ", null,
+                    null, "Ⅼ", "Ⅿ", null, null,
+                    null, null, null, null, null,
+                    null, "Ⅴ", null, "Ⅹ", null,
+                    null
+                ],
+                "lowercase": [
+                    null, null, "ⅽ", "ⅾ", null,
+                    null, null, null, "ⅰ", null,
+                    null, "ⅼ", "ⅿ", null, null,
+                    null, null, null, null, null,
+                    null, "ⅴ", null, "ⅹ", null,
+                    null
+                ]
+            }
+        },
+        {
+            "name": "Coptic Glyphs",
+            "characters": {
+                "uppercase": [
+                    null, "Ⲃ", "Ⲥ", null, null,
+                    null, null, "Ⲏ", "Ⲓ", null,
+                    "Ⲕ", "Ⳑ", "Ⲙ", "Ⲛ", "Ⲟ",
+                    "Ⲣ", null, null, null, "Ⲧ",
+                    "Ⳙ", null, "Ⲱ", "Ⲭ", "Ⲩ",
+                    "Ⲍ"
+                ]
+            }
+        },
+        {
+            "name": "Tifinagh Glyphs",
+            "characters": {
+                "uppercase": [
+                    "ⴷ", null, "ⵎ", null, "ⴹ",
+                    null, null, null, "ⵊ", null,
+                    null, null, null, null, "ⵔ",
+                    null, "ⵕ", null, "ⵢ", null,
+                    "ⵡ", "ⴸ", null, "ⵝ", "ⵖ",
+                    null
+                ]
+            }
+        },
+        {
+            "name": "Lisu Glyphs",
+            "characters": {
+                "uppercase": [
+                    "ꓮ", "ꓐ", "ꓚ", "ꓓ", "ꓰ",
+                    "ꓝ", "ꓖ", "ꓧ", "ꓲ", "ꓙ",
+                    "ꓗ", "ꓡ", "ꓟ", "ꓠ", "ꓳ",
+                    "ꓑ", null, "ꓣ", "ꓢ", "ꓔ",
+                    "ꓴ", "ꓦ", "ꓪ", "ꓫ", "ꓬ",
+                    null
+                ]
+            }
+        },
+        {
+            "name": "Regional Indicator Symbols",
+            "characters": {
+                "uppercase": [
+                    "🇦","🇧","🇨","🇩","🇪",
+                    "🇫","🇬","🇭","🇮","🇯",
+                    "🇰","🇱","🇲","🇳","🇴",
+                    "🇵","🇶","🇷","🇸","🇹",
+                    "🇺","🇻","🇼","🇽","🇾",
+                    "🇿"
+                ]
+            }
+        }
+    ]
+}
+
+
+================================================
+File: Unikod/Resources/GlyphSets/Number.json
+================================================
+﻿{
+    "normal": {
+        "name": "Number Normal",
+        "characters": [
+            "0", "1", "2", "3", "4",
+            "5", "6", "7", "8", "9"
+        ]
+    },
+    "style": [
+        {
+            "name": "Number Bold",
+            "characters": [
+                "𝟎", "𝟏", "𝟐", "𝟑", "𝟒",
+                "𝟓", "𝟔", "𝟕", "𝟖", "𝟗"
+            ]
+        },
+        {
+            "name": "Number Fullwidth",
+            "characters": [
+                "０", "１", "２", "３", "４",
+                "５", "６", "７", "８", "９"
+            ]
+        },
+        {
+            "name": "Number Superscript",
+            "characters": [
+                "⁰", "¹", "²", "³", "⁴",
+                "⁵", "⁶", "⁷", "⁸", "⁹"
+            ]
+        },
+        {
+            "name": "Number Subscript",
+            "characters": [
+                "₀", "₁", "₂", "₃", "₄",
+                "₅", "₆", "₇", "₈", "₉"
+            ]
+        },
+        {
+            "name": "Number Circled",
+            "characters": [
+                "⓪", "①", "②", "③", "④",
+                "⑤", "⑥", "⑦", "⑧", "⑨"
+            ]
+        },
+        {
+            "name": "Number Parenthesized",
+            "characters": [
+                null, "⑴", "⑵", "⑶", "⑷",
+                "⑸", "⑹", "⑺", "⑻", "⑼"
+            ]
+        },
+        {
+            "name": "Number Double Circled",
+            "characters": [
+                null, "⓵", "⓶", "⓷", "⓸",
+                "⓹", "⓺", "⓻", "⓼", "⓽"
+            ]
+        },
+        {
+            "name": "Number Circled (Dingbat Negative)",
+            "characters": [
+                "⓿", "❶", "❷", "❸", "❹",
+                "❺", "❻", "❼", "❽", "❾"
+            ]
+        },
+        {
+            "name": "Number Circled (Dingbat Sans Serif)",
+            "characters": [
+                "🄋", "➀", "➁", "➂", "➃",
+                "➄", "➅", "➆", "➇", "➈"
+            ]
+        },
+        {
+            "name": "Number Circled (Dingbat Sans Serif Negative)",
+            "characters": [
+                "🄌", "➊", "➋", "➌", "➍",
+                "➎", "➏", "➐", "➑", "➒"
+            ]
+        },
+        {
+            "name": "Number Double Struck",
+            "characters": [
+                "𝟘", "𝟙", "𝟚", "𝟛", "𝟜",
+                "𝟝", "𝟞", "𝟟", "𝟠", "𝟡"
+            ]
+        },
+        {
+            "name": "Number Sans Serif",
+            "characters": [
+                "𝟢", "𝟣", "𝟤", "𝟥", "𝟦",
+                "𝟧", "𝟨", "𝟩", "𝟪", "𝟫"
+            ]
+        },
+        {
+            "name": "Number Sans Serif Bold",
+            "characters": [
+                "𝟬", "𝟭", "𝟮", "𝟯", "𝟰",
+                "𝟱", "𝟲", "𝟳", "𝟴", "𝟵"
+            ]
+        },
+        {
+            "name": "Number Monospace",
+            "characters": [
+                "𝟶", "𝟷", "𝟸", "𝟹", "𝟺",
+                "𝟻", "𝟼", "𝟽", "𝟾", "𝟿"
+            ]
+        }
+    ]
+}
+
+
+================================================
+File: Unikod.Test/AnalyzeTest.cs
+================================================
+﻿using System.Collections.Generic;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace SDSK.Libs.Unikod.Test {
+    [TestClass]
+    public class AnalyzeTest {
+        [TestMethod]
+        public void AnalyzeTest_OneStylePerText() {
+            string testText1 = "Something's wrong";                 // Test for normal alphabets
+            string testText2 = "ℑ𝔫𝔱𝔢𝔯𝔫𝔞𝔱𝔦𝔬𝔫𝔞𝔩 𝔏𝔬𝔳𝔢";                  // Test for stylized alphabets
+            string testText3 = "33211223215543321231";              // Test for normal numbers
+            string testText4 = "𝟑𝟓𝟑𝟓𝟑𝟓𝟔𝟔𝟒𝟓𝟒𝟑𝟐";                  // Test for stylized numbers
+
+            CollectionAssert.AreEquivalent(new Dictionary<string, int>() {
+                { "Latin Normal Uppercase", 1 },
+                { "Latin Normal Lowercase", 14 }
+            }, Utils.Analyze(testText1));
+            CollectionAssert.AreEquivalent(new Dictionary<string, int>() {
+                { "Latin Fraktur Uppercase", 2 },
+                { "Latin Fraktur Lowercase", 15 }
+            }, Utils.Analyze(testText2));
+            CollectionAssert.AreEquivalent(new Dictionary<string, int>() {
+                { "Number Normal", 20 }
+            }, Utils.Analyze(testText3));
+            CollectionAssert.AreEquivalent(new Dictionary<string, int>() {
+                { "Number Bold", 13 }
+            }, Utils.Analyze(testText4));
+        }
+
+        [TestMethod]
+        public void AnalyzeTest_LatinConfusing() {
+            string testText = "𝑊𝑎𝑖𝑡𝑖𝑛𝑔 𝑓𝑜𝑟 𝑡ℎ𝑒 𝑡𝑖𝑚𝑒 𝑡𝑜 𝑝𝑎𝑠𝑠 𝑦𝑜𝑢 𝑏𝑦" +
+                "𝑯𝒐𝒑𝒆 𝒕𝒉𝒆 𝒘𝒊𝒏𝒅𝒔 𝒐𝒇 𝒄𝒉𝒂𝒏𝒈𝒆 𝒘𝒊𝒍𝒍 𝒄𝒉𝒂𝒏𝒈𝒆 𝒚𝒐𝒖𝒓 𝒎𝒊𝒏𝒅" +
+                "𝖨 𝖼𝗈𝗎𝗅𝖽 𝗀𝗂𝗏𝖾 𝖺 𝗍𝗁𝗈𝗎𝗌𝖺𝗇𝖽 𝗋𝖾𝖺𝗌𝗈𝗇𝗌 𝗐𝗁𝗒" +
+                "𝔸𝕟𝕕 𝕀 𝕜𝕟𝕠𝕨 𝕪𝕠𝕦, 𝕒𝕟𝕕 𝕪𝕠𝕦'𝕧𝕖 𝕘𝕠𝕥 𝕥𝕠" +
+                "𝓜𝓪𝓴𝓮 𝓲𝓽 𝓸𝓷 𝔂𝓸𝓾𝓻 𝓸𝔀𝓷" +
+                "𝚋𝚞𝚝 𝚠𝚎 𝚍𝚘𝚗'𝚝 𝚑𝚊𝚟𝚎 𝚝𝚘 𝚐𝚛𝚘𝚠 𝚞𝚙" +
+                "🄦⒠ ⒞⒜⒩ ⒮⒯⒜⒴ ⒡⒪⒭⒠⒱⒠⒭ ⒴⒪⒰⒩⒢" +
+                "Ｌｉｖｉｎｇ ｏｎ ｍｙ ｓｏｆａ" +
+                "𝖉𝖗𝖎𝖓𝖐𝖎𝖓𝖌 𝖗𝖚𝖒 𝖆𝖓𝖉 𝖈𝖔𝖑𝖆" +
+                "𝒰𝓃𝒹ℯ𝓇𝓃ℯ𝒶𝓉𝒽 𝓉𝒽ℯ 𝓇𝒾𝓈𝒾𝓃ℊ 𝓈𝓊𝓃";        // Some part of Zedd - Stay
+
+            CollectionAssert.AreEquivalent(new Dictionary<string, int>() {
+                { "Latin Italic Uppercase", 1 },
+                { "Latin Italic Lowercase", 6 + 3 + 3 + 4 + 2 + 4 + 3 + 2 },
+                { "Latin Bold Italic Uppercase", 1 },
+                { "Latin Bold Italic Lowercase", 3 + 3 + 5 + 2 + 6 + 4 + 6 + 4 + 4 },
+                { "Latin Sans-Serif Uppercase", 1 },
+                { "Latin Sans-Serif Lowercase", 5 + 4 + 1 + 8 + 7 + 3 },
+                { "Latin Double-Struck Uppercase", 2 },
+                { "Latin Double-Struck Lowercase", 2 + 4 + 3 + 3 + 5 + 3 + 2 },
+                { "Latin Script Bold Uppercase", 1 },
+                { "Latin Script Bold Lowercase", 3 + 2 + 2 + 4 + 3 },
+                { "Latin Monospace Lowercase", 3 + 2 + 4 + 4 + 2 + 4 + 2 },
+                { "Latin Parenthesized Uppercase", 1 },
+                { "Latin Parenthesized Lowercase", 1 + 3 + 4 + 7 + 5 },
+                { "Latin Fullwidth Uppercase", 1 },
+                { "Latin Fullwidth Lowercase", 5 + 2 + 2 + 4 },
+                { "Latin Fraktur Bold Lowercase", 8 + 3 + 3 + 4 },
+                { "Latin Script Uppercase", 1 },
+                { "Latin Script Lowercase", 9 + 3 + 6 + 3 }
+            }, Utils.Analyze(testText));
+        }
+    }
+}
+
+
+
+================================================
+File: Unikod.Test/OtherUnikodUtilsTest.cs
+================================================
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SDSK.Libs.Unikod.Common;
+using SDSK.Libs.Unikod.Types;
+
+namespace SDSK.Libs.Unikod.Test {
+    [TestClass]
+    public class OtherUnikodUtilsTest {
+        [TestMethod]
+        public void GetSetByNameTest_Normal() {
+            IUnikodSet test1 = UnicodeSets.GetSetByName("Latin Normal Uppercase");
+            IUnikodSet test2 = UnicodeSets.GetSetByName("Number Bold");
+            IUnikodSet test3 = UnicodeSets.GetSetByName("Latin Modifier(Superscript) Lowercase");
+
+            Assert.IsInstanceOfType(test1, typeof(AlphabetSet));
+            Assert.IsInstanceOfType(test2, typeof(NumberSet));
+            Assert.IsInstanceOfType(test3, typeof(AlphabetSet));
+
+            Assert.AreEqual(test1.Name, "Latin Normal Uppercase");
+            Assert.AreEqual(test2.Name, "Number Bold");
+            CollectionAssert.AreEqual(new string[] {
+                "ᵃ", "ᵇ", "ᶜ", "ᵈ", "ᵉ",
+                "ᶠ", "ᵍ", "ʰ", "ⁱ", "ʲ",
+                "ᵏ", "ˡ", "ᵐ", "ⁿ", "ᵒ",
+                "ᵖ", null, "ʳ", "ˢ", "ᵗ",
+                "ᵘ", "ᵛ", "ʷ", "ˣ", "ʸ",
+                "ᶻ"
+            }, test3.Data);
+        }
+
+        [TestMethod]
+        public void GetSetByNameTest_IgnoreCase() {
+            IUnikodSet test1 = UnicodeSets.GetSetByName("numBer doublE CirclED");
+            IUnikodSet test2 = UnicodeSets.GetSetByName("latin fullwidth uppercase");
+            IUnikodSet test3 = UnicodeSets.GetSetByName("lisu gLyphS for LATIN UPPERCASE obfuscation");
+
+            Assert.IsInstanceOfType(test1, typeof(NumberSet));
+            Assert.IsInstanceOfType(test2, typeof(AlphabetSet));
+            Assert.IsInstanceOfType(test3, typeof(AlphabetSet));
+
+            Assert.AreEqual(test1.Name, "Number Double Circled");
+            Assert.AreEqual(test2.Name, "Latin Fullwidth Uppercase");
+            CollectionAssert.AreEqual(UnicodeSets.LisuGlyphsUppercaseSet.Data, test3.Data);
+        }
+
+        [TestMethod]
+        public void GetSetByNameTest_Null() {
+            IUnikodSet test1 = UnicodeSets.GetSetByName("Unused Set Name");
+            IUnikodSet test2 = UnicodeSets.GetSetByName(string.Empty);
+            IUnikodSet test3 = UnicodeSets.GetSetByName(null);
+
+            Assert.IsNull(test1);
+            Assert.IsNull(test2);
+            Assert.IsNull(test3);
+
+            Assert.ThrowsException<NullReferenceException>(() => test1.Data.Length);
+            Assert.ThrowsException<NullReferenceException>(() => test2.Name.Length);
+            Assert.ThrowsException<NullReferenceException>(() => test3.StyleType.ToString());
+        }
+
+        [TestMethod]
+        public void GetSetsByStyleTypeTest_Normal() {
+            List<IUnikodSet> testList = UnicodeSets.GetSetsByStyleType(StyleType.Normal);
+
+            CollectionAssert.AreEquivalent(new List<IUnikodSet>() {
+                UnicodeSets.LatinNormalUppercaseSet,
+                UnicodeSets.LatinNormalLowercaseSet,
+                UnicodeSets.NumberNormalSet
+            }, testList);
+        }
+    }
+}
+
+
+
+================================================
+File: Unikod.Test/StylizeTest.cs
+================================================
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SDSK.Libs.Unikod.Common;
+
+namespace SDSK.Libs.Unikod.Test {
+    [TestClass]
+    public class StylizeTest {
+        [TestMethod]
+        public void StylizeTest_Specials() {
+            string textNull = null;
+            string textEmpty = "";
+
+            Assert.IsNull(Styler.Stylize(textNull, UnicodeSets.LatinBoldUppercaseSet));
+            Assert.AreEqual(textEmpty, Styler.Stylize(textEmpty, UnicodeSets.LatinItalicUppercaseSet));
+        }
+
+        [TestMethod]
+        public void StylizeTest_Latin_OneStyle() {
+            string textToBeStylized1 = "Style me!";
+            string textToBeStylized2 = "/*- Holy sxxt I gotta go -*/";
+
+            Assert.AreEqual("𝐒𝐭𝐲𝐥𝐞 𝐦𝐞!", Styler.Stylize(textToBeStylized1, UnicodeSets.LatinBoldUppercaseSet, UnicodeSets.LatinBoldLowercaseSet));
+            Assert.AreEqual("/*- ℌ𝔬𝔩𝔶 𝔰𝔵𝔵𝔱 ℑ 𝔤𝔬𝔱𝔱𝔞 𝔤𝔬 -*/", Styler.Stylize(textToBeStylized2, UnicodeSets.LatinFrakturUppercaseSet, UnicodeSets.LatinFrakturLowercaseSet));
+        }
+
+        [TestMethod]
+        public void StylizeTest_Latin_IncompletedOneStyle() {
+            string textToBeStylized1 = "Confusing!q";
+            string textToBeStylized2 = "You are GREAT";
+
+            Assert.AreEqual("Cᵒⁿᶠᵘˢⁱⁿᵍ!q", Styler.Stylize(textToBeStylized1, UnicodeSets.LatinModifierUppercaseSet, UnicodeSets.LatinModifierLowercaseSet));
+            Assert.AreEqual("𐌖ou are GR𐌄𐌀𐌕", Styler.Stylize(textToBeStylized2, UnicodeSets.LatinOldItalicUppercaseSet));
+        }
+
+        [TestMethod]
+        public void StylizeTest_Latin_WithFallbackStyle() {
+            string textToBeStylized1 = "Without You";
+            string textToBeStylized2 = "See You Again";
+
+            Assert.AreEqual("ᵂⁱᵗʰᵒᵘᵗ 𝚈ᵒᵘ", Styler.Stylize(textToBeStylized1, UnicodeSets.LatinModifierUppercaseSet, UnicodeSets.LatinModifierLowercaseSet, UnicodeSets.LatinMonospaceUppercaseSet, UnicodeSets.LatinMonospaceLowercaseSet));
+            Assert.AreEqual("🄢ₑₑ 🄨ₒᵤ 🄐⒢ₐᵢₙ", Styler.Stylize(textToBeStylized2, UnicodeSets.LatinSubscriptLowercaseSet, UnicodeSets.LatinParenthesizedUppercaseSet, UnicodeSets.LatinParenthesizedLowercaseSet));
+        }
+
+        [TestMethod]
+        public void StylizeTest_Number_OneStyle() {
+            string textToBeStylized1 = "00039039000";
+            string textToBeStylized2 = "95423165877";
+
+            Assert.AreEqual("０００３９０３９０００", Styler.Stylize(textToBeStylized1, UnicodeSets.NumberFullWidthSet));
+            Assert.AreEqual("𝟵𝟱𝟰𝟮𝟯𝟭𝟲𝟱𝟴𝟳𝟳", Styler.Stylize(textToBeStylized2, UnicodeSets.NumberSansSerifBoldSet));
+        }
+
+        [TestMethod]
+        public void StylizeTest_Number_IncompletedOneStyle() {
+            string textToBeStylized = "01234567890";
+
+            Assert.AreEqual("0⑴⑵⑶⑷⑸⑹⑺⑻⑼0", Styler.Stylize(textToBeStylized, UnicodeSets.NumberParenthesizedSet));
+        }
+
+        [TestMethod]
+        public void StylizeTest_Number_WithFallbackStyle() {
+            string textToBeStylized = "01234567890";
+
+            Assert.AreEqual("⓿⓵⓶⓷⓸⓹⓺⓻⓼⓽⓿", Styler.Stylize(textToBeStylized, UnicodeSets.NumberDoubleCircledSet, UnicodeSets.NumberDingbatNegativeCircledSet));
+        }
+
+        [TestMethod]
+        public void StylizeTest_LatinNumberMixed_OneStyle() {
+            string textToBeStylized = "Commits 0 Modified 2 Unikod master";
+
+            Assert.AreEqual("ℂ𝕠𝕞𝕞𝕚𝕥𝕤 𝟘 𝕄𝕠𝕕𝕚𝕗𝕚𝕖𝕕 𝟚 𝕌𝕟𝕚𝕜𝕠𝕕 𝕞𝕒𝕤𝕥𝕖𝕣", Styler.Stylize(textToBeStylized, UnicodeSets.LatinDoubleStruckUppercaseSet, UnicodeSets.LatinDoubleStruckLowercaseSet, UnicodeSets.NumberDoubleStruckSet));
+        }
+
+        [TestMethod]
+        public void StylizeTest_LatinNumberMixed_WithFallbackStyle() {
+            string textToBeStylized = "Curiosity was launched from Cape Canaveral on November 26, 2011, at 15:02 UTC";
+
+            Assert.AreEqual("𝐶ᵘʳⁱᵒˢⁱᵗʸ ʷᵃˢ ˡᵃᵘⁿᶜʰᵉᵈ ᶠʳᵒᵐ 𝐶ᵃᵖᵉ 𝐶ᵃⁿᵃᵛᵉʳᵃˡ ᵒⁿ ᴺᵒᵛᵉᵐᵇᵉʳ ⑵⑹, ⑵🄌⑴⑴, ᵃᵗ ⑴⑸:🄌⑵ ᵁᵀ𝐶", Styler.Stylize(textToBeStylized, UnicodeSets.LatinModifierUppercaseSet, UnicodeSets.LatinModifierLowercaseSet, UnicodeSets.NumberParenthesizedSet, UnicodeSets.LatinItalicUppercaseSet, UnicodeSets.LatinItalicLowercaseSet, UnicodeSets.NumberDingbatSansSerifNegativeCircledSet));
+        }
+
+        [TestMethod]
+        public void StylizeTest_ContainingCJKChars() {
+            string textToBeStylized1 = "독도(Dokdo, 獨島)는 동경 131도 51~52분/북위 37도 14분에 위치한 대한민국(Republic of Korea, 大韓民國)의 섬이자 명백한 영토이며, 이는 지리적・역사적으로 입증된 사실이다.";
+            string textToBeStylized2 = "일본(Japan, 日本) 측은 자국의 영토라 주장하고 있으며 '다케시마(Takeshima, 竹島, たけしま)'라고 부르고 있다.";
+            string textToBeStylized3 = "대한민국이 일본 측의 영토 주장에 대해 입을 열지 않고 있는 이유는, 명백한 사실이 있기에 일본 측의 터무니없는 주장에 반박할 가치가 없기 때문이다.";
+
+            Assert.AreEqual("독도(𝐃𝐨𝐤𝐝𝐨, 獨島)는 동경 𝟏𝟑𝟏도 𝟓𝟏~𝟓𝟐분/북위 𝟑𝟕도 𝟏𝟒분에 위치한 대한민국(𝐑𝐞𝐩𝐮𝐛𝐥𝐢𝐜 𝐨𝐟 𝐊𝐨𝐫𝐞𝐚, 大韓民國)의 섬이자 명백한 영토이며, 이는 지리적・역사적으로 입증된 사실이다.", Styler.Stylize(textToBeStylized1, UnicodeSets.LatinBoldUppercaseSet, UnicodeSets.LatinBoldLowercaseSet, UnicodeSets.NumberBoldSet));
+            Assert.AreEqual("일본(𝐽𝑎𝑝𝑎𝑛, 日本) 측은 자국의 영토라 주장하고 있으며 '다케시마(𝑇𝑎𝑘𝑒𝑠ℎ𝑖𝑚𝑎, 竹島, たけしま)'라고 부르고 있다.", Styler.Stylize(textToBeStylized2, UnicodeSets.LatinItalicUppercaseSet, UnicodeSets.LatinItalicLowercaseSet));
+            Assert.AreEqual("대한민국이 일본 측의 영토 주장에 대해 입을 열지 않고 있는 이유는, 명백한 사실이 있기에 일본 측의 터무니없는 주장에 반박할 가치가 없기 때문이다.", Styler.Stylize(textToBeStylized3, UnicodeSets.LatinDoubleStruckUppercaseSet, UnicodeSets.LatinDoubleStruckLowercaseSet));
+        }
+    }
+}
+
+
+
+================================================
+File: Unikod.Test/Unikod.Test.csproj
+================================================
+ï»¿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>SDSK.Libs.Unikod.Test</RootNamespace>
+  </PropertyGroup>
+ 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="1.4.0" />
+    <PackageReference Include="MSTest.TestFramework" Version="1.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Unikod\Unikod.csproj" />
+  </ItemGroup>
+</Project>
+
+
+
+================================================
+File: Unikod.Test/UnstylizeTest.cs
+================================================
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace SDSK.Libs.Unikod.Test {
+    [TestClass]
+    public class UnstylizeTest {
+        [TestMethod]
+        public void NormalizeTest_OneStylePerText() {
+            string testText1 = "𝐘𝐨𝐮 𝐚𝐫𝐞 𝐦𝐲 𝐒𝐇𝐘 𝐁𝐎𝐘";
+            string testText2 = "𝔸𝕝𝕝 𝕀 𝕎𝕒𝕟𝕥 𝔽𝕠𝕣 ℂ𝕙𝕣𝕚𝕤𝕥𝕞𝕒𝕤 𝕀𝕤 𝔾𝕆𝔻𝔻𝔸𝕄ℕ 𝕄𝕆ℕ𝔼𝕐";
+            string testText3 = "ℌ𝔢𝔶 𝔟𝔯𝔬 ℑ 𝔤𝔬𝔱𝔱𝔞 𝔪𝔬𝔳𝔢 𝔬𝔫";
+            string testText4 = "🇹🇭🇪 🇶🇺🇮🇨🇰 🇧🇷🇴🇼🇳 🇫🇴🇽 🇯🇺🇲🇵🇸 🇴🇻🇪🇷 🇹🇭🇪 🇱🇦🇿🇾 🇩🇴🇬";
+
+            Assert.AreEqual("You are my SHY BOY", Styler.Unstylize(testText1), false);
+            Assert.AreEqual("All I Want For Christmas Is GODDAMN MONEY", Styler.Unstylize(testText2), false);
+            Assert.AreEqual("Hey bro I gotta move on", Styler.Unstylize(testText3), false);
+            Assert.AreEqual("THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG", Styler.Unstylize(testText4), false);
+        }
+
+        [TestMethod]
+        public void NormalizeTest_OneStylePerText_MixWithSpecialCharacters() {
+            string testText1 = "𝐔𝐧𝐝𝐞𝐫 𝐭𝐡𝐞 𝐭𝐫𝐞𝐞 𝐰𝐡𝐞𝐫𝐞 𝐭𝐡𝐞 𝐠𝐫𝐚𝐬𝐬 𝐝𝐨𝐧'𝐭 𝐠𝐫𝐨𝐰 @@@@##$%!*";
+            string testText2 = "𝑊𝑎𝑡𝑎𝑠ℎ𝑖, 𝐾𝑖 𝑛𝑖 𝑁𝑎𝑟𝑖𝑚𝑎𝑠𝑢! -/**\\|\\()";
+            string testText3 = "𝒮𝒸ℴℴ𝓉ℯ𝓇 𝒷𝓇ℴ𝓉𝒽ℯ𝓇𝓈! 𝒮𝒞𝒪𝒪𝒯ℰℛ ℬℛ𝒪𝒯ℋℰℛ𝒮!!! ##^&**%!(**)";
+
+            Assert.AreEqual("Under the tree where the grass don't grow @@@@##$%!*", Styler.Unstylize(testText1), false);
+            Assert.AreEqual("Watashi, Ki ni Narimasu! -/**\\|\\()", Styler.Unstylize(testText2), false);
+            Assert.AreEqual("Scooter brothers! SCOOTER BROTHERS!!! ##^&**%!(**)", Styler.Unstylize(testText3), false);
+        }
+
+        [TestMethod]
+        public void NormalizeTest_MultiStylesPerText() {
+            string testText1 = "Ⓗⓔⓐⓡⓣⓐⓒⓗⓔ, 𝗁𝖾𝖺𝗋𝗍𝖻𝗋𝖾𝖺𝗄, ᵃˡˡ ᵒᵛᵉʳ ᵗᵒʷⁿ";
+            string testText2 = "𝗯𝘂𝘁 𝘀𝗼𝗺𝗲𝘁𝗵𝗶𝗻𝗴 𝘧𝘭𝘪𝘱𝘱𝘦𝘥 𝘭𝘪𝘬𝘦 𝚊 𝚜𝚠𝚒𝚝𝚌𝚑";
+            string testText3 = "𝙬𝙝𝙚𝙣 𝙮𝙤𝙪 came ａｒ𝖔𝖚𝓷𝓭";
+
+            Assert.AreEqual("Heartache, heartbreak, all over town", Styler.Unstylize(testText1), false);
+            Assert.AreEqual("but something flipped like a switch", Styler.Unstylize(testText2), false);
+            Assert.AreEqual("when you came around", Styler.Unstylize(testText3), false);
+        }
+        
+        [TestMethod]
+        public void NormalizeTest_NumberOnly_OneStylePerText() {
+            string testText1 = "𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗𝟎";
+            string testText2 = "③⑥②③①⑥④⑧⑨④⑥⑤①⑤③①③②①①⑥①⑥⑤⓪①⑥⑧④⑥④⑧⑨⑨⑤⑦⑨⑧⑤②③⓪";
+            string testText3 = "❾❾❽❾❺❻❶❻❺❶❺❷⓿⓿❶❹❻❹❽❼❹❽❾❾❺❻❷❸⓿❶❺❹❻❹❽❾";
+
+            Assert.AreEqual("1234567890", Styler.Unstylize(testText1), false);
+            Assert.AreEqual("362316489465153132116165016846489957985230", Styler.Unstylize(testText2), false);
+            Assert.AreEqual("998956165152001464874899562301546489", Styler.Unstylize(testText3), false);
+        }
+
+        [TestMethod]
+        public void NormalizeTest_NumberOnly_MultiStylesPerText() {
+            string testText1 = "𝟣𝟤𝟥𝟰𝟱𝟲𝟟𝟠𝟡𝟘";
+            string testText2 = "𝟼𝟼𝟺𝟼𝟻𝟾𝟸𝟹𝟹𝟺𝟻𝟾𝟼𝟿𝟽𝟻⑼⑼⑷⑵⑴₃₅₇₈₉₉₅⑻⑸⑵⑵⑴⑷⑵⑸";
+            string testText3 = "０１１２０２３５４４５６𝟫𝟨𝟦𝟪𝟩𝟧𝟤𝟣𝟢𝟠𝟞𝟡𝟟𝟝𝟙𝟚𝟜𝟠𝟞𝟛𝟚𝟛𝟝";
+
+            Assert.AreEqual("1234567890", Styler.Unstylize(testText1), false);
+            Assert.AreEqual("664658233458697599421357899585221425", Styler.Unstylize(testText2), false);
+            Assert.AreEqual("01120235445696487521086975124863235", Styler.Unstylize(testText3), false);
+        }
+
+        [TestMethod]
+        public void NormalizeTest_MixAllTogether() {
+            string testText1 = "𝖶𝖾 𝖺𝗋𝖾 𝗒𝗈𝗎𝗇𝗀. 𝖾𝗏𝖾𝗇 𝗂𝖿 𝗒𝗈𝗎 𝖺𝗋𝖾 𝟣𝟢𝗌, 𝟤𝟢𝗌, 𝟧𝟢𝗌, 𝖺𝗇𝖽 𝟣𝟢𝟢𝗌!";
+            string testText2 = "𝚃𝚑𝚎 𝙧𝙖𝙙𝙞𝙪𝙨 𝙤𝙛 𝙩𝙝𝙚 𝙀𝙖𝙧𝙩𝙝 𝚒𝚜 𝚊𝚋𝚘𝚞𝚝 𝟼,𝟹𝟽𝟷𝚔𝚖.";
+            string testText3 = "🄘⒯ ⒲⒤⒧⒧ ⒯⒜⒦⒠ ⒜⒝⒪⒰⒯ 𝟞𝟜 𝕙𝕠𝕦𝕣𝕤 ⒝⒴ ⒜ ⒞⒜⒭ ⒜⒯ ①⓪⓪ⓚⓜ/ⓗ.";
+
+            Assert.AreEqual("We are young. even if you are 10s, 20s, 50s, and 100s!", Styler.Unstylize(testText1), false);
+            Assert.AreEqual("The radius of the Earth is about 6,371km.", Styler.Unstylize(testText2), false);
+            Assert.AreEqual("It will take about 64 hours by a car at 100km/h.", Styler.Unstylize(testText3), false);
+        }
+
+        [TestMethod]
+        public void NormalizeTest_ContainingCJKChars() {
+            string testText1 = "이젠 𝐒𝐞𝐚로 떠날거에요";
+            string testText2 = "거미로 𝚆𝚎𝚋 쳐서 🄕⒤⒮⒣ 잡으러";
+            string testText3 = "そう ℍ𝕒𝕟𝕕 𝕚𝕟 ℍ𝕒𝕟𝕕 君のその手は";
+            string testText4 = "知らない誰かのℋ𝒶𝓃𝒹を";
+
+            Assert.AreEqual("이젠 Sea로 떠날거에요", Styler.Unstylize(testText1), false);
+            Assert.AreEqual("거미로 Web 쳐서 Fish 잡으러", Styler.Unstylize(testText2), false);
+            Assert.AreEqual("そう Hand in Hand 君のその手は", Styler.Unstylize(testText3), false);
+            Assert.AreEqual("知らない誰かのHandを", Styler.Unstylize(testText4), false);
+        }
+    }
+}
+
+

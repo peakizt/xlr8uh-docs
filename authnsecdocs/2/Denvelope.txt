@@ -1,0 +1,2067 @@
+Directory structure:
+└── twvyy3vyaw8k-denvelope/
+    ├── README.md
+    ├── LICENSE
+    ├── denvlib.sln
+    ├── Denvelope/
+    │   ├── App.config
+    │   ├── Denvelope.csproj
+    │   ├── Program.cs
+    │   └── Properties/
+    │       └── AssemblyInfo.cs
+    └── denvlib/
+        ├── Context.cs
+        ├── Preset.cs
+        ├── Processor.cs
+        ├── TaskID.cs
+        ├── denvlib.csproj
+        ├── Injections/
+        │   ├── AntiDebugInj.cs
+        │   ├── Empty.cs
+        │   └── StringEncInj.cs
+        ├── Properties/
+        │   └── AssemblyInfo.cs
+        ├── Services/
+        │   ├── DynamicCode.cs
+        │   ├── GeneralUtils.cs
+        │   ├── Mutation.cs
+        │   ├── NETExpression.cs
+        │   ├── NETUtils.cs
+        │   └── RandomGen.cs
+        └── Tasks/
+            ├── AntiDebugTask.cs
+            ├── ControlFlowTask.cs
+            ├── InvalidMDTask.cs
+            ├── RenameTask.cs
+            ├── StringEncodingTask.cs
+            └── StringEncodingTaskTest.cs
+
+================================================
+File: README.md
+================================================
+# Denvelope
+This is my .NET obfuscator from my old GitHub account.
+It is very buggy and often its output desn't work or works wrong, don't use it for important projects!
+
+
+
+
+================================================
+File: LICENSE
+================================================
+The MIT License (MIT)
+
+Copyright (c) 2015 Daniele Bianchin
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+
+================================================
+File: denvlib.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Express 2012 for Windows Desktop
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "denvlib", "denvlib\denvlib.csproj", "{CE744E8A-F3C5-4CD4-82FC-81DB6756B792}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Denvelope", "Denvelope\Denvelope.csproj", "{C76DE226-3673-4324-83A7-B1BBD3C68D54}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CE744E8A-F3C5-4CD4-82FC-81DB6756B792}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE744E8A-F3C5-4CD4-82FC-81DB6756B792}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE744E8A-F3C5-4CD4-82FC-81DB6756B792}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE744E8A-F3C5-4CD4-82FC-81DB6756B792}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C76DE226-3673-4324-83A7-B1BBD3C68D54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C76DE226-3673-4324-83A7-B1BBD3C68D54}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C76DE226-3673-4324-83A7-B1BBD3C68D54}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C76DE226-3673-4324-83A7-B1BBD3C68D54}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: Denvelope/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.5" />
+    </startup>
+</configuration>
+
+
+================================================
+File: Denvelope/Denvelope.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{C76DE226-3673-4324-83A7-B1BBD3C68D54}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Denvelope</RootNamespace>
+    <AssemblyName>Denvelope</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="denvlib">
+      <HintPath>..\denvlib\bin\Debug\denvlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
+
+
+================================================
+File: Denvelope/Program.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using denvlib;
+
+namespace Denvelope
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            string file = args[0];
+            List<TaskID> taskList = new List<TaskID>();
+            Preset preset = Preset.none;
+            if (args.Length > 1)
+            {
+                for (int i = 1; i < args.Length; i++)
+                {
+                    string arg = args[i];
+                    if (arg == "-min")
+                        preset = Preset.min;
+                    else if (arg == "-mid")
+                        preset = Preset.mid;
+                    else if (arg == "-max")
+                        preset = Preset.max;
+                    else
+                    {
+                        if (arg == "-invalidMd")
+                            taskList.Add(TaskID.InvalidMD);
+                        if (arg == "-ren")
+                            taskList.Add(TaskID.Ren);
+                        if (arg == "-antiDbg")
+                            taskList.Add(TaskID.AntiDebug);
+                        if (arg == "-stringEnc")
+                            taskList.Add(TaskID.StringEnc);
+                        if (arg == "-ctrlFlow")
+                            taskList.Add(TaskID.CtrlFlow);
+                    }
+                }
+            }
+            else
+                preset = Preset.max;
+            Context ctx;
+            if (preset == Preset.none)
+                ctx = new Context(file, taskList);
+            else
+                ctx = new Context(file, preset);
+            Processor.LogInfo l = LogInfo;
+            Processor.LogWarn w = LogWarn;
+            Processor.LogErr e = LogErr;
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("                       Denvelope obfuscator 2014 - 2015" + Environment.NewLine);
+            Console.ResetColor();
+            Console.WriteLine("File: " + file + Environment.NewLine);
+            Processor.Process(ctx, l, w, e);
+            Console.WriteLine("Finished.");
+            Console.Read();
+        }
+
+        public static void LogInfo(string s)
+        {
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("[Info] "+s);
+            Console.ResetColor();
+        }
+
+        public static void LogWarn(string s)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("[Warning] " + s);
+            Console.ResetColor();
+        }
+
+        public static void LogErr(string s)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("[Error] " + s);
+            Console.ResetColor();
+        }
+    }
+}
+
+
+
+================================================
+File: Denvelope/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// Le informazioni generali relative a un assembly sono controllate dal seguente 
+// set di attributi. Per modificare le informazioni associate a un assembly
+// occorre quindi modificare i valori di questi attributi.
+[assembly: AssemblyTitle("Denvelope")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("Denvelope")]
+[assembly: AssemblyCopyright("Copyright Â©  2015")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Se si imposta ComVisible su false, i tipi in questo assembly non saranno visibili 
+// ai componenti COM. Se Ã¨ necessario accedere a un tipo in questo assembly da 
+// COM, impostare su true l'attributo ComVisible per tale tipo.
+[assembly: ComVisible(false)]
+
+// Se il progetto viene esposto a COM, il GUID che segue verrÃ  utilizzato per creare l'ID della libreria dei tipi
+[assembly: Guid("9ba49926-7e65-45ac-9bc4-92004c96bf58")]
+
+// Le informazioni sulla versione di un assembly sono costituite dai seguenti quattro valori:
+//
+//      Numero di versione principale
+//      Numero di versione secondario 
+//      Numero build
+//      Revisione
+//
+// Ãˆ possibile specificare tutti i valori oppure impostare valori predefiniti per i numeri relativi alla revisione e alla build 
+// utilizzando l'asterisco (*) come descritto di seguito:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+
+================================================
+File: denvlib/Context.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.IO;
+using denvlib;
+
+namespace denvlib
+{
+    public class Context
+    {
+        string fileName;
+        Preset preset;
+        List<TaskID> tasksList;
+
+        public string FileName
+        {
+            get { return fileName; }
+            set { fileName = value; }
+        }
+
+        public string NewPath
+        {
+            get
+            {
+                string basePath = Path.GetDirectoryName(FileName);
+                string newDirectoryName = Directory.CreateDirectory(Path.Combine(basePath, "Protected\\")).FullName;
+                return Path.Combine(newDirectoryName + Path.GetFileName(FileName));
+            }
+        }
+
+        public Preset Preset
+        {
+            get { return preset; }
+            set 
+            {
+                preset = value;
+                List<TaskID> tasks = new List<TaskID>();
+                switch (preset)
+                {
+                    case denvlib.Preset.min:
+                        {
+                            tasks.Add(TaskID.Ren);
+                            tasks.Add(TaskID.AntiDebug);
+                        }
+                        break;
+                    case denvlib.Preset.mid:
+                        {
+                            tasks.Add(TaskID.Ren);
+                            tasks.Add(TaskID.AntiDebug);
+                            tasks.Add(TaskID.StringEnc);
+                        }
+                        break;
+                    case denvlib.Preset.max:
+                        {
+                            tasks.Add(TaskID.Ren);
+                            tasks.Add(TaskID.AntiDebug);
+                            tasks.Add(TaskID.StringEnc);
+                            tasks.Add(TaskID.CtrlFlow);
+                            tasks.Add(TaskID.InvalidMD);
+                        }
+                        break;
+                    default: break;
+                }
+                TasksList = tasks;
+            }
+        }
+
+        public List<TaskID> TasksList { 
+            get
+            {
+                return tasksList;
+            }
+            set
+            {
+                tasksList = value.Distinct().ToList();
+                tasksList.Sort();
+            }
+        }
+
+        public Context(string file)
+        {
+            FileName = file;
+            Preset = denvlib.Preset.none;
+        }
+
+        public Context(string file, Preset preset)
+        {
+            FileName = file;
+            Preset = preset;
+        }
+
+        public Context(string file, List<TaskID> taskList)
+        {
+            FileName = file;
+            Preset = denvlib.Preset.none;
+            TasksList = taskList;
+        }
+    }
+}
+
+
+================================================
+File: denvlib/Preset.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace denvlib
+{
+    public enum Preset
+    {
+        none,
+        min,
+        mid,
+        max
+    }
+}
+
+
+
+================================================
+File: denvlib/Processor.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.IO;
+using dnlib.DotNet;
+using dnlib.DotNet.Writer;
+using denvlib.Tasks;
+using denvlib.Services;
+
+namespace denvlib
+{
+    public static class Processor
+    {
+        public delegate void LogInfo(string s);
+        public delegate void LogWarn(string s);
+        public delegate void LogErr(string s);
+
+        public static string Process(Context ctx, LogInfo info, LogWarn war, LogErr err)
+        {
+            try
+            {
+                string startobf = "Starting ";
+                ModuleDefMD module = ModuleDefMD.Load(ctx.FileName);
+                module.GlobalType.FindOrCreateStaticConstructor();
+                foreach (TaskID task in ctx.TasksList)
+                {
+                    switch (task)
+                    {
+                        case AntiDebugTask.ID:
+                            {
+                                info(startobf + "Anti-Debug Task...");
+                                AntiDebugTask.Execute(module);
+                            } break;
+                        case StringEncodingTask.ID:
+                            {
+                                info(startobf + "String encoding Task...");
+                                StringEncodingTask.Execute(module);
+                            } break;
+                        case ControlFlowTask.ID:
+                            {
+                                info(startobf + "Control Flow Task...");
+                                ControlFlowTask.Execute(module);
+                            } break;
+                       case InvalidMDTask.ID:
+                            {
+                                info(startobf + "Invalid Metadata Task...");
+                                InvalidMDTask.Execute(module);
+                            } break;
+                        case RenameTask.ID:
+                            RenameTask.IsObfuscationActive = true; break;
+                    }
+                }
+                info(startobf + "Rename Task..." + Environment.NewLine);
+                    RenameTask.Execute(module);
+                module.Write(ctx.NewPath, new ModuleWriterOptions() { Listener = NETUtils.listener });
+                return ctx.NewPath;
+            }
+            catch (Exception ex)
+            {
+                err(ex.Message);
+                return "";
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: denvlib/TaskID.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace denvlib
+{
+    public enum TaskID
+    {
+        Ren = 0,
+        AntiDebug = 1,
+        StringEnc = 2,
+        CtrlFlow = 3,
+        InvalidMD = 4
+    }
+}
+
+
+
+================================================
+File: denvlib/denvlib.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{CE744E8A-F3C5-4CD4-82FC-81DB6756B792}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>denvlib</RootNamespace>
+    <AssemblyName>denvlib</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Desktop\My obfuscation shit\dontNeVitamin\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Context.cs" />
+    <Compile Include="Injections\AntiDebugInj.cs" />
+    <Compile Include="Injections\Empty.cs" />
+    <Compile Include="Injections\StringEncInj.cs" />
+    <Compile Include="Preset.cs" />
+    <Compile Include="Processor.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\DynamicCode.cs" />
+    <Compile Include="Services\GeneralUtils.cs" />
+    <Compile Include="Services\Mutation.cs" />
+    <Compile Include="Services\NETExpression.cs" />
+    <Compile Include="Services\NETUtils.cs" />
+    <Compile Include="Services\RandomGen.cs" />
+    <Compile Include="TaskID.cs" />
+    <Compile Include="Tasks\AntiDebugTask.cs" />
+    <Compile Include="Tasks\ControlFlowTask.cs" />
+    <Compile Include="Tasks\InvalidMDTask.cs" />
+    <Compile Include="Tasks\RenameTask.cs" />
+    <Compile Include="Tasks\StringEncodingTask.cs" />
+    <Compile Include="Tasks\StringEncodingTaskTest.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
+
+
+================================================
+File: denvlib/Injections/AntiDebugInj.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+
+namespace denvlib.Injections
+{
+    public class AntiDebugInj
+    {
+        [DllImport("kernel32")]
+        public static extern bool IsDebuggerPresent();
+
+        public static void Check()
+        {
+            Thread th = new Thread(t);
+            th.Start();
+           /* Thread t = new Thread(() =>
+             {
+                 //Thread.CurrentThread.IsBackground = true;
+                 while (true)
+                 {
+                     if (Debugger.IsAttached || IsDebuggerPresent())
+                         Environment.FailFast("");
+                     Thread.Sleep(1000);
+                 }
+             });
+            t.Start();*/
+        }
+
+        public static void t()
+        {
+            Thread.CurrentThread.IsBackground = true;
+            while (true)
+            {
+                if (Debugger.IsAttached || IsDebuggerPresent())
+                    Environment.FailFast("");
+                Thread.Sleep(1000);
+            }
+        }
+    }
+}
+
+
+================================================
+File: denvlib/Injections/Empty.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace denvlib.Injections
+{
+    public class Empty
+    {
+    }
+}
+
+
+
+================================================
+File: denvlib/Injections/StringEncInj.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Reflection;
+
+namespace denvlib.Injections
+{
+    class StringEncInj
+    {
+        static int sigToken;
+        static byte[] data;
+        static string s;
+
+        public static void StringInj()
+        {
+            Assembly e = Assembly.GetExecutingAssembly();
+            Module m = e.ManifestModule;
+            byte[] b = m.ResolveSignature(sigToken);
+            byte[] buffer = new byte[data.Length];
+            for (int i = 0; i < data.Length; i++)
+                buffer[i] = Convert.ToByte(data[i] ^ b[i & 15]);
+            buffer.CopyTo(data, 0);
+        }
+
+        public static string StringDec(string @string)
+        {
+            byte[] b = new byte[@string.Length];
+            for (int i = 0; i < @string.Length; i++)
+                b[i] = (byte)(@string[i] ^ sigToken);
+            return Encoding.UTF8.GetString(b);
+        }
+
+        public void InsertFields()
+        {
+            s = Encoding.UTF8.GetString(data, 0, 1);
+        }
+    }
+}
+
+
+
+================================================
+File: denvlib/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// Le informazioni generali relative a un assembly sono controllate dal seguente 
+// set di attributi. Per modificare le informazioni associate a un assembly
+// occorre quindi modificare i valori di questi attributi.
+[assembly: AssemblyTitle("denvlib")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("denvlib")]
+[assembly: AssemblyCopyright("Copyright Â©  2015")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Se si imposta ComVisible su false, i tipi in questo assembly non saranno visibili 
+// ai componenti COM. Se Ã¨ necessario accedere a un tipo in questo assembly da 
+// COM, impostare su true l'attributo ComVisible per tale tipo.
+[assembly: ComVisible(false)]
+
+// Se il progetto viene esposto a COM, il GUID che segue verrÃ  utilizzato per creare l'ID della libreria dei tipi
+[assembly: Guid("9a6b4be2-a9d2-48d8-8d44-15111b4fa5cb")]
+
+// Le informazioni sulla versione di un assembly sono costituite dai seguenti quattro valori:
+//
+//      Numero di versione principale
+//      Numero di versione secondario 
+//      Numero build
+//      Revisione
+//
+// Ãˆ possibile specificare tutti i valori oppure impostare valori predefiniti per i numeri relativi alla revisione e alla build 
+// utilizzando l'asterisco (*) come descritto di seguito:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+
+================================================
+File: denvlib/Services/DynamicCode.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Reflection;
+using System.Reflection.Emit;
+using dnlib;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using dnlib.Utils;
+using dnlib.DotNet.Writer;
+using OpCode = dnlib.DotNet.Emit.OpCode;
+using ReflOpCode = System.Reflection.Emit.OpCode;
+using OpCodes = dnlib.DotNet.Emit.OpCodes;
+using ReflOpCodes = System.Reflection.Emit.OpCodes;
+
+namespace denvlib.Services
+{
+    public class DynamicCode
+    {
+        int intensity;
+        delegate int Result();
+        RandomGen r;
+
+        public DynamicCode(int intensity)
+        {
+            this.intensity = intensity;
+            r = new RandomGen();
+        }
+
+        public Instruction[] Create()
+        {
+            int positionValue = r.Next(0, intensity);
+            List<Instruction> instructions = new List<Instruction>();
+            instructions.Add(OpCodes.Ldc_I4.ToInstruction(r.Next()));
+            instructions.Add(OpCodes.Ldc_I4.ToInstruction(r.Next()));
+            for (int i = 0; i < intensity; i++)
+            {
+                instructions.Add(getRandomOperation().ToInstruction());
+                if (positionValue == i)
+                    instructions.Add(OpCodes.Ldarg_0.ToInstruction());
+                else
+                    instructions.Add(OpCodes.Ldc_I4.ToInstruction(r.Next()));
+            }
+            instructions.Add(getRandomOperation().ToInstruction());
+            instructions.Add(OpCodes.Ret.ToInstruction());
+            return instructions.ToArray();
+        }
+
+        public int RandomNumberInModule(Instruction[] instructions, int module, bool divisible)
+        {
+            int Rnum = module * r.Next(1, 12);
+            Rnum = divisible ? Rnum : Rnum + 1;
+            int x = 0;
+            List<Instruction> instsx = new List<Instruction>();
+            while (instructions[x].OpCode != OpCodes.Ldarg_0)
+            {
+                instsx.Add(instructions[x]);
+                x++;
+            }
+            instsx.Add(OpCodes.Ret.ToInstruction());
+            int valuesx = DynamicCode.Emulate(instsx.ToArray(), 0);
+            List<Instruction> instdx = new List<Instruction>();
+            instdx.Add(OpCodes.Ldc_I4.ToInstruction(Rnum));
+            for (int i = instructions.Length - 2; i > x + 2; i -= 2)
+            {
+                Instruction operation = ReverseOperation(instructions[i].OpCode).ToInstruction();
+                Instruction value = instructions[i - 1];
+                instdx.Add(value);
+                instdx.Add(operation);
+            }
+            instdx.Add(Instruction.Create(OpCodes.Ret));
+            int valuedx = DynamicCode.Emulate(instdx.ToArray(), 0);
+            Instruction ope = ReverseOperation(instructions[x + 1].OpCode).ToInstruction();
+            List<Instruction> final = new List<Instruction>();
+            final.Add(OpCodes.Ldc_I4.ToInstruction(valuedx));
+            final.Add(OpCodes.Ldc_I4.ToInstruction(valuesx));
+            final.Add(ope.OpCode == OpCodes.Add ? OpCodes.Sub.ToInstruction() : ope);
+            final.Add(OpCodes.Ret.ToInstruction());
+            int finalValue = DynamicCode.Emulate(final.ToArray(), 0);
+            return ope.OpCode == OpCodes.Add ? (finalValue * -1) : finalValue;
+        }
+
+        public static int Emulate(Instruction[] code, int value)
+        {
+            DynamicMethod emulatore = new DynamicMethod("MER ? BUULHE", typeof(int), null);
+            ILGenerator il = emulatore.GetILGenerator();
+            foreach (Instruction instr in code)
+            {
+                if (instr.OpCode == OpCodes.Ldarg_0)
+                    il.Emit(ReflOpCodes.Ldc_I4, value);
+                else if (instr.Operand != null)
+                    il.Emit(instr.OpCode.ToReflectionOp(), Convert.ToInt32(instr.Operand));
+                else
+                    il.Emit(instr.OpCode.ToReflectionOp());
+            }
+            Result ris = (Result)emulatore.CreateDelegate(typeof(Result));
+            return ris.Invoke();
+        }
+
+        private OpCode getRandomOperation()
+        {
+            OpCode operation = null;
+            switch (r.Next(0, 3))
+            {
+                case 0: operation = OpCodes.Add; break;
+                case 1: operation = OpCodes.Sub; break;
+                //case 2: operation = OpCodes.Not; break;
+                case 2: operation = OpCodes.Xor; break;
+            }
+            return operation;
+        }
+
+        private OpCode ReverseOperation(OpCode operation)
+        {
+            switch (operation.Code)
+            {
+                case Code.Add: return OpCodes.Sub;
+                case Code.Sub: return OpCodes.Add;
+                case Code.Xor: return OpCodes.Xor;
+                default: throw new NotImplementedException();
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: denvlib/Services/GeneralUtils.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace denvlib.Services
+{
+    public static class GeneralUtils
+    {
+        public static string ToString(this byte[] bytes)
+        {
+            char[] chars = new char[bytes.Length / sizeof(char)];
+            Buffer.BlockCopy(bytes, 0, chars, 0, bytes.Length);
+            return new string(chars);
+        }
+
+        public static byte[] ToByteArray(this string @string)
+        {
+            byte[] bytes = new byte[@string.Length * sizeof(char)];
+            Buffer.BlockCopy(@string.ToCharArray(), 0, bytes, 0, bytes.Length);
+            return bytes;
+        }
+
+        public static List<T> Shuffle<T>(List<T> array, out int[] position)
+        {
+            RandomGen rand = new RandomGen();
+            List<KeyValuePair<int, T>> list = new List<KeyValuePair<int, T>>();
+            foreach (T s in array)
+                list.Add(new KeyValuePair<int, T>(rand.Next(), s));
+            var sorted = from item in list
+                         orderby item.Key
+                         select item;
+            T[] result = new T[array.Count];
+            int index = 0;
+            foreach (KeyValuePair<int, T> pair in sorted)
+            {
+                result[index] = pair.Value;
+                index++;
+            }
+            List<int> positions = new List<int>();
+            for (int i = 0; i < array.Count; i++)
+                positions.Add(Array.IndexOf(array.ToArray(), result[i]));
+            position = positions.ToArray();
+            return result.ToList();
+        }
+    }
+}
+
+
+
+================================================
+File: denvlib/Services/Mutation.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace denvlib.Services
+{
+    public class Mutation
+    {
+        public static int Key1, Key2;
+        private static Dictionary<string, int> dic = new Dictionary<string, int> { { "Key1", Key1 }, { "Key2", Key2 } };
+
+        public static MethodDef InjectKey(MethodDef method, string key, int value)
+        {
+            var instr = method.Body.Instructions;
+            int intKey;
+            if (dic.TryGetValue(key, out intKey))
+            {
+                for (int i = 0; i < instr.Count; i++)
+                {
+                    //
+                }
+            }
+            throw new NotImplementedException();
+        }
+
+    }
+}
+
+
+================================================
+File: denvlib/Services/NETExpression.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Reflection;
+using System.Reflection.Emit;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using OpCode = dnlib.DotNet.Emit.OpCode;
+using ReflOpCode = System.Reflection.Emit.OpCode;
+using OpCodes = dnlib.DotNet.Emit.OpCodes;
+using ReflOpCodes = System.Reflection.Emit.OpCodes;
+
+namespace denvlib.Services
+{
+    public class NETExpression
+    {
+        delegate int Result();
+        static RandomGen random = new RandomGen();
+        public List<Instruction> Instructions { get; private set; }
+
+        public static NETExpression CreateRandom(int intensity)
+        {            
+            int positionValue = random.Next(0, intensity - 1);
+            List<Instruction> instructions = new List<Instruction>();
+            instructions.Add(OpCodes.Ldc_I4.ToInstruction(random.Next()));
+            instructions.Add(OpCodes.Ldc_I4.ToInstruction(random.Next()));
+            for (int i = 0; i < intensity; i++)
+            {
+                instructions.Add(GetRandomOperator().ToInstruction());
+                if (positionValue == i)
+                    instructions.Add(OpCodes.Ldarg_0.ToInstruction());
+                else
+                    instructions.Add(OpCodes.Ldc_I4.ToInstruction(random.Next()));
+            }
+            instructions.Add(GetRandomOperator().ToInstruction());
+            instructions.Add(OpCodes.Ret.ToInstruction());
+            return new NETExpression() { Instructions = instructions };
+        }
+
+        /*public static NETExpression Create(int[] values, OpCode[] opcodes, int ldargPosition)
+        {
+            if (values.Length != opcodes.Length + 1)
+                throw new ArgumentException("values");
+            foreach (OpCode op in opcodes)
+            {
+                if (op.Code != Code.Add && op.Code != Code.Sub && op.Code != Code.Xor)
+                    throw new ArgumentException("opcodes");
+            }
+
+            //Not finished
+            return new NETExpression() { Instructions = new List<Instruction>() };
+        }*/
+
+        private static OpCode GetRandomOperator()
+        {
+            OpCode operation = null;
+            switch (random.Next(0, 2))
+            {
+                case 0: operation = OpCodes.Add; break;
+                case 1: operation = OpCodes.Sub; break;
+                //case 2: operation = OpCodes.Not; break;
+                case 2: operation = OpCodes.Xor; break;
+            }
+            return operation;
+        }
+
+        private OpCode ReverseOperator(OpCode operation)
+        {
+            switch (operation.Code)
+            {
+                case Code.Add: return OpCodes.Sub;
+                case Code.Sub: return OpCodes.Add;
+                case Code.Xor: return OpCodes.Xor;
+                default: throw new NotImplementedException();
+            }
+        }
+
+        public void ReplaceValue(int index, int value)
+        {
+            Instructions.RemoveAt(index);
+            Instructions.Insert(index, Instruction.CreateLdcI4(value));
+        }
+
+        public List<Instruction> ReplaceLdarg(int value)
+        {
+            List<Instruction> expression = new List<Instruction>();
+            int length = Instructions.Count;
+            for (int i = 0; i < length; i++)
+            {
+                Instruction instr = Instructions[i];
+                if (instr.OpCode == OpCodes.Ldarg_0)
+                    expression.Add(Instruction.CreateLdcI4(value));
+                else
+                    expression.Add(instr);
+            }
+            return expression;
+        }
+
+        private int Emulate(List<Instruction> emuInstr, int value)
+        {
+            DynamicMethod emulator = new DynamicMethod("Mercurio", typeof(int), null);
+            ILGenerator il = emulator.GetILGenerator();
+            foreach (Instruction instr in emuInstr)
+            {
+                if (instr.OpCode == OpCodes.Ldarg_0)
+                    il.Emit(ReflOpCodes.Ldc_I4, value);
+                else if (instr.Operand != null)
+                    il.Emit(instr.OpCode.ToReflectionOp(), Convert.ToInt32(instr.Operand));
+                else
+                    il.Emit(instr.OpCode.ToReflectionOp());
+            }
+            Result ris = (Result)emulator.CreateDelegate(typeof(Result));
+            return ris.Invoke();
+        }
+
+        public int ResolveEquation(int value)
+        {
+            int x = 0;
+            List<Instruction> instsx = new List<Instruction>();
+            while (Instructions[x].OpCode != OpCodes.Ldarg_0)
+            {
+                instsx.Add(Instructions[x]);
+                x++;
+            }
+            instsx.Add(OpCodes.Ret.ToInstruction());
+            int valuesx = Emulate(instsx, 0);
+            List<Instruction> instdx = new List<Instruction>();
+            instdx.Add(OpCodes.Ldc_I4.ToInstruction(value));
+            for (int i = Instructions.Count - 2; i > x + 2; i -= 2)
+            {
+                Instruction operation = ReverseOperator(Instructions[i].OpCode).ToInstruction();
+                Instruction last = Instructions[i - 1];
+                instdx.Add(last);
+                instdx.Add(operation);
+            }
+            instdx.Add(Instruction.Create(OpCodes.Ret));
+            int valuedx = Emulate(instdx, 0);
+            Instruction ope = ReverseOperator(Instructions[x + 1].OpCode).ToInstruction();
+            List<Instruction> final = new List<Instruction>();
+            final.Add(OpCodes.Ldc_I4.ToInstruction(valuedx));
+            final.Add(OpCodes.Ldc_I4.ToInstruction(valuesx));
+            final.Add(ope.OpCode == OpCodes.Add ? OpCodes.Sub.ToInstruction() : ope);
+            final.Add(OpCodes.Ret.ToInstruction());
+            int finalValue = Emulate(final, 0);
+            return ope.OpCode == OpCodes.Add ? (finalValue * -1) : finalValue;
+        }
+
+    }
+}
+
+
+
+================================================
+File: denvlib/Services/NETUtils.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using dnlib.DotNet;
+using dnlib.DotNet.Writer;
+using OpCode = dnlib.DotNet.Emit.OpCode;
+using ReflOpCode = System.Reflection.Emit.OpCode;
+using OpCodes = dnlib.DotNet.Emit.OpCodes;
+using ReflOpCodes = System.Reflection.Emit.OpCodes;
+using Code = dnlib.DotNet.Emit.Code;
+
+namespace denvlib.Services
+{
+    public static class NETUtils
+    {
+        public static ModuleWriterListener listener = new ModuleWriterListener();
+
+        public static MethodDef GetMethodByName(TypeDef type, string name)
+        {
+            return type.Methods.Single(method => method.Name == name);
+        }
+
+        public static TypeDef GetTypeByName(ModuleDef module, string name)
+        {
+            return module.Types.Single(type => type.Name == name);
+        }
+
+        public static TypeDef ImportType(Type type)
+        {
+            var module = ModuleDefMD.Load(type.Module);
+            var td = module.ResolveTypeDef(MDToken.ToRID(type.MetadataToken));
+            module.Types.Remove(td);
+            return td;
+        }
+
+        public static ReflOpCode ToReflectionOp(this OpCode op)
+        {
+            switch (op.Code)
+            {
+                case Code.Add: return ReflOpCodes.Add;
+                case Code.Mul: return ReflOpCodes.Mul;
+                case Code.Sub: return ReflOpCodes.Sub;
+                case Code.And: return ReflOpCodes.And;
+                case Code.Xor: return ReflOpCodes.Xor;
+                case Code.Or: return ReflOpCodes.Or;
+                case Code.Ldc_I4: return ReflOpCodes.Ldc_I4;
+                case Code.Ldarg_0: return ReflOpCodes.Ldarg_0;
+                case Code.Ret: return ReflOpCodes.Ret;
+                default: throw new NotImplementedException();
+            }
+        }
+
+        public class ModuleWriterListener : IModuleWriterListener
+        {
+            public event EventHandler<ModuleWriterListenerEventArgs> OnWriterEvent;
+
+            void IModuleWriterListener.OnWriterEvent(ModuleWriterBase writer, ModuleWriterEvent evt)
+            {
+                if (OnWriterEvent != null)
+                    OnWriterEvent(writer, new ModuleWriterListenerEventArgs(evt));
+            }
+
+            public class ModuleWriterListenerEventArgs : EventArgs
+            {
+                public ModuleWriterListenerEventArgs(ModuleWriterEvent evt)
+                {
+                    this.WriterEvent = evt;
+                }
+
+                public ModuleWriterEvent WriterEvent { get; private set; }
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: denvlib/Services/RandomGen.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Security.Cryptography;
+
+namespace denvlib.Services
+{
+    public class RandomGen
+    {
+        private const int BufferSize = 1024;
+        private byte[] RandomBuffer;
+        private int BufferOffset;
+        private RNGCryptoServiceProvider rng;
+
+        public RandomGen()
+        {
+            RandomBuffer = new byte[BufferSize];
+            rng = new RNGCryptoServiceProvider();
+            BufferOffset = RandomBuffer.Length;
+        }
+
+        private void FillBuffer()
+        {
+            rng.GetBytes(RandomBuffer);
+            BufferOffset = 0;
+        }
+
+        public int Next()
+        {
+            if (BufferOffset >= RandomBuffer.Length)
+            {
+                FillBuffer();
+            }
+            int val = BitConverter.ToInt32(RandomBuffer, BufferOffset) & 0x7fffffff;
+            BufferOffset += sizeof(int);
+            return val;
+        }
+
+        public int Next(int maxValue)
+        {
+            return Next() % maxValue;
+        }
+
+        public int Next(int minValue, int maxValue)
+        {
+            if (maxValue < minValue)
+            {
+                throw new ArgumentOutOfRangeException("maxValue must be greater than or equal to minValue");
+            }
+            int range = maxValue - minValue;
+            return minValue + Next(range);
+        }
+
+        public double NextDouble()
+        {
+            int val = Next();
+            return (double)val / int.MaxValue;
+        }
+
+        public void GetBytes(byte[] buff)
+        {
+            rng.GetBytes(buff);
+        }
+    }
+}
+
+
+
+================================================
+File: denvlib/Tasks/AntiDebugTask.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using denvlib.Services;
+using denvlib.Injections;
+
+namespace denvlib.Tasks
+{
+    public static class AntiDebugTask
+    {
+        public const TaskID ID = TaskID.AntiDebug;
+
+        public static void Execute(ModuleDefMD module)
+        {
+            TypeDef globalType = module.GlobalType;
+            MethodDef cctor = globalType.FindStaticConstructor();
+            TypeDef antiDebugType = NETUtils.ImportType(typeof(AntiDebugInj));
+            MethodDef check = NETUtils.GetMethodByName(antiDebugType, "Check");
+            MethodDef isDbgPresent = NETUtils.GetMethodByName(antiDebugType, "IsDebuggerPresent");
+            MethodDef thread = NETUtils.GetMethodByName(antiDebugType, "t");
+            antiDebugType.Methods.Remove(check);
+            antiDebugType.Methods.Remove(isDbgPresent);
+            antiDebugType.Methods.Remove(thread);
+            //RenameTask.Rename(antiDebugType);
+            RenameTask.Rename(check);
+            RenameTask.Rename(thread);
+            globalType.Methods.Add(check);
+            globalType.Methods.Add(isDbgPresent);
+            globalType.Methods.Add(thread);
+            cctor.Body.Instructions.Insert(0, Instruction.Create(OpCodes.Call, check));
+        }
+    }
+}
+
+
+
+================================================
+File: denvlib/Tasks/ControlFlowTask.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using dnlib;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using denvlib.Services;
+
+namespace denvlib.Tasks
+{
+    public static class ControlFlowTask
+    {
+        public const TaskID ID = TaskID.CtrlFlow;
+
+        static ModuleDefMD loadedMod;
+        private static Dictionary<MethodDef, Tuple<int[], int[]>> obfMethods;
+        private static RandomGen rand = new RandomGen();
+
+        public static void Execute(ModuleDefMD loadedMod)
+        {
+            obfMethods = CreateMethods(loadedMod);
+            foreach (TypeDef type in loadedMod.Types)
+            {
+                
+                foreach (MethodDef method in type.Methods)
+                {
+                    if (!method.HasBody || !method.Body.HasInstructions || method.IsNative)
+                        continue;
+                    MethodDefMD methodd = method as MethodDefMD;
+                    var body = method.Body;
+                    body.SimplifyBranches();
+                    body.MaxStack++;
+                    List<Instruction> instructions = body.Instructions.ToList();
+                    List<HBlock> Hblocks = new List<HBlock>();
+                    List<HBlock> obfHBlocks = new List<HBlock>();
+                    /*if (body.HasExceptionHandlers)
+                    {
+                        foreach (ExceptionHandler eh in body.ExceptionHandlers)
+                        {
+                            ExceptionHandlerType HType = eh.HandlerType;
+                            List<Instruction> HInstr = new List<Instruction>();
+                            int HTStart = Array.IndexOf(instructions.ToArray(), eh.TryStart);
+                            int HTEnd = Array.IndexOf(instructions.ToArray(), eh.TryEnd);
+                            if (eh.TryEnd == null) HTEnd = instructions.Count - 1;
+                            for (int i = HTStart; i < HTEnd; i++)
+                                HInstr.Add(instructions[i]);
+                            Hblocks.Add(new HBlock() { instructions = HInstr });
+                            HInstr.Clear();
+                            int HCStart = Array.IndexOf(instructions.ToArray(), eh.HandlerStart);
+                            int HCEnd = Array.IndexOf(instructions.ToArray(), eh.HandlerEnd);
+                            if (eh.HandlerEnd == null) HCEnd = instructions.Count - 1;
+                            for (int i = HCStart; i < HCEnd; i++)
+                                HInstr.Add(instructions[i]);
+                            Hblocks.Add(new HBlock() { instructions = HInstr });
+                        }
+                        foreach (HBlock Hblock in Hblocks)
+                            obfHBlocks.Add(ObfuscateHBlock(Hblock, true));
+                    }
+                    else*/
+                        obfHBlocks.Add(ObfuscateHBlock(new HBlock() { instructions = instructions }, false));
+                    body.Instructions.Clear();
+                    foreach (HBlock hBlock in obfHBlocks)
+                    {
+                        foreach (Instruction instr in hBlock.instructions)
+                            body.Instructions.Add(instr);
+                    }
+                    body.UpdateInstructionOffsets();
+                    body.SimplifyBranches();
+                }
+            }
+        }
+
+       public static HBlock ObfuscateHBlock(HBlock HB, bool isHBlock)
+        {
+            List<BBlock> bBlocks = new List<BBlock>();
+            List<Instruction> instructions = HB.instructions;
+            Instruction firstBr = Instruction.Create(OpCodes.Br, instructions[0]);
+            BBlock mainBlock = new BBlock() { instructions = new List<Instruction>(), fakeBranches = new List<Instruction>(), branchOrRet = new List<Instruction>() };
+            int stack = 0;
+            int push, pop;
+            for (int i = 0; i < instructions.Count; i++)
+            {
+                Instruction instr = instructions[i];
+                instr.CalculateStackUsage(out push, out pop);
+                stack += (push - pop);
+                if (instr.OpCode == OpCodes.Ret)
+                {
+                    mainBlock.branchOrRet.Add(instr);
+                    bBlocks.Add((BBlock)mainBlock.Clone());
+                    mainBlock.Clear();
+                }
+                else
+                    if (stack == 0 && instr.OpCode.OpCodeType != OpCodeType.Prefix)
+                    {
+                        MethodDef obfMethod = obfMethods.Keys.ToArray()[rand.Next(0, 4)];
+                        mainBlock.instructions.Add(instr);
+                       if (rand.Next(0,2) == 0)
+                        {
+                            mainBlock.branchOrRet.Add(Instruction.CreateLdcI4(obfMethods[obfMethod].Item2[rand.Next(0, 4)]));
+                            mainBlock.branchOrRet.Add(Instruction.Create(OpCodes.Call, obfMethod));
+                            mainBlock.branchOrRet.Add(Instruction.Create(OpCodes.Brfalse, instructions[i + 1]));
+                        }
+                        else
+                        {
+                            mainBlock.branchOrRet.Add(Instruction.CreateLdcI4(obfMethods[obfMethod].Item1[rand.Next(0, 4)]));
+                            mainBlock.branchOrRet.Add(Instruction.Create(OpCodes.Call, obfMethod));
+                            mainBlock.branchOrRet.Add(Instruction.Create(OpCodes.Brtrue, instructions[i + 1]));
+                        }
+                        bBlocks.Add((BBlock)mainBlock.Clone());
+                        mainBlock.Clear();
+                    }
+                    else
+                        mainBlock.instructions.Add(instr);
+            }
+            /*if (instructions.Count != bBlocks.Sum(a => a.instructions.Count) + 1)
+            {
+                throw new Exception("Did you delete any instruction?");
+            }*/
+            int[] position;
+            bBlocks = GeneralUtils.Shuffle<BBlock>(bBlocks, out position);
+            int index = Array.IndexOf(position, position.Length - 1);
+            BBlock lastB = bBlocks[position.Length - 1];
+            BBlock tempB;
+            tempB = bBlocks[index];
+            bBlocks[index] = lastB;
+            bBlocks[position.Length - 1] = tempB;
+            if (isHBlock)
+            {
+                int index2 = Array.IndexOf(position, 0);
+                BBlock firstB = bBlocks[0];
+                BBlock tempB2;
+                tempB2 = bBlocks[index2];
+                bBlocks[index2] = firstB;
+                bBlocks[0] = tempB2;
+            }
+            foreach (BBlock block in bBlocks)
+            {
+                if (block.branchOrRet[0].OpCode != OpCodes.Ret)
+                {
+                    MethodDef obfMethod = obfMethods.Keys.ToArray()[rand.Next(0, 4)];
+                    int rr = rand.Next(0, bBlocks.Count);
+                    while (bBlocks[rr].instructions.Count == 0)
+                        rr = rand.Next(0, bBlocks.Count);
+                    if (rand.Next(0,2) == 0)
+                    {
+                        block.fakeBranches.Add(Instruction.CreateLdcI4(obfMethods[obfMethod].Item1[rand.Next(0, 4)]));
+                        block.fakeBranches.Add(Instruction.Create(OpCodes.Call, obfMethod));
+                        block.fakeBranches.Add(Instruction.Create(OpCodes.Brfalse, bBlocks[rr].instructions[0]));
+                    }
+                    else
+                    {
+                        block.fakeBranches.Add(Instruction.CreateLdcI4(obfMethods[obfMethod].Item2[rand.Next(0,4)]));
+                        block.fakeBranches.Add(Instruction.Create(OpCodes.Call, obfMethod));
+                        block.fakeBranches.Add(Instruction.Create(OpCodes.Brtrue, bBlocks[rr].instructions[0]));
+                    }
+                }
+            }
+            List<Instruction> bInstrs = new List<Instruction>();
+            foreach (BBlock B in bBlocks)
+            {
+                bInstrs.AddRange(B.instructions);
+                if (rand.Next(0, 2) == 0)
+                {
+                    if (B.branchOrRet.Count != 0) bInstrs.AddRange(B.branchOrRet);
+                    if (B.fakeBranches.Count != 0)  bInstrs.AddRange(B.fakeBranches);
+                }
+                else
+                {
+                    if (B.fakeBranches.Count != 0) bInstrs.AddRange(B.fakeBranches);
+                    if (B.branchOrRet.Count != 0) bInstrs.AddRange(B.branchOrRet);
+                }
+                if (B.afterInstr != null)
+                    bInstrs.Add(B.afterInstr);
+
+            }
+            if (!isHBlock)
+                bInstrs.Insert(0, firstBr);
+            return new HBlock() { instructions = bInstrs };
+        }
+
+        public static Dictionary<MethodDef, Tuple<int[], int[]>> CreateMethods(ModuleDef loadedMod)
+        {
+            DynamicCode code = new DynamicCode(3);
+            int[] modules = new int[4];
+            for (int i = 0; i < modules.Length; i++)
+                modules[i] = rand.Next(2, 25);
+            Instruction[,] methods = new Instruction[4, 10];
+            for (int i = 0; i < 4; i++)
+            {
+                Instruction[] methodBody = code.Create();
+                for (int y = 0; y < methodBody.Length; y++)
+                    methods[i, y] = methodBody[y];
+            }
+
+            List<Tuple<Instruction[], Tuple<int, Tuple<int[], int[]>>>> InstrToInt =
+                           new List<Tuple<Instruction[], Tuple<int, Tuple<int[], int[]>>>>();
+
+            for (int i = 0; i < 4; i++)
+            {
+                List<Instruction> instr = new List<Instruction>();
+                int[] numbersTrue = new int[5];
+                int[] numbersFalse = new int[5];
+                for (int y = 0; y < 10; y++)
+                    instr.Add(methods[i, y]);
+                for (int y = 0; y < 5; y++)
+                    numbersTrue[y] = code.RandomNumberInModule(instr.ToArray(), modules[i], true);
+                for (int y = 0; y < 5; y++)
+                    numbersFalse[y] = code.RandomNumberInModule(instr.ToArray(), modules[i], false);
+                InstrToInt.Add(Tuple.Create(instr.ToArray(), Tuple.Create(modules[i], Tuple.Create(numbersTrue, numbersFalse))));
+            }
+            Dictionary<MethodDef, Tuple<int[], int[]>> final = new Dictionary<MethodDef, Tuple<int[], int[]>>();
+            MethodAttributes methFlags = MethodAttributes.Public | MethodAttributes.Static
+                | MethodAttributes.HideBySig | MethodAttributes.ReuseSlot;
+            MethodImplAttributes methImplFlags = MethodImplAttributes.IL | MethodImplAttributes.Managed;
+            for (int i = 0; i < 4; i++)
+            {
+                MethodDef methodDefs1 = new MethodDefUser(
+                                     "",
+                                     MethodSig.CreateStatic(loadedMod.CorLibTypes.Boolean, loadedMod.CorLibTypes.Int32),
+                                     methImplFlags, methFlags);
+                RenameTask.Rename(methodDefs1);
+                methodDefs1.Body = new CilBody();
+                methodDefs1.ParamDefs.Add(new ParamDefUser("lol", 0));
+                List<Instruction> preInstr = new List<Instruction>(InstrToInt[i].Item1);
+                int module = InstrToInt[i].Item2.Item1;
+                //preInstr.RemoveAt(preInstr.Count - 1);
+                preInstr.Insert(preInstr.Count - 1, Instruction.CreateLdcI4(module));
+                preInstr.Insert(preInstr.Count - 1, OpCodes.Rem.ToInstruction());
+                preInstr.Insert(preInstr.Count - 1, Instruction.CreateLdcI4(0));
+                preInstr.Insert(preInstr.Count - 1, Instruction.Create(OpCodes.Ceq));
+                //preInstr.Insert(preInstr.Count - 1, Instruction.Create(OpCodes.Ret));
+                foreach (var item in preInstr)
+                    methodDefs1.Body.Instructions.Add(item);
+                final.Add(methodDefs1, InstrToInt[i].Item2.Item2);
+            }
+
+            TypeDef type1 = new TypeDefUser("", "", loadedMod.CorLibTypes.Object.TypeDefOrRef);
+            RenameTask.Rename(type1);
+            type1.Attributes = dnlib.DotNet.TypeAttributes.Public | dnlib.DotNet.TypeAttributes.AutoLayout |
+            dnlib.DotNet.TypeAttributes.Class | dnlib.DotNet.TypeAttributes.AnsiClass;
+            loadedMod.Types.Add(type1);
+            foreach (var item in final)
+                type1.Methods.Add(item.Key);
+            return final;
+        }
+    }
+
+
+    public class HBlock : ICloneable
+    {
+        public List<Instruction> instructions;
+
+        public void Clear()
+        {
+            instructions = new List<Instruction>();
+        }
+
+        public object Clone()
+        {
+            return this.MemberwiseClone();
+        }
+    }
+
+    public class BBlock : ICloneable
+    {
+        public List<Instruction> instructions;
+        public List<Instruction> branchOrRet;
+        public Instruction afterInstr;
+        public List<Instruction> fakeBranches;
+
+        public void Clear()
+        {
+            instructions = new List<Instruction>();
+            branchOrRet = new List<Instruction>();
+            afterInstr = null;
+            fakeBranches = new List<Instruction>();
+        }
+
+        public object Clone()
+        {
+            return this.MemberwiseClone();
+        }
+    }
+}
+
+
+
+================================================
+File: denvlib/Tasks/InvalidMDTask.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.IO;
+using dnlib.DotNet;
+using dnlib.DotNet.MD;
+using dnlib.DotNet.Writer;
+using denvlib.Services;
+
+namespace denvlib.Tasks
+{
+    public static class InvalidMDTask
+    {
+        public const TaskID ID = TaskID.InvalidMD;
+        public static RandomGen random = new RandomGen();
+
+        public static void Execute(ModuleDefMD module)
+        {
+            NETUtils.listener.OnWriterEvent += OnWriterEvent;
+        }
+
+        private static void OnWriterEvent(object sender, NETUtils.ModuleWriterListener.ModuleWriterListenerEventArgs e)
+        {
+            var writer = (ModuleWriterBase)sender;
+            if (e.WriterEvent == ModuleWriterEvent.MDEndCreateTables)
+            {
+                int r = random.Next(8, 16);
+                for (int i = 0; i < r; i++)
+                    writer.MetaData.TablesHeap.ENCLogTable.Add(new RawENCLogRow((uint)random.Next(),(uint) random.Next()));
+                r = random.Next(8, 16);
+                for (int i = 0; i < r; i++)
+                    writer.MetaData.TablesHeap.ENCMapTable.Add(new RawENCMapRow((uint)random.Next()));
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: denvlib/Tasks/RenameTask.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using dnlib.DotNet;
+using denvlib.Services;
+
+namespace denvlib.Tasks
+{
+    public static class RenameTask
+    {
+        static Dictionary<TypeDef, bool> typeRename = new Dictionary<TypeDef, bool>();
+        static List<string> typeNewName = new List<string>();
+        static Dictionary<MethodDef, bool> methodRename = new Dictionary<MethodDef, bool>();
+        static List<string> methodNewName = new List<string>();
+        static Dictionary<FieldDef, bool> fieldRename = new Dictionary<FieldDef, bool>();
+        static List<string> fieldNewName = new List<string>();
+        public static bool IsObfuscationActive = false;
+        static RandomGen random = new RandomGen();
+
+        public const TaskID ID = TaskID.Ren;
+
+        public static void Rename(TypeDef type, bool canRename = true)
+        {
+            if (typeRename.ContainsKey(type))
+                typeRename[type] = canRename;
+            else
+                typeRename.Add(type, canRename);
+        }
+
+        public static void Rename(MethodDef method, bool canRename = true)
+        {
+            if (methodRename.ContainsKey(method))
+                methodRename[method] = canRename;
+            else
+                methodRename.Add(method, canRename);
+        }
+
+        public static void Rename(FieldDef field, bool canRename = true)
+        {
+            if (fieldRename.ContainsKey(field))
+                fieldRename[field] = canRename;
+            else
+                fieldRename.Add(field, canRename);
+        }
+
+        public static void Execute(ModuleDefMD module)
+        {
+            if (IsObfuscationActive)
+            {
+                string namespaceNewName = GenerateString();
+                foreach (TypeDef type in module.Types)
+                {
+                    bool canRenameType;
+                    if (typeRename.TryGetValue(type, out canRenameType))
+                    {
+                        if (canRenameType)
+                            InternalRename(type);
+                    }
+                    else
+                        InternalRename(type);
+                    type.Namespace = namespaceNewName;
+                    foreach (MethodDef method in type.Methods)
+                    {
+                        bool canRenameMethod;
+                        if (methodRename.TryGetValue(method, out canRenameMethod))
+                        {
+                            if (canRenameMethod && !method.IsConstructor && !method.IsSpecialName)
+                                InternalRename(method);
+                        }
+                        else if(!method.IsConstructor && !method.IsSpecialName)
+                            InternalRename(method);
+                    }
+                    methodNewName.Clear();
+                    foreach (FieldDef field in type.Fields)
+                    {
+                        bool canRenameField;
+                        if (fieldRename.TryGetValue(field, out canRenameField))
+                        {
+                            if (canRenameField)
+                                InternalRename(field);
+                        }
+                        else
+                            InternalRename(field);
+                    }
+                    fieldNewName.Clear();
+                }
+            }
+            else
+            {
+                foreach (var typeItem in typeRename)
+                {
+                    if (typeItem.Value)
+                        InternalRename(typeItem.Key);
+                }
+                foreach (var methodItem in methodRename)
+                {
+                    if (methodItem.Value)
+                        InternalRename(methodItem.Key);
+                }
+                foreach (var fieldItem in fieldRename)
+                {
+                    if (fieldItem.Value)
+                        InternalRename(fieldItem.Key);
+                }
+            }
+        }
+
+        static void InternalRename(TypeDef type)
+        {
+            string randString = GenerateString();
+            while (typeNewName.Contains(randString))
+                randString = GenerateString();
+            typeNewName.Add(randString);
+            type.Name = randString;
+        }
+
+        static void InternalRename(MethodDef method)
+        {
+            string randString = GenerateString();
+            while (methodNewName.Contains(randString))
+                randString = GenerateString();
+            methodNewName.Add(randString);
+            method.Name = randString;
+        }
+
+        static void InternalRename(FieldDef field)
+        {
+            string randString = GenerateString();
+            while (fieldNewName.Contains(randString))
+                randString = GenerateString();
+            fieldNewName.Add(randString);
+            field.Name = randString;
+        }
+
+        static string GenerateString()
+        {
+            string s = "";
+            for (int i = 0; i < 3; i++)
+                s+= (char)random.Next(8000, 8500);
+            return s;
+        }
+    }
+}
+
+
+
+================================================
+File: denvlib/Tasks/StringEncodingTask.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using dnlib;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using denvlib.Services;
+using denvlib.Injections;
+
+namespace denvlib.Tasks
+{
+    public static class StringEncodingTask
+    {
+        public const TaskID ID = TaskID.StringEnc;
+        private static Random rand = new Random();
+
+        public static void Execute(ModuleDefMD module)
+        {
+            int key = rand.Next(97, 122);
+           /* rand.GetBytes(byteKey);
+
+            var dataType = new TypeDefUser(module.GlobalType.Namespace, "", module.CorLibTypes.GetTypeRef("System", "ValueType"));
+            RenameTask.Rename(dataType);
+            dataType.Layout = TypeAttributes.ExplicitLayout;
+            dataType.Visibility = TypeAttributes.NestedPrivate;
+            dataType.IsSealed = true;
+            dataType.ClassLayout = new ClassLayoutUser(1, (uint)byteKey.Length);
+            module.GlobalType.NestedTypes.Add(dataType);
+
+            var dataField = new FieldDefUser("", new FieldSig(dataType.ToTypeSig()))
+            {
+                IsStatic = true,
+                HasFieldRVA = true,
+                InitialValue = byteKey,
+                Access = FieldAttributes.CompilerControlled
+            };
+            module.GlobalType.Fields.Add(dataField);
+            RenameTask.Rename(dataField);*/
+
+            TypeDef stringInjType = NETUtils.ImportType(typeof(StringEncInj));
+            MethodDef stringDecMeth = NETUtils.GetMethodByName(stringInjType, "StringDec");
+            stringDecMeth.DeclaringType = null;
+           stringDecMeth.Body.Instructions[13].OpCode = OpCodes.Ldc_I4;
+            stringDecMeth.Body.Instructions[13].Operand = key;
+            RenameTask.Rename(stringDecMeth, true);
+            TypeDef cctor = module.GlobalType;
+            cctor.Methods.Add(stringDecMeth);
+            foreach (var method in module.GetTypes().SelectMany(type => type.Methods))
+            {
+                if (method != stringDecMeth && method.HasBody)
+                {
+                    List<Instruction> stringInstr = method.Body.Instructions.Where(instr => instr.OpCode == OpCodes.Ldstr).ToList();
+                    for (int i = 0; i < stringInstr.Count; i++)
+                    {
+                        int index = method.Body.Instructions.IndexOf(stringInstr[i]);
+                        stringInstr[i].Operand = Ecrypt((string)stringInstr[i].Operand,key);
+                        method.Body.Instructions.Insert(index + 1, Instruction.Create(OpCodes.Call, stringDecMeth));
+                    }
+                }
+            }
+        }
+
+        public static string Ecrypt(string @string, int key)
+        {
+            byte[] b = new byte[@string.Length];
+            for (int i = 0; i < @string.Length; i++)
+                b[i] = (byte)(@string[i] ^ key);
+            return Encoding.UTF8.GetString(b);
+        }
+    }
+}
+
+
+
+================================================
+File: denvlib/Tasks/StringEncodingTaskTest.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using dnlib.DotNet.Writer;
+using dnlib.DotNet.MD;
+using denvlib.Services;
+using denvlib.Injections;
+
+namespace denvlib.Tasks
+{
+    public static class StringEncodingTaskTest
+    {
+        public const TaskID ID = TaskID.StringEnc;
+        private static byte[] encodingBytes;
+        private static RandomGen random = new RandomGen();
+        private static MethodDef cctor;
+        private static FieldDef GlobalDataField;
+        private static Dictionary<FieldDef, Tuple<byte[], int>> staticFields;
+
+        public static void Execute(ModuleDefMD module)
+        {
+            cctor = module.GlobalType.FindStaticConstructor();
+            Dictionary<FieldDef, Tuple<byte[], int>> fields = new Dictionary<FieldDef,Tuple<byte[], int>>();
+            List<byte> data = new List<byte>();
+            int count = 0;
+            foreach (var method in  module.GetTypes().SelectMany(type => type.Methods))
+            {
+                if (method.HasBody)
+                {
+                    List<Instruction> stringInstr = method.Body.Instructions.Where(instr => instr.OpCode == OpCodes.Ldstr).ToList();
+                    for (int i = 0; i < stringInstr.Count; i++)
+                    {
+                        byte[] stringByte = Encoding.UTF8.GetBytes(stringInstr[i].Operand as string);
+                        data.AddRange(stringByte);
+                        FieldDef field = CreateField(module);
+                        fields.Add(field, Tuple.Create(stringByte, count));
+                        method.DeclaringType.Fields.Add(field);
+                        stringInstr[i].OpCode = OpCodes.Ldsfld;
+                        stringInstr[i].Operand = field;
+                        count++;
+                    }
+                }
+            }
+            staticFields = fields;
+            data = Encrypt(data.ToArray()).ToList();
+            var dataType = new TypeDefUser("", "", module.CorLibTypes.GetTypeRef("System", "ValueType"));
+            RenameTask.Rename(dataType);
+            dataType.Layout = TypeAttributes.ExplicitLayout;
+            dataType.Visibility = TypeAttributes.NestedPrivate;
+            dataType.IsSealed = true;
+            dataType.ClassLayout = new ClassLayoutUser(1, (uint)data.Count);
+            module.GlobalType.NestedTypes.Add(dataType);
+
+            var dataField = new FieldDefUser("", new FieldSig(dataType.ToTypeSig()))
+            {
+                IsStatic = true,
+                HasFieldRVA = true,
+                InitialValue = data.ToArray(),
+                Access = FieldAttributes.CompilerControlled
+            };
+            module.GlobalType.Fields.Add(dataField);
+            GlobalDataField = dataField;
+            RenameTask.Rename(dataField);
+            NETUtils.listener.OnWriterEvent += OnWriterEvent;
+        }
+
+        private static FieldDef CreateField(ModuleDefMD module)
+        {
+            FieldAttributes attrb = FieldAttributes.Public | FieldAttributes.Static | FieldAttributes.HasFieldRVA | FieldAttributes.CompilerControlled;
+            FieldDef field = new FieldDefUser("", new FieldSig(module.CorLibTypes.String), attrb);
+            RenameTask.Rename(field);
+            return field;
+        }
+
+        private static byte[] Encrypt(byte[] data)
+        {
+            encodingBytes = new byte[16];
+            random.GetBytes(encodingBytes);
+            for (int i = 0; i < data.Length; i++)
+                data[i] ^= encodingBytes[i & 15];
+            return data;
+        }
+
+        private static void OnWriterEvent(object sender, NETUtils.ModuleWriterListener.ModuleWriterListenerEventArgs e)
+        {
+            if (e.WriterEvent == ModuleWriterEvent.MDBeginCreateTables)
+            {
+                ModuleWriterBase writer = (ModuleWriterBase)sender;
+                uint sigBlob = writer.MetaData.BlobHeap.Add(encodingBytes);
+                uint sigRid = writer.MetaData.TablesHeap.StandAloneSigTable.Add(new RawStandAloneSigRow(sigBlob));
+                uint sigToken = 0x11000000 | sigRid;
+                Inject(sigToken);
+            }
+        }
+
+        private static void Inject(uint sigToken)
+        {
+            ModuleDef mod = cctor.Module;
+            TypeDef stringInjType = NETUtils.ImportType(typeof(StringEncInj));
+            MethodDef stringInjMethod = NETUtils.GetMethodByName(stringInjType, "StringInj");
+            MethodDef InsertInstr = NETUtils.GetMethodByName(stringInjType, "InsertFields");
+            stringInjMethod.DeclaringType = null;
+            cctor.DeclaringType.Methods.Add(stringInjMethod);
+            RenameTask.Rename(stringInjMethod);
+            cctor.Body.Instructions.Insert(0, Instruction.Create(OpCodes.Call, stringInjMethod));
+            var instr = stringInjMethod.Body.Instructions;
+            instr[7].OpCode = OpCodes.Ldc_I4;
+            instr[7].Operand = Convert.ToInt32(sigToken);
+            instr[10].Operand = GlobalDataField;
+            instr[20].Operand = GlobalDataField;
+            instr[36].Operand = GlobalDataField;
+            instr[44].Operand = GlobalDataField;
+            MethodDef insertMeth = new MethodDefUser("", MethodSig.CreateStatic(mod.CorLibTypes.Void),
+                MethodAttributes.Static | MethodAttributes.Public | MethodAttributes.HideBySig);
+            RenameTask.Rename(insertMeth);
+            insertMeth.Body = new CilBody();
+            cctor.Body.Instructions.Insert(1, Instruction.Create(OpCodes.Call, insertMeth));
+            cctor.DeclaringType.Methods.Add(insertMeth);
+            List<Instruction> instertListInstr = InsertInstr.Body.Instructions.ToList();
+            instertListInstr.RemoveAt(instertListInstr.Count - 1);
+            int i = 0;
+            foreach (var item in staticFields)
+            {
+                Instruction[] instrList = new Instruction[instertListInstr.Count];
+                instertListInstr.CopyTo(instrList);
+                int stringlenght = item.Value.Item1.Length;
+                instrList[2].Operand = GlobalDataField;
+                instrList[3].OpCode = OpCodes.Ldc_I4;
+                instrList[3].Operand = i;
+                instrList[4].OpCode = OpCodes.Ldc_I4;
+                instrList[4].Operand = i + stringlenght;
+                instrList[6].Operand = item.Key;
+                i += stringlenght;
+                foreach (var instrr in instrList)
+                    insertMeth.Body.Instructions.Add(instrr.Clone());
+            }
+            insertMeth.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+        }
+    }
+}
+
+

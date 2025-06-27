@@ -1,0 +1,4294 @@
+Directory structure:
+└── wwh1004-jitunpacker-framework/
+    ├── README.md
+    ├── JitUnpacker-Framework.sln
+    ├── LICENSE
+    ├── appveyor.yml
+    ├── .editorconfig
+    ├── JitUnpacker/
+    │   ├── ConsoleTitleUtils.cs
+    │   ├── DnlibLogger.cs
+    │   ├── HandleProcessCorruptedStateExceptionsAttribute.cs
+    │   ├── JitUnpacker.cs
+    │   ├── JitUnpacker.csproj
+    │   ├── JitUnpackerSettings.cs
+    │   ├── Logger.cs
+    │   ├── MarshalEx.cs
+    │   ├── NativeMethods.cs
+    │   ├── ProgressBar.cs
+    │   ├── Properties/
+    │   │   └── AssemblyInfo.cs
+    │   ├── Runtime/
+    │   │   ├── CorInfo.cs
+    │   │   ├── IJitHook.cs
+    │   │   ├── JitHookFactory.cs
+    │   │   ├── JitHookInlineImpl.cs
+    │   │   ├── JitHookUtils.cs
+    │   │   ├── JitHookVTableImpl.cs
+    │   │   ├── RuntimeConstants.cs
+    │   │   ├── RuntimeEnvironment.cs
+    │   │   ├── RuntimeFunctions.cs
+    │   │   └── RuntimePatcher.cs
+    │   └── Unpackers/
+    │       ├── IMethodDumper.cs
+    │       ├── IUnpacker.cs
+    │       ├── IUnpackerDetector.cs
+    │       ├── JitMethodBodyReader.cs
+    │       ├── MethodDumperBase.cs
+    │       ├── UnpackerContext.cs
+    │       ├── UnpackerUtils.cs
+    │       └── Unknown/
+    │           ├── MethodDumper.cs
+    │           ├── Unpacker.cs
+    │           └── UnpackerDetector.cs
+    ├── Libraries/
+    │   ├── Tool.Interface/
+    │   └── dnlib/
+    └── RuntimeFunctionConfigGenerator/
+        ├── ConsoleTitleUtils.cs
+        ├── Ldasm.cs
+        ├── NativeMethods.cs
+        ├── RuntimeEnvironment.cs
+        ├── RuntimeFunctionConfigGenerator.bat
+        ├── RuntimeFunctionConfigGenerator.cs
+        ├── RuntimeFunctionConfigGenerator.csproj
+        ├── RuntimeFunctionConfigGeneratorSettings.cs
+        └── Properties/
+            └── AssemblyInfo.cs
+
+================================================
+File: README.md
+================================================
+# JitUnpacker-Framework
+A jit hook and unpacker framework
+
+## Requirements
+- Any .NET Framework (stable in v2.0~3.5 and v4.5+ and I didn't test it in v4.0) NOT SUPPORT .NET 4.8
+
+## Downloads
+GitHub: [Latest release](https://github.com/wwh1004/JitUnpacker-Framework/releases/latest/download/JitUnpacker.zip)
+
+AppVeyor: [![Build status](https://ci.appveyor.com/api/projects/status/k4m6lkcmihkcinup?svg=true)](https://ci.appveyor.com/project/wwh1004/jitunpacker-framework)
+
+
+
+================================================
+File: JitUnpacker-Framework.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29021.104
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JitUnpacker", "JitUnpacker\JitUnpacker.csproj", "{259737BD-2CEC-486F-A7C8-98D987A07139}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RuntimeFunctionConfigGenerator", "RuntimeFunctionConfigGenerator\RuntimeFunctionConfigGenerator.csproj", "{ACD3DCF3-BCBB-48A7-86A4-F54357B3B701}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dnlib", "Libraries\dnlib\src\dnlib.csproj", "{BAE1899F-26F0-4274-8599-0FCED94EDB56}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{259737BD-2CEC-486F-A7C8-98D987A07139}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{259737BD-2CEC-486F-A7C8-98D987A07139}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{259737BD-2CEC-486F-A7C8-98D987A07139}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{259737BD-2CEC-486F-A7C8-98D987A07139}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACD3DCF3-BCBB-48A7-86A4-F54357B3B701}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACD3DCF3-BCBB-48A7-86A4-F54357B3B701}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACD3DCF3-BCBB-48A7-86A4-F54357B3B701}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACD3DCF3-BCBB-48A7-86A4-F54357B3B701}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BAE1899F-26F0-4274-8599-0FCED94EDB56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BAE1899F-26F0-4274-8599-0FCED94EDB56}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BAE1899F-26F0-4274-8599-0FCED94EDB56}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BAE1899F-26F0-4274-8599-0FCED94EDB56}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {71181F38-3E00-4341-801E-6F773D3A1691}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: LICENSE
+================================================
+MIT License
+
+Copyright (c) 2019 æ–‡ç…Œ
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+
+================================================
+File: appveyor.yml
+================================================
+version: '{build}'
+image: Visual Studio 2019 Preview
+configuration: Release
+platform: Any CPU
+install:
+- cmd: git submodule update --init --recursive
+before_build:
+- cmd: appveyor-retry nuget restore
+build:
+  project: JitUnpacker-Framework.sln
+  verbosity: normal
+artifacts:
+- path: bin\Release\
+  name: JitUnpacker
+deploy:
+- provider: GitHub
+  tag: $(APPVEYOR_REPO_TAG_NAME)
+  release: JitUnpacker
+  auth_token:
+    secure: +8UJ1C312inNq+80I8WST34vPMrCylnmTx+9rmuIh1qnsArA5x2b8yc+kcwkXmQC
+  on:
+    APPVEYOR_REPO_TAG: true
+
+
+================================================
+File: .editorconfig
+================================================
+# Remove the line below if you want to inherit .editorconfig settings from higher directories
+root = true
+
+[*]
+charset = utf-8
+end_of_line = crlf  
+indent_style = tab
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.xaml]
+indent_style = space
+
+# C# files
+[*.cs]
+
+#### .NET Coding Conventions ####
+
+# this. and Me. preferences
+dotnet_style_qualification_for_event = false:silent
+dotnet_style_qualification_for_field = false:silent
+dotnet_style_qualification_for_method = false:silent
+dotnet_style_qualification_for_property = false:silent
+
+# Language keywords vs BCL types preferences
+dotnet_style_predefined_type_for_locals_parameters_members = true:silent
+dotnet_style_predefined_type_for_member_access = true:silent
+
+# Parentheses preferences
+dotnet_style_parentheses_in_arithmetic_binary_operators = always_for_clarity:silent
+dotnet_style_parentheses_in_other_binary_operators = always_for_clarity:silent
+dotnet_style_parentheses_in_other_operators = never_if_unnecessary:silent
+dotnet_style_parentheses_in_relational_binary_operators = always_for_clarity:silent
+
+# Modifier preferences
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:silent
+
+# Expression-level preferences
+csharp_style_deconstructed_variable_declaration = true:suggestion
+csharp_style_inlined_variable_declaration = false:suggestion
+csharp_style_throw_expression = false:suggestion
+dotnet_style_coalesce_expression = true:suggestion
+dotnet_style_collection_initializer = true:suggestion
+dotnet_style_explicit_tuple_names = true:suggestion
+dotnet_style_null_propagation = true:suggestion
+dotnet_style_object_initializer = true:suggestion
+dotnet_style_prefer_auto_properties = false:silent
+dotnet_style_prefer_conditional_expression_over_assignment = true:silent
+dotnet_style_prefer_conditional_expression_over_return = true:silent
+dotnet_style_prefer_inferred_anonymous_type_member_names = true:suggestion
+dotnet_style_prefer_inferred_tuple_names = true:suggestion
+dotnet_style_prefer_is_null_check_over_reference_equality_method = true:suggestion
+
+# Field preferences
+dotnet_style_readonly_field = true:suggestion
+
+#### C# Coding Conventions ####
+
+# var preferences
+csharp_style_var_elsewhere = false:silent
+csharp_style_var_for_built_in_types = false:silent
+csharp_style_var_when_type_is_apparent = false:silent
+
+# Expression-bodied members
+csharp_style_expression_bodied_accessors = true:silent
+csharp_style_expression_bodied_constructors = false:silent
+csharp_style_expression_bodied_indexers = true:silent
+csharp_style_expression_bodied_lambdas = true:silent
+csharp_style_expression_bodied_methods = false:silent
+csharp_style_expression_bodied_operators = false:silent
+csharp_style_expression_bodied_properties = true:silent
+
+# Pattern matching preferences
+csharp_style_pattern_matching_over_as_with_null_check = false:suggestion
+csharp_style_pattern_matching_over_is_with_cast_check = false:suggestion
+
+# Null-checking preferences
+csharp_style_conditional_delegate_call = true:suggestion
+
+# Modifier preferences
+csharp_preferred_modifier_order = public,private,protected,internal,static,extern,new,virtual,abstract,sealed,override,readonly,unsafe,volatile,async
+
+# Code-block preferences
+csharp_prefer_braces = false:silent
+
+# Expression-level preferences
+csharp_prefer_simple_default_expression = true:suggestion
+csharp_style_pattern_local_over_anonymous_function = true:suggestion
+
+#### C# Formatting Rules ####
+
+# New line preferences
+csharp_new_line_before_catch = true
+csharp_new_line_before_else = true
+csharp_new_line_before_finally = true
+csharp_new_line_before_members_in_anonymous_types = true
+csharp_new_line_before_members_in_object_initializers = true
+csharp_new_line_before_open_brace = none
+csharp_new_line_between_query_expression_clauses = false
+
+# Indentation preferences
+csharp_indent_block_contents = true
+csharp_indent_braces = false
+csharp_indent_case_contents = true
+csharp_indent_case_contents_when_block = true
+csharp_indent_labels = one_less_than_current
+csharp_indent_switch_labels = false
+
+# Space preferences
+csharp_space_after_cast = false
+csharp_space_after_colon_in_inheritance_clause = true
+csharp_space_after_comma = true
+csharp_space_after_dot = false
+csharp_space_after_keywords_in_control_flow_statements = true
+csharp_space_after_semicolon_in_for_statement = true
+csharp_space_around_binary_operators = before_and_after
+csharp_space_around_declaration_statements = false
+csharp_space_before_colon_in_inheritance_clause = true
+csharp_space_before_comma = false
+csharp_space_before_dot = false
+csharp_space_before_open_square_brackets = false
+csharp_space_before_semicolon_in_for_statement = false
+csharp_space_between_empty_square_brackets = false
+csharp_space_between_method_call_empty_parameter_list_parentheses = false
+csharp_space_between_method_call_name_and_opening_parenthesis = false
+csharp_space_between_method_call_parameter_list_parentheses = false
+csharp_space_between_method_declaration_empty_parameter_list_parentheses = false
+csharp_space_between_method_declaration_name_and_open_parenthesis = false
+csharp_space_between_method_declaration_parameter_list_parentheses = false
+csharp_space_between_parentheses = false
+csharp_space_between_square_brackets = false
+
+# Wrapping preferences
+csharp_preserve_single_line_blocks = true
+csharp_preserve_single_line_statements = true
+
+
+
+
+================================================
+File: JitUnpacker/ConsoleTitleUtils.cs
+================================================
+using System.Reflection;
+
+namespace System {
+	internal static class ConsoleTitleUtils {
+		public static string GetTitle() {
+			string productName;
+			string version;
+			string copyright;
+			int firstBlankIndex;
+			string copyrightOwnerName;
+			string copyrightYear;
+
+			productName = GetAssemblyAttribute<AssemblyProductAttribute>().Product;
+			version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+			copyright = GetAssemblyAttribute<AssemblyCopyrightAttribute>().Copyright.Substring(12);
+			firstBlankIndex = copyright.IndexOf(' ');
+			copyrightOwnerName = copyright.Substring(firstBlankIndex + 1);
+			copyrightYear = copyright.Substring(0, firstBlankIndex);
+			return $"{productName} v{version} by {copyrightOwnerName} {copyrightYear}";
+		}
+
+		private static T GetAssemblyAttribute<T>() {
+			return (T)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(T), false)[0];
+		}
+	}
+}
+
+
+
+================================================
+File: JitUnpacker/DnlibLogger.cs
+================================================
+using System;
+using dnlib.DotNet;
+
+namespace JitTools {
+	internal sealed class DnlibLogger : ILogger {
+		private static readonly DnlibLogger _instance = new DnlibLogger();
+
+		private DnlibLogger() {
+		}
+
+		public static DnlibLogger Instance => _instance;
+
+		public bool IgnoresEvent(LoggerEvent loggerEvent) {
+			return false;
+		}
+
+		public void Log(object sender, LoggerEvent loggerEvent, string format, params object[] args) {
+			ConsoleColor oldColor;
+
+			oldColor = Console.ForegroundColor;
+			switch (loggerEvent) {
+			case LoggerEvent.Error:
+				Console.ForegroundColor = ConsoleColor.Red;
+				break;
+			case LoggerEvent.Warning:
+				Console.ForegroundColor = ConsoleColor.Yellow;
+				break;
+			case LoggerEvent.Info:
+				Console.ForegroundColor = ConsoleColor.Gray;
+				break;
+			case LoggerEvent.Verbose:
+			case LoggerEvent.VeryVerbose:
+				Console.ForegroundColor = ConsoleColor.DarkGray;
+				break;
+			default:
+				throw new ArgumentOutOfRangeException(nameof(loggerEvent));
+			}
+			Console.WriteLine("LoggerEvent: " + loggerEvent.ToString());
+			Console.WriteLine("Info: " + Environment.NewLine + string.Format(format, args));
+			Console.WriteLine();
+			Console.ForegroundColor = oldColor;
+		}
+	}
+}
+
+
+
+================================================
+File: JitUnpacker/HandleProcessCorruptedStateExceptionsAttribute.cs
+================================================
+namespace System.Runtime.ExceptionServices {
+	[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
+	internal sealed class HandleProcessCorruptedStateExceptionsAttribute : Attribute {
+	}
+}
+
+
+
+================================================
+File: JitUnpacker/JitUnpacker.cs
+================================================
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using System.Runtime.ExceptionServices;
+using System.Runtime.InteropServices;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using dnlib.DotNet.Writer;
+using JitTools.Runtime;
+using JitTools.Unpackers;
+using Tool.Interface;
+using static JitTools.NativeMethods;
+using RuntimeEnvironment = JitTools.Runtime.RuntimeEnvironment;
+using System.Linq;
+using System.Runtime.CompilerServices;
+
+namespace JitTools {
+	public sealed unsafe class JitUnpacker : ITool<JitUnpackerSettings> {
+		private static IUnpacker _unpacker;
+
+		public string Title => ConsoleTitleUtils.GetTitle();
+
+		public void Execute(JitUnpackerSettings settings) {
+			Module module;
+			void* moduleHandle;
+			ModuleDefMD moduleDef;
+			void*[] methodHandles;
+
+			PrepareAllMethods();
+			// 防止陷入编译死循环
+			module = Assembly.LoadFile(settings.AssemblyPath).ManifestModule;
+			if (RuntimeEnvironment.IsClr4x)
+				moduleHandle = (void*)(IntPtr)module.GetType().GetField("m_pData", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(module);
+			else
+				moduleHandle = (void*)(IntPtr)typeof(ModuleHandle).GetField("m_ptr", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(module.ModuleHandle);
+			moduleDef = ModuleDefMD.Load(settings.AssemblyPath);
+			methodHandles = LoadMethodHandles(module, moduleDef);
+			_unpacker = LoadedUnpackerDetectors.Detect(moduleDef).CreateUnpacker(new UnpackerContext(module, moduleDef, moduleHandle, methodHandles, settings));
+			Logger.Instance.LogInfo($"Detected {_unpacker.Name} Obfuscator ({Path.GetFullPath(settings.AssemblyPath)})");
+			Console.CursorVisible = false;
+			ExecuteImpl();
+			Console.CursorVisible = true;
+			SaveAs(PathInsertPostfix(settings.AssemblyPath, ".jupk"));
+			_unpacker.Context.ModuleDef.Dispose();
+			_unpacker.Context.DumpedModuleDef.Dispose();
+			Logger.Instance.LogInfo("Finished");
+			Logger.Instance.LogNewLine();
+		}
+
+		[HandleProcessCorruptedStateExceptions]
+		private static void ExecuteImpl() {
+			ProgressBar progressBar;
+			MethodDef cctor;
+
+			progressBar = new ProgressBar(_unpacker.Context.MethodHandles.Length);
+			RuntimePatcher.PatchAll();
+			// Patch CLR和JIT
+			_unpacker.MethodDumper.Hook();
+			// 先Hook，再进行其它步骤，防止Hook被绕过
+			_unpacker.PreInitialize();
+			cctor = FindStaticConstructor(_unpacker.Context.ModuleDef);
+			if (_unpacker.Context.Settings.DumpBeforeStaticConstructor) {
+				// 要脱壳的文件DUMP时机太后
+				// 比如DNG加壳的程序套了层TMD，程序完全跑起来之后才DUMP的主程序
+				// 这时要先读取元数据流
+				_unpacker.Context.DumpedModuleDef = ModuleDefMD.Load(DumpModule());
+				// Dump元数据流和.NET资源
+			}
+			if (cctor == null)
+				Logger.Instance.LogError("WARNING: Not fount any static constructor!");
+			else {
+				// 先运行静态构造器初始化运行时（如果不存在，就是其它静态构造器）再Dump才能得到正确数据（比如元数据流和.NET资源）
+				_unpacker.Context.Module.ResolveMethod(cctor.MDToken.ToInt32()).Invoke(null, null);
+				_unpacker.PostInitialize();
+			}
+			if (!_unpacker.Context.Settings.DumpBeforeStaticConstructor) {
+				_unpacker.Context.DumpedModuleDef = ModuleDefMD.Load(DumpModule());
+				// Dump元数据流和.NET资源
+			}
+			for (int i = 0; i < _unpacker.Context.MethodHandles.Length; i++) {
+				uint oldDumpCount;
+
+				progressBar.Current = i + 1;
+				if (_unpacker.Context.MethodHandles[i] == null)
+					continue;
+				oldDumpCount = _unpacker.MethodDumper.DumpCount;
+				if (!_unpacker.NeedDecryptMethod(i))
+					continue;
+				try {
+					_unpacker.MethodDumper.SetTargetMethod(i);
+					_unpacker.CallJit(i);
+					_unpacker.MethodDumper.SetIdle();
+					if (_unpacker.MethodDumper.DumpCount != oldDumpCount + 1)
+						throw new Exception("Failed to dump current method.");
+				}
+				catch (Exception ex) {
+					_unpacker.MethodDumper.SetIdle();
+					Logger.Instance.LogError("Exception: 0x" + (0x06000001 + i).ToString("X8") + " " + _unpacker.Context.ModuleDef.ResolveMethod((uint)i + 1).ToString());
+					Logger.Instance.LogException(ex);
+					Logger.Instance.LogNewLine();
+					Logger.Instance.LogNewLine();
+				}
+			}
+			_unpacker.MethodDumper.Unhook();
+			RuntimePatcher.RestoreAll();
+			if (!_unpacker.Context.Settings.PreserveRuntime) {
+				Logger.Instance.LogInfo("Removing runtime type");
+				_unpacker.RemoveRuntime();
+			}
+			FillNullSignatures(_unpacker.Context.DumpedModuleDef);
+		}
+
+		private static void*[] LoadMethodHandles(Module module, ModuleDefMD moduleDef) {
+			void*[] methodHandles;
+			ModuleHandle moduleHandle;
+
+			methodHandles = new void*[moduleDef.TablesStream.MethodTable.Rows];
+			moduleHandle = module.ModuleHandle;
+			for (int i = 0; i < methodHandles.Length; i++) {
+				MethodDef methodDef;
+
+				methodDef = moduleDef.ResolveMethod((uint)i + 1);
+				if (!methodDef.HasBody)
+					continue;
+				methodHandles[i] = (void*)moduleHandle.ResolveMethodHandle(0x06000001 + i).Value;
+			}
+			return methodHandles;
+		}
+
+		private static MethodDef FindStaticConstructor(ModuleDefMD moduleDef) {
+			MethodDef cctor;
+
+			cctor = moduleDef.GlobalType.FindStaticConstructor();
+			if (cctor != null)
+				return cctor;
+			foreach (TypeDef typeDef in moduleDef.GetTypes()) {
+				IList<Instruction> instructions;
+
+				cctor = typeDef.FindStaticConstructor();
+				if (cctor == null)
+					continue;
+				instructions = cctor.Body.Instructions;
+				if (instructions.Count == 2 && instructions[0].OpCode.Code == Code.Call && (instructions[0].Operand is MethodDef))
+					// 只有一个call和ret，否则可能带有其它IL导致执行出错
+					break;
+			}
+			return cctor;
+		}
+
+		private static byte[] DumpModule() {
+			byte* imageBase;
+			byte* p;
+			ushort sectionCount;
+			IMAGE_SECTION_HEADER* pSectionHeaders;
+			uint imageSize;
+			byte[] peImage;
+
+			imageBase = (byte*)Marshal.GetHINSTANCE(_unpacker.Context.Module);
+			p = imageBase;
+			p += 0x3C;
+			p = imageBase + *(uint*)p;
+			p += 0x6;
+			sectionCount = *(ushort*)p;
+			p += 0xE;
+			p = p + *(ushort*)p + 4;
+			pSectionHeaders = (IMAGE_SECTION_HEADER*)p;
+			imageSize = 0;
+			for (int i = 0; i < sectionCount; i++)
+				if (pSectionHeaders[i].PointerToRawData >= imageSize)
+					imageSize = pSectionHeaders[i].PointerToRawData + pSectionHeaders[i].SizeOfRawData;
+			peImage = new byte[imageSize];
+			Marshal.Copy((IntPtr)imageBase, peImage, 0, (int)(p - imageBase) + (sizeof(IMAGE_SECTION_HEADER) * sectionCount));
+			for (int i = 0; i < sectionCount; i++)
+				Marshal.Copy((IntPtr)(imageBase + pSectionHeaders[i].VirtualAddress), peImage, (int)pSectionHeaders[i].PointerToRawData, (int)pSectionHeaders[i].VirtualSize);
+			return peImage;
+		}
+
+		private static void FillNullSignatures(ModuleDefMD moduleDef) {
+			uint rows;
+
+			rows = moduleDef.TablesStream.StandAloneSigTable.Rows;
+			for (uint rid = 1; rid <= rows; rid++) {
+				StandAloneSig standAloneSig;
+
+				standAloneSig = moduleDef.ResolveStandAloneSig(rid);
+				if (standAloneSig.Signature == null)
+					standAloneSig.Signature = new LocalSig(moduleDef.CorLibTypes.Int32);
+			}
+		}
+
+		private static string PathInsertPostfix(string path, string postfix) {
+			return Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path) + postfix + Path.GetExtension(path));
+		}
+
+		private static void SaveAs(string filePath) {
+			Logger.Instance.LogInfo(_unpacker.MethodDumper.DumpCount.ToString() + " methods are decrypted");
+			if (_unpacker.MethodDumper.DumpCount != 0) {
+				ModuleWriterOptionsBase options;
+
+				if (_unpacker.Context.Settings.UseNativeWriter)
+					options = new NativeModuleWriterOptions(_unpacker.Context.DumpedModuleDef, false);
+				else
+					options = new ModuleWriterOptions(_unpacker.Context.DumpedModuleDef);
+				if (_unpacker.Context.Settings.PreserveTokens)
+					options.MetadataOptions.Flags |= MetadataFlags.PreserveRids | MetadataFlags.PreserveUSOffsets | MetadataFlags.PreserveBlobOffsets | MetadataFlags.PreserveExtraSignatureData;
+				if (_unpacker.Context.Settings.KeepMaxStacks)
+					options.MetadataOptions.Flags |= MetadataFlags.KeepOldMaxStack;
+				options.Logger = DnlibLogger.Instance;
+				Logger.Instance.LogInfo("Saving: " + filePath);
+				Logger.Instance.LogNewLine();
+				if (_unpacker.Context.Settings.UseNativeWriter)
+					_unpacker.Context.DumpedModuleDef.NativeWrite(filePath, (NativeModuleWriterOptions)options);
+				else
+					_unpacker.Context.DumpedModuleDef.Write(filePath, (ModuleWriterOptions)options);
+			}
+		}
+
+		private static void PrepareAllMethods() {
+			const BindingFlags BindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
+
+			foreach (MethodBase methodBase in Assembly.GetExecutingAssembly().ManifestModule.GetTypes().SelectMany(t => Enumerable.Concat<MethodBase>(t.GetMethods(BindingFlags), t.GetConstructors(BindingFlags))).Where(m => !m.IsAbstract && !m.ContainsGenericParameters))
+				try {
+					RuntimeHelpers.PrepareMethod(methodBase.MethodHandle);
+				}
+				catch {
+				}
+		}
+	}
+}
+
+
+
+================================================
+File: JitUnpacker/JitUnpacker.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{259737BD-2CEC-486F-A7C8-98D987A07139}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>JitUnpacker</RootNamespace>
+    <AssemblyName>JitUnpacker</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Compile Include="ConsoleTitleUtils.cs" />
+    <Compile Include="DnlibLogger.cs" />
+    <Compile Include="HandleProcessCorruptedStateExceptionsAttribute.cs" />
+    <Compile Include="JitUnpacker.cs" />
+    <Compile Include="JitUnpackerSettings.cs" />
+    <Compile Include="Logger.cs" />
+    <Compile Include="MarshalEx.cs" />
+    <Compile Include="NativeMethods.cs" />
+    <Compile Include="ProgressBar.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Runtime\CorInfo.cs" />
+    <Compile Include="Runtime\IJitHook.cs" />
+    <Compile Include="Runtime\JitHookFactory.cs" />
+    <Compile Include="Runtime\JitHookInlineImpl.cs" />
+    <Compile Include="Runtime\JitHookUtils.cs" />
+    <Compile Include="Runtime\JitHookVTableImpl.cs" />
+    <Compile Include="Runtime\RuntimeConstants.cs" />
+    <Compile Include="Runtime\RuntimeEnvironment.cs" />
+    <Compile Include="Runtime\RuntimeFunctions.cs" />
+    <Compile Include="Runtime\RuntimePatcher.cs" />
+    <Compile Include="Unpackers\IMethodDumper.cs" />
+    <Compile Include="Unpackers\IUnpacker.cs" />
+    <Compile Include="Unpackers\IUnpackerDetector.cs" />
+    <Compile Include="Unpackers\JitMethodBodyReader.cs" />
+    <Compile Include="Unpackers\MethodDumperBase.cs" />
+    <Compile Include="Unpackers\Unknown\MethodDumper.cs" />
+    <Compile Include="Unpackers\Unknown\Unpacker.cs" />
+    <Compile Include="Unpackers\Unknown\UnpackerDetector.cs" />
+    <Compile Include="Unpackers\UnpackerContext.cs" />
+    <Compile Include="Unpackers\UnpackerUtils.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Libraries\dnlib\src\dnlib.csproj">
+      <Project>{bae1899f-26f0-4274-8599-0fced94edb56}</Project>
+      <Name>dnlib</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="Tool.Interface">
+      <HintPath>..\Libraries\Tool.Interface\Tool.Interface.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: JitUnpacker/JitUnpackerSettings.cs
+================================================
+using System;
+using System.Cli;
+using System.IO;
+using JitTools.Runtime;
+
+namespace JitTools {
+	public sealed class JitUnpackerSettings {
+		private string _assemblyPath;
+		private JitHookType _hookType;
+		private bool _dumpBeforeStaticConstructor;
+		private bool _preserveAll;
+		private bool _preserveRuntime;
+		private bool _preserveTokens;
+		private bool _keepMaxStacks;
+		private bool _useNativeWriter;
+
+		[Argument("-f", IsRequired = true, Type = "FILE", Description = "Assembly path")]
+		internal string AssemblyPathCliSetter {
+			set => AssemblyPath = value;
+		}
+
+		[Argument("-hook-type", IsRequired = false, DefaultValue = "Inline", Type = "STR", Description = "JIT hook type")]
+		internal string HookTypeCliSetter {
+			set {
+				switch (value.ToUpperInvariant()) {
+				case "INLINE":
+					_hookType = JitHookType.Inline;
+					break;
+				case "VTABLE":
+					_hookType = JitHookType.VTable;
+					break;
+				case "INT3":
+					_hookType = JitHookType.Int3;
+					break;
+				case "HARDWARE":
+					_hookType = JitHookType.Hardware;
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(value));
+				}
+			}
+		}
+
+		[Argument("--dump-before-cctor", Description = "Dump module before run static constructor")]
+		internal bool DumpBeforeStaticConstructorCliSetter {
+			set => _dumpBeforeStaticConstructor = value;
+		}
+
+		[Argument("--preserve-all", Description = "Preserve all(--preserve-tokens --preserve-tokens --keep-max-stacks --use-native-writer)")]
+		internal bool PreserveAllCliSetter {
+			set => _preserveAll = value;
+		}
+
+		[Argument("--preserve-runtime", Description = "Preserve packer runtime")]
+		internal bool PreserveRuntimeCliSetter {
+			set => _preserveRuntime = value;
+		}
+
+		[Argument("--preserve-tokens", Description = "Preserve original tokens")]
+		internal bool PreserveTokensCliSetter {
+			set => PreserveTokens = value;
+		}
+
+		[Argument("--keep-max-stacks", Description = "Keep old max-stacks")]
+		internal bool KeepMaxStacksCliSetter {
+			set => KeepMaxStacks = value;
+		}
+
+		[Argument("--use-native-writer", Description = "Use dnlib.DotNet.Writer.NativeModuleWriter")]
+		internal bool UseNativeWriterCliSetter {
+			set => UseNativeWriter = value;
+		}
+
+		public string AssemblyPath {
+			get => _assemblyPath;
+			set {
+				if (string.IsNullOrEmpty(value))
+					throw new ArgumentNullException(nameof(value));
+				if (!File.Exists(value))
+					throw new FileNotFoundException($"{value} does NOT exists");
+
+				_assemblyPath = Path.GetFullPath(value);
+			}
+		}
+
+		public JitHookType HookType {
+			get => _hookType;
+			set => _hookType = value;
+		}
+
+		public bool DumpBeforeStaticConstructor {
+			get => _dumpBeforeStaticConstructor;
+			set => _dumpBeforeStaticConstructor = value;
+		}
+
+		public bool PreserveRuntime {
+			get => _preserveAll || _preserveRuntime;
+			set => _preserveRuntime = value;
+		}
+
+		public bool PreserveTokens {
+			get => _preserveAll || _preserveTokens;
+			set => _preserveTokens = value;
+		}
+
+		public bool KeepMaxStacks {
+			get => _preserveAll || _keepMaxStacks;
+			set => _keepMaxStacks = value;
+		}
+
+		public bool UseNativeWriter {
+			get => _preserveAll || _useNativeWriter;
+			set => _useNativeWriter = value;
+		}
+	}
+}
+
+
+
+================================================
+File: JitUnpacker/Logger.cs
+================================================
+using System;
+using System.Text;
+
+namespace JitTools {
+	internal sealed class Logger {
+		private static readonly Logger _instance = new Logger();
+		private static readonly object _syncRoot = new object();
+
+		public static Logger Instance => _instance;
+
+		private Logger() {
+		}
+
+		public void LogNewLine() {
+			LogInfo(string.Empty, ConsoleColor.Gray);
+		}
+
+		public void LogInfo(string value) {
+			LogInfo(value, ConsoleColor.Gray);
+		}
+
+		public void LogWarning(string value) {
+			LogInfo(value, ConsoleColor.Yellow);
+		}
+
+		public void LogError(string value) {
+			LogInfo(value, ConsoleColor.Red);
+		}
+
+		public void LogInfo(string value, ConsoleColor color) {
+			lock (_syncRoot) {
+				ConsoleColor oldColor;
+
+				oldColor = Console.ForegroundColor;
+				Console.ForegroundColor = color;
+				Console.WriteLine(value);
+				Console.ForegroundColor = oldColor;
+			}
+		}
+
+		public void LogException(Exception value) {
+			if (value == null)
+				throw new ArgumentNullException(nameof(value));
+
+			LogError(ExceptionToString(value));
+		}
+
+		private static string ExceptionToString(Exception exception) {
+			if (exception == null)
+				throw new ArgumentNullException(nameof(exception));
+
+			StringBuilder sb;
+
+			sb = new StringBuilder();
+			DumpException(exception, sb);
+			return sb.ToString();
+		}
+
+		private static void DumpException(Exception exception, StringBuilder sb) {
+			sb.AppendLine("Type: " + Environment.NewLine + exception.GetType().FullName);
+			sb.AppendLine("Message: " + Environment.NewLine + exception.Message);
+			sb.AppendLine("Source: " + Environment.NewLine + exception.Source);
+			sb.AppendLine("StackTrace: " + Environment.NewLine + exception.StackTrace);
+			sb.AppendLine("TargetSite: " + Environment.NewLine + exception.TargetSite.ToString());
+			sb.AppendLine("----------------------------------------");
+			if (exception.InnerException != null)
+				DumpException(exception.InnerException, sb);
+		}
+	}
+}
+
+
+
+================================================
+File: JitUnpacker/MarshalEx.cs
+================================================
+using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using static JitTools.NativeMethods;
+using RuntimeEnvironment = JitTools.Runtime.RuntimeEnvironment;
+
+namespace JitTools {
+	/// <summary>
+	/// 对 <see cref="Marshal"/> 类的简化与扩展
+	/// </summary>
+	internal static unsafe class MarshalEx {
+		private static readonly byte[] ThiscallToStdcallStubCode = {
+			0x58,                         // pop     eax
+			0x59,                         // pop     ecx
+			0x50,                         // push    eax
+			0x68, 0x00, 0x00, 0x00, 0x00, // push    pFunction
+			0xC3                          // ret
+		};
+		private static readonly byte[] FastcallToStdcallStubCode = {
+			0x58,                         // pop     eax
+			0x59,                         // pop     ecx
+			0x5A,                         // pop     edx
+			0x50,                         // push    eax
+			0x68, 0x00, 0x00, 0x00, 0x00, // push    pFunction
+			0xC3                          // ret
+		};
+		private static readonly byte[] StdcallToThiscallStubCode = {
+			0x58,                         // pop     eax
+			0x51,                         // push    ecx
+			0x50,                         // push    eax
+			0x68, 0x00, 0x00, 0x00, 0x00, // push    pFunction
+			0xC3                          // ret
+		};
+		private static readonly byte[] StdcallToFastcallStubCode = {
+			0x58,                         // pop     eax
+			0x52,                         // push    edx
+			0x51,                         // push    ecx
+			0x50,                         // push    eax
+			0x68, 0x00, 0x00, 0x00, 0x00, // push    pFunction
+			0xC3                          // ret
+		};
+
+		/// <summary>
+		/// 分配内存
+		/// </summary>
+		/// <param name="size"></param>
+		/// <returns></returns>
+		public static void* Alloc(uint size) {
+			return (void*)Marshal.AllocHGlobal((int)size);
+		}
+
+		/// <summary>
+		/// 从指定地址读取数据
+		/// </summary>
+		/// <param name="address"></param>
+		/// <param name="value"></param>
+		public static void Read(void* address, byte[] value) {
+			Marshal.Copy((IntPtr)address, value, 0, value.Length);
+		}
+
+		/// <summary>
+		/// 向指定地址写入数据
+		/// </summary>
+		/// <param name="address"></param>
+		/// <param name="value"></param>
+		public static void Write(void* address, byte[] value) {
+			uint oldProtection;
+
+			VirtualProtect(address, (uint)value.Length, PAGE_EXECUTE_READWRITE, out oldProtection);
+			Marshal.Copy(value, 0, (IntPtr)address, value.Length);
+			VirtualProtect(address, (uint)value.Length, oldProtection, out _);
+		}
+
+		/// <summary>
+		/// 创建调用约定为Stdcall的委托
+		/// </summary>
+		/// <typeparam name="TDelegate"></typeparam>
+		/// <param name="pStdcallFunction">调用约定为Stdcall的函数地址</param>
+		/// <returns></returns>
+		public static TDelegate CreateDelegate<TDelegate>(void* pStdcallFunction) where TDelegate : class {
+			return CreateDelegate<TDelegate>(pStdcallFunction, CallingConvention.StdCall);
+		}
+
+		/// <summary>
+		/// 创建调用约定为Stdcall的委托
+		/// </summary>
+		/// <typeparam name="TDelegate"></typeparam>
+		/// <param name="pAnycallFunction">任意调用约定的函数地址</param>
+		/// <param name="fromCallingConvention">函数的调用约定</param>
+		/// <returns></returns>
+		public static TDelegate CreateDelegate<TDelegate>(void* pAnycallFunction, CallingConvention fromCallingConvention) where TDelegate : class {
+			if (pAnycallFunction == null)
+				throw new ArgumentNullException(nameof(pAnycallFunction));
+
+			void* pStdcallFunction;
+			Delegate stdcallDelegate;
+
+			pStdcallFunction = ConvertCallingConvention(pAnycallFunction, fromCallingConvention, CallingConvention.StdCall);
+			stdcallDelegate = Marshal.GetDelegateForFunctionPointer((IntPtr)pStdcallFunction, typeof(TDelegate));
+			RuntimeHelpers.PrepareDelegate(stdcallDelegate);
+			return (TDelegate)(object)stdcallDelegate;
+		}
+
+		/// <summary>
+		/// 获取调用约定为Stdcall的委托地址
+		/// </summary>
+		/// <param name="stdcallDelegate">调用约定为Stdcall的委托</param>
+		/// <returns></returns>
+		public static void* GetDelegateAddress(Delegate stdcallDelegate) {
+			return GetDelegateAddress(stdcallDelegate, CallingConvention.StdCall);
+		}
+
+		/// <summary>
+		/// 获取调用约定为Stdcall的委托地址
+		/// </summary>
+		/// <param name="stdcallDelegate">任意调用约定的委托</param>
+		/// <param name="toCallingConvention">委托的调用约定</param>
+		/// <returns></returns>
+		public static void* GetDelegateAddress(Delegate stdcallDelegate, CallingConvention toCallingConvention) {
+			if (stdcallDelegate == null)
+				throw new ArgumentNullException(nameof(stdcallDelegate));
+
+			void* pStdcallFunction;
+
+			RuntimeHelpers.PrepareDelegate(stdcallDelegate);
+			pStdcallFunction = (void*)Marshal.GetFunctionPointerForDelegate(stdcallDelegate);
+			return ConvertCallingConvention(pStdcallFunction, CallingConvention.StdCall, toCallingConvention);
+		}
+
+		/// <summary>
+		/// 转换调用约定
+		/// </summary>
+		/// <param name="pFunction">函数地址</param>
+		/// <param name="fromCallingConvention">原来的调用约定</param>
+		/// <param name="toCallingConvention">将转换成的调用约定</param>
+		/// <returns></returns>
+		public static void* ConvertCallingConvention(void* pFunction, CallingConvention fromCallingConvention, CallingConvention toCallingConvention) {
+			if (pFunction == null)
+				throw new ArgumentNullException(nameof(pFunction));
+
+			byte[] stubCode;
+			void* pStub;
+
+			if (!RuntimeEnvironment.Is32Bit)
+				// 64位所有调用约定都是一样的
+				return pFunction;
+			if (fromCallingConvention == CallingConvention.StdCall)
+				switch (toCallingConvention) {
+				case CallingConvention.Winapi:
+				case CallingConvention.StdCall:
+					return pFunction;
+				case CallingConvention.ThisCall:
+					stubCode = CopyByteArray(StdcallToThiscallStubCode);
+					fixed (byte* p = &stubCode[4])
+						*(uint*)p = (uint)pFunction;
+					break;
+				case CallingConvention.FastCall:
+					stubCode = CopyByteArray(StdcallToFastcallStubCode);
+					fixed (byte* p = &stubCode[5])
+						*(uint*)p = (uint)pFunction;
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(toCallingConvention));
+				}
+			else if (toCallingConvention == CallingConvention.StdCall)
+				switch (fromCallingConvention) {
+				case CallingConvention.Winapi:
+				case CallingConvention.StdCall:
+					return pFunction;
+				case CallingConvention.ThisCall:
+					stubCode = CopyByteArray(ThiscallToStdcallStubCode);
+					fixed (byte* p = &stubCode[4])
+						*(uint*)p = (uint)pFunction;
+					break;
+				case CallingConvention.FastCall:
+					stubCode = CopyByteArray(FastcallToStdcallStubCode);
+					fixed (byte* p = &stubCode[5])
+						*(uint*)p = (uint)pFunction;
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(fromCallingConvention));
+				}
+			else
+				throw new ArgumentOutOfRangeException();
+			pStub = Alloc((uint)stubCode.Length);
+			Write(pStub, stubCode);
+			VirtualProtect(pStub, (uint)stubCode.Length, PAGE_EXECUTE_READWRITE, out uint _);
+			return pStub;
+		}
+
+		private static byte[] CopyByteArray(byte[] array) {
+			if (array == null)
+				throw new ArgumentNullException(nameof(array));
+
+			byte[] newArray;
+
+			newArray = new byte[array.Length];
+			Buffer.BlockCopy(array, 0, newArray, 0, array.Length);
+			return newArray;
+		}
+	}
+}
+
+
+
+================================================
+File: JitUnpacker/NativeMethods.cs
+================================================
+using System.Runtime.InteropServices;
+using System.Text;
+
+namespace JitTools {
+	internal static unsafe class NativeMethods {
+		public const uint MAX_PATH = 260;
+		public const uint PAGE_EXECUTE_READWRITE = 0x40;
+
+		public enum CorInfoOptions {
+			CORINFO_OPT_INIT_LOCALS = 0x00000010,                // zero initialize all variables
+			CORINFO_GENERICS_CTXT_FROM_THIS = 0x00000020,        // is this shared generic code that access the generic context from the this pointer?  If so, then if the method has SEH then the 'this' pointer must always be reported and kept alive.
+			CORINFO_GENERICS_CTXT_FROM_METHODDESC = 0x00000040,  // is this shared generic code that access the generic context from the ParamTypeArg(that is a MethodDesc)?  If so, then if the method has SEH then the 'ParamTypeArg' must always be reported and kept alive. Same as CORINFO_CALLCONV_PARAMTYPE
+			CORINFO_GENERICS_CTXT_FROM_METHODTABLE = 0x00000080, // is this shared generic code that access the generic context from the ParamTypeArg(that is a MethodTable)?  If so, then if the method has SEH then the 'ParamTypeArg' must always be reported and kept alive. Same as CORINFO_CALLCONV_PARAMTYPE
+			CORINFO_GENERICS_CTXT_MASK = CORINFO_GENERICS_CTXT_FROM_THIS | CORINFO_GENERICS_CTXT_FROM_METHODDESC | CORINFO_GENERICS_CTXT_FROM_METHODTABLE,
+			CORINFO_GENERICS_CTXT_KEEP_ALIVE = 0x00000100,       //  Keep the generics context alive throughout the method even if there is no explicit use, and report its location to the CLR
+		};
+
+		public enum CORINFO_EH_CLAUSE_FLAGS {
+			CORINFO_EH_CLAUSE_NONE = 0,
+			CORINFO_EH_CLAUSE_FILTER = 0x0001,
+			CORINFO_EH_CLAUSE_FINALLY = 0x0002,
+			CORINFO_EH_CLAUSE_FAULT = 0x0004,
+			CORINFO_EH_CLAUSE_DUPLICATE = 0x0008,
+			CORINFO_EH_CLAUSE_SAMETRY = 0x0010,
+		};
+
+		[StructLayout(LayoutKind.Sequential)]
+		public struct IMAGE_SECTION_HEADER {
+			public fixed sbyte Name[8];
+			public uint VirtualSize;
+			public uint VirtualAddress;
+			public uint SizeOfRawData;
+			public uint PointerToRawData;
+			public uint PointerToRelocations;
+			public uint PointerToLinenumbers;
+			public ushort NumberOfRelocations;
+			public ushort NumberOfLinenumbers;
+			public uint Characteristics;
+		}
+
+		[StructLayout(LayoutKind.Sequential)]
+		public struct CORINFO_METHOD_INFO_20 {
+			public void* ftn;               // CORINFO_METHOD_HANDLE
+			public void* scope;             // CORINFO_MODULE_HANDLE
+			public byte* ILCode;
+			public uint ILCodeSize;
+			public ushort maxStack;
+			public ushort EHcount;
+			public CorInfoOptions options;
+			public uint regionKind;         // CorInfoRegionKind
+			public CORINFO_SIG_INFO_20 args;
+			public CORINFO_SIG_INFO_20 locals;
+		};
+
+		[StructLayout(LayoutKind.Sequential)]
+		public struct CORINFO_METHOD_INFO_40 {
+			public void* ftn;               // CORINFO_METHOD_HANDLE
+			public void* scope;             // CORINFO_MODULE_HANDLE
+			public byte* ILCode;
+			public uint ILCodeSize;
+			public uint maxStack;
+			public uint EHcount;
+			public CorInfoOptions options;
+			public uint regionKind;         // CorInfoRegionKind
+			public CORINFO_SIG_INFO_40 args;
+			public CORINFO_SIG_INFO_40 locals;
+		};
+
+		[StructLayout(LayoutKind.Sequential, Pack = 1)]
+		public struct CORINFO_SIG_INFO_20 {
+			public uint callConv; // CorInfoCallConv
+			public void* retTypeClass; // CORINFO_CLASS_HANDLE
+			public void* retTypeSigClass; // CORINFO_CLASS_HANDLE
+			public byte retType; // CorInfoType
+			public byte flags;
+			public ushort numArgs;
+			public CORINFO_SIG_INST sigInst;
+			public void* args; // CORINFO_ARG_LIST_HANDLE
+			public void* pSig; // PCCOR_SIGNATURE
+			public void* scope; // CORINFO_MODULE_HANDLE
+			public uint token;
+		};
+
+		[StructLayout(LayoutKind.Sequential, Pack = 1)]
+		public struct CORINFO_SIG_INFO_40 {
+			public uint callConv; // CorInfoCallConv
+			public void* retTypeClass; // CORINFO_CLASS_HANDLE
+			public void* retTypeSigClass; // CORINFO_CLASS_HANDLE
+			public byte retType; // CorInfoType
+			public byte flags;
+			public ushort numArgs;
+			public CORINFO_SIG_INST sigInst;
+			public void* args; // CORINFO_ARG_LIST_HANDLE
+			public void* pSig; // PCCOR_SIGNATURE
+			public uint cbSig;
+			public void* scope; // CORINFO_MODULE_HANDLE
+			public uint token;
+		};
+
+		[StructLayout(LayoutKind.Sequential)]
+		public struct CORINFO_SIG_INST {
+			public uint classInstCount;
+			public void** classInst; // CORINFO_CLASS_HANDLE*
+			public uint methInstCount;
+			public void** methInst; // CORINFO_CLASS_HANDLE*
+		}
+
+		[StructLayout(LayoutKind.Sequential)]
+		public struct CORINFO_EH_CLAUSE {
+			public CORINFO_EH_CLAUSE_FLAGS Flags;
+			public uint TryOffset;
+			public uint TryLength;
+			public uint HandlerOffset;
+			public uint HandlerLength;
+			public uint ClassTokenOrFilterOffset;
+		}
+
+		[UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+		public delegate void ResetDelegate(void* pMethodDesc);
+
+		[UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+		public delegate void* DoPrestubDelegate(void* pMethodDesc, void* pDispatchingMT);
+
+		[UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+		public delegate void* GetWrappedMethodDescDelegate(void* pMethodDesc);
+
+		public delegate int CompCompileDelegate(void* pThis, void* methodHnd, void* classPtr, void* compHnd, void* methodInfo, byte** methodCodePtr, uint* methodCodeSize, void* compileFlags);
+
+		public delegate int CompileMethodDelegate(void* pThis, void* compHnd, void* methodInfo, uint flags, byte** entryAddress, uint* nativeSizeOfCode);
+
+		public delegate void GetEHInfoDelegate(void* pThis, void* ftn, uint EHnumber, out CORINFO_EH_CLAUSE clause);
+
+		[DllImport("kernel32.dll", BestFitMapping = false, CharSet = CharSet.Unicode, SetLastError = true)]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		public static extern bool GetModuleFileName(void* hModule, StringBuilder lpFilename, uint nSize);
+
+		[DllImport("mscorjit.dll", BestFitMapping = false, CharSet = CharSet.Unicode, EntryPoint = "getJit", SetLastError = true)]
+		public static extern void* GetJit2();
+
+		[DllImport("clrjit.dll", BestFitMapping = false, CharSet = CharSet.Unicode, EntryPoint = "getJit", SetLastError = true)]
+		public static extern void* GetJit4();
+
+		[DllImport("kernel32.dll", BestFitMapping = false, CharSet = CharSet.Unicode, SetLastError = true)]
+		public static extern void* GetModuleHandle(string lpModuleName);
+
+		[DllImport("kernel32.dll", BestFitMapping = false, CharSet = CharSet.Unicode, SetLastError = true)]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		public static extern bool VirtualProtect(void* lpAddress, uint dwSize, uint flNewProtect, out uint lpflOldProtect);
+	}
+}
+
+
+
+================================================
+File: JitUnpacker/ProgressBar.cs
+================================================
+using System;
+
+namespace JitTools {
+	internal enum ProgressBarType {
+		Character,
+		Multicolor
+	}
+
+	internal sealed class ProgressBar {
+		private readonly int _length;
+		private readonly int _width;
+		private readonly ProgressBarType _type;
+		private readonly int _left;
+		private readonly int _top;
+		private int _current;
+
+		public int Length => _length;
+
+		public int Width => _width;
+
+		public ProgressBarType Type => _type;
+
+		public int Left => _left;
+
+		public int Top => _top;
+
+		public int Current {
+			get => _current;
+			set {
+				if (value < 0 || value > _length)
+					throw new ArgumentOutOfRangeException(nameof(value));
+
+				bool oldCursorVisible;
+				int oldCursorLeft;
+				int oldCursorTop;
+
+				if (_current == value)
+					return;
+				oldCursorVisible = Console.CursorVisible;
+				oldCursorLeft = Console.CursorLeft;
+				oldCursorTop = Console.CursorTop;
+				Console.CursorVisible = false;
+				_current = value;
+				if (_type == ProgressBarType.Multicolor) {
+					ConsoleColor backgroundColor;
+					ConsoleColor foregroundColor;
+
+					backgroundColor = Console.BackgroundColor;
+					foregroundColor = Console.ForegroundColor;
+					// 保存背景色与前景色
+					Console.BackgroundColor = ConsoleColor.Green;
+					Console.SetCursorPosition(_left, _top);
+					Console.Write(new string(' ', (int)Math.Round((double)_current / _length * _width)));
+					Console.BackgroundColor = backgroundColor;
+					// 绘制进度条进度
+					Console.ForegroundColor = ConsoleColor.White;
+					Console.SetCursorPosition(_left + _width + 1, _top);
+					// 更新进度百分比
+					Console.Write(((int)Math.Round((double)_current / _length * 100)).ToString() + "%");
+					Console.ForegroundColor = foregroundColor;
+				}
+				else {
+					Console.SetCursorPosition(_left + 1, _top);
+					Console.Write(new string('*', (int)Math.Round((double)_current / _length * (_width - 2))));
+					// 绘制进度条进度
+					Console.SetCursorPosition(_left + _width + 1, _top);
+					// 显示百分比
+					Console.Write(((int)Math.Round((double)_current / _length * 100)).ToString() + "%");
+				}
+				Console.WriteLine();
+				Console.SetCursorPosition(oldCursorLeft, oldCursorTop);
+				Console.CursorVisible = oldCursorVisible;
+			}
+		}
+
+		public ProgressBar(int length) : this(length, 50, ProgressBarType.Character) {
+		}
+
+		public ProgressBar(int length, int width, ProgressBarType type) : this(length, width, type, Console.CursorLeft, Console.CursorTop) {
+		}
+
+		public ProgressBar(int length, int width, ProgressBarType type, int left, int top) {
+			if (length <= 0)
+				throw new ArgumentOutOfRangeException(nameof(length));
+			if (width <= 0)
+				throw new ArgumentOutOfRangeException(nameof(width));
+
+			_length = length;
+			_width = width;
+			_type = type;
+			_left = left;
+			_top = top;
+			Console.SetCursorPosition(left, top);
+			for (int i = left; i < Console.WindowWidth; i++)
+				Console.Write(" ");
+			// 清空显示区域
+			if (_type == ProgressBarType.Multicolor) {
+				ConsoleColor backgroundColor;
+
+				backgroundColor = Console.BackgroundColor;
+				Console.SetCursorPosition(left, top);
+				Console.BackgroundColor = ConsoleColor.White;
+				for (int i = 0; i < width; i++)
+					Console.Write(" ");
+				Console.BackgroundColor = backgroundColor;
+			}
+			else {
+				Console.SetCursorPosition(left, top);
+				Console.Write("[");
+				Console.SetCursorPosition(left + width - 1, top);
+				Console.Write("]");
+			}
+			// 绘制进度条背景
+			Console.WriteLine();
+		}
+	}
+}
+
+
+
+================================================
+File: JitUnpacker/Properties/AssemblyInfo.cs
+================================================
+using System.Reflection;
+
+[assembly: AssemblyTitle("JitUnpacker")]
+[assembly: AssemblyProduct("JitUnpacker")]
+[assembly: AssemblyCopyright("Copyright Â© 2019 Wwh")]
+[assembly: AssemblyVersion("1.0.1.0")]
+[assembly: AssemblyFileVersion("1.0.1.0")]
+
+
+
+================================================
+File: JitUnpacker/Runtime/CorInfo.cs
+================================================
+using static JitTools.NativeMethods;
+
+namespace JitTools.Runtime {
+	internal sealed unsafe class CorMethodInfo {
+		private readonly void* _pData;
+
+		public void* PointerOfData => _pData;
+
+		public CORINFO_METHOD_INFO_20* MethodInfo20 => (CORINFO_METHOD_INFO_20*)_pData;
+
+		public CORINFO_METHOD_INFO_40* MethodInfo40 => (CORINFO_METHOD_INFO_40*)_pData;
+
+		public void* MethodHandle => RuntimeEnvironment.IsClr4x ? MethodInfo40->ftn : MethodInfo20->ftn;
+
+		public void* ModuleHandle => RuntimeEnvironment.IsClr4x ? MethodInfo40->scope : MethodInfo20->scope;
+
+		public byte* ILCode => RuntimeEnvironment.IsClr4x ? MethodInfo40->ILCode : MethodInfo20->ILCode;
+
+		public uint ILCodeSize => RuntimeEnvironment.IsClr4x ? MethodInfo40->ILCodeSize : MethodInfo20->ILCodeSize;
+
+		public uint MaxStack => RuntimeEnvironment.IsClr4x ? MethodInfo40->maxStack : MethodInfo20->maxStack;
+
+		public uint ExceptionHandlerCount => RuntimeEnvironment.IsClr4x ? MethodInfo40->EHcount : MethodInfo20->EHcount;
+
+		public CorInfoOptions Options => RuntimeEnvironment.IsClr4x ? MethodInfo40->options : MethodInfo20->options;
+
+		public CorSigInfo Locals => new CorSigInfo(RuntimeEnvironment.IsClr4x ? (void*)&MethodInfo40->locals : &MethodInfo20->locals);
+
+		public CorMethodInfo(void* pData) {
+			_pData = pData;
+		}
+	}
+
+	internal sealed unsafe class CorSigInfo {
+		private readonly void* _pData;
+
+		public void* PointerOfData => _pData;
+
+		public CORINFO_SIG_INFO_20* SigInfo20 => (CORINFO_SIG_INFO_20*)_pData;
+
+		public CORINFO_SIG_INFO_40* SigInfo40 => (CORINFO_SIG_INFO_40*)_pData;
+
+		public ushort ArgumentCount => RuntimeEnvironment.IsClr4x ? SigInfo40->numArgs : SigInfo20->numArgs;
+
+		public void* Arguments => RuntimeEnvironment.IsClr4x ? SigInfo40->args : SigInfo20->args;
+
+		public CorSigInfo(void* pData) {
+			_pData = pData;
+		}
+	}
+}
+
+
+
+================================================
+File: JitUnpacker/Runtime/IJitHook.cs
+================================================
+namespace JitTools.Runtime {
+	internal sealed unsafe class JitCompilationInfo {
+		private void* _pICorJitInfo;
+		private CorMethodInfo _methodInfo;
+		private byte** _ppNativeCode;
+		private uint* _pNativeCodeSize;
+
+		public void* PointerOfICorJitInfo {
+			get => _pICorJitInfo;
+			set => _pICorJitInfo = value;
+		}
+
+		public CorMethodInfo MethodInfo {
+			get => _methodInfo;
+			set => _methodInfo = value;
+		}
+
+		public byte** PointerOfNativeCodeAddress {
+			get => _ppNativeCode;
+			set => _ppNativeCode = value;
+		}
+
+		public uint* PointerOfNativeCodeSize {
+			get => _pNativeCodeSize;
+			set => _pNativeCodeSize = value;
+		}
+	}
+
+	/// <summary>
+	/// JIT编译回调方法
+	/// </summary>
+	/// <param name="compilationInfo"></param>
+	/// <returns>返回 <see langword="true"/> 表示不将方法交给JIT编译器进行继续编译，反之表示将方法交给JIT编译器进行继续编译</returns>
+	internal unsafe delegate bool JitCompilationCallback(JitCompilationInfo compilationInfo);
+
+	/// <summary>
+	/// JitHook接口
+	/// </summary>
+	internal unsafe interface IJitHook {
+		/// <summary>
+		/// 要截获的模块的句柄
+		/// </summary>
+		void* TargetModuleHandle { get; set; }
+
+		/// <summary>
+		/// 要截获的方法的句柄
+		/// </summary>
+		void* TargetMethodHandle { get; set; }
+
+		/// <summary>
+		/// 编译前触发的回调方法
+		/// </summary>
+		JitCompilationCallback Callback { get; set; }
+
+		/// <summary>
+		/// 安装Hook
+		/// </summary>
+		/// <returns></returns>
+		bool Hook();
+
+		/// <summary>
+		/// 卸载Hook
+		/// </summary>
+		/// <returns></returns>
+		bool Unhook();
+	}
+}
+
+
+
+================================================
+File: JitUnpacker/Runtime/JitHookFactory.cs
+================================================
+using System;
+
+namespace JitTools.Runtime {
+	public enum JitHookType {
+		Inline,
+		VTable,
+		Int3,
+		Hardware
+	}
+
+	internal static class JitHookFactory {
+		public static IJitHook Create(JitHookType type) {
+			switch (type) {
+			case JitHookType.Inline:
+				return new JitHookInlineImpl();
+			case JitHookType.VTable:
+				return new JitHookVTableImpl();
+			case JitHookType.Int3:
+				throw new NotImplementedException();
+			case JitHookType.Hardware:
+				throw new NotImplementedException();
+			default:
+				throw new ArgumentOutOfRangeException(nameof(type));
+			}
+		}
+	}
+}
+
+
+
+================================================
+File: JitUnpacker/Runtime/JitHookInlineImpl.cs
+================================================
+using System;
+using System.Runtime.ExceptionServices;
+using System.Runtime.InteropServices;
+using static JitTools.NativeMethods;
+using static JitTools.Runtime.RuntimeConstants;
+
+namespace JitTools.Runtime {
+	internal sealed unsafe class JitHookInlineImpl : IJitHook {
+		private readonly int* _pCallCompCompileOperation;
+		private readonly void* _pCompCompileOriginal;
+		private readonly CompCompileDelegate _compCompileOriginal;
+		private readonly CompCompileDelegate _compCompileStub;
+		// 我们不会使用到这个字段，为这个字段赋值的目的是防止GC回收委托
+		private readonly void* _pCompCompileStub;
+		private bool _isHooked;
+		private void* _targetModuleHandle;
+		private void* _targetMethodHandle;
+		private JitCompilationCallback _callback;
+		private uint _depth;
+
+		public void* TargetModuleHandle {
+			get => _targetModuleHandle;
+			set => _targetModuleHandle = value;
+		}
+
+		public void* TargetMethodHandle {
+			get => _targetMethodHandle;
+			set => _targetMethodHandle = value;
+		}
+
+		public JitCompilationCallback Callback {
+			get => _callback;
+			set => _callback = value;
+		}
+
+		static JitHookInlineImpl() {
+			// 防止JitHook进入死循环，先编译一些方法
+			CORINFO_METHOD_INFO_40 nativeMethodInfo;
+			CorMethodInfo methodInfo;
+
+			nativeMethodInfo = new CORINFO_METHOD_INFO_40();
+			methodInfo = new CorMethodInfo(&nativeMethodInfo);
+			_ = methodInfo.MethodHandle;
+			_ = methodInfo.ModuleHandle;
+		}
+
+		public JitHookInlineImpl() {
+			_pCallCompCompileOperation = (int*)((byte*)RuntimeEnvironment.JitModuleHandle + CALL_COMPCOMPILE_RVA + 1);
+			// 指向"call Compiler::compCompile"的操作数
+			_pCompCompileOriginal = (byte*)_pCallCompCompileOperation + *_pCallCompCompileOperation + 4;
+			_compCompileOriginal = MarshalEx.CreateDelegate<CompCompileDelegate>(_pCompCompileOriginal, CallingConvention.FastCall);
+			// 获取Compiler::compCompile
+			_compCompileStub = CompCompileStub;
+			_pCompCompileStub = MarshalEx.GetDelegateAddress(_compCompileStub, CallingConvention.FastCall);
+			// 调用回调方法的stub
+			_compCompileStub(null, null, null, null, null, null, null, null);
+		}
+
+		public bool Hook() {
+			if (_isHooked)
+				throw new InvalidOperationException(nameof(_isHooked) + " = true");
+
+			MarshalEx.Write(_pCallCompCompileOperation, BitConverter.GetBytes((int)_pCompCompileStub - (int)_pCallCompCompileOperation - 4));
+			_isHooked = true;
+			return true;
+		}
+
+		public bool Unhook() {
+			if (!_isHooked)
+				throw new InvalidOperationException(nameof(_isHooked) + " = false");
+
+			MarshalEx.Write(_pCallCompCompileOperation, BitConverter.GetBytes((int)_pCompCompileOriginal - (int)_pCallCompCompileOperation - 4));
+			_isHooked = false;
+			return true;
+		}
+
+		[HandleProcessCorruptedStateExceptions]
+		private int CompCompileStub(void* pThis, void* methodHandle, void* moduleHandle, void* pICorJitInfo, void* pMethodInfo, byte** ppEntryAddress, uint* pNativeSizeOfCode, void* compileFlags) {
+			CorMethodInfo methodInfo;
+			JitCompilationInfo compilationInfo;
+
+			if (pThis == null)
+				return 0;
+			methodInfo = new CorMethodInfo(pMethodInfo);
+			if (methodInfo.ModuleHandle != _targetModuleHandle || JitHookUtils.GetRealMethodHandle(methodInfo.MethodHandle) != _targetMethodHandle || _depth > 20)
+				return _compCompileOriginal(pThis, methodHandle, moduleHandle, pICorJitInfo, pMethodInfo, ppEntryAddress, pNativeSizeOfCode, compileFlags);
+			compilationInfo = new JitCompilationInfo {
+				PointerOfICorJitInfo = pICorJitInfo,
+				MethodInfo = methodInfo,
+				PointerOfNativeCodeAddress = ppEntryAddress,
+				PointerOfNativeCodeSize = pNativeSizeOfCode
+			};
+			try {
+				_depth++;
+				// 深度，表示CompCompileStub被嵌套调用了多少次，防止调用次数过多导致堆栈溢出
+				if (_callback(compilationInfo))
+					// 返回true表示不将方法交给JIT编译器进行继续编译
+					return 0;
+				pICorJitInfo = compilationInfo.PointerOfICorJitInfo;
+				pMethodInfo = compilationInfo.MethodInfo.PointerOfData;
+				ppEntryAddress = compilationInfo.PointerOfNativeCodeAddress;
+				pNativeSizeOfCode = compilationInfo.PointerOfNativeCodeSize;
+				// 使用回调方法修改后的数据进行编译
+				return _compCompileOriginal(pThis, methodHandle, moduleHandle, pICorJitInfo, pMethodInfo, ppEntryAddress, pNativeSizeOfCode, compileFlags);
+			}
+			finally {
+				_depth = 0;
+			}
+		}
+	}
+}
+
+
+
+================================================
+File: JitUnpacker/Runtime/JitHookUtils.cs
+================================================
+using System;
+using System.Reflection;
+
+namespace JitTools.Runtime {
+	internal static unsafe class JitHookUtils {
+		private static readonly ConstructorInfo ConstructorInfo_RuntimeMethodHandleInternal;
+		private static readonly MethodBase MethodBase_GetDeclaringType;
+		private static readonly MethodBase MethodBase_GetStubIfNeeded;
+		private static readonly FieldInfo FieldInfo_m_handle;
+		private static readonly MethodBase MethodBase_GetUnboxingStub;
+
+		static JitHookUtils() {
+			if (RuntimeEnvironment.IsClr4x) {
+				Type type_RuntimeMethodHandleInternal;
+
+				type_RuntimeMethodHandleInternal = Type.GetType("System.RuntimeMethodHandleInternal");
+				ConstructorInfo_RuntimeMethodHandleInternal = type_RuntimeMethodHandleInternal.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(IntPtr) }, null);
+				MethodBase_GetDeclaringType = typeof(RuntimeMethodHandle).GetMethod("GetDeclaringType", BindingFlags.NonPublic | BindingFlags.Static, null, new Type[] { Type.GetType("System.RuntimeMethodHandleInternal") }, null);
+				MethodBase_GetStubIfNeeded = typeof(RuntimeMethodHandle).GetMethod("GetStubIfNeeded", BindingFlags.NonPublic | BindingFlags.Static);
+				FieldInfo_m_handle = type_RuntimeMethodHandleInternal.GetField("m_handle", BindingFlags.NonPublic | BindingFlags.Instance);
+			}
+			else {
+				MethodBase_GetDeclaringType = typeof(RuntimeMethodHandle).GetMethod("GetDeclaringType", BindingFlags.NonPublic | BindingFlags.Instance);
+				MethodBase_GetUnboxingStub = typeof(RuntimeMethodHandle).GetMethod("GetUnboxingStub", BindingFlags.NonPublic | BindingFlags.Instance);
+			}
+		}
+
+		public static void* GetRealMethodHandle(void* methodHandle) {
+			if (RuntimeEnvironment.IsClr4x) {
+				object runtimeMethodHandleInternal;
+				Type declaringType;
+
+				runtimeMethodHandleInternal = ConstructorInfo_RuntimeMethodHandleInternal.Invoke(new object[] { (IntPtr)methodHandle });
+				declaringType = (Type)MethodBase_GetDeclaringType.Invoke(null, new object[] { runtimeMethodHandleInternal });
+				return declaringType.IsValueType
+					? (void*)(IntPtr)FieldInfo_m_handle.GetValue(MethodBase_GetStubIfNeeded.Invoke(null, new object[] { runtimeMethodHandleInternal, declaringType, null }))
+					: methodHandle;
+			}
+			else {
+				RuntimeMethodHandle runtimeMethodHandle;
+
+				runtimeMethodHandle = *(RuntimeMethodHandle*)&methodHandle;
+				return Type.GetTypeFromHandle((RuntimeTypeHandle)MethodBase_GetDeclaringType.Invoke(runtimeMethodHandle, null)).IsValueType
+					? (void*)((RuntimeMethodHandle)MethodBase_GetUnboxingStub.Invoke(runtimeMethodHandle, null)).Value
+					: methodHandle;
+			}
+		}
+	}
+}
+
+
+
+================================================
+File: JitUnpacker/Runtime/JitHookVTableImpl.cs
+================================================
+using System;
+using System.Runtime.ExceptionServices;
+using System.Runtime.InteropServices;
+using static JitTools.NativeMethods;
+
+namespace JitTools.Runtime {
+	internal sealed unsafe class JitHookVTableImpl : IJitHook {
+		private static readonly CallingConvention CompileMethodCallingConvention = RuntimeEnvironment.IsCompileMethodThisCall ? CallingConvention.ThisCall : CallingConvention.StdCall;
+		private readonly void** _ppCompileMethod;
+		private readonly void* _pCompileMethodOriginal;
+		private readonly CompileMethodDelegate _compileMethodOriginal;
+		private readonly CompileMethodDelegate _compileMethodStub;
+		// 我们不会使用到这个字段，为这个字段赋值的目的是防止GC回收委托
+		private readonly void* _pCompileMethodStub;
+		private bool _isHooked;
+		private void* _targetModuleHandle;
+		private void* _targetMethodHandle;
+		private JitCompilationCallback _callback;
+		private uint _depth;
+
+		public void* TargetModuleHandle {
+			get => _targetModuleHandle;
+			set => _targetModuleHandle = value;
+		}
+
+		public void* TargetMethodHandle {
+			get => _targetMethodHandle;
+			set => _targetMethodHandle = value;
+		}
+
+		public JitCompilationCallback Callback {
+			get => _callback;
+			set => _callback = value;
+		}
+
+		static JitHookVTableImpl() {
+			// 防止JitHook进入死循环，先编译一些方法
+			CORINFO_METHOD_INFO_40 nativeMethodInfo;
+			CorMethodInfo methodInfo;
+
+			nativeMethodInfo = new CORINFO_METHOD_INFO_40();
+			methodInfo = new CorMethodInfo(&nativeMethodInfo);
+			_ = methodInfo.MethodHandle;
+			_ = methodInfo.ModuleHandle;
+		}
+
+		public JitHookVTableImpl() {
+			_ppCompileMethod = *(void***)RuntimeFunctions.GetJit();
+			// 虚表第一项是CILJit::compileMethod
+			_pCompileMethodOriginal = *_ppCompileMethod;
+			_compileMethodOriginal = MarshalEx.CreateDelegate<CompileMethodDelegate>(_pCompileMethodOriginal, CompileMethodCallingConvention);
+			// 获取原始compileMethod
+			_compileMethodStub = CompileMethodStub;
+			_pCompileMethodStub = MarshalEx.GetDelegateAddress(_compileMethodStub, CompileMethodCallingConvention);
+			// 调用回调方法的stub
+			_compileMethodStub(null, null, null, 0, null, null);
+		}
+
+		public bool Hook() {
+			if (_isHooked)
+				throw new InvalidOperationException(nameof(_isHooked) + " = true");
+
+			MarshalEx.Write(_ppCompileMethod, GetBytes(_pCompileMethodStub));
+			_isHooked = true;
+			return true;
+		}
+
+		public bool Unhook() {
+			if (!_isHooked)
+				throw new InvalidOperationException(nameof(_isHooked) + " = false");
+
+			MarshalEx.Write(_ppCompileMethod, GetBytes(_pCompileMethodOriginal));
+			_isHooked = false;
+			return true;
+		}
+
+		private static byte[] GetBytes(void* value) {
+			return RuntimeEnvironment.Is32Bit ? BitConverter.GetBytes((uint)value) : BitConverter.GetBytes((ulong)value);
+		}
+
+		[HandleProcessCorruptedStateExceptions]
+		private int CompileMethodStub(void* pThis, void* pICorJitInfo, void* pMethodInfo, uint flags, byte** ppEntryAddress, uint* pNativeSizeOfCode) {
+			CorMethodInfo methodInfo;
+			JitCompilationInfo compilationInfo;
+
+			if (pThis == null)
+				return 0;
+			methodInfo = new CorMethodInfo(pMethodInfo);
+			if (methodInfo.ModuleHandle != _targetModuleHandle || JitHookUtils.GetRealMethodHandle(methodInfo.MethodHandle) != _targetMethodHandle || _depth > 20)
+				return _compileMethodOriginal(pThis, pICorJitInfo, pMethodInfo, flags, ppEntryAddress, pNativeSizeOfCode);
+			compilationInfo = new JitCompilationInfo {
+				PointerOfICorJitInfo = pICorJitInfo,
+				MethodInfo = methodInfo,
+				PointerOfNativeCodeAddress = ppEntryAddress,
+				PointerOfNativeCodeSize = pNativeSizeOfCode
+			};
+			try {
+				_depth++;
+				// 深度，表示CompileMethodStub被嵌套调用了多少次，防止调用次数过多导致堆栈溢出
+				if (_callback(compilationInfo))
+					// 返回true表示不将方法交给JIT编译器进行继续编译
+					return 0;
+				pICorJitInfo = compilationInfo.PointerOfICorJitInfo;
+				pMethodInfo = compilationInfo.MethodInfo.PointerOfData;
+				ppEntryAddress = compilationInfo.PointerOfNativeCodeAddress;
+				pNativeSizeOfCode = compilationInfo.PointerOfNativeCodeSize;
+				// 使用回调方法修改后的数据进行编译
+				return _compileMethodOriginal(pThis, pICorJitInfo, pMethodInfo, flags, ppEntryAddress, pNativeSizeOfCode);
+			}
+			finally {
+				_depth = 0;
+			}
+		}
+	}
+}
+
+
+
+================================================
+File: JitUnpacker/Runtime/RuntimeConstants.cs
+================================================
+using System;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using static JitTools.NativeMethods;
+
+namespace JitTools.Runtime {
+	internal static unsafe class RuntimeConstants {
+#pragma warning disable CS0649
+		public static readonly uint METHODDESC_RESET_RVA;
+		public static readonly uint METHODDESC_DOPRESTUB_RVA;
+		public static readonly uint METHODDESC_GETWRAPPEDMETHODDESC_RVA;
+		public static readonly uint CEEINFO_CANINLINE_RVA;
+		public static readonly uint METHODDESC_DOPRESTUB_CALL_CONTAINSGENERICVARIABLES_RVA;
+		public static readonly uint METHODDESC_DOPRESTUB_CALL_ISCLASSCONSTRUCTORTRIGGEREDVIAPRESTUB_RVA;
+		public static readonly uint METHODDESC_DOPRESTUB_CALL_CHECKRUNCLASSINITTHROWING_RVA;
+		public static readonly uint CALL_COMPCOMPILE_RVA;
+		public static readonly uint JITNATIVECODE_RVA;
+#pragma warning restore CS0649
+
+		static RuntimeConstants() {
+			string configName;
+			string[][] configs;
+
+			configName = "JitUnpacker.RuntimeFunctions";
+			if (RuntimeEnvironment.Is32Bit)
+				configName += RuntimeEnvironment.IsClr2x ? ".CLR20.x86" : ".CLR40.x86";
+			else
+				configName += RuntimeEnvironment.IsClr2x ? ".CLR20.x64" : ".CLR40.x64";
+			configName += ".config";
+			configs = File.ReadAllLines(configName).Select(line => line.Split('=')).ToArray();
+			CheckVersions(configs);
+			foreach (FieldInfo fieldInfo in typeof(RuntimeConstants).GetFields(BindingFlags.Public | BindingFlags.Static)) {
+				string key;
+				string[] config;
+
+				key = fieldInfo.Name;
+				config = configs.First(t => t[0] == key);
+				fieldInfo.SetValue(null, GetValue(config[1]));
+			}
+		}
+
+		private static uint GetValue(string value) {
+			return uint.Parse(value, NumberStyles.HexNumber);
+		}
+
+		private static void CheckVersions(string[][] configs) {
+			CheckVersion(configs, "CLR_VERSION", RuntimeEnvironment.ClrModuleHandle);
+			CheckVersion(configs, "JIT_VERSION", RuntimeEnvironment.JitModuleHandle);
+		}
+
+		private static void CheckVersion(string[][] configs, string configKey, void* moduleHandle) {
+			StringBuilder buffer;
+			string filePath;
+			FileVersionInfo versionInfo;
+			Version version;
+
+			buffer = new StringBuilder((int)MAX_PATH);
+			GetModuleFileName(moduleHandle, buffer, MAX_PATH);
+			filePath = buffer.ToString();
+			versionInfo = FileVersionInfo.GetVersionInfo(filePath);
+			version = new Version(versionInfo.FileMajorPart, versionInfo.FileMinorPart, versionInfo.FileBuildPart, versionInfo.FilePrivatePart);
+			if (configs.First(t => t[0] == configKey)[1] != version.ToString())
+				throw new NotSupportedException("You should run RuntimeFunctionConfigGenerator to update JitUnpacker.RuntimeFunctions.*.config");
+		}
+	}
+}
+
+
+
+================================================
+File: JitUnpacker/Runtime/RuntimeEnvironment.cs
+================================================
+using System;
+using static JitTools.NativeMethods;
+
+namespace JitTools.Runtime {
+	internal static unsafe class RuntimeEnvironment {
+		private static readonly Version Clr45DevPreviewVersion = new Version(4, 0, 30319, 17020);
+		private static readonly Version Clr45RtmVersion = new Version(4, 0, 30319, 17929);
+		private static readonly Version _clrVersion;
+		private static readonly void* _clrModuleHandle;
+		private static readonly void* _jitModuleHandle;
+		private static bool? _isClr40x;
+		private static bool? _isClr45x;
+		private static bool? _isCompileMethodThisCall;
+
+		public static bool Is32Bit => IntPtr.Size == 4;
+
+		public static Version ClrVersion => _clrVersion;
+
+		public static string ClrModuleName => IsClr2x ? "mscorwks.dll" : "clr.dll";
+
+		public static string JitModuleName => IsClr2x ? "mscorjit.dll" : "clrjit.dll";
+
+		public static void* ClrModuleHandle => _clrModuleHandle;
+
+		public static void* JitModuleHandle => _jitModuleHandle;
+
+		public static bool IsClr2x => _clrVersion.Major == 2;
+
+		public static bool IsClr4x => _clrVersion.Major == 4;
+
+		public static bool IsClr40x {
+			get {
+				if (_isClr40x == null)
+					_isClr40x = _clrVersion.Major == 4 && _clrVersion < Clr45DevPreviewVersion;
+				return _isClr40x.Value;
+			}
+		}
+
+		public static bool IsClr45x {
+			get {
+				if (_isClr45x == null)
+					_isClr45x = _clrVersion >= Clr45DevPreviewVersion;
+				return _isClr45x.Value;
+			}
+		}
+
+		public static bool IsCompileMethodThisCall {
+			get {
+				if (_isCompileMethodThisCall == null)
+					_isCompileMethodThisCall = _clrVersion >= Clr45DevPreviewVersion && _clrVersion < Clr45RtmVersion;
+				return _isCompileMethodThisCall.Value;
+			}
+		}
+
+		static RuntimeEnvironment() {
+			_clrVersion = Environment.Version;
+			_clrModuleHandle = GetModuleHandle(ClrModuleName);
+			_jitModuleHandle = GetModuleHandle(JitModuleName);
+		}
+	}
+}
+
+
+
+================================================
+File: JitUnpacker/Runtime/RuntimeFunctions.cs
+================================================
+using System.Runtime.InteropServices;
+using static JitTools.NativeMethods;
+using static JitTools.Runtime.RuntimeConstants;
+
+namespace JitTools.Runtime {
+	internal static unsafe class RuntimeFunctions {
+		private static readonly ResetDelegate _reset;
+		private static readonly DoPrestubDelegate _doPrestub;
+		private static readonly GetWrappedMethodDescDelegate _getWrappedMethodDesc;
+
+		static RuntimeFunctions() {
+			_reset = MarshalEx.CreateDelegate<ResetDelegate>((byte*)RuntimeEnvironment.ClrModuleHandle + METHODDESC_RESET_RVA);
+			_doPrestub = MarshalEx.CreateDelegate<DoPrestubDelegate>((byte*)RuntimeEnvironment.ClrModuleHandle + METHODDESC_DOPRESTUB_RVA);
+			_getWrappedMethodDesc = MarshalEx.CreateDelegate<GetWrappedMethodDescDelegate>((byte*)RuntimeEnvironment.ClrModuleHandle + METHODDESC_GETWRAPPEDMETHODDESC_RVA);
+		}
+
+		public static void* GetJit() {
+			return RuntimeEnvironment.IsClr2x ? GetJit2() : GetJit4();
+		}
+
+		public static bool IsUnboxingStub(void* pMethodDesc) {
+			return (*((byte*)pMethodDesc + 3) & 0x4) != 0;
+			// return (m_bFlags2 & enum_flag2_IsUnboxingStub) != 0;
+		}
+
+		public static void Reset(void* pMethodDesc) {
+			_reset(pMethodDesc);
+		}
+
+		public static void* DoPrestub(void* pMethodDesc) {
+			try {
+				return _doPrestub(pMethodDesc, null);
+			}
+			catch (SEHException) {
+				return null;
+			}
+		}
+
+		public static void* GetWrappedMethodDesc(void* pMethodDesc) {
+			return _getWrappedMethodDesc(pMethodDesc);
+		}
+	}
+}
+
+
+
+================================================
+File: JitUnpacker/Runtime/RuntimePatcher.cs
+================================================
+using System;
+using System.Collections.Generic;
+using static JitTools.Runtime.RuntimeConstants;
+
+namespace JitTools.Runtime {
+	internal static unsafe class RuntimePatcher {
+		private static readonly List<PatchInfo> _patchInfos = new List<PatchInfo>();
+
+		static RuntimePatcher() {
+			AddCanInlinePatchInfo();
+			AddStaticConstructorCheckingPatchInfo();
+			AddGenericVariablesCheckingPatchInfo();
+		}
+
+		public static void PatchAll() {
+			if (!RuntimeEnvironment.Is32Bit)
+				throw new NotSupportedException();
+
+			foreach (PatchInfo patchInfo in _patchInfos)
+				MarshalEx.Write(patchInfo.Address, patchInfo.Patch);
+		}
+
+		public static void RestoreAll() {
+			if (!RuntimeEnvironment.Is32Bit)
+				throw new NotSupportedException();
+
+			foreach (PatchInfo patchInfo in _patchInfos)
+				MarshalEx.Write(patchInfo.Address, patchInfo.Original);
+		}
+
+		private static void AddCanInlinePatchInfo() {
+			byte[] noInlineCode;
+
+			if (RuntimeEnvironment.IsClr45x)
+				// CLR45的CEEInfo::canInline开始使用thiscall调用约定
+				noInlineCode = new byte[] {
+					0x8B, 0x44, 0x24, 0x0C, // mov     eax, [esp+0xC]
+					0x85, 0xC0,             // test    eax, eax
+					0x74, 0x03,             // je      label1
+					0x83, 0x20, 0x00,       // and     [eax], 0x0
+					0x6A, 0xFE,             // label1: push    0xFFFFFFFE
+					0x58,		            // pop     eax
+					0xC2, 0x0C, 0x00        // ret     0xC
+				};
+			else
+				// CLR20~CLR40的CEEInfo::canInline是stdcall调用约定
+				noInlineCode = new byte[] {
+					0x8B, 0x44, 0x24, 0x10, // mov     eax, [esp+0x10]
+					0x85, 0xC0,             // test    eax, eax
+					0x74, 0x03,             // je      label1
+					0x83, 0x20, 0x00,       // and     [eax], 0x0
+					0x6A, 0xFE,             // label1: push    0xFFFFFFFE
+					0x58,		            // pop     eax
+					0xC2, 0x10, 0x00  	    // ret     0x10
+				};
+			_patchInfos.Add(CreatePatchInfo((void*)((byte*)RuntimeEnvironment.ClrModuleHandle + CEEINFO_CANINLINE_RVA), noInlineCode));
+		}
+
+		private static void AddStaticConstructorCheckingPatchInfo() {
+			byte* address;
+			byte[] patch;
+
+			if (RuntimeEnvironment.IsClr4x) {
+				address = (byte*)RuntimeEnvironment.ClrModuleHandle + METHODDESC_DOPRESTUB_CALL_ISCLASSCONSTRUCTORTRIGGEREDVIAPRESTUB_RVA;
+				patch = new byte[] { 0xB8, 0x00, 0x00, 0x00, 0x00, 0x90, 0x90, 0x90 };
+				// 85C0          | test    eax, eax            |
+				// 0F85 90500300 | jne     clr_4.0_32.78236DAB |
+				// 改成：
+				// mov eax, 0
+				// nop
+				// nop
+				// nop
+			}
+			else {
+				address = (byte*)RuntimeEnvironment.ClrModuleHandle + METHODDESC_DOPRESTUB_CALL_CHECKRUNCLASSINITTHROWING_RVA;
+				patch = new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 };
+				//MarshalEx.Write((byte*)RuntimeEnvironment.ClrModuleHandle + 0x1030E, new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
+				// 8B4D E8     | mov     ecx, dword ptr [ebp-0x18]                                             |
+				// E8 D89DFFFF | call    <mscorwks.public: void __thiscall MethodTable::CheckRunClassInitThrow |
+				// 改成：
+				// nop * 8
+			}
+			_patchInfos.Add(CreatePatchInfo(address, patch));
+		}
+
+		private static void AddGenericVariablesCheckingPatchInfo() {
+			if (RuntimeEnvironment.IsClr45x) {
+				_patchInfos.Add(CreatePatchInfo((byte*)RuntimeEnvironment.ClrModuleHandle + METHODDESC_DOPRESTUB_CALL_CONTAINSGENERICVARIABLES_RVA, new byte[] { 0xB8, 0x00, 0x00, 0x00, 0x00, 0x90, 0x90, 0x90 }));
+				// 85C0          | test    eax, eax     |
+				// 0F85 6A313100 | jne     clr.70ABE175 |
+				// 改成：
+				// mov eax, 0
+				// nop
+				// nop
+				// nop
+			}
+		}
+
+		private static PatchInfo CreatePatchInfo(void* address, byte[] patch) {
+			byte[] original;
+
+			original = new byte[patch.Length];
+			MarshalEx.Read(address, original);
+			return new PatchInfo {
+				Address = address,
+				Original = original,
+				Patch = patch
+			};
+		}
+
+		private sealed class PatchInfo {
+			public void* Address;
+			public byte[] Original;
+			public byte[] Patch;
+		}
+	}
+}
+
+
+
+================================================
+File: JitUnpacker/Unpackers/IMethodDumper.cs
+================================================
+namespace JitTools.Unpackers {
+	/// <summary>
+	/// 相对于目标方法的Dump状态，因为DNGuardHVM会多次调用JIT，并且一般情况下最后一次调用JIT时才可以得到真正的IL
+	/// </summary>
+	internal enum DumpingState {
+		Waiting,
+		Dumping,
+		Finished
+	}
+
+	internal interface IMethodDumper {
+		DumpingState State { get; }
+
+		uint DumpCount { get; }
+
+		void Hook();
+
+		void Unhook();
+
+		void SetTargetMethod(int index);
+
+		void SetIdle();
+	}
+}
+
+
+
+================================================
+File: JitUnpacker/Unpackers/IUnpacker.cs
+================================================
+namespace JitTools.Unpackers {
+	internal interface IUnpacker {
+		/// <summary>
+		/// 脱壳机全名
+		/// </summary>
+		string Name { get; }
+
+		/// <summary>
+		/// 壳ID（壳名称的缩写）
+		/// </summary>
+		string Id { get; }
+
+		/// <summary>
+		/// Context
+		/// </summary>
+		UnpackerContext Context { get; }
+
+		/// <summary>
+		/// MethodDumper
+		/// </summary>
+		IMethodDumper MethodDumper { get; }
+
+		/// <summary>
+		/// 在cctor运行前初始化
+		/// </summary>
+		void PreInitialize();
+
+		/// <summary>
+		/// 在cctor运行后初始化
+		/// </summary>
+		void PostInitialize();
+
+		/// <summary>
+		/// 判断指定方法是否需要解密
+		/// </summary>
+		/// <param name="index">MethodHandle的索引</param>
+		/// <returns></returns>
+		bool NeedDecryptMethod(int index);
+
+		/// <summary>
+		/// 调用JIT
+		/// </summary>
+		/// <param name="index">MethodHandle的索引</param>
+		void CallJit(int index);
+
+		/// <summary>
+		/// 解密完成后移除目标程序集中初始化运行时的代码
+		/// </summary>
+		void RemoveRuntime();
+	}
+}
+
+
+
+================================================
+File: JitUnpacker/Unpackers/IUnpackerDetector.cs
+================================================
+using System;
+using System.Collections.Generic;
+using dnlib.DotNet;
+
+namespace JitTools.Unpackers {
+	internal unsafe interface IUnpackerDetector {
+		/// <summary>
+		/// 判断是否为当前Unpacker可以处理的壳
+		/// </summary>
+		/// <param name="moduleDef"></param>
+		/// <returns></returns>
+		bool Detect(ModuleDefMD moduleDef);
+
+		/// <summary>
+		/// 创建脱壳机
+		/// </summary>
+		/// <param name="context"></param>
+		/// <returns></returns>
+		IUnpacker CreateUnpacker(UnpackerContext context);
+	}
+
+	internal static class LoadedUnpackerDetectors {
+		private static readonly IUnpackerDetector[] _allWithoutUnknown;
+		private static readonly IUnpackerDetector _unknown;
+
+		public static IUnpackerDetector[] AllWithoutUnknown => _allWithoutUnknown;
+
+		public static IUnpackerDetector Unknown => _unknown;
+
+		static LoadedUnpackerDetectors() {
+			Type targetType;
+			List<IUnpackerDetector> detectors;
+
+			targetType = typeof(IUnpackerDetector);
+			detectors = new List<IUnpackerDetector>();
+			foreach (Type type in typeof(IUnpackerDetector).Module.GetTypes())
+				foreach (Type interfaceType in type.GetInterfaces())
+					if (interfaceType.IsAssignableFrom(targetType)) {
+						IUnpackerDetector detector;
+
+						detector = (IUnpackerDetector)Activator.CreateInstance(type);
+						if (detector is Unknown.UnpackerDetector)
+							_unknown = detector;
+						else
+							detectors.Add(detector);
+					}
+			_allWithoutUnknown = detectors.ToArray();
+		}
+
+		public static IUnpackerDetector Detect(ModuleDefMD moduleDef) {
+			foreach (IUnpackerDetector detector in _allWithoutUnknown)
+				if (detector.Detect(moduleDef))
+					return detector;
+			return _unknown;
+		}
+	}
+}
+
+
+
+================================================
+File: JitUnpacker/Unpackers/JitMethodBodyReader.cs
+================================================
+using System;
+using System.Collections.Generic;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using dnlib.IO;
+using static JitTools.NativeMethods;
+
+namespace JitTools.Unpackers {
+	internal delegate uint TokenResolver(Code code, uint token);
+
+	internal sealed class JitMethodBodyReader : MethodBodyReaderBase {
+		private readonly ModuleDefMD _moduleDef;
+		private TokenResolver _tokenResolver;
+
+		public TokenResolver TokenResolver {
+			get => _tokenResolver;
+			set => _tokenResolver = value;
+		}
+
+		public JitMethodBodyReader(ModuleDefMD moduleDef, IList<Parameter> parameters) {
+			if (moduleDef == null)
+				throw new ArgumentNullException(nameof(moduleDef));
+			if (parameters == null)
+				throw new ArgumentNullException(nameof(parameters));
+
+			_moduleDef = moduleDef;
+			base.parameters = parameters;
+		}
+
+		public CilBody CreateCilBody(byte[] byteILs, ushort maxStack, byte[] byteLocalSig, CORINFO_EH_CLAUSE[] clauses) {
+			if (byteILs == null)
+				throw new ArgumentNullException(nameof(byteILs));
+
+			if (byteLocalSig != null) {
+				CallingConventionSig callingConventionSig;
+
+				callingConventionSig = SignatureReader.ReadSig(_moduleDef, byteLocalSig);
+				SetLocals(((LocalSig)callingConventionSig).Locals);
+			}
+			reader = ByteArrayDataReaderFactory.CreateReader(byteILs);
+			ReadInstructionsNumBytes((uint)byteILs.Length);
+			if (clauses != null)
+				foreach (CORINFO_EH_CLAUSE clause in clauses) {
+					ExceptionHandler exceptionHandler;
+
+					exceptionHandler = new ExceptionHandler((ExceptionHandlerType)clause.Flags) {
+						TryStart = GetInstruction(clause.TryOffset),
+						TryEnd = GetInstruction(clause.TryOffset + clause.TryLength),
+						HandlerStart = GetInstruction(clause.HandlerOffset),
+						HandlerEnd = GetInstruction(clause.HandlerOffset + clause.HandlerLength)
+					};
+					if (exceptionHandler.HandlerType == ExceptionHandlerType.Catch)
+						exceptionHandler.CatchType = (ITypeDefOrRef)_moduleDef.ResolveToken(clause.ClassTokenOrFilterOffset);
+					else if (exceptionHandler.HandlerType == ExceptionHandlerType.Filter)
+						exceptionHandler.FilterStart = GetInstruction(clause.ClassTokenOrFilterOffset);
+					Add(exceptionHandler);
+				}
+			return new CilBody(byteLocalSig != null, instructions, exceptionHandlers, locals) {
+				MaxStack = maxStack
+			};
+		}
+
+		protected override IField ReadInlineField(Instruction instr) {
+			return (IField)_moduleDef.ResolveToken(ResolveToken(instr.OpCode.Code, reader.ReadUInt32()));
+		}
+
+		protected override IMethod ReadInlineMethod(Instruction instr) {
+			return (IMethod)_moduleDef.ResolveToken(ResolveToken(instr.OpCode.Code, reader.ReadUInt32()));
+		}
+
+		protected override MethodSig ReadInlineSig(Instruction instr) {
+			StandAloneSig standAloneSig;
+			MethodSig methodSig;
+
+			standAloneSig = (StandAloneSig)_moduleDef.ResolveToken(ResolveToken(instr.OpCode.Code, reader.ReadUInt32()));
+			if (standAloneSig == null) {
+				Logger.Instance.LogError("ReadInlineSig failed");
+				return null;
+			}
+			methodSig = standAloneSig.MethodSig;
+			if (methodSig != null)
+				methodSig.OriginalToken = standAloneSig.MDToken.Raw;
+			return methodSig;
+		}
+
+		protected override string ReadInlineString(Instruction instr) {
+			return _moduleDef.ReadUserString(reader.ReadUInt32());
+		}
+
+		protected override ITokenOperand ReadInlineTok(Instruction instr) {
+			return (ITokenOperand)_moduleDef.ResolveToken(ResolveToken(instr.OpCode.Code, reader.ReadUInt32()));
+		}
+
+		protected override ITypeDefOrRef ReadInlineType(Instruction instr) {
+			return (ITypeDefOrRef)_moduleDef.ResolveToken(ResolveToken(instr.OpCode.Code, reader.ReadUInt32()));
+		}
+
+		private uint ResolveToken(Code code, uint token) {
+			return _tokenResolver == null ? token : _tokenResolver(code, token);
+		}
+	}
+}
+
+
+
+================================================
+File: JitUnpacker/Unpackers/MethodDumperBase.cs
+================================================
+using System;
+using dnlib.DotNet;
+using JitTools.Runtime;
+using static JitTools.NativeMethods;
+using CallingConvention = System.Runtime.InteropServices.CallingConvention;
+using RuntimeEnvironment = JitTools.Runtime.RuntimeEnvironment;
+
+namespace JitTools.Unpackers {
+	internal abstract unsafe class MethodDumperBase : IMethodDumper {
+		protected readonly UnpackerContext _context;
+		protected readonly IJitHook _jitHook;
+		protected GetEHInfoDelegate _getEHInfo;
+		protected int _targetIndex;
+		protected DumpingState _state;
+		protected uint _dumpCount;
+
+		public DumpingState State => _state;
+
+		public uint DumpCount => _dumpCount;
+
+		protected MethodDumperBase(UnpackerContext context) {
+			if (context == null)
+				throw new ArgumentNullException(nameof(context));
+
+			_context = context;
+			_jitHook = JitHookFactory.Create(_context.Settings.HookType);
+			_jitHook.TargetModuleHandle = _context.ModuleHandle;
+			_jitHook.Callback = OnJitCompilation;
+			SetIdle();
+		}
+
+		protected abstract bool OnJitCompilation(JitCompilationInfo compilationInfo);
+
+		public virtual void Hook() {
+			SetIdle();
+			_jitHook.Hook();
+		}
+
+		public virtual void Unhook() {
+			_jitHook.Unhook();
+			SetIdle();
+		}
+
+		public virtual void SetTargetMethod(int index) {
+			_targetIndex = index;
+			_jitHook.TargetMethodHandle = _context.MethodHandles[index];
+			_state = DumpingState.Waiting;
+		}
+
+		public virtual void SetIdle() {
+			_targetIndex = -1;
+			_jitHook.TargetMethodHandle = null;
+			_state = DumpingState.Waiting;
+		}
+
+		protected void EnsueGetEHInfo(void* pICorJitInfo) {
+			if (_getEHInfo == null)
+				InitializeGetEHInfo(pICorJitInfo);
+		}
+
+		protected virtual void InitializeGetEHInfo(void* pICorJitInfo) {
+			void* pGetEHInfo;
+
+			pGetEHInfo = VTableHelpers.GetGetEHInfo(pICorJitInfo);
+			if (RuntimeEnvironment.IsClr45x)
+				pGetEHInfo = MarshalEx.ConvertCallingConvention(pGetEHInfo, CallingConvention.ThisCall, CallingConvention.StdCall);
+			_getEHInfo = MarshalEx.CreateDelegate<GetEHInfoDelegate>(pGetEHInfo);
+		}
+
+		protected static byte[] ReadILs(CorMethodInfo methodInfo) {
+			byte[] byteILs;
+
+			byteILs = new byte[methodInfo.ILCodeSize];
+			MarshalEx.Read(methodInfo.ILCode, byteILs);
+			return byteILs;
+		}
+
+		protected static byte[] GetVariables(void* pArg, uint count) {
+			byte* pNextArg;
+			byte elementType;
+			byte[] variables;
+
+			pNextArg = (byte*)pArg;
+			for (uint i = 0; i < count; i++) {
+				elementType = *pNextArg++;
+				WalkType(ref pNextArg, elementType);
+			}
+			variables = new byte[pNextArg - (byte*)pArg];
+			MarshalEx.Read(pArg, variables);
+			return variables;
+		}
+
+		protected static byte[] BuildLocalSig(byte[] variables, uint count) {
+			int compressedCountLength;
+			byte[] localSig;
+
+			compressedCountLength = GetCompressedUInt32Length(count);
+			localSig = new byte[1 + compressedCountLength + variables.Length];
+			// CORINFO_CALLCONV_LOCAL_SIG + CompressedNumberOfVariables
+			localSig[0] = 0x07;
+			WriteCompressedUInt32(localSig, 1, count);
+			Buffer.BlockCopy(variables, 0, localSig, 1 + compressedCountLength, variables.Length);
+			return localSig;
+		}
+
+		private static int GetCompressedUInt32Length(uint value) {
+			if (value <= 0x7F)
+				return 1;
+			if (value <= 0x3FFF)
+				return 2;
+			if (value <= 0x1FFFFFFF)
+				return 4;
+			else
+				throw new ArgumentOutOfRangeException(nameof(value));
+		}
+
+		private static void WriteCompressedUInt32(byte[] buffer, int startIndex, uint value) {
+			if (value <= 0x7F)
+				buffer[startIndex + 0] = (byte)value;
+			else if (value <= 0x3FFF) {
+				buffer[startIndex + 0] = (byte)((value >> 8) | 0x80);
+				buffer[startIndex + 1] = (byte)value;
+			}
+			else if (value <= 0x1FFFFFFF) {
+				buffer[startIndex + 0] = (byte)((value >> 24) | 0xC0);
+				buffer[startIndex + 1] = (byte)(value >> 16);
+				buffer[startIndex + 2] = (byte)(value >> 8);
+				buffer[startIndex + 3] = (byte)value;
+			}
+			else
+				throw new ArgumentOutOfRangeException(nameof(value));
+		}
+
+		protected static byte[] GetNextVariable(ref void* pArg) {
+			byte* pNextArg;
+			byte elementType;
+			byte[] variable;
+
+			pNextArg = (byte*)pArg;
+			elementType = *pNextArg++;
+			WalkType(ref pNextArg, elementType);
+			variable = new byte[pNextArg - (byte*)pArg];
+			MarshalEx.Read(pArg, variable);
+			pArg = pNextArg;
+			return variable;
+		}
+
+		private static void WalkType(ref byte* p, byte elementType) {
+			byte t;
+
+			switch ((ElementType)elementType) {
+			case ElementType.ValueType:
+				ReadCompressedUInt32(ref p);
+				break;
+			case ElementType.Class:
+				ReadCompressedUInt32(ref p);
+				break;
+			case ElementType.Ptr:
+				t = *p; p++;
+				WalkType(ref p, t);
+				break;
+			case ElementType.FnPtr: {
+					byte conv = *p; p++;
+					if ((conv & 0x10) != 0)
+						ReadCompressedUInt32(ref p);
+					uint paramCount = ReadCompressedUInt32(ref p);
+					t = *p; p++;
+					WalkType(ref p, t);
+					for (uint i = 0; i < paramCount; i++) {
+						t = *p; p++;
+						WalkType(ref p, t);
+					}
+				}
+				break;
+			case ElementType.ByRef:
+				t = *p; p++;
+				WalkType(ref p, t);
+				break;
+			case ElementType.Pinned:
+				t = *p; p++;
+				WalkType(ref p, t);
+				break;
+			case ElementType.SZArray:
+				t = *p; p++;
+				WalkType(ref p, t);
+				break;
+			case ElementType.Array: {
+					t = *p; p++;
+					WalkType(ref p, t);
+					_ = ReadCompressedUInt32(ref p);
+					// rank
+					uint sizes = ReadCompressedUInt32(ref p);
+					for (uint i = 0; i < sizes; i++)
+						ReadCompressedUInt32(ref p);
+					uint low_bounds = ReadCompressedUInt32(ref p);
+					for (uint i = 0; i < low_bounds; i++)
+						ReadCompressedUInt32(ref p);
+				}
+				break;
+			case ElementType.CModOpt:
+				ReadCompressedUInt32(ref p);
+				t = *p; p++;
+				WalkType(ref p, t);
+				break;
+			case ElementType.CModReqd:
+				ReadCompressedUInt32(ref p);
+				t = *p; p++;
+				WalkType(ref p, t);
+				break;
+			case ElementType.Sentinel:
+				t = *p; p++;
+				WalkType(ref p, t);
+				break;
+			case ElementType.Var:
+				ReadCompressedUInt32(ref p);
+				break;
+			case ElementType.MVar:
+				ReadCompressedUInt32(ref p);
+				break;
+			case ElementType.GenericInst: {
+					p++;
+					ReadCompressedUInt32(ref p);
+					uint arity = ReadCompressedUInt32(ref p);
+					for (uint i = 0; i < arity; i++) {
+						t = *p; p++;
+						WalkType(ref p, t);
+					}
+				}
+				break;
+			}
+		}
+
+		private static uint ReadCompressedUInt32(ref byte* p) {
+			uint result;
+			byte first;
+
+			first = *p;
+			p++;
+			if ((first & 0x80) == 0)
+				result = first;
+			else if ((first & 0x40) == 0) {
+				result = ((uint)(first & ~0x80) << 8) | *p;
+				p++;
+			}
+			else {
+				byte a = *p; p++;
+				byte b = *p; p++;
+				byte c = *p; p++;
+				result = ((uint)(first & ~0xc0) << 24) | (uint)a << 16 | (uint)b << 8 | c;
+			}
+			return result;
+		}
+
+		protected CORINFO_EH_CLAUSE[] GetAllExceptionHandlers(void* pICorJitInfo, CorMethodInfo methodInfo) {
+			CORINFO_EH_CLAUSE[] clauses;
+
+			if (methodInfo.ExceptionHandlerCount == 0)
+				return null;
+			clauses = new CORINFO_EH_CLAUSE[methodInfo.ExceptionHandlerCount];
+			for (uint i = 0; i < clauses.Length; i++)
+				GetEHInfo(pICorJitInfo, methodInfo.MethodHandle, i, out clauses[i]);
+			return clauses;
+		}
+
+		protected virtual void GetEHInfo(void* pICorJitInfo, void* methodHandle, uint ehIndex, out CORINFO_EH_CLAUSE clause) {
+			_getEHInfo(VTableHelpers.AdjustThis_GetEHInfo(pICorJitInfo), methodHandle, ehIndex, out clause);
+		}
+
+		protected void RestoreMethod(int index, byte[] byteILs, ushort maxStack, byte[] byteLocalSig, CORINFO_EH_CLAUSE[] clauses, TokenResolver tokenResolver) {
+			MethodDef methodDef;
+			JitMethodBodyReader methodBodyReader;
+
+			methodDef = _context.DumpedModuleDef.ResolveMethod((uint)index + 1);
+			methodBodyReader = new JitMethodBodyReader(_context.DumpedModuleDef, methodDef.Parameters) {
+				TokenResolver = tokenResolver
+			};
+			methodDef.FreeMethodBody();
+			methodDef.Body = methodBodyReader.CreateCilBody(byteILs, maxStack, byteLocalSig, clauses);
+		}
+
+		protected static class VTableHelpers {
+			public static void* GetGetEHInfo(void* pICorJitInfo) {
+				// CLR47:
+				// 8BBB 48190000 | mov     edi, [ebx+0x1948]            |
+				// 8D5424 3C     | lea     edx, [esp+0x3C]              |
+				// 52            | push    edx                          |
+				// 51            | push    ecx                          |
+				// FFB3 54190000 | push    [ebx+0x1954]                 |
+				// 8B07          | mov     eax, [edi]                   |
+				// 8B70 20       | mov     esi, [eax+0x20]              |
+				// 8BCE          | mov     ecx, esi                     |
+				// FF15 8C112D6F | call    [<__guard_check_icall_fptr>] |
+				// 8BCF          | mov     ecx, edi                     |
+				// FFD6          | call    esi                          |
+
+				// CLR40:
+				// 8B86 D81B0000 | mov     eax, [esi+0x1BD8]  | eaxæ˜¯pICorJitInfo
+				// 8B48 04       | mov     ecx, [eax+0x4]     |
+				// 8B49 04       | mov     ecx, [ecx+0x4]     |
+				// 8D55 E4       | lea     edx, [ebp-0x1C]    |
+				// 52            | push    edx                |
+				// FF75 E0       | push    [ebp-0x20]         |
+				// 8D4401 04     | lea     eax, [ecx+eax+0x4] |
+				// FFB6 E41B0000 | push    [esi+0x1BE4]       |
+				// 8B08          | mov     ecx, [eax]         |
+				// 50            | push    eax                |
+				// FF51 28       | call    [ecx+0x28]         | [ecx+0x28]æ˜¯getEHinfo vtordispçš„å‡½æ•°æŒ‡é’ˆ
+
+				void* pGetEHInfo;
+
+				if (RuntimeEnvironment.IsClr45x) {
+					uint edi;
+					uint eax;
+
+					edi = (uint)pICorJitInfo;
+					eax = *(uint*)edi;
+					pGetEHInfo = *(void**)(eax + 0x20);
+				}
+				else if (RuntimeEnvironment.IsClr40x) {
+					uint eax;
+					uint ecx;
+
+					eax = (uint)pICorJitInfo;
+					ecx = *(uint*)(eax + 0x4);
+					ecx = *(uint*)(ecx + 0x4);
+					eax = ecx + eax + 0x4;
+					ecx = *(uint*)eax;
+					pGetEHInfo = *(void**)(ecx + 0x28);
+				}
+				else {
+					uint eax;
+					uint ecx;
+
+					eax = (uint)pICorJitInfo;
+					ecx = *(uint*)(eax + 0x4);
+					ecx = *(uint*)(ecx + 0x4);
+					eax = ecx + eax + 0x4;
+					ecx = *(uint*)eax;
+					pGetEHInfo = *(void**)(ecx + 0x20);
+				}
+				return pGetEHInfo;
+			}
+
+			public static void* AdjustThis_GetEHInfo(void* pICorJitInfo) {
+				void* newThis;
+
+				if (RuntimeEnvironment.IsClr45x)
+					newThis = pICorJitInfo;
+				else {
+					void* temp;
+
+					temp = *(byte**)((byte*)pICorJitInfo + 0x4);
+					temp = *(byte**)((byte*)temp + 0x4);
+					newThis = (byte*)pICorJitInfo + (int)temp + 4;
+				}
+				return newThis;
+			}
+		}
+	}
+}
+
+
+
+================================================
+File: JitUnpacker/Unpackers/UnpackerContext.cs
+================================================
+using System;
+using System.Reflection;
+using dnlib.DotNet;
+
+namespace JitTools.Unpackers {
+	internal sealed unsafe class UnpackerContext {
+		private readonly Module _module;
+		private readonly ModuleDefMD _moduleDef;
+		private readonly void* _moduleHandle;
+		private readonly void*[] _methodHandles;
+		private readonly JitUnpackerSettings _settings;
+		private ModuleDefMD _dumpedModuleDef;
+
+		public Module Module => _module;
+
+		public ModuleDefMD ModuleDef => _moduleDef;
+
+		public void* ModuleHandle => _moduleHandle;
+
+		public void*[] MethodHandles => _methodHandles;
+
+		public JitUnpackerSettings Settings => _settings;
+
+		public ModuleDefMD DumpedModuleDef {
+			get => _dumpedModuleDef;
+			set => _dumpedModuleDef = value;
+		}
+
+		/// <summary>
+		/// 构造器
+		/// </summary>
+		/// <param name="module">模块</param>
+		/// <param name="moduleDef">模块</param>
+		/// <param name="moduleHandle">要脱壳的程序集的.NET模块句柄</param>
+		/// <param name="methodHandles">要脱壳的程序集的所有方法句柄</param>
+		/// <param name="settings"></param>
+		public UnpackerContext(Module module, ModuleDefMD moduleDef, void* moduleHandle, void*[] methodHandles, JitUnpackerSettings settings) {
+			if (module == null)
+				throw new ArgumentNullException(nameof(module));
+			if (moduleDef == null)
+				throw new ArgumentNullException(nameof(moduleDef));
+			if (moduleHandle == null)
+				throw new ArgumentNullException(nameof(moduleHandle));
+			if (methodHandles == null)
+				throw new ArgumentNullException(nameof(methodHandles));
+			if (settings == null)
+				throw new ArgumentNullException(nameof(settings));
+
+			_module = module;
+			_moduleDef = moduleDef;
+			_moduleHandle = moduleHandle;
+			_methodHandles = methodHandles;
+			_settings = settings;
+		}
+	}
+}
+
+
+
+================================================
+File: JitUnpacker/Unpackers/UnpackerUtils.cs
+================================================
+using JitTools.Runtime;
+
+namespace JitTools.Unpackers {
+	internal static unsafe class UnpackerUtils {
+		public static void CallJit(void* methodHandle) {
+			RuntimeFunctions.Reset(methodHandle);
+			RuntimeFunctions.DoPrestub(methodHandle);
+			if (RuntimeFunctions.IsUnboxingStub(methodHandle)) {
+				// CLR内部存在UnboxingStub的方法不会被JIT直接编译，所以需要对UnboxingStub进行编译
+				void* pUnboxingStub;
+
+				pUnboxingStub = RuntimeFunctions.GetWrappedMethodDesc(methodHandle);
+				RuntimeFunctions.Reset(pUnboxingStub);
+				RuntimeFunctions.DoPrestub(pUnboxingStub);
+				RuntimeFunctions.Reset(pUnboxingStub);
+			}
+			RuntimeFunctions.Reset(methodHandle);
+		}
+	}
+}
+
+
+
+================================================
+File: JitUnpacker/Unpackers/Unknown/MethodDumper.cs
+================================================
+using JitTools.Runtime;
+using static JitTools.NativeMethods;
+
+namespace JitTools.Unpackers.Unknown {
+	internal sealed unsafe class MethodDumper : MethodDumperBase {
+		public MethodDumper(UnpackerContext context) : base(context) {
+		}
+
+		protected override bool OnJitCompilation(JitCompilationInfo compilationInfo) {
+			void* pICorJitInfo;
+			CorMethodInfo methodInfo;
+			byte[] byteILs;
+			CorSigInfo locals;
+			byte[] byteLocalSig;
+			CORINFO_EH_CLAUSE[] clauses;
+
+			pICorJitInfo = compilationInfo.PointerOfICorJitInfo;
+			methodInfo = compilationInfo.MethodInfo;
+			EnsueGetEHInfo(pICorJitInfo);
+			byteILs = ReadILs(methodInfo);
+			locals = methodInfo.Locals;
+			byteLocalSig = locals.ArgumentCount == 0 ? null : BuildLocalSig(GetVariables(locals.Arguments, locals.ArgumentCount), locals.ArgumentCount);
+			clauses = GetAllExceptionHandlers(pICorJitInfo, methodInfo);
+			RestoreMethod(_targetIndex, byteILs, (ushort)methodInfo.MaxStack, byteLocalSig, clauses, null);
+			_state = DumpingState.Finished;
+			_dumpCount++;
+			return true;
+		}
+	}
+}
+
+
+
+================================================
+File: JitUnpacker/Unpackers/Unknown/Unpacker.cs
+================================================
+using System;
+
+namespace JitTools.Unpackers.Unknown {
+	internal sealed unsafe class Unpacker : IUnpacker {
+		private readonly UnpackerContext _context;
+		private readonly MethodDumper _methodDumper;
+
+		public string Name => "Unknown";
+
+		public string Id => "un";
+
+		public UnpackerContext Context => _context;
+
+		public IMethodDumper MethodDumper => _methodDumper;
+
+		public Unpacker(UnpackerContext context) {
+			if (context == null)
+				throw new ArgumentNullException(nameof(context));
+
+			_context = context;
+			_methodDumper = new MethodDumper(context);
+		}
+
+		public void PreInitialize() {
+		}
+
+		public void PostInitialize() {
+		}
+
+		public bool NeedDecryptMethod(int index) {
+			return _context.ModuleDef.ResolveMethod((uint)index + 1).HasBody;
+		}
+
+		public void CallJit(int index) {
+			UnpackerUtils.CallJit(_context.MethodHandles[index]);
+		}
+
+		public void RemoveRuntime() {
+		}
+	}
+}
+
+
+
+================================================
+File: JitUnpacker/Unpackers/Unknown/UnpackerDetector.cs
+================================================
+using dnlib.DotNet;
+
+namespace JitTools.Unpackers.Unknown {
+	internal sealed class UnpackerDetector : IUnpackerDetector {
+		public bool Detect(ModuleDefMD moduleDef) {
+			return true;
+		}
+
+		public IUnpacker CreateUnpacker(UnpackerContext context) {
+			return new Unpacker(context);
+		}
+	}
+}
+
+
+
+
+
+================================================
+File: RuntimeFunctionConfigGenerator/ConsoleTitleUtils.cs
+================================================
+using System.Reflection;
+
+namespace System {
+	internal static class ConsoleTitleUtils {
+		public static string GetTitle() {
+			string productName;
+			string version;
+			string copyright;
+			int firstBlankIndex;
+			string copyrightOwnerName;
+			string copyrightYear;
+
+			productName = GetAssemblyAttribute<AssemblyProductAttribute>().Product;
+			version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+			copyright = GetAssemblyAttribute<AssemblyCopyrightAttribute>().Copyright.Substring(12);
+			firstBlankIndex = copyright.IndexOf(' ');
+			copyrightOwnerName = copyright.Substring(firstBlankIndex + 1);
+			copyrightYear = copyright.Substring(0, firstBlankIndex);
+			return $"{productName} v{version} by {copyrightOwnerName} {copyrightYear}";
+		}
+
+		private static T GetAssemblyAttribute<T>() {
+			return (T)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(T), false)[0];
+		}
+	}
+}
+
+
+
+================================================
+File: RuntimeFunctionConfigGenerator/Ldasm.cs
+================================================
+/*
+*
+* Copyright (c) 2009-2011
+* vol4ok <admin@vol4ok.net> PGP KEY ID: 26EC143CCDC61C9D
+*
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+using System;
+using static JitTools.LdasmConstants;
+
+namespace JitTools {
+	internal static class LdasmConstants {
+		/*
+		 Instruction format:
+		
+		 | prefix | REX | opcode | modR/M | SIB | disp8/16/32 | imm8/16/32/64 |
+		
+		 */
+		public const byte F_INVALID = 0x01;
+		public const byte F_PREFIX = 0x02;
+		public const byte F_REX = 0x04;
+		public const byte F_MODRM = 0x08;
+		public const byte F_SIB = 0x10;
+		public const byte F_DISP = 0x20;
+		public const byte F_IMM = 0x40;
+		public const byte F_RELATIVE = 0x80;
+		public const byte OP_NONE = 0x00;
+		public const byte OP_INVALID = 0x80;
+		public const byte OP_DATA_I8 = 0x01;
+		public const byte OP_DATA_I16 = 0x02;
+		public const byte OP_DATA_I16_I32 = 0x04;
+		public const byte OP_DATA_I16_I32_I64 = 0x08;
+		public const byte OP_EXTENDED = 0x10;
+		public const byte OP_RELATIVE = 0x20;
+		public const byte OP_MODRM = 0x40;
+		public const byte OP_PREFIX = 0x80;
+		public static readonly byte[] flags_table = new byte[256] {
+			/* 00 */    OP_MODRM,
+			/* 01 */    OP_MODRM,
+			/* 02 */    OP_MODRM,
+			/* 03 */    OP_MODRM,
+			/* 04 */    OP_DATA_I8,
+			/* 05 */    OP_DATA_I16_I32,
+			/* 06 */    OP_NONE,
+			/* 07 */    OP_NONE,
+			/* 08 */    OP_MODRM,
+			/* 09 */    OP_MODRM,
+			/* 0A */    OP_MODRM,
+			/* 0B */    OP_MODRM,
+			/* 0C */    OP_DATA_I8,
+			/* 0D */    OP_DATA_I16_I32,
+			/* 0E */    OP_NONE,
+			/* 0F */    OP_NONE,
+			
+			/* 10 */    OP_MODRM,
+			/* 11 */    OP_MODRM,
+			/* 12 */    OP_MODRM,
+			/* 13 */    OP_MODRM,
+			/* 14 */    OP_DATA_I8,
+			/* 15 */    OP_DATA_I16_I32,
+			/* 16 */    OP_NONE,
+			/* 17 */    OP_NONE,
+			/* 18 */    OP_MODRM,
+			/* 19 */    OP_MODRM,
+			/* 1A */    OP_MODRM,
+			/* 1B */    OP_MODRM,
+			/* 1C */    OP_DATA_I8,
+			/* 1D */    OP_DATA_I16_I32,
+			/* 1E */    OP_NONE,
+			/* 1F */    OP_NONE,
+			
+			/* 20 */    OP_MODRM,
+			/* 21 */    OP_MODRM,
+			/* 22 */    OP_MODRM,
+			/* 23 */    OP_MODRM,
+			/* 24 */    OP_DATA_I8,
+			/* 25 */    OP_DATA_I16_I32,
+			/* 26 */    OP_PREFIX,
+			/* 27 */    OP_NONE,
+			/* 28 */    OP_MODRM,
+			/* 29 */    OP_MODRM,
+			/* 2A */    OP_MODRM,
+			/* 2B */    OP_MODRM,
+			/* 2C */    OP_DATA_I8,
+			/* 2D */    OP_DATA_I16_I32,
+			/* 2E */    OP_PREFIX,
+			/* 2F */    OP_NONE,
+			
+			/* 30 */    OP_MODRM,
+			/* 31 */    OP_MODRM,
+			/* 32 */    OP_MODRM,
+			/* 33 */    OP_MODRM,
+			/* 34 */    OP_DATA_I8,
+			/* 35 */    OP_DATA_I16_I32,
+			/* 36 */    OP_PREFIX,
+			/* 37 */    OP_NONE,
+			/* 38 */    OP_MODRM,
+			/* 39 */    OP_MODRM,
+			/* 3A */    OP_MODRM,
+			/* 3B */    OP_MODRM,
+			/* 3C */    OP_DATA_I8,
+			/* 3D */    OP_DATA_I16_I32,
+			/* 3E */    OP_PREFIX,
+			/* 3F */    OP_NONE,
+			
+			/* 40 */    OP_NONE,
+			/* 41 */    OP_NONE,
+			/* 42 */    OP_NONE,
+			/* 43 */    OP_NONE,
+			/* 44 */    OP_NONE,
+			/* 45 */    OP_NONE,
+			/* 46 */    OP_NONE,
+			/* 47 */    OP_NONE,
+			/* 48 */    OP_NONE,
+			/* 49 */    OP_NONE,
+			/* 4A */    OP_NONE,
+			/* 4B */    OP_NONE,
+			/* 4C */    OP_NONE,
+			/* 4D */    OP_NONE,
+			/* 4E */    OP_NONE,
+			/* 4F */    OP_NONE,
+			
+			/* 50 */    OP_NONE,
+			/* 51 */    OP_NONE,
+			/* 52 */    OP_NONE,
+			/* 53 */    OP_NONE,
+			/* 54 */    OP_NONE,
+			/* 55 */    OP_NONE,
+			/* 56 */    OP_NONE,
+			/* 57 */    OP_NONE,
+			/* 58 */    OP_NONE,
+			/* 59 */    OP_NONE,
+			/* 5A */    OP_NONE,
+			/* 5B */    OP_NONE,
+			/* 5C */    OP_NONE,
+			/* 5D */    OP_NONE,
+			/* 5E */    OP_NONE,
+			/* 5F */    OP_NONE,
+			/* 60 */    OP_NONE,
+			
+			/* 61 */    OP_NONE,
+			/* 62 */    OP_MODRM,
+			/* 63 */    OP_MODRM,
+			/* 64 */    OP_PREFIX,
+			/* 65 */    OP_PREFIX,
+			/* 66 */    OP_PREFIX,
+			/* 67 */    OP_PREFIX,
+			/* 68 */    OP_DATA_I16_I32,
+			/* 69 */    OP_MODRM | OP_DATA_I16_I32,
+			/* 6A */    OP_DATA_I8,
+			/* 6B */    OP_MODRM | OP_DATA_I8,
+			/* 6C */    OP_NONE,
+			/* 6D */    OP_NONE,
+			/* 6E */    OP_NONE,
+			/* 6F */    OP_NONE,
+			
+			/* 70 */    OP_RELATIVE | OP_DATA_I8,
+			/* 71 */    OP_RELATIVE | OP_DATA_I8,
+			/* 72 */    OP_RELATIVE | OP_DATA_I8,
+			/* 73 */    OP_RELATIVE | OP_DATA_I8,
+			/* 74 */    OP_RELATIVE | OP_DATA_I8,
+			/* 75 */    OP_RELATIVE | OP_DATA_I8,
+			/* 76 */    OP_RELATIVE | OP_DATA_I8,
+			/* 77 */    OP_RELATIVE | OP_DATA_I8,
+			/* 78 */    OP_RELATIVE | OP_DATA_I8,
+			/* 79 */    OP_RELATIVE | OP_DATA_I8,
+			/* 7A */    OP_RELATIVE | OP_DATA_I8,
+			/* 7B */    OP_RELATIVE | OP_DATA_I8,
+			/* 7C */    OP_RELATIVE | OP_DATA_I8,
+			/* 7D */    OP_RELATIVE | OP_DATA_I8,
+			/* 7E */    OP_RELATIVE | OP_DATA_I8,
+			/* 7F */    OP_RELATIVE | OP_DATA_I8,
+			
+			/* 80 */    OP_MODRM | OP_DATA_I8,
+			/* 81 */    OP_MODRM | OP_DATA_I16_I32,
+			/* 82 */    OP_MODRM | OP_DATA_I8,
+			/* 83 */    OP_MODRM | OP_DATA_I8,
+			/* 84 */    OP_MODRM,
+			/* 85 */    OP_MODRM,
+			/* 86 */    OP_MODRM,
+			/* 87 */    OP_MODRM,
+			/* 88 */    OP_MODRM,
+			/* 89 */    OP_MODRM,
+			/* 8A */    OP_MODRM,
+			/* 8B */    OP_MODRM,
+			/* 8C */    OP_MODRM,
+			/* 8D */    OP_MODRM,
+			/* 8E */    OP_MODRM,
+			/* 8F */    OP_MODRM,
+			
+			/* 90 */    OP_NONE,
+			/* 91 */    OP_NONE,
+			/* 92 */    OP_NONE,
+			/* 93 */    OP_NONE,
+			/* 94 */    OP_NONE,
+			/* 95 */    OP_NONE,
+			/* 96 */    OP_NONE,
+			/* 97 */    OP_NONE,
+			/* 98 */    OP_NONE,
+			/* 99 */    OP_NONE,
+			/* 9A */    OP_DATA_I16 | OP_DATA_I16_I32,
+			/* 9B */    OP_NONE,
+			/* 9C */    OP_NONE,
+			/* 9D */    OP_NONE,
+			/* 9E */    OP_NONE,
+			/* 9F */    OP_NONE,
+			
+			/* A0 */    OP_DATA_I8,
+			/* A1 */    OP_DATA_I16_I32_I64,
+			/* A2 */    OP_DATA_I8,
+			/* A3 */    OP_DATA_I16_I32_I64,
+			/* A4 */    OP_NONE,
+			/* A5 */    OP_NONE,
+			/* A6 */    OP_NONE,
+			/* A7 */    OP_NONE,
+			/* A8 */    OP_DATA_I8,
+			/* A9 */    OP_DATA_I16_I32,
+			/* AA */    OP_NONE,
+			/* AB */    OP_NONE,
+			/* AC */    OP_NONE,
+			/* AD */    OP_NONE,
+			/* AE */    OP_NONE,
+			/* AF */    OP_NONE,
+			
+			/* B0 */    OP_DATA_I8,
+			/* B1 */    OP_DATA_I8,
+			/* B2 */    OP_DATA_I8,
+			/* B3 */    OP_DATA_I8,
+			/* B4 */    OP_DATA_I8,
+			/* B5 */    OP_DATA_I8,
+			/* B6 */    OP_DATA_I8,
+			/* B7 */    OP_DATA_I8,
+			/* B8 */    OP_DATA_I16_I32_I64,
+			/* B9 */    OP_DATA_I16_I32_I64,
+			/* BA */    OP_DATA_I16_I32_I64,
+			/* BB */    OP_DATA_I16_I32_I64,
+			/* BC */    OP_DATA_I16_I32_I64,
+			/* BD */    OP_DATA_I16_I32_I64,
+			/* BE */    OP_DATA_I16_I32_I64,
+			/* BF */    OP_DATA_I16_I32_I64,
+			
+			/* C0 */    OP_MODRM | OP_DATA_I8,
+			/* C1 */    OP_MODRM | OP_DATA_I8,
+			/* C2 */    OP_DATA_I16,
+			/* C3 */    OP_NONE,
+			/* C4 */    OP_MODRM,
+			/* C5 */    OP_MODRM,
+			/* C6 */    OP_MODRM | OP_DATA_I8,
+			/* C7 */    OP_MODRM | OP_DATA_I16_I32,
+			/* C8 */    OP_DATA_I8 | OP_DATA_I16,
+			/* C9 */    OP_NONE,
+			/* CA */    OP_DATA_I16,
+			/* CB */    OP_NONE,
+			/* CC */    OP_NONE,
+			/* CD */    OP_DATA_I8,
+			/* CE */    OP_NONE,
+			/* CF */    OP_NONE,
+			
+			/* D0 */    OP_MODRM,
+			/* D1 */    OP_MODRM,
+			/* D2 */    OP_MODRM,
+			/* D3 */    OP_MODRM,
+			/* D4 */    OP_DATA_I8,
+			/* D5 */    OP_DATA_I8,
+			/* D6 */    OP_NONE,
+			/* D7 */    OP_NONE,
+			/* D8 */    OP_MODRM,
+			/* D9 */    OP_MODRM,
+			/* DA */    OP_MODRM,
+			/* DB */    OP_MODRM,
+			/* DC */    OP_MODRM,
+			/* DD */    OP_MODRM,
+			/* DE */    OP_MODRM,
+			/* DF */    OP_MODRM,
+			
+			/* E0 */    OP_RELATIVE | OP_DATA_I8,
+			/* E1 */    OP_RELATIVE | OP_DATA_I8,
+			/* E2 */    OP_RELATIVE | OP_DATA_I8,
+			/* E3 */    OP_RELATIVE | OP_DATA_I8,
+			/* E4 */    OP_DATA_I8,
+			/* E5 */    OP_DATA_I8,
+			/* E6 */    OP_DATA_I8,
+			/* E7 */    OP_DATA_I8,
+			/* E8 */    OP_RELATIVE | OP_DATA_I16_I32,
+			/* E9 */    OP_RELATIVE | OP_DATA_I16_I32,
+			/* EA */    OP_DATA_I16 | OP_DATA_I16_I32,
+			/* EB */    OP_RELATIVE | OP_DATA_I8,
+			/* EC */    OP_NONE,
+			/* ED */    OP_NONE,
+			/* EE */    OP_NONE,
+			/* EF */    OP_NONE,
+			
+			/* F0 */    OP_PREFIX,
+			/* F1 */    OP_NONE,
+			/* F2 */    OP_PREFIX,
+			/* F3 */    OP_PREFIX,
+			/* F4 */    OP_NONE,
+			/* F5 */    OP_NONE,
+			/* F6 */    OP_MODRM,
+			/* F7 */    OP_MODRM,
+			/* F8 */    OP_NONE,
+			/* F9 */    OP_NONE,
+			/* FA */    OP_NONE,
+			/* FB */    OP_NONE,
+			/* FC */    OP_NONE,
+			/* FD */    OP_NONE,
+			/* FE */    OP_MODRM,
+			/* FF */    OP_MODRM
+		};
+		public static readonly byte[] flags_table_ex = new byte[256] {
+			/* 0F00 */    OP_MODRM,
+			/* 0F01 */    OP_MODRM,
+			/* 0F02 */    OP_MODRM,
+			/* 0F03 */    OP_MODRM,
+			/* 0F04 */    OP_INVALID,
+			/* 0F05 */    OP_NONE,
+			/* 0F06 */    OP_NONE,
+			/* 0F07 */    OP_NONE,
+			/* 0F08 */    OP_NONE,
+			/* 0F09 */    OP_NONE,
+			/* 0F0A */    OP_INVALID,
+			/* 0F0B */    OP_NONE,
+			/* 0F0C */    OP_INVALID,
+			/* 0F0D */    OP_MODRM,
+			/* 0F0E */    OP_INVALID,
+			/* 0F0F */    OP_MODRM | OP_DATA_I8,        //3Dnow
+			
+			/* 0F10 */    OP_MODRM,
+			/* 0F11 */    OP_MODRM,
+			/* 0F12 */    OP_MODRM,
+			/* 0F13 */    OP_MODRM,
+			/* 0F14 */    OP_MODRM,
+			/* 0F15 */    OP_MODRM,
+			/* 0F16 */    OP_MODRM,
+			/* 0F17 */    OP_MODRM,
+			/* 0F18 */    OP_MODRM,
+			/* 0F19 */    OP_INVALID,
+			/* 0F1A */    OP_INVALID,
+			/* 0F1B */    OP_INVALID,
+			/* 0F1C */    OP_INVALID,
+			/* 0F1D */    OP_INVALID,
+			/* 0F1E */    OP_INVALID,
+			/* 0F1F */    OP_NONE,
+			
+			/* 0F20 */    OP_MODRM,
+			/* 0F21 */    OP_MODRM,
+			/* 0F22 */    OP_MODRM,
+			/* 0F23 */    OP_MODRM,
+			/* 0F24 */    OP_MODRM | OP_EXTENDED,        //SSE5
+			/* 0F25 */    OP_INVALID,
+			/* 0F26 */    OP_MODRM,
+			/* 0F27 */    OP_INVALID,
+			/* 0F28 */    OP_MODRM,
+			/* 0F29 */    OP_MODRM,
+			/* 0F2A */    OP_MODRM,
+			/* 0F2B */    OP_MODRM,
+			/* 0F2C */    OP_MODRM,
+			/* 0F2D */    OP_MODRM,
+			/* 0F2E */    OP_MODRM,
+			/* 0F2F */    OP_MODRM,
+			
+			/* 0F30 */    OP_NONE,
+			/* 0F31 */    OP_NONE,
+			/* 0F32 */    OP_NONE,
+			/* 0F33 */    OP_NONE,
+			/* 0F34 */    OP_NONE,
+			/* 0F35 */    OP_NONE,
+			/* 0F36 */    OP_INVALID,
+			/* 0F37 */    OP_NONE,
+			/* 0F38 */    OP_MODRM | OP_EXTENDED, 
+			/* 0F39 */    OP_INVALID,
+			/* 0F3A */    OP_MODRM | OP_EXTENDED | OP_DATA_I8,
+			/* 0F3B */    OP_INVALID,
+			/* 0F3C */    OP_INVALID,
+			/* 0F3D */    OP_INVALID,
+			/* 0F3E */    OP_INVALID,
+			/* 0F3F */    OP_INVALID,
+			
+			/* 0F40 */    OP_MODRM,
+			/* 0F41 */    OP_MODRM,
+			/* 0F42 */    OP_MODRM,
+			/* 0F43 */    OP_MODRM,
+			/* 0F44 */    OP_MODRM,
+			/* 0F45 */    OP_MODRM,
+			/* 0F46 */    OP_MODRM,
+			/* 0F47 */    OP_MODRM,
+			/* 0F48 */    OP_MODRM,
+			/* 0F49 */    OP_MODRM,
+			/* 0F4A */    OP_MODRM,
+			/* 0F4B */    OP_MODRM,
+			/* 0F4C */    OP_MODRM,
+			/* 0F4D */    OP_MODRM,
+			/* 0F4E */    OP_MODRM,
+			/* 0F4F */    OP_MODRM,
+			
+			/* 0F50 */    OP_MODRM,
+			/* 0F51 */    OP_MODRM,
+			/* 0F52 */    OP_MODRM,
+			/* 0F53 */    OP_MODRM,
+			/* 0F54 */    OP_MODRM,
+			/* 0F55 */    OP_MODRM,
+			/* 0F56 */    OP_MODRM,
+			/* 0F57 */    OP_MODRM,
+			/* 0F58 */    OP_MODRM,
+			/* 0F59 */    OP_MODRM,
+			/* 0F5A */    OP_MODRM,
+			/* 0F5B */    OP_MODRM,
+			/* 0F5C */    OP_MODRM,
+			/* 0F5D */    OP_MODRM,
+			/* 0F5E */    OP_MODRM,
+			/* 0F5F */    OP_MODRM,
+			
+			/* 0F60 */    OP_MODRM,
+			/* 0F61 */    OP_MODRM,
+			/* 0F62 */    OP_MODRM,
+			/* 0F63 */    OP_MODRM,
+			/* 0F64 */    OP_MODRM,
+			/* 0F65 */    OP_MODRM,
+			/* 0F66 */    OP_MODRM,
+			/* 0F67 */    OP_MODRM,
+			/* 0F68 */    OP_MODRM,
+			/* 0F69 */    OP_MODRM,
+			/* 0F6A */    OP_MODRM,
+			/* 0F6B */    OP_MODRM,
+			/* 0F6C */    OP_MODRM,
+			/* 0F6D */    OP_MODRM,
+			/* 0F6E */    OP_MODRM,
+			/* 0F6F */    OP_MODRM,
+			
+			/* 0F70 */    OP_MODRM | OP_DATA_I8,
+			/* 0F71 */    OP_MODRM | OP_DATA_I8,
+			/* 0F72 */    OP_MODRM | OP_DATA_I8,
+			/* 0F73 */    OP_MODRM | OP_DATA_I8,
+			/* 0F74 */    OP_MODRM,
+			/* 0F75 */    OP_MODRM,
+			/* 0F76 */    OP_MODRM,
+			/* 0F77 */    OP_NONE,
+			/* 0F78 */    OP_MODRM,
+			/* 0F79 */    OP_MODRM,
+			/* 0F7A */    OP_INVALID,
+			/* 0F7B */    OP_INVALID,
+			/* 0F7C */    OP_MODRM,
+			/* 0F7D */    OP_MODRM,
+			/* 0F7E */    OP_MODRM,
+			/* 0F7F */    OP_MODRM,
+			
+			/* 0F80 */    OP_RELATIVE | OP_DATA_I16_I32,
+			/* 0F81 */    OP_RELATIVE | OP_DATA_I16_I32,
+			/* 0F82 */    OP_RELATIVE | OP_DATA_I16_I32,
+			/* 0F83 */    OP_RELATIVE | OP_DATA_I16_I32,
+			/* 0F84 */    OP_RELATIVE | OP_DATA_I16_I32,
+			/* 0F85 */    OP_RELATIVE | OP_DATA_I16_I32,
+			/* 0F86 */    OP_RELATIVE | OP_DATA_I16_I32,
+			/* 0F87 */    OP_RELATIVE | OP_DATA_I16_I32,
+			/* 0F88 */    OP_RELATIVE | OP_DATA_I16_I32,
+			/* 0F89 */    OP_RELATIVE | OP_DATA_I16_I32,
+			/* 0F8A */    OP_RELATIVE | OP_DATA_I16_I32,
+			/* 0F8B */    OP_RELATIVE | OP_DATA_I16_I32,
+			/* 0F8C */    OP_RELATIVE | OP_DATA_I16_I32,
+			/* 0F8D */    OP_RELATIVE | OP_DATA_I16_I32,
+			/* 0F8E */    OP_RELATIVE | OP_DATA_I16_I32,
+			/* 0F8F */    OP_RELATIVE | OP_DATA_I16_I32,
+			
+			/* 0F90 */    OP_MODRM,
+			/* 0F91 */    OP_MODRM,
+			/* 0F92 */    OP_MODRM,
+			/* 0F93 */    OP_MODRM,
+			/* 0F94 */    OP_MODRM,
+			/* 0F95 */    OP_MODRM,
+			/* 0F96 */    OP_MODRM,
+			/* 0F97 */    OP_MODRM,
+			/* 0F98 */    OP_MODRM,
+			/* 0F99 */    OP_MODRM,
+			/* 0F9A */    OP_MODRM,
+			/* 0F9B */    OP_MODRM,
+			/* 0F9C */    OP_MODRM,
+			/* 0F9D */    OP_MODRM,
+			/* 0F9E */    OP_MODRM,
+			/* 0F9F */    OP_MODRM,
+			
+			/* 0FA0 */    OP_NONE,
+			/* 0FA1 */    OP_NONE,
+			/* 0FA2 */    OP_NONE,
+			/* 0FA3 */    OP_MODRM,
+			/* 0FA4 */    OP_MODRM | OP_DATA_I8,
+			/* 0FA5 */    OP_MODRM,
+			/* 0FA6 */    OP_INVALID,
+			/* 0FA7 */    OP_INVALID,
+			/* 0FA8 */    OP_NONE,
+			/* 0FA9 */    OP_NONE,
+			/* 0FAA */    OP_NONE,
+			/* 0FAB */    OP_MODRM,
+			/* 0FAC */    OP_MODRM | OP_DATA_I8,
+			/* 0FAD */    OP_MODRM,
+			/* 0FAE */    OP_MODRM,
+			/* 0FAF */    OP_MODRM,
+			
+			/* 0FB0 */    OP_MODRM,
+			/* 0FB1 */    OP_MODRM,
+			/* 0FB2 */    OP_MODRM,
+			/* 0FB3 */    OP_MODRM,
+			/* 0FB4 */    OP_MODRM,
+			/* 0FB5 */    OP_MODRM,
+			/* 0FB6 */    OP_MODRM,
+			/* 0FB7 */    OP_MODRM,
+			/* 0FB8 */    OP_MODRM,
+			/* 0FB9 */    OP_MODRM,
+			/* 0FBA */    OP_MODRM | OP_DATA_I8,
+			/* 0FBB */    OP_MODRM,
+			/* 0FBC */    OP_MODRM,
+			/* 0FBD */    OP_MODRM,
+			/* 0FBE */    OP_MODRM,
+			/* 0FBF */    OP_MODRM,
+			
+			/* 0FC0 */    OP_MODRM,
+			/* 0FC1 */    OP_MODRM,
+			/* 0FC2 */    OP_MODRM | OP_DATA_I8,
+			/* 0FC3 */    OP_MODRM,
+			/* 0FC4 */    OP_MODRM | OP_DATA_I8,
+			/* 0FC5 */    OP_MODRM | OP_DATA_I8,
+			/* 0FC6 */    OP_MODRM | OP_DATA_I8,
+			/* 0FC7 */    OP_MODRM,
+			/* 0FC8 */    OP_NONE,
+			/* 0FC9 */    OP_NONE,
+			/* 0FCA */    OP_NONE,
+			/* 0FCB */    OP_NONE,
+			/* 0FCC */    OP_NONE,
+			/* 0FCD */    OP_NONE,
+			/* 0FCE */    OP_NONE,
+			/* 0FCF */    OP_NONE,
+			
+			/* 0FD0 */    OP_MODRM,
+			/* 0FD1 */    OP_MODRM,
+			/* 0FD2 */    OP_MODRM,
+			/* 0FD3 */    OP_MODRM,
+			/* 0FD4 */    OP_MODRM,
+			/* 0FD5 */    OP_MODRM,
+			/* 0FD6 */    OP_MODRM,
+			/* 0FD7 */    OP_MODRM,
+			/* 0FD8 */    OP_MODRM,
+			/* 0FD9 */    OP_MODRM,
+			/* 0FDA */    OP_MODRM,
+			/* 0FDB */    OP_MODRM,
+			/* 0FDC */    OP_MODRM,
+			/* 0FDD */    OP_MODRM,
+			/* 0FDE */    OP_MODRM,
+			/* 0FDF */    OP_MODRM,
+			
+			/* 0FE0 */    OP_MODRM,
+			/* 0FE1 */    OP_MODRM,
+			/* 0FE2 */    OP_MODRM,
+			/* 0FE3 */    OP_MODRM,
+			/* 0FE4 */    OP_MODRM,
+			/* 0FE5 */    OP_MODRM,
+			/* 0FE6 */    OP_MODRM,
+			/* 0FE7 */    OP_MODRM,
+			/* 0FE8 */    OP_MODRM,
+			/* 0FE9 */    OP_MODRM,
+			/* 0FEA */    OP_MODRM,
+			/* 0FEB */    OP_MODRM,
+			/* 0FEC */    OP_MODRM,
+			/* 0FED */    OP_MODRM,
+			/* 0FEE */    OP_MODRM,
+			/* 0FEF */    OP_MODRM,
+			
+			/* 0FF0 */    OP_MODRM,
+			/* 0FF1 */    OP_MODRM,
+			/* 0FF2 */    OP_MODRM,
+			/* 0FF3 */    OP_MODRM,
+			/* 0FF4 */    OP_MODRM,
+			/* 0FF5 */    OP_MODRM,
+			/* 0FF6 */    OP_MODRM,
+			/* 0FF7 */    OP_MODRM,
+			/* 0FF8 */    OP_MODRM,
+			/* 0FF9 */    OP_MODRM,
+			/* 0FFA */    OP_MODRM,
+			/* 0FFB */    OP_MODRM,
+			/* 0FFC */    OP_MODRM,
+			/* 0FFD */    OP_MODRM,
+			/* 0FFE */    OP_MODRM,
+			/* 0FFF */    OP_INVALID,
+		};
+	}
+
+	internal sealed unsafe class Ldasm {
+		private byte _flags;
+		private byte _rex;
+		private byte _modrm;
+		private byte _sib;
+		private byte _opcd_offset;
+		private byte _opcd_size;
+		private byte _disp_offset;
+		private byte _disp_size;
+		private byte _imm_offset;
+		private byte _imm_size;
+
+		public byte Flags => _flags;
+
+		public byte Rex => _rex;
+
+		public byte Modrm => _modrm;
+
+		public byte Sib => _sib;
+
+		public byte OpcodeOffset => _opcd_offset;
+
+		public byte OpcodeSize => _opcd_size;
+
+		public byte DisplacementOffset => _disp_offset;
+
+		public byte DisplacementSize => _disp_size;
+
+		public byte ImmediateOffset => _imm_offset;
+
+		public byte ImmediateSize => _imm_size;
+
+		/// <summary>
+		/// Disassemble one instruction
+		/// </summary>
+		/// <param name="pCode">pointer to the code for disassemble</param>
+		/// <param name="is64">set this flag for 64-bit code, and clear for 32-bit</param>
+		/// <returns>length of instruction</returns>
+		public uint Disassemble(void* pCode, bool is64) {
+			if (pCode == null)
+				throw new ArgumentNullException(nameof(pCode));
+
+			byte* p = (byte*)pCode;
+			byte s, op, f;
+			byte rexw, pr_66, pr_67;
+
+			s = rexw = pr_66 = pr_67 = 0;
+
+			/* init output data */
+			_flags = 0;
+			_rex = 0;
+			_modrm = 0;
+			_sib = 0;
+			_opcd_offset = 0;
+			_opcd_size = 0;
+			_disp_offset = 0;
+			_disp_size = 0;
+			_imm_offset = 0;
+			_imm_size = 0;
+
+			/* phase 1: parse prefixies */
+			while ((GetFlags(*p) & OP_PREFIX) != 0) {
+				if (*p == 0x66)
+					pr_66 = 1;
+				if (*p == 0x67)
+					pr_67 = 1;
+				p++; s++;
+				_flags |= F_PREFIX;
+				if (s == 15) {
+					_flags |= F_INVALID;
+					return s;
+				}
+			}
+
+			/* parse REX prefix */
+			if (is64 && *p >> 4 == 4) {
+				_rex = *p;
+				rexw = (byte)((_rex >> 3) & 1);
+				_flags |= F_REX;
+				p++; s++;
+			}
+
+			/* can be only one REX prefix */
+			if (is64 && *p >> 4 == 4) {
+				_flags |= F_INVALID;
+				s++;
+				return s;
+			}
+
+			/* phase 2: parse opcode */
+			_opcd_offset = (byte)(p - (byte*)pCode);
+			_opcd_size = 1;
+			op = *p++; s++;
+
+			/* is 2 byte opcode? */
+			if (op == 0x0F) {
+				op = *p++; s++;
+				_opcd_size++;
+				f = GetFlagsEx(op);
+				if ((f & OP_INVALID) != 0) {
+					_flags |= F_INVALID;
+					return s;
+				}
+				/* for SSE instructions */
+				if ((f & OP_EXTENDED) != 0) {
+					op = *p++; s++;
+					_opcd_size++;
+				}
+			}
+			else {
+				f = GetFlags(op);
+				/* pr_66 = pr_67 for opcodes A0-A3 */
+				if (op >= 0xA0 && op <= 0xA3)
+					pr_66 = pr_67;
+			}
+
+			/* phase 3: parse ModR/M, SIB and DISP */
+			if ((f & OP_MODRM) != 0) {
+				byte mod = (byte)(*p >> 6);
+				byte ro = (byte)((*p & 0x38) >> 3);
+				byte rm = (byte)(*p & 7);
+
+				_modrm = *p++; s++;
+				_flags |= F_MODRM;
+
+				/* in F6,F7 opcodes immediate data present if R/O == 0 */
+				if (op == 0xF6 && (ro == 0 || ro == 1))
+					f |= OP_DATA_I8;
+				if (op == 0xF7 && (ro == 0 || ro == 1))
+					f |= OP_DATA_I16_I32_I64;
+
+				/* is SIB byte exist? */
+				if (mod != 3 && rm == 4 && !(!is64 && pr_67 != 0)) {
+					_sib = *p++; s++;
+					_flags |= F_SIB;
+
+					/* if base == 5 and mod == 0 */
+					if ((_sib & 7) == 5 && mod == 0) {
+						_disp_size = 4;
+					}
+				}
+
+				switch (mod) {
+				case 0:
+					if (is64) {
+						if (rm == 5) {
+							_disp_size = 4;
+							if (is64)
+								_flags |= F_RELATIVE;
+						}
+					}
+					else if (pr_67 != 0) {
+						if (rm == 6)
+							_disp_size = 2;
+					}
+					else {
+						if (rm == 5)
+							_disp_size = 4;
+					}
+					break;
+				case 1:
+					_disp_size = 1;
+					break;
+				case 2:
+					if (is64)
+						_disp_size = 4;
+					else if (pr_67 != 0)
+						_disp_size = 2;
+					else
+						_disp_size = 4;
+					break;
+				}
+
+				if (_disp_size != 0) {
+					_disp_offset = (byte)(p - (byte*)pCode);
+					p += _disp_size;
+					s += _disp_size;
+					_flags |= F_DISP;
+				}
+			}
+
+			/* phase 4: parse immediate data */
+			if (rexw != 0 && (f & OP_DATA_I16_I32_I64) != 0)
+				_imm_size = 8;
+			else if ((f & OP_DATA_I16_I32) != 0 || (f & OP_DATA_I16_I32_I64) != 0)
+				_imm_size = (byte)(4 - (pr_66 << 1));
+
+			/* if exist, add OP_DATA_I16 and OP_DATA_I8 size */
+			_imm_size += (byte)(f & 3);
+
+			if (_imm_size != 0) {
+				s += _imm_size;
+				_imm_offset = (byte)(p - (byte*)pCode);
+				_flags |= F_IMM;
+				if ((f & OP_RELATIVE) != 0)
+					_flags |= F_RELATIVE;
+			}
+
+			/* instruction is too long */
+			if (s > 15)
+				_flags |= F_INVALID;
+
+			return s;
+		}
+
+		private static byte GetFlags(byte op) {
+			return flags_table[op];
+		}
+
+		private static byte GetFlagsEx(byte op) {
+			return flags_table_ex[op];
+		}
+	}
+}
+
+
+
+================================================
+File: RuntimeFunctionConfigGenerator/NativeMethods.cs
+================================================
+using System.Runtime.InteropServices;
+using System.Text;
+
+namespace JitTools {
+	internal static unsafe class NativeMethods {
+		public const uint SYMOPT_DEFERRED_LOADS = 4;
+		public const uint MAX_PATH = 260;
+
+		[DllImport("kernel32.dll", BestFitMapping = false, CharSet = CharSet.Unicode, SetLastError = true)]
+		public static extern void* GetCurrentProcess();
+
+		[DllImport("kernel32.dll", BestFitMapping = false, CharSet = CharSet.Unicode, SetLastError = true)]
+		public static extern void* GetModuleHandle(string lpModuleName);
+
+		[DllImport("dbghelp.dll", BestFitMapping = false, CharSet = CharSet.Unicode, SetLastError = true)]
+		public static extern uint SymSetOptions(uint SymOptions);
+
+		[DllImport("dbghelp.dll", BestFitMapping = false, CharSet = CharSet.Unicode, SetLastError = true)]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		public static extern bool SymInitialize(void* hProcess, string UserSearchPath, bool fInvadeProcess);
+
+		[DllImport("dbghelp.dll", BestFitMapping = false, CharSet = CharSet.Unicode, SetLastError = true)]
+		public static extern ulong SymLoadModuleEx(void* hProcess, void* hFile, string ImageName, string ModuleName, ulong BaseOfDll, uint DllSize, void* Data, uint Flags);
+
+		[DllImport("dbghelp.dll", BestFitMapping = false, CharSet = CharSet.Unicode, SetLastError = true)]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		public static extern bool SymFromName(void* hProcess, string Name, SYMBOL_INFO* Symbol);
+
+		[DllImport("kernel32.dll", BestFitMapping = false, CharSet = CharSet.Unicode, SetLastError = true)]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		public static extern bool GetModuleFileName(void* hModule, StringBuilder lpFilename, uint nSize);
+
+		[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+		public struct SYMBOL_INFO {
+			public uint SizeOfStruct;
+			public uint TypeIndex;
+			public fixed ulong Reserved[2];
+			public uint Index;
+			public uint Size;
+			public ulong ModBase;
+			public uint Flags;
+			public ulong Value;
+			public ulong Address;
+			public uint Register;
+			public uint Scope;
+			public uint Tag;
+			public uint NameLen;
+			public uint MaxNameLen;
+			public fixed char Name[1000];
+		}
+	}
+}
+
+
+
+================================================
+File: RuntimeFunctionConfigGenerator/RuntimeEnvironment.cs
+================================================
+using System;
+using static JitTools.NativeMethods;
+
+namespace JitTools {
+	internal static unsafe class RuntimeEnvironment {
+		private static readonly Version Clr45DevPreviewVersion = new Version(4, 0, 30319, 17020);
+		private static readonly Version _clrVersion;
+		private static readonly void* _clrModuleHandle;
+		private static readonly void* _jitModuleHandle;
+		private static bool? _isClr45x;
+
+		public static bool Is32Bit => IntPtr.Size == 4;
+
+		public static Version ClrVersion => _clrVersion;
+
+		public static string ClrModuleName => IsClr2x ? "mscorwks.dll" : "clr.dll";
+
+		public static string JitModuleName => IsClr2x ? "mscorjit.dll" : "clrjit.dll";
+
+		public static void* ClrModuleHandle => _clrModuleHandle;
+
+		public static void* JitModuleHandle => _jitModuleHandle;
+
+		public static bool IsClr2x => _clrVersion.Major == 2;
+
+		public static bool IsClr4x => _clrVersion.Major == 4;
+
+		public static bool IsClr45x {
+			get {
+				if (_isClr45x == null)
+					_isClr45x = _clrVersion >= Clr45DevPreviewVersion;
+				return _isClr45x.Value;
+			}
+		}
+
+		static RuntimeEnvironment() {
+			_clrVersion = Environment.Version;
+			_clrModuleHandle = GetModuleHandle(ClrModuleName);
+			_jitModuleHandle = GetModuleHandle(JitModuleName);
+		}
+	}
+}
+
+
+
+================================================
+File: RuntimeFunctionConfigGenerator/RuntimeFunctionConfigGenerator.bat
+================================================
+@echo off
+Tool.Loader.CLR20.x86.exe RuntimeFunctionConfigGenerator.dll
+Tool.Loader.CLR40.x86.exe RuntimeFunctionConfigGenerator.dll
+pause
+
+
+
+================================================
+File: RuntimeFunctionConfigGenerator/RuntimeFunctionConfigGenerator.cs
+================================================
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Text;
+using Tool.Interface;
+using static JitTools.NativeMethods;
+
+namespace JitTools {
+	public sealed unsafe class RuntimeFunctionConfigGenerator : ITool<RuntimeFunctionConfigGeneratorSettings> {
+		private RuntimeFunctionConfigGeneratorSettings _settings;
+
+		public string Title => ConsoleTitleUtils.GetTitle();
+
+		public void Execute(RuntimeFunctionConfigGeneratorSettings settings) {
+			if (!RuntimeEnvironment.Is32Bit)
+				throw new NotSupportedException();
+
+			_settings = settings;
+			GenerateForJitUnpacker();
+		}
+
+		private void GenerateForJitUnpacker() {
+			string configName;
+			StringBuilder config;
+			StringBuilder buffer;
+			string clrModulePath;
+			string jitModulePath;
+			Version jitFileVersion;
+			byte* address;
+			bool isClr471AndLater;
+
+			configName = "JitUnpacker.RuntimeFunctions";
+			if (RuntimeEnvironment.Is32Bit)
+				configName += RuntimeEnvironment.IsClr2x ? ".CLR20.x86" : ".CLR40.x86";
+			else
+				configName += RuntimeEnvironment.IsClr2x ? ".CLR20.x64" : ".CLR40.x64";
+			configName += ".config";
+			config = new StringBuilder();
+
+			buffer = new StringBuilder((int)MAX_PATH);
+			GetModuleFileName(RuntimeEnvironment.ClrModuleHandle, buffer, MAX_PATH);
+			clrModulePath = buffer.ToString();
+			GetModuleFileName(RuntimeEnvironment.JitModuleHandle, buffer, MAX_PATH);
+			jitModulePath = buffer.ToString();
+
+			if (string.IsNullOrEmpty(_settings.SymbolsDirectory)) {
+				CallProcess("PDBDownloader.exe", $".\\Symbols \"{clrModulePath}|{jitModulePath}\"");
+				_settings.SymbolsDirectory = Path.GetFullPath("Symbols");
+			}
+			PdbInitialize();
+
+			WriteConfig(config, "CLR_VERSION", GetFileVersion(clrModulePath).ToString());
+			jitFileVersion = GetFileVersion(jitModulePath);
+			WriteConfig(config, "JIT_VERSION", jitFileVersion.ToString());
+
+			WriteFunctionRva(config, "?Reset@MethodDesc@@QAEXXZ", "METHODDESC_RESET_RVA");
+			WriteFunctionRva(config, "?DoPrestub@MethodDesc@@QAEKPAVMethodTable@@@Z", "METHODDESC_DOPRESTUB_RVA");
+			WriteFunctionRva(config, "?GetWrappedMethodDesc@MethodDesc@@QAEPAV1@XZ", "METHODDESC_GETWRAPPEDMETHODDESC_RVA");
+
+			if (RuntimeEnvironment.IsClr45x)
+				WriteFunctionRva(config, "?canInline@CEEInfo@@UAE?AW4CorInfoInline@@PAUCORINFO_METHOD_STRUCT_@@0PAK@Z", "CEEINFO_CANINLINE_RVA");
+			else
+				WriteFunctionRva(config, "?canInline@CEEInfo@@UAG?AW4CorInfoInline@@PAUCORINFO_METHOD_STRUCT_@@0PAK@Z", "CEEINFO_CANINLINE_RVA");
+
+			if (RuntimeEnvironment.IsClr45x) {
+				address = GetFirstCallAddress("?DoPrestub@MethodDesc@@QAEKPAVMethodTable@@@Z", "?ContainsGenericVariables@MethodDesc@@QAEHXZ");
+				address = GetFirstTestEaxEaxAddress(address);
+				WriteConfig(config, "METHODDESC_DOPRESTUB_CALL_CONTAINSGENERICVARIABLES_RVA", (uint)(address - (byte*)RuntimeEnvironment.ClrModuleHandle));
+				address = GetFirstCallAddress("?DoPrestub@MethodDesc@@QAEKPAVMethodTable@@@Z", "?IsClassConstructorTriggeredViaPrestub@MethodDesc@@QAEHXZ");
+				address = GetFirstTestEaxEaxAddress(address);
+				WriteConfig(config, "METHODDESC_DOPRESTUB_CALL_ISCLASSCONSTRUCTORTRIGGEREDVIAPRESTUB_RVA", (uint)(address - (byte*)RuntimeEnvironment.ClrModuleHandle));
+				WriteConfig(config, "METHODDESC_DOPRESTUB_CALL_CHECKRUNCLASSINITTHROWING_RVA", 0);
+			}
+			else {
+				WriteConfig(config, "METHODDESC_DOPRESTUB_CALL_CONTAINSGENERICVARIABLES_RVA", 0);
+				WriteConfig(config, "METHODDESC_DOPRESTUB_CALL_ISCLASSCONSTRUCTORTRIGGEREDVIAPRESTUB_RVA", 0);
+				address = GetFirstCallAddress("?DoPrestub@MethodDesc@@QAEKPAVMethodTable@@@Z", "?CheckRunClassInitThrowing@MethodTable@@QAEXXZ");
+				address -= 3;
+				WriteConfig(config, "METHODDESC_DOPRESTUB_CALL_CHECKRUNCLASSINITTHROWING_RVA", (uint)(address - (byte*)RuntimeEnvironment.ClrModuleHandle));
+			}
+
+			isClr471AndLater = jitFileVersion >= new Version(4, 7, 2558, 0);
+
+			if (isClr471AndLater)
+				address = GetFirstCallAddress("jitNativeCode", "?compCompile@Compiler@@QAIHPAUCORINFO_METHOD_STRUCT_@@PAUCORINFO_MODULE_STRUCT_@@PAVICorJitInfo@@PAUCORINFO_METHOD_INFO@@PAPAXPAKI@Z");
+			else
+				address = GetFirstCallAddress("?jitNativeCode@@YIHPAUCORINFO_METHOD_STRUCT_@@PAUCORINFO_MODULE_STRUCT_@@PAVICorJitInfo@@PAUCORINFO_METHOD_INFO@@PAPAXPAKIPAX@Z", "?compCompile@Compiler@@QAIHPAUCORINFO_METHOD_STRUCT_@@PAUCORINFO_MODULE_STRUCT_@@PAVICorJitInfo@@PAUCORINFO_METHOD_INFO@@PAPAXPAKI@Z");
+			WriteConfig(config, "CALL_COMPCOMPILE_RVA", (uint)(address - (byte*)RuntimeEnvironment.JitModuleHandle));
+
+			if (isClr471AndLater)
+				WriteFunctionRva(config, "jitNativeCode", "JITNATIVECODE_RVA");
+			else
+				WriteFunctionRva(config, "?jitNativeCode@@YIHPAUCORINFO_METHOD_STRUCT_@@PAUCORINFO_MODULE_STRUCT_@@PAVICorJitInfo@@PAUCORINFO_METHOD_INFO@@PAPAXPAKIPAX@Z", "JITNATIVECODE_RVA");
+
+			File.WriteAllText(configName, config.ToString());
+			Console.WriteLine(config.ToString());
+			Console.WriteLine("Saving: " + Path.GetFullPath(configName));
+			Console.WriteLine();
+		}
+
+		private static Version GetFileVersion(string filePath) {
+			FileVersionInfo versionInfo;
+
+			versionInfo = FileVersionInfo.GetVersionInfo(filePath);
+			return new Version(versionInfo.FileMajorPart, versionInfo.FileMinorPart, versionInfo.FileBuildPart, versionInfo.FilePrivatePart);
+		}
+
+		private static void CallProcess(string filePath, string arguments) {
+			using (Process process = new Process() {
+				StartInfo = new ProcessStartInfo(filePath, arguments) {
+					CreateNoWindow = true,
+					UseShellExecute = false
+				}
+			}) {
+				Console.WriteLine();
+				Console.WriteLine(filePath + " " + arguments);
+				Console.WriteLine();
+				process.Start();
+				process.WaitForExit();
+			}
+		}
+
+		private void PdbInitialize() {
+			void* processHandle;
+
+			processHandle = GetCurrentProcess();
+			SymSetOptions(SYMOPT_DEFERRED_LOADS);
+			SymInitialize(processHandle, _settings.SymbolsDirectory, false);
+			SymLoadModuleEx(processHandle, null, RuntimeEnvironment.ClrModuleName, null, (ulong)RuntimeEnvironment.ClrModuleHandle, 0, null, 0);
+			SymLoadModuleEx(processHandle, null, RuntimeEnvironment.JitModuleName, null, (ulong)RuntimeEnvironment.JitModuleHandle, 0, null, 0);
+		}
+
+		private static void WriteFunctionRva(StringBuilder config, string functionName, string escapedFunctionName) {
+			uint rva;
+
+			rva = GetFunctionRva(functionName);
+			WriteConfig(config, escapedFunctionName, rva);
+		}
+
+		private static uint GetFunctionRva(string functionName) {
+			SYMBOL_INFO symbolInfo;
+			uint rva;
+
+			if (!SymFromName(GetCurrentProcess(), functionName, &symbolInfo)) {
+				Console.WriteLine($"error on \"{functionName}\"");
+				throw new ApplicationException();
+			}
+			rva = (uint)(symbolInfo.Address - symbolInfo.ModBase);
+			return rva;
+		}
+
+		private static byte* GetFunctionAddress(string functionName) {
+			SYMBOL_INFO symbolInfo;
+
+			if (!SymFromName(GetCurrentProcess(), functionName, &symbolInfo)) {
+				Console.WriteLine($"error on \"{functionName}\"");
+				throw new ApplicationException();
+			}
+			return (byte*)symbolInfo.Address;
+		}
+
+		private static byte* GetFirstCallAddress(string functionName, string callTargetName) {
+			Ldasm ldasm;
+			byte* p;
+			void* pTarget;
+
+			ldasm = new Ldasm();
+			p = GetFunctionAddress(functionName);
+			pTarget = GetFunctionAddress(callTargetName);
+			while (true)
+				if (*p == 0xE8 && p + *(int*)(p + 1) + 5 == pTarget)
+					return p;
+				else
+					p += ldasm.Disassemble(p, !RuntimeEnvironment.Is32Bit);
+		}
+
+		private static byte* GetFirstTestEaxEaxAddress(byte* p) {
+			Ldasm ldasm;
+
+			ldasm = new Ldasm();
+			while (true)
+				if (*p == 0x85 && *(p + 1) == 0xC0)
+					return p;
+				else
+					p += ldasm.Disassemble(p, !RuntimeEnvironment.Is32Bit);
+		}
+
+		private static void WriteConfig(StringBuilder config, string name, uint value) {
+			WriteConfig(config, name, value.ToString("X"));
+		}
+
+		private static void WriteConfig(StringBuilder config, string name, string value) {
+			config.AppendLine(name + "=" + value);
+		}
+	}
+}
+
+
+
+================================================
+File: RuntimeFunctionConfigGenerator/RuntimeFunctionConfigGenerator.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{ACD3DCF3-BCBB-48A7-86A4-F54357B3B701}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>JitTools</RootNamespace>
+    <AssemblyName>RuntimeFunctionConfigGenerator</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="ConsoleTitleUtils.cs" />
+    <Compile Include="Ldasm.cs" />
+    <Compile Include="NativeMethods.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RuntimeEnvironment.cs" />
+    <Compile Include="RuntimeFunctionConfigGenerator.cs" />
+    <Compile Include="RuntimeFunctionConfigGeneratorSettings.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="RuntimeFunctionConfigGenerator.bat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Libraries\dnlib\src\dnlib.csproj">
+      <Project>{fdfc1237-143f-4919-8318-4926901f4639}</Project>
+      <Name>dnlib</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="Tool.Interface">
+      <HintPath>..\Libraries\Tool.Interface\Tool.Interface.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="PDBDownloader.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: RuntimeFunctionConfigGenerator/RuntimeFunctionConfigGeneratorSettings.cs
+================================================
+using System.Cli;
+using System.IO;
+
+namespace JitTools {
+	public sealed class RuntimeFunctionConfigGeneratorSettings {
+		private string _symbolsDirectory;
+
+		[Argument("-d", IsRequired = false, DefaultValue = "", Type = "DIR", Description = "The directory of symbols")]
+		internal string SymbolsDirectoryCliSetter {
+			set => SymbolsDirectory = value;
+		}
+
+		public string SymbolsDirectory {
+			get => _symbolsDirectory;
+			set => _symbolsDirectory = string.IsNullOrEmpty(value) ? null : Path.GetFullPath(value);
+		}
+	}
+}
+
+
+
+================================================
+File: RuntimeFunctionConfigGenerator/Properties/AssemblyInfo.cs
+================================================
+using System.Reflection;
+
+[assembly: AssemblyTitle("RuntimeFunctionConfigGenerator")]
+[assembly: AssemblyProduct("RuntimeFunctionConfigGenerator")]
+[assembly: AssemblyCopyright("Copyright Â© 2019 Wwh")]
+[assembly: AssemblyVersion("1.0.1.0")]
+[assembly: AssemblyFileVersion("1.0.1.0")]
+
+

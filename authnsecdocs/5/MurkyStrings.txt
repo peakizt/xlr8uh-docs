@@ -1,0 +1,696 @@
+Directory structure:
+└── dr4k0nia-murkystrings/
+    ├── README.md
+    ├── LICENSE.md
+    ├── MurkyStrings.sln
+    └── MurkyStrings/
+        ├── App.config
+        ├── MurkyStrings.csproj
+        ├── Obfuscator.cs
+        ├── Program.cs
+        ├── RemoveObfuscator.cs
+        ├── ReplaceObfuscator.cs
+        ├── packages.config
+        └── Properties/
+            └── AssemblyInfo.cs
+
+================================================
+File: README.md
+================================================
+ï»¿# MurkyStrings - stealthy string obfuscation
+
+MurkyStrings is a string obfuscator for .NET applications, built to evade static string analysis. It does not rely on encryption or encoding to evade entropy-based detections. Instead, it transforms strings into a murky mess by inserting special characters and random words. Removing them again on runtime.
+
+
+
+## Usage
+
+
+
+```
+
+MurkyStrings.exe <file path> [--mode=<mode>]
+
+```
+
+
+
+Available modes:
+
+| name | functionality |
+|---|---|
+|replace[glyph]|Insert a variety of homoglyph characters that look identical to alphabetical characters|
+|replace[simple]|Insert random amounts of a special character in between all actual characters | |remove|Insert random method names and spaces into the original string|
+|combine[glyph]|Combines remove and replace[glyph]|
+|combine[simple]|Combines remove and replace[simple]|
+
+
+
+
+## Compatibility
+
+
+
+MurkyStrings is by default build for .NET Framework however, you can compile it targeting .NET Core and it should work just fine.
+
+
+## How does it work?
+
+
+
+I wrote a detailed blog post for that feel free to [check it out](https://dr4k0nia.github.io/posts/String-Obfuscation-The-Malware-Way/)
+
+
+
+Very quickly explained: We insert junk data into the original strings and then remove the junk data on runtime.
+
+
+
+================================================
+File: LICENSE.md
+================================================
+MIT License
+
+Copyright (c) 2022 drakonia
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+
+================================================
+File: MurkyStrings.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MurkyStrings", "MurkyStrings\MurkyStrings.csproj", "{C1F19660-3179-402A-947E-ACDFD3959F77}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C1F19660-3179-402A-947E-ACDFD3959F77}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1F19660-3179-402A-947E-ACDFD3959F77}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1F19660-3179-402A-947E-ACDFD3959F77}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1F19660-3179-402A-947E-ACDFD3959F77}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: MurkyStrings/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?><configuration>
+  <runtime>
+    <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
+      <dependentAssembly>
+        <assemblyIdentity name="System.Runtime.CompilerServices.Unsafe" publicKeyToken="b03f5f7f11d50a3a" culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-6.0.0.0" newVersion="6.0.0.0" />
+      </dependentAssembly>
+      <dependentAssembly>
+        <assemblyIdentity name="System.Text.Json" publicKeyToken="cc7b13ffcd2ddd51" culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-6.0.0.7" newVersion="6.0.0.7" />
+      </dependentAssembly>
+    </assemblyBinding>
+  </runtime>
+</configuration>
+
+
+================================================
+File: MurkyStrings/MurkyStrings.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+    <PropertyGroup>
+        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+        <ProjectGuid>{C1F19660-3179-402A-947E-ACDFD3959F77}</ProjectGuid>
+        <OutputType>Exe</OutputType>
+        <AppDesignerFolder>Properties</AppDesignerFolder>
+        <RootNamespace>MurkyStrings</RootNamespace>
+        <AssemblyName>MurkyStrings</AssemblyName>
+        <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+        <FileAlignment>512</FileAlignment>
+        <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>full</DebugType>
+        <Optimize>false</Optimize>
+        <OutputPath>bin\Debug\</OutputPath>
+        <DefineConstants>DEBUG;TRACE</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <DebugType>pdbonly</DebugType>
+        <Optimize>true</Optimize>
+        <OutputPath>bin\Release\</OutputPath>
+        <DefineConstants>TRACE</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+    </PropertyGroup>
+    <ItemGroup>
+        <Reference Include="AsmResolver, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+          <HintPath>..\packages\AsmResolver.5.0.0\lib\netstandard2.0\AsmResolver.dll</HintPath>
+        </Reference>
+        <Reference Include="AsmResolver.DotNet, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+          <HintPath>..\packages\AsmResolver.DotNet.5.0.0\lib\netstandard2.0\AsmResolver.DotNet.dll</HintPath>
+        </Reference>
+        <Reference Include="AsmResolver.PE, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+          <HintPath>..\packages\AsmResolver.PE.5.0.0\lib\netstandard2.0\AsmResolver.PE.dll</HintPath>
+        </Reference>
+        <Reference Include="AsmResolver.PE.File, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+          <HintPath>..\packages\AsmResolver.PE.File.5.0.0\lib\netstandard2.0\AsmResolver.PE.File.dll</HintPath>
+        </Reference>
+        <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=6.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+          <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.6.0.0\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+        </Reference>
+        <Reference Include="mscorlib" />
+        <Reference Include="System" />
+        <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+          <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
+        </Reference>
+        <Reference Include="System.Core" />
+        <Reference Include="System.Data" />
+        <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+          <HintPath>..\packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
+        </Reference>
+        <Reference Include="System.Numerics" />
+        <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+        </Reference>
+        <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+        </Reference>
+        <Reference Include="System.Text.Encodings.Web, Version=6.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+          <HintPath>..\packages\System.Text.Encodings.Web.6.0.0\lib\net461\System.Text.Encodings.Web.dll</HintPath>
+        </Reference>
+        <Reference Include="System.Text.Json, Version=6.0.0.7, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+          <HintPath>..\packages\System.Text.Json.6.0.7\lib\net461\System.Text.Json.dll</HintPath>
+        </Reference>
+        <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+          <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
+        </Reference>
+        <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+          <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
+        </Reference>
+        <Reference Include="System.Xml" />
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Include="Obfuscator.cs" />
+        <Compile Include="RemoveObfuscator.cs" />
+        <Compile Include="ReplaceObfuscator.cs" />
+        <Compile Include="Program.cs" />
+        <Compile Include="Properties\AssemblyInfo.cs" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Include="App.config" />
+      <None Include="packages.config" />
+    </ItemGroup>
+    <ItemGroup>
+      <Content Include="readme.md" />
+    </ItemGroup>
+    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+    <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+         Other similar extension points exist, see Microsoft.Common.targets.
+    <Target Name="BeforeBuild">
+    </Target>
+    <Target Name="AfterBuild">
+    </Target>
+    -->
+
+</Project>
+
+
+
+================================================
+File: MurkyStrings/Obfuscator.cs
+================================================
+ï»¿using AsmResolver.DotNet;
+
+namespace MurkyStrings;
+
+public abstract class Obfuscator
+{
+    protected Obfuscator()
+    {
+    }
+
+    public abstract void Execute();
+}
+
+
+
+================================================
+File: MurkyStrings/Program.cs
+================================================
+ï»¿using System;
+using System.IO;
+using AsmResolver.DotNet;
+
+namespace MurkyStrings
+{
+    internal class Program
+    {
+        public static void Main(string[] args)
+        {
+            Console.WriteLine("MurkyStrings by drakonia | https://github.com/dr4k0nia");
+
+            Console.WriteLine("Available arguments --mode=");
+            Console.WriteLine("replace[glyph]\nreplace[simple]\nremove\ncombine[glyph]\ncombine[simple]\n");
+
+            if (!File.Exists(args[0]))
+                throw new FileNotFoundException(args[0]);
+
+            var module = ModuleDefinition.FromFile(args[0]);
+
+            if (args.Length == 1)
+            {
+                Console.WriteLine($"Mode was not specified using default option: replace[glyph]");
+                var obfuscator = new ReplaceObfuscator(module);
+                obfuscator.Execute();
+            }
+            else
+            {
+                if (!args[1].StartsWith("--mode="))
+                    throw new Exception("Invalid arguments please use --mode=");
+
+                if (!TryHandleMode(args[1].Remove(0, 7), ref module))
+                {
+                    Console.ReadKey();
+                    return;
+                }
+                Console.WriteLine($"Used mode: {args[1]}");
+            }
+
+            string path = module.FilePath!;
+            string filePath = Path.Combine(Path.GetDirectoryName(path)!,
+                $"{Path.GetFileNameWithoutExtension(path)}_murked{Path.GetExtension(path)}");
+            Console.WriteLine($"Strings have been obfuscated, output file: {filePath}");
+            module.Write(filePath);
+        }
+
+        private static bool TryHandleMode(string mode, ref ModuleDefinition module)
+        {
+            Obfuscator obfuscator;
+            switch (mode)
+            {
+                case "replace[glyph]":
+                    obfuscator = new ReplaceObfuscator(module);
+                    obfuscator.Execute();
+                    return true;
+                case "replace[simple]":
+                    obfuscator = new ReplaceObfuscator(module, ReplaceObfuscator.Mode.Simple);
+                    obfuscator.Execute();
+                    return true;
+                case "remove":
+                    obfuscator = new RemoveObfuscator(module);
+                    obfuscator.Execute();
+                    return true;
+                case "combine[glyph]":
+                    obfuscator = new RemoveObfuscator(module);
+                    obfuscator.Execute();
+                    obfuscator = new ReplaceObfuscator(module);
+                    obfuscator.Execute();
+                    return true;
+                case "combine[simple]":
+                    obfuscator = new RemoveObfuscator(module);
+                    obfuscator.Execute();
+                    obfuscator = new ReplaceObfuscator(module, ReplaceObfuscator.Mode.Simple);
+                    obfuscator.Execute();
+                    return true;
+                default:
+                    Console.WriteLine(
+                        "\nPlease use one of the available modes: replace[glyph], replace[simple], remove, combine[glyph], combine[simple]");
+                    return false;
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: MurkyStrings/RemoveObfuscator.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using AsmResolver.DotNet;
+using AsmResolver.PE.DotNet.Cil;
+
+namespace MurkyStrings
+{
+    public class RemoveObfuscator : Obfuscator
+    {
+        private readonly ModuleDefinition _module;
+
+        private readonly Random _random;
+
+        private readonly List<string> _names;
+
+        public RemoveObfuscator(ModuleDefinition module)
+        {
+            _module = module;
+            _names = new List<string>();
+            _random = new Random(Guid.NewGuid().GetHashCode());
+        }
+
+        public override void Execute()
+        {
+            var importer = new ReferenceImporter(_module);
+            foreach (var type in _module.GetAllTypes().Where(t => t.Methods.Count != 0))
+            {
+                foreach (var method in type.Methods)
+                {
+                    if (method.CilMethodBody == null)
+                        continue;
+
+                    var instructions = method.CilMethodBody.Instructions;
+
+                    for (int i = 0; i < instructions.Count; i++)
+                    {
+                        if (instructions[i].OpCode != CilOpCodes.Ldstr)
+                            continue;
+
+                        // if ((string) instructions[i].Operand == string.Empty)
+                        //     continue;
+
+                        var replaceMethod =
+                            importer.ImportMethod(typeof(string).GetMethod("Remove",
+                                new[] {typeof(int), typeof(int)}) ?? throw new InvalidDataException());
+
+                        string operand = (string) instructions[i].Operand!;
+
+                        var result = ObfuscateString(ref operand);
+
+                        instructions[i].Operand = operand;
+
+                        var implant = new List<CilInstruction>();
+                        int count = 0;
+                        foreach (var pair in result)
+                        {
+                            implant.Add(CilInstruction.CreateLdcI4(pair.Item1));
+                            implant.Add(CilInstruction.CreateLdcI4(pair.Item2));
+                            implant.Add(count == 0
+                                ? new CilInstruction(CilOpCodes.Call, importer.ImportMethod(replaceMethod))
+                                : new CilInstruction(CilOpCodes.Callvirt, importer.ImportMethod(replaceMethod)));
+
+                            count++;
+                        }
+
+                        instructions.InsertRange(i + 1, implant);
+
+                        i += implant.Count;
+                    }
+
+                    instructions.OptimizeMacros();
+                }
+            }
+        }
+
+        private List<Tuple<int, int>> ObfuscateString(ref string input)
+        {
+            int insertsCount = _random.Next(5);
+            var result = new List<Tuple<int, int>>();
+
+            for (int i = 0; i < insertsCount; i++)
+            {
+                int index = _random.Next(0, input.Length);
+                string insert = GetRandomName();
+                int insertLength = insert.Length;
+
+                input = input.Insert(index, insert);
+
+                result.Add(new Tuple<int, int>(index, insertLength));
+            }
+
+            result.Reverse();
+            return result;
+        }
+
+        private string GetRandomName()
+        {
+            if (_names.Count != 0)
+            {
+                StringBuilder builder = new StringBuilder();
+
+                for (int i = 0; i < _random.Next(0, 5); i++)
+                {
+                    builder.Append(_names[_random.Next(_names.Count)]);
+                    if (_random.Next(0, 2) == 0)
+                        builder.Append((char) 0x20, _random.Next(1, 4)); // Append random spaces
+                }
+
+                return builder.ToString();
+            }
+
+            var types = typeof(string).Module.GetTypes();
+
+            foreach (var type in types)
+            {
+                foreach (var method in type.GetMethods())
+                {
+                    if (!_names.Contains(method.Name))
+                        _names.Add(method.Name);
+                }
+            }
+
+            return GetRandomName();
+        }
+    }
+}
+
+
+
+================================================
+File: MurkyStrings/ReplaceObfuscator.cs
+================================================
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using AsmResolver.DotNet;
+using AsmResolver.PE.DotNet.Cil;
+
+namespace MurkyStrings
+{
+    public class ReplaceObfuscator : Obfuscator
+    {
+        private readonly ModuleDefinition _module;
+        private readonly Mode _mode;
+
+        private readonly Random _random;
+
+        public enum Mode
+        {
+            Simple,
+            Homoglyph
+        }
+
+        public ReplaceObfuscator(ModuleDefinition module, Mode mode = Mode.Homoglyph)
+        {
+            _module = module;
+            _mode = mode;
+            _random = new Random(Guid.NewGuid().GetHashCode());
+        }
+
+        public override void Execute()
+        {
+            var importer = new ReferenceImporter(_module);
+            foreach (var type in _module.GetAllTypes().Where(t => t.Methods.Count != 0))
+            {
+                foreach (var method in type.Methods)
+                {
+                    if (method.CilMethodBody == null)
+                        continue;
+
+                    var instructions = method.CilMethodBody.Instructions;
+
+                    for (int i = 0; i < instructions.Count; i++)
+                    {
+                        if (instructions[i].OpCode != CilOpCodes.Ldstr)
+                            continue;
+
+                        if ((string) instructions[i].Operand == string.Empty)
+                            continue;
+
+                        instructions[i].Operand = ObfuscateString((string) instructions[i].Operand);
+
+                        var implant = new List<CilInstruction>();
+                        var replaceMethod =
+                            importer.ImportMethod(typeof(string).GetMethod("Replace",
+                                new[] {typeof(string), typeof(string)}) ?? throw new InvalidDataException());
+
+                        if (_mode == Mode.Homoglyph)
+                        {
+                            string[] glyphs = {"а", "е", "і", "о", "с"};
+
+                            string[] ordered = glyphs.OrderBy(c => _random.Next()).ToArray();
+
+                            for (int j = 0; j < ordered.Length; j++)
+                            {
+                                implant.Add(new CilInstruction(CilOpCodes.Ldstr, ordered[j]));
+                                implant.Add(new CilInstruction(CilOpCodes.Ldnull));
+
+                                if (j == 0)
+                                {
+                                    implant.Add(new CilInstruction(CilOpCodes.Call, replaceMethod));
+                                    continue;
+                                }
+
+                                implant.Add(new CilInstruction(CilOpCodes.Callvirt, replaceMethod));
+                            }
+                        }
+                        else
+                        {
+                            implant.Add(new CilInstruction(CilOpCodes.Ldstr, "\u115F"));
+                            implant.Add(new CilInstruction(CilOpCodes.Ldnull));
+                            implant.Add(new CilInstruction(CilOpCodes.Call, replaceMethod));
+                        }
+
+                        instructions.InsertRange(i + 1, implant);
+
+                        i += implant.Count;
+                    }
+
+                    instructions.OptimizeMacros();
+                }
+            }
+        }
+
+        private string ObfuscateString(string input)
+        {
+            StringBuilder result = new StringBuilder();
+            foreach (char c in input)
+            {
+                // randomize if the glyphs are inserted before or after the original character
+                if (_random.Next(0, 2) == 0)
+                {
+                    result.Append(_mode == Mode.Homoglyph
+                        ? new string(GetHomoglyph(c), _random.Next(4))
+                        : new string('\u115F', _random.Next(16)));
+                    result.Append(c);
+                }
+                else
+                {
+                    result.Append(c);
+                    result.Append(_mode == Mode.Homoglyph
+                        ? new string(GetHomoglyph(c), 1)
+                        : new string('\u115F', _random.Next(16)));
+                }
+            }
+
+            return result.ToString();
+        }
+
+        // Use characters that look like standard alphabetical
+        // but are actually from a different alphabet (Homoglyphs)
+        private char GetHomoglyph(char input)
+        {
+            char[] glyphs = {'а', 'е', 'і', 'о', 'с'};
+            switch (input)
+            {
+                case 'a':
+                    return glyphs[0];
+                case 'e':
+                    return glyphs[1];
+                case 'i':
+                    return glyphs[2];
+                case 'o':
+                    return glyphs[3];
+                default:
+                    return glyphs[_random.Next(glyphs.Length)];
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: MurkyStrings/packages.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<packages>
+  <package id="AsmResolver" version="5.0.0" targetFramework="net48" />
+  <package id="AsmResolver.DotNet" version="5.0.0" targetFramework="net48" />
+  <package id="AsmResolver.PE" version="5.0.0" targetFramework="net48" />
+  <package id="AsmResolver.PE.File" version="5.0.0" targetFramework="net48" />
+  <package id="Microsoft.Bcl.AsyncInterfaces" version="6.0.0" targetFramework="net48" />
+  <package id="System.Buffers" version="4.5.1" targetFramework="net48" />
+  <package id="System.Memory" version="4.5.4" targetFramework="net48" />
+  <package id="System.Numerics.Vectors" version="4.5.0" targetFramework="net48" />
+  <package id="System.Runtime.CompilerServices.Unsafe" version="6.0.0" targetFramework="net48" />
+  <package id="System.Text.Encodings.Web" version="6.0.0" targetFramework="net48" />
+  <package id="System.Text.Json" version="6.0.7" targetFramework="net48" />
+  <package id="System.Threading.Tasks.Extensions" version="4.5.4" targetFramework="net48" />
+  <package id="System.ValueTuple" version="4.5.0" targetFramework="net48" />
+</packages>
+
+
+================================================
+File: MurkyStrings/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following 
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("MurkyStrings")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("MurkyStrings")]
+[assembly: AssemblyCopyright("Copyright Â©  2022")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Setting ComVisible to false makes the types in this assembly not visible 
+// to COM components.  If you need to access a type in this assembly from 
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("C1F19660-3179-402A-947E-ACDFD3959F77")]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version 
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers 
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+

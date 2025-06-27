@@ -1,0 +1,638 @@
+Directory structure:
+└── zeroplusblog-easypredicatekiller/
+    ├── EasyPredicateKiller.sln
+    └── EasyPredicateKiller/
+        ├── App.config
+        ├── Configuration.cs
+        ├── EasyPredicateKiller.csproj
+        ├── MethodDefExt.cs
+        ├── MethodExporter.cs
+        ├── MiscExt.cs
+        ├── Program.cs
+        ├── X86ILTester.cs
+        └── Properties/
+            └── AssemblyInfo.cs
+
+================================================
+File: EasyPredicateKiller.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyPredicateKiller", "EasyPredicateKiller\EasyPredicateKiller.csproj", "{544A276E-E069-41BF-817B-E90C5F456482}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{544A276E-E069-41BF-817B-E90C5F456482}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{544A276E-E069-41BF-817B-E90C5F456482}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{544A276E-E069-41BF-817B-E90C5F456482}.Debug|x64.ActiveCfg = Debug|x64
+		{544A276E-E069-41BF-817B-E90C5F456482}.Debug|x64.Build.0 = Debug|x64
+		{544A276E-E069-41BF-817B-E90C5F456482}.Debug|x86.ActiveCfg = Debug|x86
+		{544A276E-E069-41BF-817B-E90C5F456482}.Debug|x86.Build.0 = Debug|x86
+		{544A276E-E069-41BF-817B-E90C5F456482}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{544A276E-E069-41BF-817B-E90C5F456482}.Release|Any CPU.Build.0 = Release|Any CPU
+		{544A276E-E069-41BF-817B-E90C5F456482}.Release|x64.ActiveCfg = Release|x64
+		{544A276E-E069-41BF-817B-E90C5F456482}.Release|x64.Build.0 = Release|x64
+		{544A276E-E069-41BF-817B-E90C5F456482}.Release|x86.ActiveCfg = Release|x86
+		{544A276E-E069-41BF-817B-E90C5F456482}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: EasyPredicateKiller/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.5" />
+    </startup>
+</configuration>
+
+
+================================================
+File: EasyPredicateKiller/Configuration.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using dnlib.DotNet;
+
+namespace EasyPredicateKiller
+{
+    class Configuration
+    {
+        public static String AssemblyFilename { get; set; }
+    }
+}
+
+
+
+================================================
+File: EasyPredicateKiller/EasyPredicateKiller.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{544A276E-E069-41BF-817B-E90C5F456482}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>EasyPredicateKiller</RootNamespace>
+    <AssemblyName>EasyPredicateKiller</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib">
+      <HintPath>..\..\..\..\..\Downloads\dnlib-master\dnlib-master\Debug\bin\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDisasm">
+      <HintPath>..\..\..\..\..\Downloads\SharpDisasm1.1.5\Net45\SharpDisasm.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Configuration.cs" />
+    <Compile Include="MethodDefExt.cs" />
+    <Compile Include="MethodExporter.cs" />
+    <Compile Include="MiscExt.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="X86ILTester.cs" />
+    <Compile Include="x86\Instructions\X86ADD.cs" />
+    <Compile Include="x86\Instructions\X86DIV.cs" />
+    <Compile Include="x86\Instructions\X86IMUL.cs" />
+    <Compile Include="x86\Instructions\X86MOV.cs" />
+    <Compile Include="x86\Instructions\X86NEG.cs" />
+    <Compile Include="x86\Instructions\X86NOT.cs" />
+    <Compile Include="x86\Instructions\X86POP.cs" />
+    <Compile Include="x86\Instructions\X86SUB.cs" />
+    <Compile Include="x86\Instructions\X86XOR.cs" />
+    <Compile Include="x86\X86Instruction.cs" />
+    <Compile Include="x86\X86Method.cs" />
+    <Compile Include="x86\X86MethodToILConverter.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
+
+
+================================================
+File: EasyPredicateKiller/MethodDefExt.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using dnlib.PE;
+
+namespace EasyPredicateKiller
+{
+    public static class MethodDefExt
+    {
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr LoadLibrary(string dllToLoad);
+
+
+        public static ModuleDefMD OriginalMD { get; set; }
+        private static IntPtr moduleHandle = IntPtr.Zero;
+
+        public static byte[] ReadBodyFromRva(this MethodDef method)
+        {
+            if (OriginalMD == null)
+            {
+                OriginalMD = AssemblyDef.Load(Configuration.AssemblyFilename).ManifestModule as ModuleDefMD;
+            }
+
+            var stream = OriginalMD.MetaData.PEImage.CreateFullStream();
+            var offset = OriginalMD.MetaData.PEImage.ToFileOffset(method.RVA);
+            var nextMethod = OriginalMD.TablesStream.ReadMethodRow(method.Rid + 1);
+            var size = OriginalMD.MetaData.PEImage.ToFileOffset((RVA)nextMethod.RVA) - offset;
+            var buff = new byte[100];
+
+            stream.Position = (long)offset + 20;
+            stream.Read(buff, 0, buff.Length);
+            return buff;
+        }
+
+        // Not working for all tokens !
+        /*public static IEnumerable<Tuple<Instruction, MethodDef>> FindAllReferences(this MethodDef mDef)
+        {
+            foreach (
+                var method in
+                    mDef.Module.Assembly.FindMethods(x => x.HasBody))
+            {
+                for (var i = 0; i < method.Body.Instructions.Count; i++)
+                {
+                    if (method.Body.Instructions[i].OpCode == OpCodes.Call)
+                        if ((method.Body.Instructions[i].Operand as MethodSpec) != null)
+                        {
+                            var a = method.Body.Instructions[i].Operand as MethodSpec;
+                            if (a.Method == mDef)
+                                yield return Tuple.Create(method.Body.Instructions[i], method);
+                        }
+                        else if ((method.Body.Instructions[i].Operand as MethodDef) != null)
+                        {
+                            var a = method.Body.Instructions[i].Operand as MethodDef;
+                            if (a == mDef)
+                                yield return Tuple.Create(method.Body.Instructions[i], method);
+                        }
+                        else if ((method.Body.Instructions[i].Operand as MemberRef != null))
+                        {
+                            var a = method.Body.Instructions[i].Operand as MemberRef;
+                            if (a.ResolveMethod() != null)
+                                yield return Tuple.Create(method.Body.Instructions[i], method);
+                        }
+                }
+            }
+        }*/
+
+        // Somehow the other method skipped some references
+        // Now we resolve every method by its token and check the instructions, it works this way (but isn't as clean as the other)
+        public static IEnumerable<Instruction> FindAllReferences(this MethodDef mDef, ModuleDefMD module)
+        {
+            var returnList = new List<Instruction>();
+
+            var totalMethods2 = new List<MethodDef>();
+            // TODO: Read count dynamically
+            for (int i = 1; i < 0x10000; i++)
+            {
+                var resolved = module.ResolveMethod((uint)i);
+                if (resolved == null)
+                    continue;
+
+                if (resolved.HasBody)
+                    totalMethods2.Add(resolved);
+            }
+
+            foreach (
+                var method in
+                    totalMethods2)
+            {
+
+                if (!method.HasBody)
+                    continue;
+
+                for (var i = 0; i < method.Body.Instructions.Count; i++)
+                {
+                    if (method.Body.Instructions[i].OpCode == OpCodes.Call)
+                    {
+                        var currentMethod = method.Body.Instructions[i].Operand as MethodDef;
+
+                        if (currentMethod != null && currentMethod.MDToken.ToInt32() == mDef.MDToken.ToInt32())
+                        {
+                            returnList.Add(method.Body.Instructions[i]);
+                        }
+
+                        var currentMethodSpec = method.Body.Instructions[i].Operand as MethodSpec;
+                        if (currentMethodSpec != null && currentMethodSpec.MDToken.ToInt32() == mDef.MDToken.ToInt32())
+                        {
+                            returnList.Add(method.Body.Instructions[i]);
+                        }
+                    
+                    }
+                }
+            }
+
+            return returnList;
+        }
+    }
+}
+
+
+
+================================================
+File: EasyPredicateKiller/MethodExporter.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using dnlib.DotNet;
+using dnlib.DotNet.Writer;
+
+namespace EasyPredicateKiller
+{
+    public static class MethodExporter
+    {
+        public static void ExportMethodsToDll(String filename, List<MethodDef> nativeMethods, ModuleDefMD asmModule )
+        {
+            // Create new module
+            ModuleDef mod = new ModuleDefUser(filename);
+            mod.Kind = ModuleKind.Dll;
+            var newAsm = new AssemblyDefUser(new UTF8String("TestAssembly"), new Version(1, 2, 3, 4));
+            newAsm.Modules.Add(mod);
+
+            // Add some type
+            mod.Types.Add(new TypeDefUser("Startup", "MyType", mod.CorLibTypes.Object.TypeDefOrRef));
+            var currentType = mod.Types.FirstOrDefault(m => m.Name == "MyType");
+
+
+            for (int i = 0; i < nativeMethods.Count; i++)
+            {
+                var ilMethod = asmModule.GlobalType.Methods.FirstOrDefault(m => m.Name == nativeMethods[i].Name + "_IL");
+
+                // We do clone the method since we have to set the DeclaringType to zero. But we don't want to mess with the reference
+                var clonedILMethod = new MethodDefUser(new UTF8String(Encoding.UTF8.GetBytes(nativeMethods[i].Name)), ilMethod.MethodSig, ilMethod.Attributes);
+
+                clonedILMethod.Body = ilMethod.Body;
+                clonedILMethod.DeclaringType = null;
+                clonedILMethod.Name = Convert.ToBase64String(Encoding.UTF8.GetBytes(nativeMethods[i].Name));
+
+                currentType.Methods.Add(clonedILMethod);
+            }
+
+            var testAssemblyWriterOptions = new ModuleWriterOptions();
+
+            // Do we want to suppress errors ? 
+            // testAssemblyWriterOptions.Logger = DummyLogger.NoThrowInstance;
+
+            newAsm.Write(filename, testAssemblyWriterOptions);
+        }
+    }
+}
+
+
+
+================================================
+File: EasyPredicateKiller/MiscExt.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using ConfuserDeobfuscator.Engine.Routines.Ex.x86;
+using SharpDisasm;
+using SharpDisasm.Udis86;
+
+namespace EasyPredicateKiller
+{
+    public static class MiscExt
+    {
+        public static IX86Operand GetOperand(this Operand argument)
+        {
+            if (argument.Type == ud_type.UD_OP_IMM)
+                return
+                    new X86ImmediateOperand((int)argument.Value);
+
+            return new X86RegisterOperand((X86Register)argument.Base);
+        }
+    }
+}
+
+
+
+================================================
+File: EasyPredicateKiller/Program.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
+using System.Runtime.InteropServices;
+using System.Runtime.Remoting.Messaging;
+using System.Text;
+using System.Threading.Tasks;
+using ConfuserDeobfuscator.Engine.Routines.Ex.x86;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using dnlib.DotNet.MD;
+using dnlib.DotNet.Writer;
+using EasyPredicateKiller.x86;
+using SharpDisasm;
+using Instruction = dnlib.DotNet.Emit.Instruction;
+using OpCodes = dnlib.DotNet.Emit.OpCodes;
+
+namespace EasyPredicateKiller
+{
+    internal class Program
+    {
+        private static void Main(string[] args)
+        {
+            if (args.Length == 0)
+            {
+                Console.WriteLine("No input file specified...");
+                return;
+            }
+
+            // Store the obfuscated file name for later use (e.g. when resolving the RVAs)
+            Configuration.AssemblyFilename = args[0];
+
+            // Load the assembly via dnlib (Only the module, we need this structure to resolve MD Tokens)
+            var assemblyModuleDnlib = ModuleDefMD.Load(Configuration.AssemblyFilename);
+
+            // Get the <Module>-Type for later use
+            var cctorType = assemblyModuleDnlib.GlobalType;
+
+            // Store the replaced methods in this list
+            var nativeMethodsReplaced = new List<MethodDef>();
+
+            // Find methods with native code
+            var nativeMethods = cctorType.Methods.Where(m => m.IsNative).ToList();
+
+            foreach (var nativeMethod in nativeMethods)
+            {
+                // Get the assembly code and the X86  Opcode Structure (Thanks to ubbelol)
+                X86Method x86NativeMethod = new X86Method(nativeMethod);
+                var ILNativeMethod = X86MethodToILConverter.CreateILFromX86Method(x86NativeMethod);
+
+                nativeMethod.DeclaringType.Methods.Add(ILNativeMethod);
+                nativeMethodsReplaced.Add(nativeMethod);
+            }
+
+            // Export all the IL Methods to a DLL
+            MethodExporter.ExportMethodsToDll("TestMethodModule.dll", nativeMethodsReplaced, assemblyModuleDnlib);
+
+            // Call the DLL IL Methods and the native Methods via x86 function ptr to see if the result is the same
+            X86ILTester.TestNativeWithILMethods(Configuration.AssemblyFilename, Path.Combine(Environment.CurrentDirectory, "TestMethodModule.dll"));
+           
+            // Find all the native method calls and replace them with the IL calls
+            foreach (var replacedMethod in nativeMethodsReplaced)
+            {
+                var callsToNativeMethod = replacedMethod.FindAllReferences(assemblyModuleDnlib);
+                var ilMethod =assemblyModuleDnlib.GlobalType.Methods.FirstOrDefault(m => m.Name == replacedMethod.Name + "_IL");
+
+                foreach (var call in callsToNativeMethod)
+                    call.Operand = ilMethod;
+
+                Console.WriteLine("[+] Removed " + callsToNativeMethod.ToList().Count + " entries.");
+            }
+
+            // Remove each native method
+            foreach (var replacedMethod in nativeMethodsReplaced)
+            {
+                cctorType.Methods.Remove(replacedMethod);
+            }
+
+            // Turn off signing
+            assemblyModuleDnlib.IsStrongNameSigned = false;
+            assemblyModuleDnlib.Assembly.PublicKey = null;
+
+
+            // Preserve Tokens and fix the flags for ILOnly
+            var moduleWriterOptions = new ModuleWriterOptions();
+            moduleWriterOptions.MetaDataOptions.Flags |= MetaDataFlags.PreserveAll;
+            moduleWriterOptions.MetaDataOptions.Flags |= MetaDataFlags.KeepOldMaxStack;
+            moduleWriterOptions.Cor20HeaderOptions.Flags = ComImageFlags.ILOnly | ComImageFlags._32BitRequired;
+            
+
+            assemblyModuleDnlib.Write("out_mod.exe", moduleWriterOptions);
+        }
+
+        
+        
+    }
+}
+
+
+================================================
+File: EasyPredicateKiller/X86ILTester.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
+using dnlib.DotNet;
+
+namespace EasyPredicateKiller
+{
+    public class X86ILTester
+    {
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr LoadLibrary(string dllToLoad);
+
+        [UnmanagedFunctionPointer(System.Runtime.InteropServices.CallingConvention.Cdecl)]
+        private delegate int PredicateCall(Int32 currentNum);
+
+        public static bool TestNativeWithILMethods(String filenameAsm1, String filenameAsm2)
+        {
+            // Load the current mixed mode assembly into the memory
+            var nativeAssembly = LoadLibrary(filenameAsm1);
+
+            // Load the assemblies via reflection and dnlib
+            var dnlibAssembly1 = AssemblyDef.Load(filenameAsm1);
+            var reflectedAssembly2 = Assembly.LoadFile(filenameAsm2);
+            
+            // Get the only type (except for the <Module> which is not shwon)
+            var reflectedType = reflectedAssembly2.GetModules()[0].GetTypes()[0];
+
+            // Get all the public static methods
+            var methodsReflected = reflectedType.GetMethods(BindingFlags.Static | BindingFlags.Public);
+
+            // Find all the native x86 functions in the current assembly
+            foreach (var method in dnlibAssembly1.Modules[0].GlobalType.Methods.Where(m => m.IsNative))
+            {
+                // Resolve name (UTF8 fucked up, so its the base64 encoding of the name)
+                var currentMethodReflected =
+                    methodsReflected.FirstOrDefault(
+                        m => m.Name == Convert.ToBase64String(Encoding.UTF8.GetBytes(method.Name)));
+
+                // Invoke the IL-Method via reflection
+                var resultInvoked = (int)currentMethodReflected.Invoke(null, new object[] {0x1337});
+
+                // Calculate the VA of the native method
+                var methodAddressStart = (long)nativeAssembly + (long)method.NativeBody.RVA;
+                // Get a pointer with a delegate __Cdecl
+                var functionPtr = (PredicateCall)Marshal.GetDelegateForFunctionPointer(new IntPtr(methodAddressStart), typeof(PredicateCall));
+
+                // Invoke native
+                var resultNative = functionPtr.Invoke(0x1337);
+
+                // Compare results, throw exception if something went wrong
+                if (resultInvoked != resultNative)
+                {
+                    throw new Exception("WRONG CODE!");
+                }
+            }
+
+            return true;
+        }
+    }
+}
+
+
+
+================================================
+File: EasyPredicateKiller/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// Allgemeine Informationen Ã¼ber eine Assembly werden Ã¼ber die folgenden 
+// Attribute gesteuert. Ã„ndern Sie diese Attributwerte, um die Informationen zu Ã¤ndern,
+// die mit einer Assembly verknÃ¼pft sind.
+[assembly: AssemblyTitle("EasyPredicateKiller")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("EasyPredicateKiller")]
+[assembly: AssemblyCopyright("Copyright Â©  2017")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Durch Festlegen von ComVisible auf "false" werden die Typen in dieser Assembly unsichtbar 
+// fÃ¼r COM-Komponenten. Wenn Sie auf einen Typ in dieser Assembly von 
+// COM zugreifen mÃ¼ssen, legen Sie das ComVisible-Attribut fÃ¼r diesen Typ auf "true" fest.
+[assembly: ComVisible(false)]
+
+// Die folgende GUID bestimmt die ID der Typbibliothek, wenn dieses Projekt fÃ¼r COM verfÃ¼gbar gemacht wird
+[assembly: Guid("3d2cd4d3-c07a-4506-9d67-b3505d47c698")]
+
+// Versionsinformationen fÃ¼r eine Assembly bestehen aus den folgenden vier Werten:
+//
+//      Hauptversion
+//      Nebenversion 
+//      Buildnummer
+//      Revision
+//
+// Sie kÃ¶nnen alle Werte angeben oder die standardmÃ¤ÃŸigen Build- und Revisionsnummern 
+// Ã¼bernehmen, indem Sie "*" eingeben:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+

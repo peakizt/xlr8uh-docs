@@ -1,0 +1,3840 @@
+Directory structure:
+└── advdebug-netshield_protector/
+    ├── README.md
+    ├── LICENSE
+    ├── NetShield Protector.sln
+    ├── NetShield Protector/
+    │   ├── App.config
+    │   ├── Classes.cs
+    │   ├── Encryption.cs
+    │   ├── Helper.cs
+    │   ├── Main.Designer.cs
+    │   ├── Main.cs
+    │   ├── Main.resx
+    │   ├── NetShield Protector.csproj
+    │   ├── Program.cs
+    │   ├── Resource1.Designer.cs
+    │   ├── Resource1.resx
+    │   ├── Properties/
+    │   │   ├── AssemblyInfo.cs
+    │   │   ├── Resources.Designer.cs
+    │   │   ├── Resources.resx
+    │   │   ├── Settings.Designer.cs
+    │   │   └── Settings.settings
+    │   └── Resources/
+    │       ├── LicensePacker.cs
+    │       ├── PackStub.cs
+    │       ├── Program.cs
+    │       └── USBPacker.cs
+    └── .github/
+        └── workflows/
+            └── codeql.yml
+
+================================================
+File: README.md
+================================================
+# NetShield Protector
+.NET Copy Protection Software which includes licensing your C# with many things such as Hardware ID, License, USB Hardware ID, etc....
+
+Note that the project are no longer supported.
+# Obfuscastion
+Base64 String Encoding.
+
+Anti-De4dot.
+
+Fake Obfuscastor Attributes.
+
+Junk Methods and namespaces.
+
+Control Flow Obfuscastion.
+
+INT Confusion
+
+Anti-ILDasm Protection
+
+Renamer (renames methods, parameters, etc...)
+
+Anti-VM
+
+Anti-Debug
+
+Anti-Decompiler
+
+Packing (you have to select another obfuscastion option to enable)
+
+# Licensing
+Hardware ID Licensing
+
+Just a license file
+
+USB Hardware ID Licensing
+# Use Cases
+Please Note that you shouldn't depend on this Protector Protection, it's are mainly for testing and exploring how obfuscation and packing/licensing may work.
+
+Some use cases are:
+
+* Packing your program with a specific HWID so that it runs on your pc only and people with physical access can't steal it easily.
+
+* Packing your program with a specific USB HWID so that it runs on different PCs with a trusted USB without easily tampering your program code.
+# Credits
+
+Thanks To <a href="https://github.com/Sato-Isolated/MindLated">MindLated Project</a> for Control Flow and INT Confusion
+
+
+
+================================================
+File: LICENSE
+================================================
+MIT License
+
+Copyright (c) 2021 AdvDebug
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+
+================================================
+File: NetShield Protector.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31624.102
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetShield Protector", "NetShield Protector\NetShield Protector.csproj", "{F796DDDD-9133-4A59-B511-6A0950690C4C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F796DDDD-9133-4A59-B511-6A0950690C4C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F796DDDD-9133-4A59-B511-6A0950690C4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F796DDDD-9133-4A59-B511-6A0950690C4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F796DDDD-9133-4A59-B511-6A0950690C4C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EEA0E6CF-94B1-4AB2-8844-25009C6D2847}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: NetShield Protector/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.7.2" />
+    </startup>
+	<System.Windows.Forms.ApplicationConfigurationSection>
+		<add key="DpiAware" value="true"/>
+		<add key="DpiAwareness" value="PerMonitorV2"/>
+	</System.Windows.Forms.ApplicationConfigurationSection>
+</configuration>
+
+
+================================================
+File: NetShield Protector/Classes.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Management;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace NetShield_Protector
+{
+    internal class Classes
+    {
+        internal class AntiDebug
+        {
+            [DllImport("kernel32.dll", SetLastError = true)]
+            private static extern bool IsDebuggerPresent();
+
+            [DllImport("kernel32.dll", SetLastError = true)]
+            private static extern bool CloseHandle(IntPtr Handle);
+
+            [DllImport("kernel32.dll", SetLastError = true)]
+            private static extern bool CheckRemoteDebuggerPresent(IntPtr Handle, ref bool IsPresent);
+            public static void AntiDebugCheck()
+            {
+                bool IsPresent = false;
+                CheckRemoteDebuggerPresent(Process.GetCurrentProcess().Handle, ref IsPresent);
+                if (IsDebuggerPresent() || Debugger.IsAttached || IsPresent)
+                {
+                    Environment.Exit(0);
+                }
+                try
+                {
+                    CloseHandle((IntPtr)0x1231);
+                }
+                catch
+                {
+                    Environment.Exit(0);
+                }
+            }
+        }
+
+        internal class AntiVM
+        {
+            [DllImport("kernel32.dll", SetLastError = true)]
+            private static extern IntPtr GetModuleHandle(string lib);
+
+            public static bool IsEmulated()
+            {
+                long Tick = Environment.TickCount;
+                Thread.Sleep(500);
+                long Tick2 = Environment.TickCount;
+                if (((Tick2 - Tick) < 500L))
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            public static bool IsModulePresent(string lib)
+            {
+                if (GetModuleHandle(lib) != IntPtr.Zero )
+                    return true;
+                return false;
+            }
+
+            public static bool CheckForVMwareAndVirtualBox()
+            {
+                using (ManagementObjectSearcher ObjectSearcher = new ManagementObjectSearcher("Select * from Win32_ComputerSystem"))
+                {
+                    using (ManagementObjectCollection ObjectItems = ObjectSearcher.Get())
+                    {
+                        foreach (ManagementBaseObject Item in ObjectItems)
+                        {
+                            string ManufacturerString = Item["Manufacturer"].ToString().ToLower();
+                            string ModelName = Item["Model"].ToString();
+                            if ((ManufacturerString == "microsoft corporation" && ModelName.ToUpperInvariant().Contains("VIRTUAL") || ManufacturerString.Contains("vmware")))
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false;
+            }
+
+            public static void AntiVMCheck()
+            {
+                string[] BlacklistModules = { "SbieDll.dll", "cmdvrt32.dll", "SxIn.dll", "cuckoomon.dll" };
+                for (int i = 0; i < BlacklistModules.Length; i++)
+                {
+                    if (IsModulePresent(BlacklistModules[i]))
+                    {
+                        Environment.Exit(0);
+                    }
+                }
+                if (CheckForVMwareAndVirtualBox() || IsEmulated())
+                {
+                    Environment.Exit(0);
+                }
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: NetShield Protector/Encryption.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace NetShield_Protector
+{
+    public class Encryption
+    {
+        public static string AesTextEncryption(string DataToEncrypt, string KeyToEncryptWith, string IVKey)
+        {
+            byte[] data = UTF8Encoding.UTF8.GetBytes(DataToEncrypt);
+            using (SHA256CryptoServiceProvider SHA256 = new SHA256CryptoServiceProvider())
+            {
+                string initVector = IVKey;
+                byte[] initVectorBytes = Encoding.ASCII.GetBytes(initVector);
+                byte[] keys = SHA256.ComputeHash(UTF8Encoding.UTF8.GetBytes(KeyToEncryptWith));
+                using (AesCryptoServiceProvider AES = new AesCryptoServiceProvider() { Key = keys, Mode = CipherMode.CBC, Padding = PaddingMode.PKCS7 })
+                {
+                    AES.IV = initVectorBytes;
+                    ICryptoTransform transform = AES.CreateEncryptor();
+                    byte[] results = transform.TransformFinalBlock(data, 0, data.Length);
+                    string Result = Convert.ToBase64String(results, 0, results.Length);
+                    return Result;
+                }
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: NetShield Protector/Helper.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace NetShield_Protector
+{
+    public static class InjectHelper
+    {
+        private static TypeDefUser Clone(TypeDef origin)
+        {
+            var ret = new TypeDefUser(origin.Namespace, origin.Name)
+            {
+                Attributes = origin.Attributes
+            };
+
+            if (origin.ClassLayout != null)
+                ret.ClassLayout = new ClassLayoutUser(origin.ClassLayout.PackingSize, origin.ClassSize);
+
+            foreach (var genericParam in origin.GenericParameters)
+                ret.GenericParameters.Add(new GenericParamUser(genericParam.Number, genericParam.Flags, "-"));
+
+            return ret;
+        }
+
+        private static MethodDefUser Clone(MethodDef origin)
+        {
+            var ret = new MethodDefUser(origin.Name, null, origin.ImplAttributes, origin.Attributes);
+
+            foreach (var genericParam in origin.GenericParameters)
+                ret.GenericParameters.Add(new GenericParamUser(genericParam.Number, genericParam.Flags, "-"));
+
+            return ret;
+        }
+
+        private static FieldDefUser Clone(FieldDef origin)
+        {
+            var ret = new FieldDefUser(origin.Name, null, origin.Attributes);
+            return ret;
+        }
+
+        private static TypeDef PopulateContext(TypeDef typeDef, InjectContext ctx)
+        {
+            TypeDef ret;
+            if (!ctx.Mep.TryGetValue(typeDef, out var existing))
+            {
+                ret = Clone(typeDef);
+                ctx.Mep[typeDef] = ret;
+            }
+            else
+                ret = (TypeDef)existing;
+
+            foreach (var nestedType in typeDef.NestedTypes)
+                ret.NestedTypes.Add(PopulateContext(nestedType, ctx));
+
+            foreach (var method in typeDef.Methods)
+                ret.Methods.Add((MethodDef)(ctx.Mep[method] = Clone(method)));
+
+            foreach (var field in typeDef.Fields)
+                ret.Fields.Add((FieldDef)(ctx.Mep[field] = Clone(field)));
+
+            return ret;
+        }
+
+        private static void CopyTypeDef(TypeDef typeDef, InjectContext ctx)
+        {
+            var newTypeDef = (TypeDef)ctx.Mep[typeDef];
+
+            newTypeDef.BaseType = ctx.Importer.Import(typeDef.BaseType);
+
+            foreach (var iface in typeDef.Interfaces)
+                newTypeDef.Interfaces.Add(new InterfaceImplUser(ctx.Importer.Import(iface.Interface)));
+        }
+
+        private static void CopyMethodDef(MethodDef methodDef, InjectContext ctx)
+        {
+            var newMethodDef = (MethodDef)ctx.Mep[methodDef];
+
+            newMethodDef.Signature = ctx.Importer.Import(methodDef.Signature);
+            newMethodDef.Parameters.UpdateParameterTypes();
+
+            if (methodDef.ImplMap != null)
+                newMethodDef.ImplMap = new ImplMapUser(new ModuleRefUser(ctx.TargetModule, methodDef.ImplMap.Module.Name), methodDef.ImplMap.Name, methodDef.ImplMap.Attributes);
+
+            foreach (var ca in methodDef.CustomAttributes)
+                newMethodDef.CustomAttributes.Add(new CustomAttribute((ICustomAttributeType)ctx.Importer.Import(ca.Constructor)));
+
+            if (!methodDef.HasBody)
+                return;
+            newMethodDef.Body = new CilBody(methodDef.Body.InitLocals, new List<Instruction>(),
+                new List<ExceptionHandler>(), new List<Local>())
+            { MaxStack = methodDef.Body.MaxStack };
+
+            var bodyMap = new Dictionary<object, object>();
+
+            foreach (var local in methodDef.Body.Variables)
+            {
+                var newLocal = new Local(ctx.Importer.Import(local.Type));
+                newMethodDef.Body.Variables.Add(newLocal);
+                newLocal.Name = local.Name;
+                newLocal.Attributes = local.Attributes;
+
+                bodyMap[local] = newLocal;
+            }
+
+            foreach (var instr in methodDef.Body.Instructions)
+            {
+                var newInstr = new Instruction(instr.OpCode, instr.Operand)
+                {
+                    SequencePoint = instr.SequencePoint
+                };
+
+                switch (newInstr.Operand)
+                {
+                    case IType type:
+                        newInstr.Operand = ctx.Importer.Import(type);
+                        break;
+
+                    case IMethod method:
+                        newInstr.Operand = ctx.Importer.Import(method);
+                        break;
+
+                    case IField field:
+                        newInstr.Operand = ctx.Importer.Import(field);
+                        break;
+                }
+
+                newMethodDef.Body.Instructions.Add(newInstr);
+                bodyMap[instr] = newInstr;
+            }
+
+            foreach (var instr in newMethodDef.Body.Instructions)
+            {
+                if (instr.Operand != null && bodyMap.ContainsKey(instr.Operand))
+                    instr.Operand = bodyMap[instr.Operand];
+                else if (instr.Operand is Instruction[] v)
+                    instr.Operand = v.Select(target => (Instruction)bodyMap[target]).ToArray();
+            }
+
+            foreach (var eh in methodDef.Body.ExceptionHandlers)
+                newMethodDef.Body.ExceptionHandlers.Add(new ExceptionHandler(eh.HandlerType)
+                {
+                    CatchType = eh.CatchType == null ? null : ctx.Importer.Import(eh.CatchType),
+                    TryStart = (Instruction)bodyMap[eh.TryStart],
+                    TryEnd = (Instruction)bodyMap[eh.TryEnd],
+                    HandlerStart = (Instruction)bodyMap[eh.HandlerStart],
+                    HandlerEnd = (Instruction)bodyMap[eh.HandlerEnd],
+                    FilterStart = eh.FilterStart == null ? null : (Instruction)bodyMap[eh.FilterStart]
+                });
+
+            newMethodDef.Body.SimplifyMacros(newMethodDef.Parameters);
+        }
+
+        private static void CopyFieldDef(FieldDef fieldDef, InjectContext ctx)
+        {
+            var newFieldDef = (FieldDef)ctx.Mep[fieldDef];
+
+            newFieldDef.Signature = ctx.Importer.Import(fieldDef.Signature);
+        }
+
+        private static void Copy(TypeDef typeDef, InjectContext ctx, bool copySelf)
+        {
+            if (copySelf)
+                CopyTypeDef(typeDef, ctx);
+
+            foreach (var nestedType in typeDef.NestedTypes)
+                Copy(nestedType, ctx, true);
+
+            foreach (var method in typeDef.Methods)
+                CopyMethodDef(method, ctx);
+
+            foreach (var field in typeDef.Fields)
+                CopyFieldDef(field, ctx);
+        }
+
+        public static TypeDef Inject(TypeDef typeDef, ModuleDef target)
+        {
+            var ctx = new InjectContext(target);
+            PopulateContext(typeDef, ctx);
+            Copy(typeDef, ctx, true);
+            return (TypeDef)ctx.Mep[typeDef];
+        }
+
+        public static MethodDef Inject(MethodDef methodDef, ModuleDef target)
+        {
+            var ctx = new InjectContext(target)
+            {
+                Mep =
+                {
+                    [methodDef] = Clone(methodDef)
+                }
+            };
+            CopyMethodDef(methodDef, ctx);
+            return (MethodDef)ctx.Mep[methodDef];
+        }
+
+        public static IEnumerable<IDnlibDef> Inject(TypeDef typeDef, TypeDef newType, ModuleDef target)
+        {
+            var ctx = new InjectContext(target)
+            {
+                Mep =
+                {
+                    [typeDef] = newType
+                }
+            };
+            PopulateContext(typeDef, ctx);
+            Copy(typeDef, ctx, false);
+            return ctx.Mep.Values.Except(new[] { newType });
+        }
+
+        private class InjectContext : ImportMapper
+        {
+            public readonly Dictionary<IDnlibDef, IDnlibDef> Mep = new Dictionary<IDnlibDef, IDnlibDef>();
+
+            public readonly ModuleDef TargetModule;
+
+            public InjectContext(ModuleDef target)
+            {
+                TargetModule = target;
+                Importer = new Importer(target, ImporterOptions.TryToUseTypeDefs, new GenericParamContext(), this);
+            }
+
+            public Importer Importer { get; }
+
+            public override ITypeDefOrRef Map(ITypeDefOrRef typeDefOrRef)
+            {
+                return typeDefOrRef is TypeDef typeDef && Mep.ContainsKey(typeDef) ? Mep[typeDef] as TypeDef : null;
+            }
+
+            public override IMethod Map(MethodDef methodDef)
+            {
+                return Mep.ContainsKey(methodDef) ? Mep[methodDef] as MethodDef : null;
+            }
+
+            public override IField Map(FieldDef fieldDef)
+            {
+                return Mep.ContainsKey(fieldDef) ? Mep[fieldDef] as FieldDef : null;
+            }
+        }
+    }
+}
+
+
+================================================
+File: NetShield Protector/Main.Designer.cs
+================================================
+ï»¿
+namespace NetShield_Protector
+{
+    partial class Main
+    {
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main));
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.AntiDecompilerCheckBox = new System.Windows.Forms.CheckBox();
+            this.AntiVMCheckBox = new System.Windows.Forms.CheckBox();
+            this.AntiDebugCheckBox = new System.Windows.Forms.CheckBox();
+            this.PackingCheckBox = new System.Windows.Forms.CheckBox();
+            this.AntiILDasmCheckBox = new System.Windows.Forms.CheckBox();
+            this.INTConfusionCheckBox = new System.Windows.Forms.CheckBox();
+            this.RenamingCheckBox = new System.Windows.Forms.CheckBox();
+            this.CtrlFlowCheckBox = new System.Windows.Forms.CheckBox();
+            this.JunkCheckBox = new System.Windows.Forms.CheckBox();
+            this.FakeObfuscatorAttributesCheckBox = new System.Windows.Forms.CheckBox();
+            this.AntiDe4DotCheckBox = new System.Windows.Forms.CheckBox();
+            this.Base64EncodeCheckBox = new System.Windows.Forms.CheckBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.BrowseButton = new System.Windows.Forms.Button();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.panel2 = new System.Windows.Forms.Panel();
+            this.textBox4 = new System.Windows.Forms.TextBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.HowThisWorksButton = new System.Windows.Forms.Button();
+            this.USBComboBox = new System.Windows.Forms.ComboBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.USBHWIDCheckBox = new System.Windows.Forms.CheckBox();
+            this.WhatThisDoButton = new System.Windows.Forms.Button();
+            this.checkBox4 = new System.Windows.Forms.CheckBox();
+            this.textBox3 = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.panel4 = new System.Windows.Forms.Panel();
+            this.panel3 = new System.Windows.Forms.Panel();
+            this.GetCurrentHWIDButton = new System.Windows.Forms.Button();
+            this.LockToHWIDCheckBox = new System.Windows.Forms.CheckBox();
+            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.button3 = new System.Windows.Forms.Button();
+            this.panel1.SuspendLayout();
+            this.panel2.SuspendLayout();
+            this.SuspendLayout();
+            // 
+            // panel1
+            // 
+            this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel1.Controls.Add(this.AntiDecompilerCheckBox);
+            this.panel1.Controls.Add(this.AntiVMCheckBox);
+            this.panel1.Controls.Add(this.AntiDebugCheckBox);
+            this.panel1.Controls.Add(this.PackingCheckBox);
+            this.panel1.Controls.Add(this.AntiILDasmCheckBox);
+            this.panel1.Controls.Add(this.INTConfusionCheckBox);
+            this.panel1.Controls.Add(this.RenamingCheckBox);
+            this.panel1.Controls.Add(this.CtrlFlowCheckBox);
+            this.panel1.Controls.Add(this.JunkCheckBox);
+            this.panel1.Controls.Add(this.FakeObfuscatorAttributesCheckBox);
+            this.panel1.Controls.Add(this.AntiDe4DotCheckBox);
+            this.panel1.Controls.Add(this.Base64EncodeCheckBox);
+            this.panel1.Location = new System.Drawing.Point(12, 101);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(286, 590);
+            this.panel1.TabIndex = 0;
+            // 
+            // AntiDecompilerCheckBox
+            // 
+            this.AntiDecompilerCheckBox.AutoSize = true;
+            this.AntiDecompilerCheckBox.Location = new System.Drawing.Point(13, 544);
+            this.AntiDecompilerCheckBox.Name = "AntiDecompilerCheckBox";
+            this.AntiDecompilerCheckBox.Size = new System.Drawing.Size(147, 24);
+            this.AntiDecompilerCheckBox.TabIndex = 12;
+            this.AntiDecompilerCheckBox.Text = "Anti Decompiler";
+            this.AntiDecompilerCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // AntiVMCheckBox
+            // 
+            this.AntiVMCheckBox.AutoSize = true;
+            this.AntiVMCheckBox.Location = new System.Drawing.Point(13, 493);
+            this.AntiVMCheckBox.Name = "AntiVMCheckBox";
+            this.AntiVMCheckBox.Size = new System.Drawing.Size(92, 24);
+            this.AntiVMCheckBox.TabIndex = 11;
+            this.AntiVMCheckBox.Text = "Anti-VM";
+            this.AntiVMCheckBox.UseVisualStyleBackColor = true;
+            this.AntiVMCheckBox.MouseHover += new System.EventHandler(this.checkBox14_MouseHover);
+            // 
+            // AntiDebugCheckBox
+            // 
+            this.AntiDebugCheckBox.AutoSize = true;
+            this.AntiDebugCheckBox.Location = new System.Drawing.Point(13, 440);
+            this.AntiDebugCheckBox.Name = "AntiDebugCheckBox";
+            this.AntiDebugCheckBox.Size = new System.Drawing.Size(116, 24);
+            this.AntiDebugCheckBox.TabIndex = 10;
+            this.AntiDebugCheckBox.Text = "Anti-Debug";
+            this.AntiDebugCheckBox.UseVisualStyleBackColor = true;
+            this.AntiDebugCheckBox.MouseHover += new System.EventHandler(this.checkBox13_MouseHover_1);
+            // 
+            // PackingCheckBox
+            // 
+            this.PackingCheckBox.AutoSize = true;
+            this.PackingCheckBox.Location = new System.Drawing.Point(13, 393);
+            this.PackingCheckBox.Name = "PackingCheckBox";
+            this.PackingCheckBox.Size = new System.Drawing.Size(91, 24);
+            this.PackingCheckBox.TabIndex = 9;
+            this.PackingCheckBox.Text = "Packing";
+            this.PackingCheckBox.UseVisualStyleBackColor = true;
+            this.PackingCheckBox.MouseHover += new System.EventHandler(this.checkBox12_MouseHover);
+            // 
+            // AntiILDasmCheckBox
+            // 
+            this.AntiILDasmCheckBox.AutoSize = true;
+            this.AntiILDasmCheckBox.Location = new System.Drawing.Point(13, 348);
+            this.AntiILDasmCheckBox.Name = "AntiILDasmCheckBox";
+            this.AntiILDasmCheckBox.Size = new System.Drawing.Size(123, 24);
+            this.AntiILDasmCheckBox.TabIndex = 8;
+            this.AntiILDasmCheckBox.Text = "Anti ILDasm";
+            this.AntiILDasmCheckBox.UseVisualStyleBackColor = true;
+            this.AntiILDasmCheckBox.MouseHover += new System.EventHandler(this.checkBox11_MouseHover);
+            // 
+            // INTConfusionCheckBox
+            // 
+            this.INTConfusionCheckBox.AutoSize = true;
+            this.INTConfusionCheckBox.Location = new System.Drawing.Point(13, 296);
+            this.INTConfusionCheckBox.Name = "INTConfusionCheckBox";
+            this.INTConfusionCheckBox.Size = new System.Drawing.Size(136, 24);
+            this.INTConfusionCheckBox.TabIndex = 7;
+            this.INTConfusionCheckBox.Text = "INT Confusion";
+            this.INTConfusionCheckBox.UseVisualStyleBackColor = true;
+            this.INTConfusionCheckBox.MouseHover += new System.EventHandler(this.checkBox10_MouseHover);
+            // 
+            // RenamingCheckBox
+            // 
+            this.RenamingCheckBox.AutoSize = true;
+            this.RenamingCheckBox.Location = new System.Drawing.Point(13, 248);
+            this.RenamingCheckBox.Name = "RenamingCheckBox";
+            this.RenamingCheckBox.Size = new System.Drawing.Size(204, 24);
+            this.RenamingCheckBox.TabIndex = 5;
+            this.RenamingCheckBox.Text = "Rename Methods, etc...";
+            this.RenamingCheckBox.UseVisualStyleBackColor = true;
+            this.RenamingCheckBox.MouseHover += new System.EventHandler(this.checkBox8_MouseHover);
+            // 
+            // CtrlFlowCheckBox
+            // 
+            this.CtrlFlowCheckBox.AutoSize = true;
+            this.CtrlFlowCheckBox.Location = new System.Drawing.Point(13, 198);
+            this.CtrlFlowCheckBox.Name = "CtrlFlowCheckBox";
+            this.CtrlFlowCheckBox.Size = new System.Drawing.Size(230, 24);
+            this.CtrlFlowCheckBox.TabIndex = 4;
+            this.CtrlFlowCheckBox.Text = "Control Flow Obfouscastion";
+            this.CtrlFlowCheckBox.UseVisualStyleBackColor = true;
+            this.CtrlFlowCheckBox.MouseHover += new System.EventHandler(this.checkBox7_MouseHover);
+            // 
+            // JunkCheckBox
+            // 
+            this.JunkCheckBox.AutoSize = true;
+            this.JunkCheckBox.Location = new System.Drawing.Point(13, 146);
+            this.JunkCheckBox.Name = "JunkCheckBox";
+            this.JunkCheckBox.Size = new System.Drawing.Size(261, 24);
+            this.JunkCheckBox.TabIndex = 3;
+            this.JunkCheckBox.Text = "Junk Methods and namespaces";
+            this.JunkCheckBox.UseVisualStyleBackColor = true;
+            this.JunkCheckBox.MouseHover += new System.EventHandler(this.checkBox6_MouseHover);
+            // 
+            // FakeObfuscatorAttributesCheckBox
+            // 
+            this.FakeObfuscatorAttributesCheckBox.AutoSize = true;
+            this.FakeObfuscatorAttributesCheckBox.Location = new System.Drawing.Point(13, 95);
+            this.FakeObfuscatorAttributesCheckBox.Name = "FakeObfuscatorAttributesCheckBox";
+            this.FakeObfuscatorAttributesCheckBox.Size = new System.Drawing.Size(235, 24);
+            this.FakeObfuscatorAttributesCheckBox.TabIndex = 2;
+            this.FakeObfuscatorAttributesCheckBox.Text = "Fake Obfuscastor Attributes";
+            this.FakeObfuscatorAttributesCheckBox.UseVisualStyleBackColor = true;
+            this.FakeObfuscatorAttributesCheckBox.MouseHover += new System.EventHandler(this.checkBox5_MouseHover);
+            // 
+            // AntiDe4DotCheckBox
+            // 
+            this.AntiDe4DotCheckBox.AutoSize = true;
+            this.AntiDe4DotCheckBox.Location = new System.Drawing.Point(13, 51);
+            this.AntiDe4DotCheckBox.Name = "AntiDe4DotCheckBox";
+            this.AntiDe4DotCheckBox.Size = new System.Drawing.Size(121, 24);
+            this.AntiDe4DotCheckBox.TabIndex = 1;
+            this.AntiDe4DotCheckBox.Text = "Anti-De4dot";
+            this.AntiDe4DotCheckBox.UseVisualStyleBackColor = true;
+            this.AntiDe4DotCheckBox.MouseHover += new System.EventHandler(this.checkBox2_MouseHover);
+            // 
+            // Base64EncodeCheckBox
+            // 
+            this.Base64EncodeCheckBox.AutoSize = true;
+            this.Base64EncodeCheckBox.Location = new System.Drawing.Point(13, 10);
+            this.Base64EncodeCheckBox.Name = "Base64EncodeCheckBox";
+            this.Base64EncodeCheckBox.Size = new System.Drawing.Size(235, 24);
+            this.Base64EncodeCheckBox.TabIndex = 0;
+            this.Base64EncodeCheckBox.Text = "Encode Strings with Base64";
+            this.Base64EncodeCheckBox.UseVisualStyleBackColor = true;
+            this.Base64EncodeCheckBox.MouseHover += new System.EventHandler(this.checkBox1_MouseHover);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(12, 21);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(111, 20);
+            this.label1.TabIndex = 1;
+            this.label1.Text = "File To Protect";
+            // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(138, 18);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(533, 26);
+            this.textBox1.TabIndex = 2;
+            // 
+            // BrowseButton
+            // 
+            this.BrowseButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.BrowseButton.Location = new System.Drawing.Point(677, 9);
+            this.BrowseButton.Name = "BrowseButton";
+            this.BrowseButton.Size = new System.Drawing.Size(111, 44);
+            this.BrowseButton.TabIndex = 3;
+            this.BrowseButton.Text = "Browse";
+            this.BrowseButton.UseVisualStyleBackColor = true;
+            this.BrowseButton.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F);
+            this.label2.Location = new System.Drawing.Point(8, 64);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(115, 22);
+            this.label2.TabIndex = 4;
+            this.label2.Text = "Obfuscastion";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F);
+            this.label3.Location = new System.Drawing.Point(702, 64);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(86, 22);
+            this.label3.TabIndex = 4;
+            this.label3.Text = "Licensing";
+            // 
+            // panel2
+            // 
+            this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel2.Controls.Add(this.textBox4);
+            this.panel2.Controls.Add(this.label6);
+            this.panel2.Controls.Add(this.HowThisWorksButton);
+            this.panel2.Controls.Add(this.USBComboBox);
+            this.panel2.Controls.Add(this.label7);
+            this.panel2.Controls.Add(this.USBHWIDCheckBox);
+            this.panel2.Controls.Add(this.WhatThisDoButton);
+            this.panel2.Controls.Add(this.checkBox4);
+            this.panel2.Controls.Add(this.textBox3);
+            this.panel2.Controls.Add(this.label5);
+            this.panel2.Controls.Add(this.panel4);
+            this.panel2.Controls.Add(this.panel3);
+            this.panel2.Controls.Add(this.GetCurrentHWIDButton);
+            this.panel2.Controls.Add(this.LockToHWIDCheckBox);
+            this.panel2.Controls.Add(this.textBox2);
+            this.panel2.Controls.Add(this.label4);
+            this.panel2.Location = new System.Drawing.Point(364, 101);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(424, 590);
+            this.panel2.TabIndex = 5;
+            // 
+            // textBox4
+            // 
+            this.textBox4.Location = new System.Drawing.Point(162, 317);
+            this.textBox4.Name = "textBox4";
+            this.textBox4.Size = new System.Drawing.Size(244, 26);
+            this.textBox4.TabIndex = 14;
+            this.textBox4.Text = "License.dat";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(19, 320);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(137, 20);
+            this.label6.TabIndex = 13;
+            this.label6.Text = "License Filename:";
+            // 
+            // HowThisWorksButton
+            // 
+            this.HowThisWorksButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.HowThisWorksButton.Location = new System.Drawing.Point(233, 454);
+            this.HowThisWorksButton.Name = "HowThisWorksButton";
+            this.HowThisWorksButton.Size = new System.Drawing.Size(173, 43);
+            this.HowThisWorksButton.TabIndex = 12;
+            this.HowThisWorksButton.Text = "How this works?";
+            this.HowThisWorksButton.UseVisualStyleBackColor = true;
+            this.HowThisWorksButton.Click += new System.EventHandler(this.button5_Click);
+            // 
+            // USBComboBox
+            // 
+            this.USBComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.USBComboBox.FormattingEnabled = true;
+            this.USBComboBox.Location = new System.Drawing.Point(72, 462);
+            this.USBComboBox.Name = "USBComboBox";
+            this.USBComboBox.Size = new System.Drawing.Size(121, 28);
+            this.USBComboBox.TabIndex = 11;
+            this.USBComboBox.DropDown += new System.EventHandler(this.comboBox1_DropDown);
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(19, 465);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(47, 20);
+            this.label7.TabIndex = 10;
+            this.label7.Text = "USB:";
+            // 
+            // USBHWIDCheckBox
+            // 
+            this.USBHWIDCheckBox.AutoSize = true;
+            this.USBHWIDCheckBox.Location = new System.Drawing.Point(23, 527);
+            this.USBHWIDCheckBox.Name = "USBHWIDCheckBox";
+            this.USBHWIDCheckBox.Size = new System.Drawing.Size(290, 24);
+            this.USBHWIDCheckBox.TabIndex = 9;
+            this.USBHWIDCheckBox.Text = "Enable USB Hardware ID Activation";
+            this.USBHWIDCheckBox.UseVisualStyleBackColor = true;
+            this.USBHWIDCheckBox.CheckedChanged += new System.EventHandler(this.checkBox9_CheckedChanged);
+            // 
+            // WhatThisDoButton
+            // 
+            this.WhatThisDoButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.WhatThisDoButton.Location = new System.Drawing.Point(103, 186);
+            this.WhatThisDoButton.Name = "WhatThisDoButton";
+            this.WhatThisDoButton.Size = new System.Drawing.Size(218, 46);
+            this.WhatThisDoButton.TabIndex = 8;
+            this.WhatThisDoButton.Text = "What this do?";
+            this.WhatThisDoButton.UseVisualStyleBackColor = true;
+            this.WhatThisDoButton.Click += new System.EventHandler(this.button4_Click);
+            // 
+            // checkBox4
+            // 
+            this.checkBox4.AutoSize = true;
+            this.checkBox4.Location = new System.Drawing.Point(23, 384);
+            this.checkBox4.Name = "checkBox4";
+            this.checkBox4.Size = new System.Drawing.Size(270, 24);
+            this.checkBox4.TabIndex = 7;
+            this.checkBox4.Text = "Enable Registration With Licence";
+            this.checkBox4.UseVisualStyleBackColor = true;
+            this.checkBox4.CheckedChanged += new System.EventHandler(this.checkBox4_CheckedChanged);
+            // 
+            // textBox3
+            // 
+            this.textBox3.Location = new System.Drawing.Point(93, 275);
+            this.textBox3.Name = "textBox3";
+            this.textBox3.Size = new System.Drawing.Size(313, 26);
+            this.textBox3.TabIndex = 6;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(19, 278);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(68, 20);
+            this.label5.TabIndex = 5;
+            this.label5.Text = "License:";
+            // 
+            // panel4
+            // 
+            this.panel4.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel4.Location = new System.Drawing.Point(6, 440);
+            this.panel4.Name = "panel4";
+            this.panel4.Size = new System.Drawing.Size(417, 1);
+            this.panel4.TabIndex = 4;
+            // 
+            // panel3
+            // 
+            this.panel3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel3.Location = new System.Drawing.Point(2, 251);
+            this.panel3.Name = "panel3";
+            this.panel3.Size = new System.Drawing.Size(417, 1);
+            this.panel3.TabIndex = 4;
+            // 
+            // GetCurrentHWIDButton
+            // 
+            this.GetCurrentHWIDButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.GetCurrentHWIDButton.Location = new System.Drawing.Point(23, 64);
+            this.GetCurrentHWIDButton.Name = "GetCurrentHWIDButton";
+            this.GetCurrentHWIDButton.Size = new System.Drawing.Size(284, 47);
+            this.GetCurrentHWIDButton.TabIndex = 3;
+            this.GetCurrentHWIDButton.Text = "Get Current PC HWID";
+            this.GetCurrentHWIDButton.UseVisualStyleBackColor = true;
+            this.GetCurrentHWIDButton.Click += new System.EventHandler(this.button2_Click);
+            // 
+            // LockToHWIDCheckBox
+            // 
+            this.LockToHWIDCheckBox.AutoSize = true;
+            this.LockToHWIDCheckBox.Location = new System.Drawing.Point(23, 137);
+            this.LockToHWIDCheckBox.Name = "LockToHWIDCheckBox";
+            this.LockToHWIDCheckBox.Size = new System.Drawing.Size(229, 24);
+            this.LockToHWIDCheckBox.TabIndex = 2;
+            this.LockToHWIDCheckBox.Text = "Lock to the specified HWID";
+            this.LockToHWIDCheckBox.UseVisualStyleBackColor = true;
+            this.LockToHWIDCheckBox.CheckedChanged += new System.EventHandler(this.checkBox3_CheckedChanged);
+            // 
+            // textBox2
+            // 
+            this.textBox2.Location = new System.Drawing.Point(82, 11);
+            this.textBox2.Name = "textBox2";
+            this.textBox2.Size = new System.Drawing.Size(324, 26);
+            this.textBox2.TabIndex = 1;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(19, 14);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(57, 20);
+            this.label4.TabIndex = 0;
+            this.label4.Text = "HWID:";
+            // 
+            // button3
+            // 
+            this.button3.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button3.Location = new System.Drawing.Point(74, 705);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(155, 39);
+            this.button3.TabIndex = 6;
+            this.button3.Text = "Protect";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
+            // 
+            // Main
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(800, 752);
+            this.Controls.Add(this.button3);
+            this.Controls.Add(this.panel2);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.BrowseButton);
+            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.panel1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Name = "Main";
+            this.Text = "NetShield Protector";
+            this.Load += new System.EventHandler(this.Main_Load);
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
+            this.panel2.ResumeLayout(false);
+            this.panel2.PerformLayout();
+            this.ResumeLayout(false);
+            this.PerformLayout();
+
+        }
+
+        #endregion
+
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.Button BrowseButton;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.CheckBox checkBox4;
+        private System.Windows.Forms.TextBox textBox3;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Panel panel3;
+        private System.Windows.Forms.Button GetCurrentHWIDButton;
+        private System.Windows.Forms.CheckBox LockToHWIDCheckBox;
+        private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.CheckBox FakeObfuscatorAttributesCheckBox;
+        private System.Windows.Forms.CheckBox AntiDe4DotCheckBox;
+        private System.Windows.Forms.CheckBox Base64EncodeCheckBox;
+        private System.Windows.Forms.CheckBox CtrlFlowCheckBox;
+        private System.Windows.Forms.CheckBox JunkCheckBox;
+        private System.Windows.Forms.CheckBox RenamingCheckBox;
+        private System.Windows.Forms.Button WhatThisDoButton;
+        private System.Windows.Forms.ComboBox USBComboBox;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.CheckBox USBHWIDCheckBox;
+        private System.Windows.Forms.Panel panel4;
+        private System.Windows.Forms.Button HowThisWorksButton;
+        private System.Windows.Forms.CheckBox INTConfusionCheckBox;
+        private System.Windows.Forms.CheckBox AntiILDasmCheckBox;
+        private System.Windows.Forms.CheckBox PackingCheckBox;
+        private System.Windows.Forms.TextBox textBox4;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.CheckBox AntiVMCheckBox;
+        private System.Windows.Forms.CheckBox AntiDebugCheckBox;
+        private System.Windows.Forms.CheckBox AntiDecompilerCheckBox;
+    }
+}
+
+
+================================================
+File: NetShield Protector/Main.cs
+================================================
+﻿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using dnlib.DotNet.MD;
+using dnlib.DotNet.Writer;
+using Microsoft.CSharp;
+using System;
+using System.CodeDom.Compiler;
+using System.Collections.Generic;
+using System.Data;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Management;
+using System.Net;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Windows.Forms;
+
+namespace NetShield_Protector
+{
+    public partial class Main : Form
+    {
+        public Main()
+        {
+            InitializeComponent();
+        }
+
+        private string RandomPassword(int PasswordLength)
+        {
+            StringBuilder MakePassword = new StringBuilder();
+            Random MakeRandom = new Random();
+            while (0 < PasswordLength--)
+            {
+                string characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ*!@=&?&/abcdefghijklmnopqrstuvwxyz1234567890";
+                MakePassword.Append(characters[MakeRandom.Next(characters.Length)]);
+            }
+            return MakePassword.ToString();
+        }
+
+        private string RandomName(int NameLength)
+        {
+            StringBuilder MakePassword = new StringBuilder();
+            Random MakeRandom = new Random();
+            while (0 < NameLength--)
+            {
+                string characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+                MakePassword.Append(characters[MakeRandom.Next(characters.Length)]);
+            }
+            return MakePassword.ToString();
+        }
+
+        public static string RandomChineseCharacters(int NameLength)
+        {
+            const string chars = "的是有为也而要你可生家发如成起经";
+            return new string(Enumerable.Repeat(chars, NameLength)
+                .Select(s => s[new Random(Guid.NewGuid().GetHashCode()).Next(s.Length)]).ToArray());
+        }
+
+        private string RandomChineseCharacters_SameName(int NameLength)
+        {
+            StringBuilder MakePassword = new StringBuilder();
+            Random MakeRandom = new Random();
+            while (0 < NameLength--)
+            {
+                string characters = "的是有为也而要你可生家发如成起经";
+                MakePassword.Append(characters[MakeRandom.Next(characters.Length)]);
+            }
+            return MakePassword.ToString();
+        }
+
+        public class Block { public Block() { Instructions = new List<Instruction>(); } public List<Instruction> Instructions { get; set; } public int Number { get; set; } }
+
+        public static List<Block> GetMethod(MethodDef method) { var blocks = new List<Block>(); var block = new Block(); var id = 0; var usage = 0; block.Number = id; block.Instructions.Add(Instruction.Create(OpCodes.Nop)); blocks.Add(block); block = new Block(); var handlers = new Stack<ExceptionHandler>(); foreach (var instruction in method.Body.Instructions) { foreach (var eh in method.Body.ExceptionHandlers) { if (eh.HandlerStart == instruction || eh.TryStart == instruction || eh.FilterStart == instruction) handlers.Push(eh); } foreach (var eh in method.Body.ExceptionHandlers) { if (eh.HandlerEnd == instruction || eh.TryEnd == instruction) handlers.Pop(); } instruction.CalculateStackUsage(out var stacks, out var pops); block.Instructions.Add(instruction); usage += stacks - pops; if (stacks == 0) { if (instruction.OpCode != OpCodes.Nop) { if ((usage == 0 || instruction.OpCode == OpCodes.Ret) && handlers.Count == 0) { block.Number = ++id; blocks.Add(block); block = new Block(); } } } } return blocks; }
+
+        private string XOREncryptionKeys(string KeyToEncrypt, string Key)
+        {
+            StringBuilder DecryptEncryptionKey = new StringBuilder();
+            for (int c = 0; c < KeyToEncrypt.Length; c++)
+                DecryptEncryptionKey.Append((char)((uint)KeyToEncrypt[c] ^ (uint)Key[c % 4]));
+            return DecryptEncryptionKey.ToString();
+        }
+
+        private void PackAndEncrypt(string FileToPack, string Output)
+        {
+            var Options = new Dictionary<string, string>();
+            Options.Add("CompilerVersion", "v4.0");
+            Options.Add("language", "c#");
+            var codeProvider = new CSharpCodeProvider(Options);
+            CompilerParameters parameters = new CompilerParameters();
+            parameters.CompilerOptions = "/target:winexe /unsafe";
+            parameters.GenerateExecutable = true;
+            parameters.OutputAssembly = Output;
+            parameters.IncludeDebugInformation = false;
+            parameters.TreatWarningsAsErrors = false;
+            string[] Librarys = { "System", "System.Windows.Forms", "System.Management", "System.Net", "System.Core", "System.Net.Http", "System.Runtime", "System.Runtime.InteropServices" };
+            foreach (string Library in Librarys)
+            {
+                parameters.ReferencedAssemblies.Add(Library + ".dll");
+            }
+            byte[] CodeToProtect = File.ReadAllBytes(FileToPack);
+            string RandomIV = RandomName(16);
+            string RandomKey = RandomPassword(17);
+            string RandomXORKey = RandomPassword(4);
+            string EncryptedKey = XOREncryptionKeys(RandomKey, RandomXORKey);
+            string EncryptedIV = XOREncryptionKeys(RandomIV, RandomXORKey);
+            string Final = Encryption.AesTextEncryption(Convert.ToBase64String(CodeToProtect).Replace("A", ".").Replace("B", "*").Replace("S", @"_"), EncryptedKey, EncryptedIV);
+            string PackStub = Resource1.PackStub;
+            string NewPackStub = PackStub.Replace("DecME", Final).Replace("THISISIV", RandomIV).Replace("THISISKEY", RandomKey);
+            string TotallyNewPackStub = NewPackStub.Replace("decryptkeyencryption", Convert.ToBase64String(Encoding.UTF8.GetBytes(RandomXORKey))).Replace("decryptkeyiv", Convert.ToBase64String(Encoding.UTF8.GetBytes(RandomXORKey))).Replace("PackStub", "namespace " + RandomName(12));
+            CompilerResults cr = codeProvider.CompileAssemblyFromSource(parameters, TotallyNewPackStub);
+            if (cr.Errors.Count > 0)
+            {
+                foreach (CompilerError ce in cr.Errors)
+                {
+                    MessageBox.Show("Errors building: " + ce.ErrorText + ", in line: " + ce.Line);
+                }
+            }
+        }
+
+        private void ObfuscasteCode(string ToProtect)
+        {
+            byte[] AssemblyToProtect = File.ReadAllBytes(ToProtect);
+            ModuleContext ModuleCont = ModuleDefMD.CreateModuleContext();
+            ModuleDefMD FileModule = ModuleDefMD.Load(AssemblyToProtect, ModuleCont);
+            AssemblyDef Assembly1 = FileModule.Assembly;
+
+            if (AntiDe4DotCheckBox.Checked)
+            {
+                for (int i = 200; i < 300; i++)
+                {
+                    InterfaceImpl Interface = new InterfaceImplUser(FileModule.GlobalType);
+                    TypeDef typedef = new TypeDefUser("", $"Form{i.ToString()}", FileModule.CorLibTypes.GetTypeRef("System", "Attribute"));
+                    InterfaceImpl interface1 = new InterfaceImplUser(typedef);
+                    FileModule.Types.Add(typedef);
+                    typedef.Interfaces.Add(interface1);
+                    typedef.Interfaces.Add(Interface);
+                }
+            }
+
+            string[] FakeObfuscastionsAttributes = { "ConfusedByAttribute", "YanoAttribute", "NetGuard", "DotfuscatorAttribute", "BabelAttribute", "ObfuscatedByGoliath", "dotNetProtector" };
+            if (FakeObfuscatorAttributesCheckBox.Checked)
+            {
+                for (int i = 0; i < FakeObfuscastionsAttributes.Length; i++)
+                {
+                    var FakeObfuscastionsAttribute = new TypeDefUser(FakeObfuscastionsAttributes[i], FileModule.CorLibTypes.Object.TypeDefOrRef);
+                    FileModule.Types.Add(FakeObfuscastionsAttribute);
+                }
+            }
+
+            if (RenamingCheckBox.Checked)
+            {
+                foreach (TypeDef type in FileModule.Types)
+                {
+                    FileModule.Name = RandomName(12);
+                    if (type.IsGlobalModuleType || type.IsRuntimeSpecialName || type.IsSpecialName || type.IsWindowsRuntime || type.IsInterface)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        for (int i = 200; i < 300; i++)
+                        {
+                            foreach (PropertyDef property in type.Properties)
+                            {
+                                if (property.IsRuntimeSpecialName) continue;
+                                property.Name = RandomName(20) + i + RandomName(10) + i;
+                            }
+                            foreach (FieldDef fields in type.Fields)
+                            {
+                                fields.Name = RandomName(20) + i + RandomName(10) + i;
+                            }
+                            foreach (EventDef eventdef in type.Events)
+                            {
+                                eventdef.Name = RandomName(20) + i + RandomName(10) + i;
+                            }
+                            foreach (MethodDef method in type.Methods)
+                            {
+                                if (method.IsConstructor || method.IsRuntimeSpecialName || method.IsRuntime || method.IsStaticConstructor || method.IsVirtual) continue;
+                                method.Name = RandomName(20) + i + RandomName(10) + i;
+                            }
+                            foreach (MethodDef method in type.Methods)
+                            {
+                                foreach (Parameter RenameParameters in method.Parameters)
+                                {
+                                    RenameParameters.Name = RandomName(10);
+                                }
+                            }
+                        }
+                    }
+                    foreach (ModuleDefMD module in FileModule.Assembly.Modules)
+                    {
+                        module.Name = RandomName(13);
+                        module.Assembly.Name = RandomName(14);
+                    }
+                }
+
+                foreach (TypeDef type in FileModule.Types)
+                {
+                    foreach (MethodDef GetMethods in type.Methods)
+                    {
+                        for (int i = 200; i < 300; i++)
+                        {
+                            if (GetMethods.IsConstructor || GetMethods.IsRuntimeSpecialName || GetMethods.IsRuntime || GetMethods.IsStaticConstructor) continue;
+                            GetMethods.Name = RandomName(15) + i;
+                        }
+                    }
+                }
+
+                Dictionary<string, string> AssemblyNames = new Dictionary<string, string>();
+                foreach (var type in FileModule.GetTypes())
+                {
+                    if (type.IsGlobalModuleType) continue;
+                    if (type.Namespace == "")
+                        continue;
+                    if (AssemblyNames.TryGetValue(type.Namespace, out var nameValue))
+                        type.Namespace = nameValue;
+                    else
+                    {
+                        string newName = null;
+                        for (int i = 0; i < 200; i++)
+                        {
+                            newName = RandomName(11) + RandomName(3) + RandomName(11) + RandomName(11) + i;
+                        }
+                        AssemblyNames.Add(type.Namespace, newName);
+                        type.Namespace = newName;
+                    }
+                }
+                foreach (var type in FileModule.GetTypes())
+                {
+                    if (type.IsGlobalModuleType) continue;
+
+                    if (type.Name == "GeneratedInternalTypeHelper" || type.Name == "Resources" || type.Name == "Settings")
+                        continue;
+                    if (AssemblyNames.TryGetValue(type.Name, out var nameValue))
+                        type.Name = nameValue;
+                    else
+                    {
+                        string newName = null;
+                        for (int i = 0; i < 200; i++)
+                        {
+                            newName = RandomName(11) + RandomName(3) + RandomName(11) + RandomName(11) + i;
+                        }
+                        AssemblyNames.Add(type.Name, newName);
+                        type.Name = newName;
+                    }
+                }
+                foreach (var resource in FileModule.Resources)
+                {
+                    foreach (var item in AssemblyNames.Where(item => resource.Name.Contains(item.Key)))
+                    {
+                        resource.Name = resource.Name.Replace(item.Key, item.Value);
+                    }
+                }
+                foreach (var type in FileModule.GetTypes())
+                {
+                    foreach (var property in type.Properties)
+                    {
+                        if (property.Name != "ResourceManager")
+                            continue;
+
+                        var instr = property.GetMethod.Body.Instructions;
+                    }
+                }
+            }
+
+            if (JunkCheckBox.Checked)
+            {
+                for (int i = 0; i < 200; i++)
+                {
+                    var Junk = new TypeDefUser("A" + RandomChineseCharacters(10) + RandomChineseCharacters(10) + RandomChineseCharacters(10) + i, FileModule.CorLibTypes.Object.Namespace);
+                    FileModule.Types.Add(Junk);
+                }
+
+                for (int i = 0; i < 200; i++)
+                {
+                    var Junk = new TypeDefUser(RandomChineseCharacters(10) + RandomChineseCharacters(10) + RandomChineseCharacters(10) + i, FileModule.CorLibTypes.Object.TypeDefOrRef);
+                    FileModule.Types.Add(Junk);
+                }
+
+                for (int i = 0; i < 200; i++)
+                {
+                    var Junk = new TypeDefUser(RandomChineseCharacters(10) + RandomChineseCharacters(2) + RandomChineseCharacters(10) + RandomChineseCharacters(10) + i, FileModule.CorLibTypes.Object.TypeDefOrRef);
+                    var Junk2 = new TypeDefUser(RandomChineseCharacters(11) + RandomChineseCharacters(3) + RandomChineseCharacters(11) + RandomChineseCharacters(11) + i, FileModule.CorLibTypes.Object.TypeDefOrRef);
+                    FileModule.Types.Add(Junk);
+                    FileModule.Types.Add(Junk2);
+                }
+
+                for (int i = 0; i < 200; i++)
+                {
+                    var Junk = new TypeDefUser(RandomChineseCharacters(10) + RandomChineseCharacters(4) + RandomChineseCharacters(10) + RandomChineseCharacters(10) + i, FileModule.CorLibTypes.Object.Namespace);
+                    var Junk2 = new TypeDefUser(RandomChineseCharacters(11) + RandomChineseCharacters(5) + RandomChineseCharacters(11) + RandomChineseCharacters(11) + i, FileModule.CorLibTypes.Object.Namespace);
+                    FileModule.Types.Add(Junk);
+                    FileModule.Types.Add(Junk2);
+                }
+            }
+
+            if (Base64EncodeCheckBox.Checked)
+            {
+                foreach (TypeDef type in FileModule.Types)
+                {
+                    foreach (MethodDef method in type.Methods)
+                    {
+                        if (method.Body == null) continue;
+                        method.Body.SimplifyBranches();
+                        for (int i = 0; i < method.Body.Instructions.Count; i++)
+                        {
+                            if (method.Body.Instructions[i].OpCode == OpCodes.Ldstr)
+                            {
+                                string EncodedString = method.Body.Instructions[i].Operand.ToString();
+                                string InsertEncodedString = Convert.ToBase64String(UTF8Encoding.UTF8.GetBytes(EncodedString));
+                                method.Body.Instructions[i].OpCode = OpCodes.Nop;
+                                method.Body.Instructions.Insert(i + 1, new Instruction(OpCodes.Call, FileModule.Import(typeof(Encoding).GetMethod("get_UTF8", new Type[] { }))));
+                                method.Body.Instructions.Insert(i + 2, new Instruction(OpCodes.Ldstr, InsertEncodedString));
+                                method.Body.Instructions.Insert(i + 3, new Instruction(OpCodes.Call, FileModule.Import(typeof(Convert).GetMethod("FromBase64String", new Type[] { typeof(string) }))));
+                                method.Body.Instructions.Insert(i + 4, new Instruction(OpCodes.Callvirt, FileModule.Import(typeof(Encoding).GetMethod("GetString", new Type[] { typeof(byte[]) }))));
+                                i += 4;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (INTConfusionCheckBox.Checked)
+            {
+                foreach (var type in FileModule.GetTypes())
+                {
+                    if (type.IsGlobalModuleType) continue;
+                    foreach (var method in type.Methods)
+                    {
+                        if (!method.HasBody) continue;
+                        {
+                            for (var i = 0; i < method.Body.Instructions.Count; i++)
+                            {
+                                if (!method.Body.Instructions[i].IsLdcI4()) continue;
+                                var numorig = new Random(Guid.NewGuid().GetHashCode()).Next();
+                                var div = new Random(Guid.NewGuid().GetHashCode()).Next();
+                                var num = numorig ^ div;
+                                var nop = OpCodes.Nop.ToInstruction();
+                                var local = new Local(method.Module.ImportAsTypeSig(typeof(int)));
+                                method.Body.Variables.Add(local);
+                                method.Body.Instructions.Insert(i + 1, OpCodes.Stloc.ToInstruction(local));
+                                method.Body.Instructions.Insert(i + 2, Instruction.Create(OpCodes.Ldc_I4, method.Body.Instructions[i].GetLdcI4Value() - sizeof(float)));
+                                method.Body.Instructions.Insert(i + 3, Instruction.Create(OpCodes.Ldc_I4, num));
+                                method.Body.Instructions.Insert(i + 4, Instruction.Create(OpCodes.Ldc_I4, div));
+                                method.Body.Instructions.Insert(i + 5, Instruction.Create(OpCodes.Xor));
+                                method.Body.Instructions.Insert(i + 6, Instruction.Create(OpCodes.Ldc_I4, numorig));
+                                method.Body.Instructions.Insert(i + 7, Instruction.Create(OpCodes.Bne_Un, nop));
+                                method.Body.Instructions.Insert(i + 8, Instruction.Create(OpCodes.Ldc_I4, 2));
+                                method.Body.Instructions.Insert(i + 9, OpCodes.Stloc.ToInstruction(local));
+                                method.Body.Instructions.Insert(i + 10, Instruction.Create(OpCodes.Sizeof, method.Module.Import(typeof(float))));
+                                method.Body.Instructions.Insert(i + 11, Instruction.Create(OpCodes.Add));
+                                method.Body.Instructions.Insert(i + 12, nop);
+                                i += 12;
+                            }
+                            method.Body.SimplifyBranches();
+                        }
+                    }
+                }
+            }
+
+            if (AntiILDasmCheckBox.Checked)
+            {
+                foreach (ModuleDef module in FileModule.Assembly.Modules)
+                {
+                    TypeRef attrRef = FileModule.CorLibTypes.GetTypeRef("System.Runtime.CompilerServices", "SuppressIldasmAttribute");
+                    var ctorRef = new MemberRefUser(module, ".ctor", MethodSig.CreateInstance(module.CorLibTypes.Void), attrRef);
+                    var attr = new CustomAttribute(ctorRef);
+                    module.CustomAttributes.Add(attr);
+                }
+            }
+
+            if (CtrlFlowCheckBox.Checked)
+            {
+                foreach (var tDef in FileModule.Types)
+                {
+                    if (tDef == FileModule.GlobalType) continue;
+                    foreach (var mDef in tDef.Methods)
+                    {
+                        if (mDef.Name.StartsWith("get_") || mDef.Name.StartsWith("set_")) continue;
+                        if (!mDef.HasBody || mDef.IsConstructor) continue;
+                        mDef.Body.SimplifyBranches();
+                        mDef.Body.SimplifyMacros(mDef.Parameters);
+                        var blocks = GetMethod(mDef);
+                        var ret = new List<Block>();
+                        foreach (var group in blocks)
+                        {
+                            Random rnd = new Random();
+                            ret.Insert(rnd.Next(0, ret.Count), group);
+                        }
+                        blocks = ret;
+                        mDef.Body.Instructions.Clear();
+                        var local = new Local(mDef.Module.CorLibTypes.Int32);
+                        mDef.Body.Variables.Add(local);
+                        var target = Instruction.Create(OpCodes.Nop);
+                        var instr = Instruction.Create(OpCodes.Br, target);
+                        var instructions = new List<Instruction> { Instruction.Create(OpCodes.Ldc_I4, 0) };
+                        foreach (var instruction in instructions)
+                            mDef.Body.Instructions.Add(instruction);
+                        mDef.Body.Instructions.Add(Instruction.Create(OpCodes.Stloc, local));
+                        mDef.Body.Instructions.Add(Instruction.Create(OpCodes.Br, instr));
+                        mDef.Body.Instructions.Add(target);
+                        foreach (var block in blocks.Where(block => block != blocks.Single(x => x.Number == blocks.Count - 1)))
+                        {
+                            mDef.Body.Instructions.Add(Instruction.Create(OpCodes.Ldloc, local));
+                            var instructions1 = new List<Instruction> { Instruction.Create(OpCodes.Ldc_I4, block.Number) };
+                            foreach (var instruction in instructions1)
+                                mDef.Body.Instructions.Add(instruction);
+                            mDef.Body.Instructions.Add(Instruction.Create(OpCodes.Ceq));
+                            var instruction4 = Instruction.Create(OpCodes.Nop);
+                            mDef.Body.Instructions.Add(Instruction.Create(OpCodes.Brfalse, instruction4));
+
+                            foreach (var instruction in block.Instructions)
+                                mDef.Body.Instructions.Add(instruction);
+
+                            var instructions2 = new List<Instruction> { Instruction.Create(OpCodes.Ldc_I4, block.Number + 1) };
+                            foreach (var instruction in instructions2)
+                                mDef.Body.Instructions.Add(instruction);
+
+                            mDef.Body.Instructions.Add(Instruction.Create(OpCodes.Stloc, local));
+                            mDef.Body.Instructions.Add(instruction4);
+                        }
+                        mDef.Body.Instructions.Add(Instruction.Create(OpCodes.Ldloc, local));
+                        var instructions3 = new List<Instruction> { Instruction.Create(OpCodes.Ldc_I4, blocks.Count - 1) };
+                        foreach (var instruction in instructions3)
+                            mDef.Body.Instructions.Add(instruction);
+                        mDef.Body.Instructions.Add(Instruction.Create(OpCodes.Ceq));
+                        mDef.Body.Instructions.Add(Instruction.Create(OpCodes.Brfalse, instr));
+                        mDef.Body.Instructions.Add(Instruction.Create(OpCodes.Br, blocks.Single(x => x.Number == blocks.Count - 1).Instructions[0]));
+                        mDef.Body.Instructions.Add(instr);
+
+                        foreach (var lastBlock in blocks.Single(x => x.Number == blocks.Count - 1).Instructions)
+                            mDef.Body.Instructions.Add(lastBlock);
+                    }
+                }
+            }
+
+            if (AntiDebugCheckBox.Checked)
+            {
+                var typeModule = ModuleDefMD.Load(typeof(Classes.AntiDebug).Module);
+                var cctor = FileModule.GlobalType.FindOrCreateStaticConstructor();
+                var typeDef = typeModule.ResolveTypeDef(MDToken.ToRID(typeof(Classes.AntiDebug).MetadataToken));
+                var members = InjectHelper.Inject(typeDef, FileModule.GlobalType, FileModule);
+                var init = (MethodDef)members.Single(method => method.Name == "AntiDebugCheck");
+                cctor.Body.Instructions.Insert(0, Instruction.Create(OpCodes.Call, init));
+                foreach (var md in FileModule.GlobalType.Methods)
+                {
+                    if (md.Name != ".ctor") continue;
+                    FileModule.GlobalType.Remove(md);
+                    break;
+                }
+            }
+
+            if(AntiVMCheckBox.Checked)
+            {
+                var typeModule = ModuleDefMD.Load(typeof(Classes.AntiVM).Module);
+                var cctor = FileModule.GlobalType.FindOrCreateStaticConstructor();
+                var typeDef = typeModule.ResolveTypeDef(MDToken.ToRID(typeof(Classes.AntiVM).MetadataToken));
+                var members = InjectHelper.Inject(typeDef, FileModule.GlobalType, FileModule);
+                var init = (MethodDef)members.Single(method => method.Name == "AntiVMCheck");
+                cctor.Body.Instructions.Insert(0, Instruction.Create(OpCodes.Call, init));
+                foreach (var md in FileModule.GlobalType.Methods)
+                {
+                    if (md.Name != ".ctor") continue;
+                    FileModule.GlobalType.Remove(md);
+                    break;
+                }
+            }
+            
+            if(AntiDecompilerCheckBox.Checked)
+            {
+                foreach (TypeDef typeDef in FileModule.GetTypes())
+                {
+                    foreach (MethodDef methodDef in typeDef.Methods)
+                    {
+                        methodDef.Body.KeepOldMaxStack = true;
+                        if (methodDef.HasBody && methodDef.Body.HasInstructions)
+                        {
+                            methodDef.Body.Instructions.Insert(0, Instruction.Create(OpCodes.Box, methodDef.Module.Import(typeof(Math))));
+                        }
+                    }
+                }
+            }
+
+            if (File.Exists(Environment.CurrentDirectory + @"\Obfuscasted.exe") == false)
+            {
+                FileModule.Write(Environment.CurrentDirectory + @"\Obfuscasted.exe");
+                if (PackingCheckBox.Checked)
+                {
+                    string RandomAssemblyName = RandomChineseCharacters(12);
+                    PackAndEncrypt(Environment.CurrentDirectory + @"\Obfuscasted.exe", Environment.CurrentDirectory + @"\" + RandomAssemblyName + ".tmp");
+                    File.Delete(Environment.CurrentDirectory + @"\Obfuscasted.exe");
+                    File.Move(Environment.CurrentDirectory + @"\" + RandomAssemblyName + ".tmp", Environment.CurrentDirectory + @"\Obfuscasted.exe");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Please Delete or move the file: " + Environment.CurrentDirectory + @"\Obfuscasted.exe" + " first to Obfuscaste your file", "Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
+            }
+        }
+
+        private static string HashingHardwareID(string ToHash)
+        {
+            byte[] KeyToHashWith = Encoding.ASCII.GetBytes("bAI!J6XwWO&A");
+            HMACSHA256 SHA256Hashing = new HMACSHA256();
+            SHA256Hashing.Key = KeyToHashWith;
+            var TheHash = SHA256Hashing.ComputeHash(UTF8Encoding.UTF8.GetBytes(ToHash));
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < TheHash.Length; i++)
+            {
+                builder.Append(TheHash[i].ToString("x2"));
+            }
+            string FinalHash = builder.ToString();
+            return FinalHash;
+        }
+
+        private static string GetHardwareID()
+        {
+            ManagementObjectSearcher CPU = new ManagementObjectSearcher("SELECT * FROM Win32_Processor");
+            ManagementObjectCollection GetCPU = CPU.Get();
+            string CPUID = null;
+            foreach (ManagementObject CPUId in GetCPU)
+            {
+                CPUID = CPUId["ProcessorType"].ToString() + CPUId["ProcessorId"].ToString();
+            }
+            ManagementObjectSearcher BIOS = new ManagementObjectSearcher("SELECT * FROM Win32_BIOS");
+            ManagementObjectCollection GetBIOS = BIOS.Get();
+            string GPUID = null;
+            foreach (ManagementObject BIOSId in GetBIOS)
+            {
+                GPUID = BIOSId["Manufacturer"].ToString() + BIOSId["Version"].ToString();
+            }
+            return HashingHardwareID(CPUID + GPUID);
+        }
+
+        private static string GetUSBHardwareID(string USBPath)
+        {
+            DriveInfo[] GetDrives = DriveInfo.GetDrives();
+            foreach (DriveInfo GetInfo in GetDrives)
+            {
+                if (GetInfo.RootDirectory.ToString() == USBPath)
+                {
+                    ManagementObjectSearcher USB = new ManagementObjectSearcher("SELECT * FROM Win32_DiskDrive");
+                    ManagementObjectCollection GetUSB = USB.Get();
+                    foreach (ManagementObject USBHardwareID in GetUSB)
+                    {
+                        if (USBHardwareID["MediaType"].ToString() == "Removable Media")
+                        {
+                            return HashingHardwareID(GetInfo.TotalSize + USBHardwareID["SerialNumber"].ToString() + USBHardwareID["PNPDeviceID"].ToString());
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        private void HWIDPacking(string FileToPack, string Output)
+        {
+            var Options = new Dictionary<string, string>();
+            Options.Add("CompilerVersion", "v4.0");
+            Options.Add("language", "c#");
+            var codeProvider = new CSharpCodeProvider(Options);
+            CompilerParameters parameters = new CompilerParameters();
+            parameters.CompilerOptions = "/target:winexe";
+            parameters.GenerateExecutable = true;
+            parameters.OutputAssembly = Output;
+            parameters.IncludeDebugInformation = false;
+            string[] Librarys = { "System", "System.Windows.Forms", "System.Management", "System.Core", "System.Runtime", "System.Runtime.InteropServices" };
+            foreach (string Library in Librarys)
+            {
+                parameters.ReferencedAssemblies.Add(Library + ".dll");
+            }
+            byte[] CodeToProtect = File.ReadAllBytes(FileToPack);
+            string RandomIV = RandomPassword(16);
+            string RandomKey = RandomPassword(4);
+            StringBuilder ROT13Encoding = new StringBuilder();
+            Regex regex = new Regex("[A-Za-z]");
+            foreach (char KSXZ in XOREncryptionKeys(textBox2.Text, RandomKey))
+            {
+                if (regex.IsMatch(KSXZ.ToString()))
+                {
+                    int C = ((KSXZ & 223) - 52) % 26 + (KSXZ & 32) + 65;
+                    ROT13Encoding.Append((char)C);
+                }
+            }
+            string EncryptedKey = UTF8Encoding.UTF8.GetString(MD5.Create().ComputeHash(UTF8Encoding.UTF8.GetBytes(ROT13Encoding.ToString())));
+            var GetTextToHEX = Encoding.Unicode.GetBytes(EncryptedKey);
+            var BuildHEX = new StringBuilder();
+            foreach (var FinalHEX in GetTextToHEX)
+            {
+                BuildHEX.Append(FinalHEX.ToString("X2"));
+            }
+            StringBuilder sb = new StringBuilder(); foreach (char c in BuildHEX.ToString().ToCharArray()) { sb.Append(Convert.ToString(c, 2).PadLeft(8, '0')); }
+            byte[] keys = MD5.Create().ComputeHash(UTF8Encoding.UTF8.GetBytes(sb.ToString()));
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < keys.Length; i++)
+            {
+                builder.Append(keys[i].ToString("x2"));
+            }
+            string Final = Encryption.AesTextEncryption(Convert.ToBase64String(CodeToProtect), builder.ToString(), RandomIV);
+            string HWIDPacker = Resource1.HWIDPacker;
+            string NewHWIDPackerCode = HWIDPacker.Replace("DecME", Final).Replace("THISISIV", RandomIV).Replace("HWIDPacker", "namespace " + RandomName(14));
+            string MyShinyNewPacker = NewHWIDPackerCode.Replace("SOS12", Convert.ToBase64String(Encoding.UTF8.GetBytes(RandomKey)));
+            codeProvider.CompileAssemblyFromSource(parameters, MyShinyNewPacker);
+        }
+
+        private void LicensePacking(string FileToPack, string Output)
+        {
+            var Options = new Dictionary<string, string>();
+            Options.Add("CompilerVersion", "v4.0");
+            Options.Add("language", "c#");
+            var codeProvider = new CSharpCodeProvider(Options);
+            CompilerParameters parameters = new CompilerParameters();
+            parameters.CompilerOptions = "/target:winexe";
+            parameters.GenerateExecutable = true;
+            parameters.OutputAssembly = Output;
+            parameters.IncludeDebugInformation = false;
+            string[] Librarys = { "System", "System.Windows.Forms", "System.Management", "System.Net", "System.Core", "System.Net.Http", "System.Runtime", "System.Runtime.InteropServices" };
+            foreach (string Library in Librarys)
+            {
+                parameters.ReferencedAssemblies.Add(Library + ".dll");
+            }
+            byte[] CodeToProtect = File.ReadAllBytes(FileToPack);
+            string RandomIV = RandomPassword(16);
+            string RandomKey = RandomPassword(4);
+            Random rnd = new Random();
+            int RandomINT = rnd.Next(6, 13);
+            string RandomHashingKey = RandomPassword(RandomINT);
+            StringBuilder ROT13Encoding = new StringBuilder();
+            Regex regex = new Regex("[A-Za-z]");
+            foreach (char KSXZ in XOREncryptionKeys(textBox3.Text, RandomKey))
+            {
+                if (regex.IsMatch(KSXZ.ToString()))
+                {
+                    int C = ((KSXZ & 223) - 52) % 26 + (KSXZ & 32) + 65;
+                    ROT13Encoding.Append((char)C);
+                }
+            }
+            StringBuilder sb = new StringBuilder(); foreach (char c in ROT13Encoding.ToString().ToCharArray()) { sb.Append(Convert.ToString(c, 2).PadLeft(8, '0')); }
+            var GetTextToHEX = Encoding.Unicode.GetBytes(sb.ToString());
+            var BuildHEX = new StringBuilder();
+            foreach (var FinalHEX in GetTextToHEX)
+            {
+                BuildHEX.Append(FinalHEX.ToString("X2"));
+            }
+            string HashedKey = UTF8Encoding.UTF8.GetString(MD5.Create().ComputeHash(UTF8Encoding.UTF8.GetBytes(BuildHEX.ToString())));
+            HMACMD5 HMACMD = new HMACMD5();
+            HMACMD.Key = UTF8Encoding.UTF8.GetBytes("LXSO12".Replace(UTF8Encoding.UTF8.GetString(Convert.FromBase64String("TFhTTzEy")), RandomHashingKey));
+            string HashedKey2 = UTF8Encoding.UTF8.GetString(HMACMD.ComputeHash(UTF8Encoding.UTF8.GetBytes(HashedKey)));
+            string Final = Encryption.AesTextEncryption(Convert.ToBase64String(CodeToProtect), HashedKey2.ToString(), RandomIV);
+            string LicensePacker = Resource1.LicensePacker;
+            string NewLicensePackerCode = LicensePacker.Replace("DecME", Final).Replace("THISISIV", RandomIV).Replace("LicensePacker", "namespace " + RandomName(14));
+            string MyShinyNewPacker = NewLicensePackerCode.Replace("decryptkeyencryption", Convert.ToBase64String(Encoding.UTF8.GetBytes(RandomKey))).Replace("SOS13", textBox4.Text).Replace(UTF8Encoding.UTF8.GetString(Convert.FromBase64String("TFhTTzEy")), RandomHashingKey);
+            codeProvider.CompileAssemblyFromSource(parameters, MyShinyNewPacker);
+        }
+
+        private void USBPacking(string FileToPack, string Output)
+        {
+            var Options = new Dictionary<string, string>();
+            Options.Add("CompilerVersion", "v4.0");
+            Options.Add("language", "c#");
+            var codeProvider = new CSharpCodeProvider(Options);
+            CompilerParameters parameters = new CompilerParameters();
+            parameters.CompilerOptions = "/target:winexe";
+            parameters.GenerateExecutable = true;
+            parameters.OutputAssembly = Output;
+            parameters.IncludeDebugInformation = false;
+            string[] Librarys = { "System", "System.Windows.Forms", "System.Management", "System.Net", "System.Core", "System.Net.Http", "System.Runtime", "System.Runtime.InteropServices" };
+            foreach (string Library in Librarys)
+            {
+                parameters.ReferencedAssemblies.Add(Library + ".dll");
+            }
+            byte[] CodeToProtect = File.ReadAllBytes(FileToPack);
+            string RandomIV = RandomPassword(16);
+            string RandomKey = RandomPassword(4);
+            string USBHWID = GetUSBHardwareID(USBComboBox.Text);
+            string EncryptedKey = XOREncryptionKeys(USBHWID, RandomKey);
+            string Final = Encryption.AesTextEncryption(Convert.ToBase64String(CodeToProtect), Convert.ToBase64String(Encoding.UTF8.GetBytes(EncryptedKey)), RandomIV);
+            string USBPacker = Resource1.USBPacker;
+            string NewUSBPackerCode = USBPacker.Replace("DecME", Final).Replace(GetUSBHardwareID(USBComboBox.Text), USBPacker).Replace("THISISIV", RandomIV).Replace("USBPacker", "namespace " + RandomName(14)).Replace("USBSADASAS", HashingHardwareID(USBComboBox.Text));
+            string MyShinyNewPacker = NewUSBPackerCode.Replace("SOS12", Convert.ToBase64String(UTF8Encoding.UTF8.GetBytes(RandomKey)));
+            codeProvider.CompileAssemblyFromSource(parameters, MyShinyNewPacker);
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(textBox1.Text))
+                {
+                    MessageBox.Show("Please Select a file to protect.", "Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
+                }
+                else
+                {
+                    bool IsAnythingSelected = false;
+                    if (Base64EncodeCheckBox.Checked || AntiDe4DotCheckBox.Checked || FakeObfuscatorAttributesCheckBox.Checked || JunkCheckBox.Checked || CtrlFlowCheckBox.Checked || RenamingCheckBox.Checked || INTConfusionCheckBox.Checked || AntiILDasmCheckBox.Checked || AntiDebugCheckBox.Checked)
+                    {
+                        IsAnythingSelected = true;
+                        ObfuscasteCode(textBox1.Text);
+                    }
+
+                    if (LockToHWIDCheckBox.Checked)
+                    {
+                        if (string.IsNullOrEmpty(textBox2.Text))
+                        {
+                            MessageBox.Show("Please Enter your hardware id or the buyer hardware id.", "Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
+                        }
+                        else
+                        {
+                            IsAnythingSelected = true;
+                            if (Base64EncodeCheckBox.Checked || AntiDe4DotCheckBox.Checked || FakeObfuscatorAttributesCheckBox.Checked || JunkCheckBox.Checked || CtrlFlowCheckBox.Checked || RenamingCheckBox.Checked || INTConfusionCheckBox.Checked || AntiILDasmCheckBox.Checked)
+                            {
+                                HWIDPacking(Environment.CurrentDirectory + @"\Obfuscasted.exe", Environment.CurrentDirectory + @"\Packed.exe");
+                                File.Delete(Environment.CurrentDirectory + @"\Obfuscasted.exe");
+                            }
+                            else
+                            {
+                                HWIDPacking(textBox1.Text, Environment.CurrentDirectory + @"\Packed.exe");
+                            }
+                        }
+                    }
+
+                    if (USBHWIDCheckBox.Checked)
+                    {
+                        if (string.IsNullOrEmpty(USBComboBox.Text))
+                        {
+                            MessageBox.Show("Please Choose a USB.", "Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
+                        }
+                        else
+                        {
+                            IsAnythingSelected = true;
+                            if (Base64EncodeCheckBox.Checked || AntiDe4DotCheckBox.Checked || FakeObfuscatorAttributesCheckBox.Checked || JunkCheckBox.Checked || CtrlFlowCheckBox.Checked || RenamingCheckBox.Checked || INTConfusionCheckBox.Checked || AntiILDasmCheckBox.Checked)
+                            {
+                                USBPacking(Environment.CurrentDirectory + @"\Obfuscasted.exe", Environment.CurrentDirectory + @"\Packed.exe");
+                                File.Delete(Environment.CurrentDirectory + @"\Obfuscasted.exe");
+                            }
+                            else
+                            {
+                                USBPacking(textBox1.Text, Environment.CurrentDirectory + @"\Packed.exe");
+                            }
+                        }
+                    }
+
+                    if (checkBox4.Checked)
+                    {
+                        if (string.IsNullOrEmpty(textBox3.Text))
+                        {
+                            MessageBox.Show("Please Enter the license you want to license your program with.", "Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
+                        }
+                        else
+                        {
+                            IsAnythingSelected = true;
+                            if (Base64EncodeCheckBox.Checked || AntiDe4DotCheckBox.Checked || FakeObfuscatorAttributesCheckBox.Checked || JunkCheckBox.Checked || CtrlFlowCheckBox.Checked || RenamingCheckBox.Checked || INTConfusionCheckBox.Checked || AntiILDasmCheckBox.Checked)
+                            {
+                                if (LockToHWIDCheckBox.Checked)
+                                {
+                                    MessageBox.Show("Sorry but you can't use Hardware ID Licensing with Normal Licensing.", "Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
+                                }
+                                else
+                                {
+                                    LicensePacking(Environment.CurrentDirectory + @"\Obfuscasted.exe", Environment.CurrentDirectory + @"\Packed.exe");
+                                    File.Delete(Environment.CurrentDirectory + @"\Obfuscasted.exe");
+                                }
+                            }
+                            else
+                            {
+                                LicensePacking(textBox1.Text, Environment.CurrentDirectory + @"\Packed.exe");
+                            }
+                        }
+                    }
+                    if (IsAnythingSelected == true)
+                    {
+                        MessageBox.Show("Done.", "Done", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            textBox2.Text = GetHardwareID();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog GetFileToProtect = new OpenFileDialog();
+            GetFileToProtect.Title = "Select File To Protect";
+            if (GetFileToProtect.ShowDialog() == DialogResult.OK)
+            {
+                textBox1.Text = GetFileToProtect.FileName;
+            }
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Hardware ID Licensing (HWID For Shortcut) are a type of licensing which gets the Hardware Information and then hashes it to get a unique hash for your pc, and there's two types of copy protection software that uses this method: the one who just compares the hardware id with yours and decrypt the program if it found that the hardware id matches which are horrible in terms of security cause the program can get fooled by editing code to make it think that the hardware id matches (patching in memory or disk), and the another type is the one who encrypt your program on the stub executable based on your hardware id and try to decrypt it using your hardware id or the buyer hardware id and if exception thrown then we know that the one that tries to run the program are not authorized to use it which are good for security and that what we use.", "Explaination", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
+        }
+
+        private void checkBox4_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox4.Checked)
+            {
+                if (LockToHWIDCheckBox.Checked || USBHWIDCheckBox.Checked)
+                {
+                    MessageBox.Show("Sorry, but only one registration method supported.", "Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
+                    checkBox4.Checked = false;
+                }
+            }
+        }
+
+        private void comboBox1_DropDown(object sender, EventArgs e)
+        {
+            DriveInfo[] GetDrives = DriveInfo.GetDrives();
+            foreach (DriveInfo GetUSB in GetDrives)
+            {
+                if (GetUSB.DriveType == DriveType.Removable)
+                {
+                    USBComboBox.Items.Clear();
+                    USBComboBox.Items.Add(GetUSB.RootDirectory);
+                }
+            }
+        }
+
+        private void checkBox9_CheckedChanged(object sender, EventArgs e)
+        {
+            if (USBHWIDCheckBox.Checked)
+            {
+                if (checkBox4.Checked || LockToHWIDCheckBox.Checked)
+                {
+                    MessageBox.Show("Sorry, but only one registration method supported.", "Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
+                    USBHWIDCheckBox.Checked = false;
+                }
+            }
+        }
+
+        private void checkBox3_CheckedChanged(object sender, EventArgs e)
+        {
+            if (LockToHWIDCheckBox.Checked)
+            {
+                if (checkBox4.Checked || USBHWIDCheckBox.Checked)
+                {
+                    MessageBox.Show("Sorry, but only one registration method supported.", "Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
+                    LockToHWIDCheckBox.Checked = false;
+                }
+            }
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("you choose a usb from the list and choose a program to protect and then the program will be encrypted based on the usb hardware id and if no usb found or there were no vaild usb the program will show a message that says that you are not authorized to use this program and only works if you entered a vaild USB making it impossible for someone which doesn't have your USB to recover the program code or access it, and please make sure to enter one USB while protecting the program or running it, cause errors may occur.", "Explaination", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
+        }
+
+        private void checkBox1_MouseHover(object sender, EventArgs e)
+        {
+            ToolTip ShowInfo = new ToolTip();
+            ShowInfo.SetToolTip(Base64EncodeCheckBox, "Encode Strings Inside The Protected .NET Executable To Prevent Easy String Access or to identify a function based on string.");
+        }
+
+        private void checkBox2_MouseHover(object sender, EventArgs e)
+        {
+            ToolTip ShowInfo = new ToolTip();
+            ShowInfo.SetToolTip(AntiDe4DotCheckBox, "Prevent De4dot from processing the protected .NET File.");
+        }
+
+        private void checkBox5_MouseHover(object sender, EventArgs e)
+        {
+            ToolTip ShowInfo = new ToolTip();
+            ShowInfo.SetToolTip(FakeObfuscatorAttributesCheckBox, "Prevent Identifying Obfuscastor Which Obfuscasted This File and it can cause automated deobfuscastors tools to corrupt the .NET executable file.");
+        }
+
+        private void checkBox6_MouseHover(object sender, EventArgs e)
+        {
+            ToolTip ShowInfo = new ToolTip();
+            ShowInfo.SetToolTip(JunkCheckBox, "Adding Junk Namespaces and Methods.");
+        }
+
+        private void checkBox7_MouseHover(object sender, EventArgs e)
+        {
+            ToolTip ShowInfo = new ToolTip();
+            ShowInfo.SetToolTip(CtrlFlowCheckBox, "Control Flow Edits the program in such a way so it returns the same result and mangling the code, and it can confuse the one who are trying to read the source code.");
+        }
+
+        private void checkBox8_MouseHover(object sender, EventArgs e)
+        {
+            ToolTip ShowInfo = new ToolTip();
+            ShowInfo.SetToolTip(RenamingCheckBox, "renaming assembly name, methods and functions to the same name so that the one who try to decompile it and tries to identify a function or a string he can't easily.");
+        }
+
+        private void checkBox10_MouseHover(object sender, EventArgs e)
+        {
+            ToolTip ShowInfo = new ToolTip();
+            ShowInfo.SetToolTip(INTConfusionCheckBox, "This Protection adds junk INT Comparsion, sizeof's and float's, making it more confusing.");
+        }
+
+        private void checkBox11_MouseHover(object sender, EventArgs e)
+        {
+            ToolTip ShowInfo = new ToolTip();
+            ShowInfo.SetToolTip(AntiILDasmCheckBox, "Prevent Decompiling .NET Assembly by adding SuppressIldasmAttribute Attribute to it, probably you will never need this option but you can add it as an extra.");
+        }
+
+        private void checkBox12_MouseHover(object sender, EventArgs e)
+        {
+            ToolTip ShowInfo = new ToolTip();
+            ShowInfo.SetToolTip(PackingCheckBox, "Encrypting Your .NET Executable Inside of another one that will gonna be decrypted in memory, but keep in mind that this are not AV Friendly.");
+        }
+
+        private void checkBox13_MouseHover(object sender, EventArgs e)
+        {
+            ToolTip ShowInfo = new ToolTip();
+            ShowInfo.SetToolTip(AntiDebugCheckBox, "Convert Calls to Calli.");
+        }
+
+        private void Main_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void checkBox13_MouseHover_1(object sender, EventArgs e)
+        {
+            new ToolTip().SetToolTip(AntiDebugCheckBox, "Injects Anti-Debugging Code into the protected application.");
+        }
+
+        private void checkBox14_MouseHover(object sender, EventArgs e)
+        {
+            new ToolTip().SetToolTip(AntiVMCheckBox, "Injects Anti-VM Code into the protected application.");
+        }
+    }
+}
+
+
+================================================
+File: NetShield Protector/Main.resx
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        AAABAAEAQEAAAAEAIAAoQgAAFgAAACgAAABAAAAAgAAAAAEAIAAAAAAAAEIAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ2PeXKckHiqnJB4qpyQeKqckHiqnJB4qpyQ
+        eKqckHiqnJB4qpyQeKqckHiqnJB4qpyQeKqckHiqnJB4qpyQeKqckHiqnJB4qpyQeKqckHiqnJB4qpyQ
+        eKqckHiqnJB4qpyQeKqckHiqnJB4qpyQeKqckHiqnY95cgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACbj3mpnJB4/5yQ
+        eP+ckHj/nJB4/5yQeP+ckHj/nJB4/5yQeP+ckHj/nJB4/5yQeP+ckHj/nJB4/5yQeP+ckHj/nJB4/5yQ
+        eP+ckHj/nJB4/5yQeP+ckHj/nJB4/5yQeP+ckHj/nJB4/5yQeP+ckHj/nJB4/5uPeakAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAnJB5gZyQeP+ckHj/nJB4/5yQeP+ckHj/nJB4/5yQeP+ckHj/nJB4/5yQeP+ckHj/nJB4/5yQ
+        eP+ckHj/nJB4/5yQeP+ckHj/nJB4/5yQeP+ckHj/nJB4/5yQeP+ckHj/nJB4/5yQeP+ckHj/nJB4/5yQ
+        eP+dkXh/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAJmPehmckHjbnJB4/5yQeP+ckHj/nJB4/5yQeP+ckHj/nJB4/5yQ
+        eP+ckHj/nJB4/5yQeP+ckHj/nJB4/5yQeP+ckHj/nJB4/5yQeP+ckHj/nJB4/5yQeP+ckHj/nJB4/5yQ
+        eP+ckHj/nJB4/5yQeP+ckHjam5B6FwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAn5+ACJuPeEKckHhVnJB4VZyQ
+        eFWckHhVnJB4VZyQeFWckHhVnJB4VZyQeP+ckHj/nJB4/5yQeP+ckHj/nJB4/5yQeP+ckHj/nJB4VZyQ
+        eFWckHhVnJB4VZyQeFWckHhVnJB4VZyQeFWbj3hCkpJtBwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACckHj/nJB4/5yQeP+ckHj/nJB4/5yQ
+        eP+ckHj/nJB4/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAnJB4/5yQ
+        eP+ckHj/nJB4/5yQeP+ckHj/nJB4/5yQeP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAJyQeP+ckHj/nJB4/5yQeP+ckHj/nJB4/5yQeP+ckHj/AAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAxb2wq8W9sKvFvbCrxb2wq8W9sKvFvbCrxb2wq8W9sKvFvbCrxb2wq8W9sKvFvbCrxb2wq8W9
+        sKvFvbCrxb2wq8W9sKvFvbCrxb2wq8W9sKuzqpjHs6qYx7OqmMezqpjHs6qYx7OqmMezqpjHs6qYx8W9
+        sKvFvbCrxb2wq8W9sKvFvbCrxb2wq8W9sKvFvbCrxb2wq8W9sKvFvbCrxb2wq8W9sKvFvbCrxb2wq8W9
+        sKvFvbCrxb2wq8W9sKvFvbCrAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAMW+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+
+        sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+
+        sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+
+        sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADFvrD/xb6w/8W+sP/FvrD/xb6w/8W+
+        sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+
+        sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+
+        sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP8AAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxb6w/8W+
+        sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+
+        sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+
+        sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+
+        sP/FvrD/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAMW+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+
+        sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+
+        sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+
+        sP/FvrD/xb6w/8W+sP/FvrD/xb6w/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADFvrD/xb6w/8W+sP/FvrD/mJl1/5iZdf+YmXX/mJl1/5iZ
+        df+YmXX/mJl1/5iZdf+YmXX/mJl1/5iZdf+YmXX/mJl1/5iZdf+YmXX/mJl1/5iZdf+YmXX/mJl1/5iZ
+        df+YmXX/mJl1/5iZdf+YmXX/mJl1/5iZdf+YmXX/mJl1/5iZdf+YmXX/mJl1/5iZdf+YmXX/mJl1/5iZ
+        df+YmXX/mJl1/5iZdf+YmXX/mJl1/8W+sP/FvrD/xb6w/8W+sP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxb6w/8W+sP/FvrD/xb6w/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP/FvrD/xb6w/8W+sP/FvrD/AAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMW+
+        sP/FvrD/xb6w/8W+sP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/xb6w/8W+
+        sP/FvrD/xb6w/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAADFvrD/xb6w/8W+sP/FvrD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9LXAP/S1wD/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/8W+sP/FvrD/xb6w/8W+sP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxb6w/8W+sP/FvrD/xb6w/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/iK0S/4muEv9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP/FvrD/xb6w/8W+sP/FvrD/AAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMW+sP/FvrD/xb6w/8W+
+        sP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/V20G/7XoHf+16B3/W3EH/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/xb6w/8W+sP/FvrD/xb6w/wAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AADFvrD/xb6w/8W+sP/FvrD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE4A/53IF/+26R3/tukd/6DL
+        GP9BTwD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/8W+
+        sP/FvrD/xb6w/8W+sP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAxb6w/8W+sP/FvrD/xb6w/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/26J
+        C/+26R3/tukd/7bpHf+26R3/c5AN/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP/FvrD/xb6w/8W+sP/FvrD/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMW+sP/FvrD/xb6w/8W+sP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0lYAv+t3hv/tukd/7DgG/+w4Bv/tukd/7DiHP9NXwP/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/xb6w/8W+sP/FvrD/xb6w/wAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADFvrD/xb6w/8W+
+        sP/FvrD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP+DpRD/tukd/7bpHf94lw7/dZMN/7bpHf+26R3/jbIT/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/8W+sP/FvrD/xb6w/8W+
+        sP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAxb6w/8W+sP/FvrD/xb6w/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9UZwX/s+Yc/7bpHf+n1Bn/RFIB/0NQ
+        Af+izhj/tukd/7XoHf9dcwf/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP/FvrD/xb6w/8W+sP/FvrD/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAMW+sP/FvrD/xb6w/8W+sP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/mMIW/7bp
+        Hf+26R3/ZHwJ/0BNAP9ATQD/WnAH/7XoHf+26R3/oc0Y/0JQAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/xb6w/8W+sP/FvrD/xb6w/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADFvrD/xb6w/8W+sP/FvrD/YHYI/2B2
+        CP9gdgj/YHYI/2B2CP9gdgj/YHYI/2B2CP9gdgj/YHYI/09iBP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/a4YL/7bpHf+26R3/k7sU/0BNAP9ATQD/QE0A/0BNAP+FqRH/tukd/7bpHf+CpRD/YHYI/2B2
+        CP9gdgj/YHYI/2B2CP9gdgj/YHYI/2B2CP9gdgj/W3EH/8W+sP/FvrD/xb6w/8W+sP8AAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxb6w/8W+
+        sP/FvrD/xb6w/7bpHf+26R3/tukd/7bpHf+26R3/tukd/7bpHf+26R3/tukd/7bpHf+j0Bj/QlAB/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/RFMB/6jWGf+26R3/tOYd/1RoBf9ATQD/QE0A/0BNAP9ATQD/SVkC/63e
+        G/+26R3/tukd/7bpHf+26R3/tukd/7bpHf+26R3/tukd/7bpHf+26R3/tukd/6fUGf/FvrD/xb6w/8W+
+        sP/FvrD/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAMW+sP/FvrD/xb6w/8W+sP+26R3/tukd/7bpHf+26R3/tukd/7bpHf+26R3/tukd/7bp
+        Hf+26R3/tukd/3mYDv9ATQD/QE0A/0BNAP9ATQD/QE0A/36fD/+26R3/tukd/4GkEP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9tiQv/tukd/7bpHf+26R3/tukd/7bpHf+26R3/tukd/7bpHf+26R3/tukd/7bp
+        Hf+n1Bn/xb6w/8W+sP/FvrD/xb6w/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADFvrD/xb6w/8W+sP/FvrD/aIEK/2iBCv9ogQr/aIEK/2iB
+        Cv9ogQr/aIEK/2iBCv9ogQr/qtga/7bpHf+y5Bz/UWQE/0BNAP9ATQD/QE0A/1NmBf+z5hz/tukd/6ra
+        Gv9GVQH/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QU4A/2V+Cf9ogQr/aIEK/2iBCv9ogQr/aIEK/2iB
+        Cv9ogQr/aIEK/2iBCv9ogQr/YnsI/8W+sP/FvrD/xb6w/8W+sP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxb6w/8W+sP/FvrD/xb6w/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/2mCCv+26R3/tukd/5O7FP9ATQD/QE0A/0BN
+        AP+UuxX/tukd/7bpHf9uigv/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP/FvrD/xb6w/8W+sP/FvrD/AAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMW+
+        sP/FvrD/xb6w/8W+sP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/lr8V/7bp
+        Hf+26R3/ZoAJ/0BNAP9kfAn/tukd/7bpHf+fyxf/QE4A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/xb6w/8W+
+        sP/FvrD/xb6w/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAADFvrD/xb6w/8W+sP/FvrD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/1JlBP+z5Rz/tukd/6nXGv9JWAL/pdEZ/7bpHf+16B3/XXMH/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/8W+sP/FvrD/xb6w/8W+sP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxb6w/8W+sP/FvrD/xb6w/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/eJcO/7bpHf+26R3/qNca/7bpHf+26R3/ia0S/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP/FvrD/xb6w/8W+sP/FvrD/AAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMW+sP/FvrD/xb6w/8W+
+        sP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0RSAf+l0hn/tukd/7bp
+        Hf+26R3/sOIc/0xeA/9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/xb6w/8W+sP/FvrD/xb6w/wAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AADFvrD/xb6w/8W+sP/FvrD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/X3YI/7bpHf+26R3/tukd/3iXDv9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/8W+
+        sP/FvrD/xb6w/8W+sP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAxb6w/8W+sP/FvrD/xb6w/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP+LrxL/tukd/6fUGf9EUgH/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP/FvrD/xb6w/8W+sP/FvrD/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMW+sP/FvrD/xb6w/8W+sP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/SloC/67eG/9kfAn/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/xb6w/8W+sP/FvrD/xb6w/wAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADFvrD/xb6w/8W+
+        sP/FvrD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9Xawb/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/8W+sP/FvrD/xb6w/8W+
+        sP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAxb6w/8W+sP/FvrD/xb6w/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP/FvrD/xb6w/8W+sP/FvrD/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAMW+sP/FvrD/xb6w/8W+sP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BNAP9ATQD/QE0A/0BN
+        AP9ATQD/QE0A/0BNAP9ATQD/xb6w/8W+sP/FvrD/xb6w/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADFvrD/xb6w/8W+sP/FvrD/mJl1/5iZ
+        df+YmXX/mJl1/5iZdf+YmXX/mJl1/5iZdf+YmXX/mJl1/5iZdf+YmXX/mJl1/5iZdf+YmXX/mJl1/5iZ
+        df+YmXX/mJl1/5iZdf+YmXX/mJl1/5iZdf+YmXX/mJl1/5iZdf+YmXX/mJl1/5iZdf+YmXX/mJl1/5iZ
+        df+YmXX/mJl1/5iZdf+YmXX/mJl1/5iZdf+YmXX/mJl1/8W+sP/FvrD/xb6w/8W+sP8AAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxb6w/8W+
+        sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+
+        sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+
+        sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+
+        sP/FvrD/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAMW+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+
+        sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+
+        sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+
+        sP/FvrD/xb6w/8W+sP/FvrD/xb6w/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADFvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+
+        sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+
+        sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+
+        sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP/FvrD/xb6w/8W+sP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxr2xVca9sVXGvbFVxr2xVca9
+        sVXGvbFVxr2xVca9sVXGvbFVxr2xVca9sVXGvbFVxr2xVca9sVXGvbFVxr2xVca9sVXGvbFVxr2xVca9
+        sVXGvbFVxr2xVca9sVXGvbFVxr2xVca9sVXGvbFVxr2xVca9sVXGvbFVxr2xVca9sVXGvbFVxr2xVca9
+        sVXGvbFVxr2xVca9sVXGvbFVxr2xVca9sVXGvbFVxr2xVca9sVXGvbFVxr2xVca9sVXGvbFVAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAA////////////////////////////////////////////////////////////////////////
+        ///////////////////////////AAAAD/////4AAAAH/////gAAAA//////AAAAD///////wD///////
+        //AP////////8A/////////wD/////8AAAAAAAD//wAAAAAAAP//AAAAAAAA//8AAAAAAAD//wAAAAAA
+        AP//AAAAAAAA//8AAAAAAAD//wAAAAAAAP//AAAAAAAA//8AAAAAAAD//wAAAAAAAP//AAAAAAAA//8A
+        AAAAAAD//wAAAAAAAP//AAAAAAAA//8AAAAAAAD//wAAAAAAAP//AAAAAAAA//8AAAAAAAD//wAAAAAA
+        AP//AAAAAAAA//8AAAAAAAD//wAAAAAAAP//AAAAAAAA//8AAAAAAAD//wAAAAAAAP//AAAAAAAA//8A
+        AAAAAAD//wAAAAAAAP//AAAAAAAA//8AAAAAAAD//wAAAAAAAP//AAAAAAAA//8AAAAAAAD//wAAAAAA
+        AP//AAAAAAAA////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////8=
+</value>
+  </data>
+</root>
+
+
+================================================
+File: NetShield Protector/NetShield Protector.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{F796DDDD-9133-4A59-B511-6A0950690C4C}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>NetShield_Protector</RootNamespace>
+    <AssemblyName>NetShield Protector</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>icons81_system_task.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib">
+      <HintPath>Resources\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Classes.cs" />
+    <Compile Include="Encryption.cs" />
+    <Compile Include="Helper.cs" />
+    <Compile Include="Main.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Main.Designer.cs">
+      <DependentUpon>Main.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Resource1.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resource1.resx</DependentUpon>
+    </Compile>
+    <None Include="Resources\PackStub.cs" />
+    <None Include="Resources\USBPacker.cs" />
+    <None Include="Resources\LicensePacker.cs" />
+    <None Include="Resources\Program.cs" />
+    <EmbeddedResource Include="Main.resx">
+      <DependentUpon>Main.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resource1.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resource1.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="icons81_system_task.ico" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: NetShield Protector/Program.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Runtime.InteropServices;
+
+namespace NetShield_Protector
+{
+    static class Program
+    {
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool SetProcessDPIAware();
+
+        [STAThread]
+        static void Main()
+        {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Main main = new Main();
+            main.AutoScaleMode = AutoScaleMode.Dpi;
+            main.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            Application.Run(main);
+        }
+    }
+}
+
+
+
+================================================
+File: NetShield Protector/Resource1.Designer.cs
+================================================
+ï»¿//------------------------------------------------------------------------------
+// <auto-generated>
+//     This code was generated by a tool.
+//     Runtime Version:4.0.30319.42000
+//
+//     Changes to this file may cause incorrect behavior and will be lost if
+//     the code is regenerated.
+// </auto-generated>
+//------------------------------------------------------------------------------
+
+namespace NetShield_Protector {
+    using System;
+    
+    
+    /// <summary>
+    ///   A strongly-typed resource class, for looking up localized strings, etc.
+    /// </summary>
+    // This class was auto-generated by the StronglyTypedResourceBuilder
+    // class via a tool like ResGen or Visual Studio.
+    // To add or remove a member, edit your .ResX file then rerun ResGen
+    // with the /str option, or rebuild your VS project.
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    internal class Resource1 {
+        
+        private static global::System.Resources.ResourceManager resourceMan;
+        
+        private static global::System.Globalization.CultureInfo resourceCulture;
+        
+        [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+        internal Resource1() {
+        }
+        
+        /// <summary>
+        ///   Returns the cached ResourceManager instance used by this class.
+        /// </summary>
+        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
+        internal static global::System.Resources.ResourceManager ResourceManager {
+            get {
+                if (object.ReferenceEquals(resourceMan, null)) {
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("NetShield_Protector.Resource1", typeof(Resource1).Assembly);
+                    resourceMan = temp;
+                }
+                return resourceMan;
+            }
+        }
+        
+        /// <summary>
+        ///   Overrides the current thread's CurrentUICulture property for all
+        ///   resource lookups using this strongly typed resource class.
+        /// </summary>
+        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
+        internal static global::System.Globalization.CultureInfo Culture {
+            get {
+                return resourceCulture;
+            }
+            set {
+                resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to using System;
+        ///using System.Collections.Generic;
+        ///using System.Linq;
+        ///using System.Threading.Tasks;
+        ///using System.Windows.Forms;
+        ///using System.Security.Cryptography;
+        ///using System.Management;
+        ///using System.Reflection;
+        ///using System.Text;
+        ///using System.Runtime.InteropServices;
+        ///using System.Diagnostics;
+        ///
+        ///HWIDPacker
+        ///{
+        ///    static class Program
+        ///    {
+        ///        static string ProgramToDecrypt = &quot;DecME&quot;;
+        ///        static string IV = &quot;THISISIV&quot;;
+        ///
+        ///        [DllImport(&quot;kernel32.dll&quot;, SetLastError = true)]
+        ///       [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string HWIDPacker {
+            get {
+                return ResourceManager.GetString("HWIDPacker", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to using System;
+        ///using System.Collections.Generic;
+        ///using System.Diagnostics;
+        ///using System.IO;
+        ///using System.Linq;
+        ///using System.Reflection;
+        ///using System.Runtime.InteropServices;
+        ///using System.Security.Cryptography;
+        ///using System.Text;
+        ///using System.Threading.Tasks;
+        ///using System.Windows.Forms;
+        ///
+        ///LicensePacker
+        ///{
+        ///    static class Program
+        ///    {
+        ///        static string ProgramToDecrypt = &quot;DecME&quot;;
+        ///        static string IV = &quot;THISISIV&quot;;
+        ///
+        ///        [DllImport(&quot;kernel32.dll&quot;, SetLastError = true)]
+        ///        pri [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string LicensePacker {
+            get {
+                return ResourceManager.GetString("LicensePacker", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to using System;
+        ///using System.Collections.Generic;
+        ///using System.Linq;
+        ///using System.Threading.Tasks;
+        ///using System.Windows.Forms;
+        ///using System.Security.Cryptography;
+        ///using System.Text;
+        ///using System.Runtime.InteropServices;
+        ///using System.Diagnostics;
+        ///using System.Reflection;
+        ///
+        ///namespace PackStub
+        ///{
+        ///    static class Program
+        ///    {
+        ///        [DllImport(&quot;kernel32.dll&quot;, SetLastError = true)]
+        ///        private static extern bool IsDebuggerPresent();
+        ///
+        ///        static string fMJUcafeoygb = &quot;DecME&quot;;
+        ///        sta [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string PackStub {
+            get {
+                return ResourceManager.GetString("PackStub", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to using System;
+        ///using System.Diagnostics;
+        ///using System.IO;
+        ///using System.Management;
+        ///using System.Reflection;
+        ///using System.Runtime.InteropServices;
+        ///using System.Security.Cryptography;
+        ///using System.Text;
+        ///using System.Windows.Forms;
+        ///
+        ///USBPacker
+        ///{
+        ///    internal static class Program
+        ///    {
+        ///        private static string ProgramToDecrypt = &quot;DecME&quot;;
+        ///        private static string IV = &quot;THISISIV&quot;;
+        ///
+        ///        [DllImport(&quot;kernel32.dll&quot;, SetLastError = true)]
+        ///        private static extern bool IsDebuggerPrese [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string USBPacker {
+            get {
+                return ResourceManager.GetString("USBPacker", resourceCulture);
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: NetShield Protector/Resource1.resx
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="HWIDPacker" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\Program.cs;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="LicensePacker" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\LicensePacker.cs;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  </data>
+  <data name="PackStub" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\PackStub.cs;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  </data>
+  <data name="USBPacker" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\USBPacker.cs;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  </data>
+</root>
+
+
+================================================
+File: NetShield Protector/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("NetShield Protector")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("NetShield Protector")]
+[assembly: AssemblyCopyright("Copyright Â©  2021")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Setting ComVisible to false makes the types in this assembly not visible
+// to COM components.  If you need to access a type in this assembly from
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("f796dddd-9133-4a59-b511-6a0950690c4c")]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+
+================================================
+File: NetShield Protector/Properties/Resources.Designer.cs
+================================================
+ï»¿//------------------------------------------------------------------------------
+// <auto-generated>
+//     This code was generated by a tool.
+//     Runtime Version:4.0.30319.42000
+//
+//     Changes to this file may cause incorrect behavior and will be lost if
+//     the code is regenerated.
+// </auto-generated>
+//------------------------------------------------------------------------------
+
+namespace NetShield_Protector.Properties {
+    using System;
+    
+    
+    /// <summary>
+    ///   A strongly-typed resource class, for looking up localized strings, etc.
+    /// </summary>
+    // This class was auto-generated by the StronglyTypedResourceBuilder
+    // class via a tool like ResGen or Visual Studio.
+    // To add or remove a member, edit your .ResX file then rerun ResGen
+    // with the /str option, or rebuild your VS project.
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    internal class Resources {
+        
+        private static global::System.Resources.ResourceManager resourceMan;
+        
+        private static global::System.Globalization.CultureInfo resourceCulture;
+        
+        [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+        internal Resources() {
+        }
+        
+        /// <summary>
+        ///   Returns the cached ResourceManager instance used by this class.
+        /// </summary>
+        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
+        internal static global::System.Resources.ResourceManager ResourceManager {
+            get {
+                if (object.ReferenceEquals(resourceMan, null)) {
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("NetShield_Protector.Properties.Resources", typeof(Resources).Assembly);
+                    resourceMan = temp;
+                }
+                return resourceMan;
+            }
+        }
+        
+        /// <summary>
+        ///   Overrides the current thread's CurrentUICulture property for all
+        ///   resource lookups using this strongly typed resource class.
+        /// </summary>
+        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
+        internal static global::System.Globalization.CultureInfo Culture {
+            get {
+                return resourceCulture;
+            }
+            set {
+                resourceCulture = value;
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: NetShield Protector/Properties/Resources.resx
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+</root>
+
+
+================================================
+File: NetShield Protector/Properties/Settings.Designer.cs
+================================================
+ï»¿//------------------------------------------------------------------------------
+// <auto-generated>
+//     This code was generated by a tool.
+//     Runtime Version:4.0.30319.42000
+//
+//     Changes to this file may cause incorrect behavior and will be lost if
+//     the code is regenerated.
+// </auto-generated>
+//------------------------------------------------------------------------------
+
+
+namespace NetShield_Protector.Properties
+{
+    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "11.0.0.0")]
+    internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase
+    {
+
+        private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
+
+        public static Settings Default
+        {
+            get
+            {
+                return defaultInstance;
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: NetShield Protector/Properties/Settings.settings
+================================================
+ï»¿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)">
+  <Profiles>
+    <Profile Name="(Default)" />
+  </Profiles>
+  <Settings />
+</SettingsFile>
+
+
+
+================================================
+File: NetShield Protector/Resources/LicensePacker.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+LicensePacker
+{
+    static class Program
+    {
+        static string ProgramToDecrypt = "DecME";
+        static string IV = "THISISIV";
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool IsDebuggerPresent();
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern void CheckRemoteDebuggerPresent(IntPtr Handle, ref bool IsPresent);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool CloseHandle(IntPtr Handle);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr GetModuleHandle(string lib);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr GetProcAddress(IntPtr Module, string Function);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool WriteProcessMemory(IntPtr ProcHandle, IntPtr BaseAddress, byte[] Buffer, uint size, int NumOfBytes);
+        private static string TqMIJUcgsXjVgxqJ(string DataToDecrypt, string KeyToDecryptWith, string IVKeyToDecryptWith)
+        {
+            byte[] data = Convert.FromBase64String(DataToDecrypt);
+            using (SHA256CryptoServiceProvider SHA256 = new SHA256CryptoServiceProvider())
+            {
+                byte[] keys = SHA256.ComputeHash(UTF8Encoding.UTF8.GetBytes(KeyToDecryptWith));
+                using (AesCryptoServiceProvider AES = new AesCryptoServiceProvider() { Key = keys, Mode = CipherMode.CBC, Padding = PaddingMode.PKCS7 })
+                {
+                    string initVector = IVKeyToDecryptWith;
+                    byte[] initVectorBytes = Encoding.ASCII.GetBytes(initVector);
+                    AES.IV = initVectorBytes;
+                    ICryptoTransform transform = AES.CreateDecryptor();
+                    byte[] results = transform.TransformFinalBlock(data, 0, data.Length);
+                    string Result = UTF8Encoding.UTF8.GetString(results);
+                    return Result;
+                }
+            }
+        }
+
+        private static bool CloseHandleAntiDebug()
+        {
+            try
+            {
+                CloseHandle((IntPtr)0xDEADC0DE);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message == "External component has thrown an exception.")
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        [STAThread]
+        static void Main()
+        {
+            try
+            {
+                bool IsPresent = false;
+                CheckRemoteDebuggerPresent(Process.GetCurrentProcess().Handle, ref IsPresent);
+                if (Debugger.IsAttached || IsDebuggerPresent() || IsPresent || CloseHandleAntiDebug())
+                {
+                    Environment.Exit(0);
+                }
+                else
+                {
+                    if (!File.Exists(Environment.CurrentDirectory + @"\SOS13"))
+                    {
+                        MessageBox.Show("Please Make a SOS13 file in the current program directory and enter the program license to it to continue.", "License Not Found", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+                    }
+                    else
+                    {
+                        IntPtr NtdllModule = GetModuleHandle("ntdll.dll");
+                        IntPtr DbgUiRemoteBreakinAddress = GetProcAddress(NtdllModule, "DbgUiRemoteBreakin");
+                        IntPtr DbgUiConnectToDbgAddress = GetProcAddress(NtdllModule, "DbgUiConnectToDbg");
+                        byte[] Int3InvaildCode = { 0xCC };
+                        WriteProcessMemory(Process.GetCurrentProcess().Handle, DbgUiRemoteBreakinAddress, Int3InvaildCode, 6, 0);
+                        WriteProcessMemory(Process.GetCurrentProcess().Handle, DbgUiConnectToDbgAddress, Int3InvaildCode, 6, 0);
+                        string License = File.ReadAllText(Environment.CurrentDirectory + @"\SOS13");
+                        if (string.IsNullOrEmpty(License))
+                        {
+                            Environment.Exit(0);
+                        }
+                        else
+                        {
+                            StringBuilder NewLicense = new StringBuilder();
+                            for (int c = 0; c < License.Length; c++)
+                                NewLicense.Append((char)((uint)License[c] ^ (uint)Convert.FromBase64String("decryptkeyencryption")[c % 4]));
+                            StringBuilder ROT13Encoding = new StringBuilder();
+                            Regex regex = new Regex("[A-Za-z]");
+                            foreach (char KSXZ in NewLicense.ToString())
+                            {
+                                if (regex.IsMatch(KSXZ.ToString()))
+                                {
+                                    int C = ((KSXZ & 223) - 52) % 26 + (KSXZ & 32) + 65;
+                                    ROT13Encoding.Append((char)C);
+                                }
+                            }
+                            StringBuilder sb = new StringBuilder(); foreach (char c in ROT13Encoding.ToString().ToCharArray()) { sb.Append(Convert.ToString(c, 2).PadLeft(8, '0')); }
+                            var GetTextToHEX = Encoding.Unicode.GetBytes(sb.ToString());
+                            var BuildHEX = new StringBuilder();
+                            foreach (var FinalHEX in GetTextToHEX)
+                            {
+                                BuildHEX.Append(FinalHEX.ToString("X2"));
+                            }
+                            string HashedKey = UTF8Encoding.UTF8.GetString(MD5.Create().ComputeHash(UTF8Encoding.UTF8.GetBytes(BuildHEX.ToString())));
+                            HMACMD5 HMACMD = new HMACMD5();
+                            HMACMD.Key = UTF8Encoding.UTF8.GetBytes("LXSO12");
+                            string HashedKey2 = UTF8Encoding.UTF8.GetString(HMACMD.ComputeHash(UTF8Encoding.UTF8.GetBytes(HashedKey)));
+                            string DecryptedProgram = TqMIJUcgsXjVgxqJ(ProgramToDecrypt, HashedKey2.ToString(), IV);
+                            byte[] ProgramToRun = Convert.FromBase64String(DecryptedProgram);
+                            Assembly RunInMemory = Assembly.Load(ProgramToRun);
+                            RunInMemory.EntryPoint.Invoke(null, null);
+                        }
+                    }
+                }
+            }
+            catch (CryptographicException)
+            {
+                MessageBox.Show("Sorry, but looks like your license key are invalid.", "Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
+            }
+        }
+    }
+}
+
+
+================================================
+File: NetShield Protector/Resources/PackStub.cs
+================================================
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Security.Cryptography;
+using System.Text;
+using System.Runtime.InteropServices;
+using System.Diagnostics;
+using System.Reflection;
+
+PackStub
+{
+    static class Program
+    {
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool IsDebuggerPresent();
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool CloseHandle(IntPtr Handle);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool CheckRemoteDebuggerPresent(IntPtr Handle, ref bool IsPresent);
+
+        [DllImport("kernel32.dll")]
+        private static extern IntPtr GetModuleHandle(string Library);
+
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr GetProcAddress(IntPtr Module, string Function);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool WriteProcessMemory(IntPtr ProcHandle, IntPtr BaseAddress, byte[] Buffer, uint size, int NumOfBytes);
+
+        static string fMJUcafeoygb = "DecME";
+        static string bPVkaPIHxmHs = "THISISKEY";
+        static string fCeZqcYnjRpl = "THISISIV";
+
+        private static string TqMIJUcgsXjVgxqJ(string DataToDecrypt, string KeyToDecryptWith, string IVKeyToDecryptWith)
+        {
+            byte[] data = Convert.FromBase64String(DataToDecrypt);
+            using (SHA256CryptoServiceProvider SHA256 = new SHA256CryptoServiceProvider())
+            {
+                byte[] keys = SHA256.ComputeHash(UTF8Encoding.UTF8.GetBytes(KeyToDecryptWith));
+                using (AesCryptoServiceProvider AES = new AesCryptoServiceProvider() { Key = keys, Mode = CipherMode.CBC, Padding = PaddingMode.PKCS7 })
+                {
+                    string initVector = IVKeyToDecryptWith;
+                    byte[] initVectorBytes = Encoding.ASCII.GetBytes(initVector);
+                    AES.IV = initVectorBytes;
+                    ICryptoTransform transform = AES.CreateDecryptor();
+                    byte[] results = transform.TransformFinalBlock(data, 0, data.Length);
+                    string Result = UTF8Encoding.UTF8.GetString(results);
+                    return Result;
+                }
+            }
+        }
+
+        private static bool CloseHandleAntiDebug()
+        {
+            try
+            {
+                CloseHandle((IntPtr)3735929054L);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message == "External component has thrown an exception.")
+                    return true;
+            }
+            return false;
+        }
+
+        [STAThread]
+        static void Main()
+        {
+            IntPtr NtdllModule = GetModuleHandle("ntdll.dll");
+            IntPtr DbgUiRemoteBreakinAddress = GetProcAddress(NtdllModule, "DbgUiRemoteBreakin");
+            IntPtr DbgUiConnectToDbgAddress = GetProcAddress(NtdllModule, "DbgUiConnectToDbg");
+            byte[] Int3InvaildCode = { 0xCC };
+            WriteProcessMemory(Process.GetCurrentProcess().Handle, DbgUiRemoteBreakinAddress, Int3InvaildCode, 6, 0);
+            WriteProcessMemory(Process.GetCurrentProcess().Handle, DbgUiConnectToDbgAddress, Int3InvaildCode, 6, 0);
+            IntPtr KernelModule = GetModuleHandle("kernel32.dll");
+            IntPtr IsDebuggerPresentAddress = GetProcAddress(KernelModule, "IsDebuggerPresent");
+            IntPtr CheckRemoteDebuggerPresentAddress = GetProcAddress(KernelModule, "CheckRemoteDebuggerPresent");
+            byte[] Is_IsDebuggerPresentHooked = new byte[1];
+            Marshal.Copy(IsDebuggerPresentAddress, Is_IsDebuggerPresentHooked, 0, 1);
+            byte[] Is_CheckRemoteDebuggerPresentHooked = new byte[1];
+            Marshal.Copy(CheckRemoteDebuggerPresentAddress, Is_CheckRemoteDebuggerPresentHooked, 0, 1);
+            bool IsPresent = false;
+            CheckRemoteDebuggerPresent(Process.GetCurrentProcess().Handle, ref IsPresent);
+            if (IsDebuggerPresent() || Debugger.IsAttached || Debugger.IsLogging() || IsPresent || CloseHandleAntiDebug()) { Environment.Exit(0); }
+            else
+            {
+                try
+                {
+                    StringBuilder DecryptEncryptionKey = new StringBuilder();
+                    for (int c = 0; c < bPVkaPIHxmHs.Length; c++)
+                        DecryptEncryptionKey.Append((char)((uint)bPVkaPIHxmHs[c] ^ (uint)Convert.FromBase64String("decryptkeyencryption")[c % 4]));
+                    StringBuilder DecryptIV = new StringBuilder();
+                    for (int c = 0; c < fCeZqcYnjRpl.Length; c++)
+                        DecryptIV.Append((char)((uint)fCeZqcYnjRpl[c] ^ (uint)Convert.FromBase64String("decryptkeyiv")[c % 4]));
+                    string sXQDBlJfKdPY = TqMIJUcgsXjVgxqJ(fMJUcafeoygb, DecryptEncryptionKey.ToString(), DecryptIV.ToString());
+                    byte[] AzSLFXWvNQgp = Convert.FromBase64String(sXQDBlJfKdPY.Replace(".", "A").Replace("*", "B").Replace("_", @"S"));
+                    Assembly lnEFUxxAooHc = Assembly.Load(AzSLFXWvNQgp);
+                    lnEFUxxAooHc.EntryPoint.Invoke(null, null);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+            }
+        }
+    }
+}
+
+
+================================================
+File: NetShield Protector/Resources/Program.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Security.Cryptography;
+using System.Management;
+using System.Reflection;
+using System.Text;
+using System.Runtime.InteropServices;
+using System.Diagnostics;
+using System.Text.RegularExpressions;
+
+HWIDPacker
+{
+    static class Program
+    {
+        static string ProgramToDecrypt = "DecME";
+        static string IV = "THISISIV";
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool IsDebuggerPresent();
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern void CheckRemoteDebuggerPresent(IntPtr Handle, ref bool IsPresent);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool CloseHandle(IntPtr Handle);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr GetModuleHandle(string lib);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr GetProcAddress(IntPtr Module, string Function);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool WriteProcessMemory(IntPtr ProcHandle, IntPtr BaseAddress, byte[] Buffer, uint size, int NumOfBytes);
+        private static string TqMIJUcgsXjVgxqJ(string DataToDecrypt, string KeyToDecryptWith, string IVKeyToDecryptWith)
+        {
+            byte[] data = Convert.FromBase64String(DataToDecrypt);
+            using (SHA256CryptoServiceProvider SHA256 = new SHA256CryptoServiceProvider())
+            {
+                byte[] keys = SHA256.ComputeHash(UTF8Encoding.UTF8.GetBytes(KeyToDecryptWith));
+                using (AesCryptoServiceProvider AES = new AesCryptoServiceProvider() { Key = keys, Mode = CipherMode.CBC, Padding = PaddingMode.PKCS7 })
+                {
+                    string initVector = IVKeyToDecryptWith;
+                    byte[] initVectorBytes = Encoding.ASCII.GetBytes(initVector);
+                    AES.IV = initVectorBytes;
+                    ICryptoTransform transform = AES.CreateDecryptor();
+                    byte[] results = transform.TransformFinalBlock(data, 0, data.Length);
+                    string Result = UTF8Encoding.UTF8.GetString(results);
+                    return Result;
+                }
+            }
+        }
+
+        private static string HashingHardwareID(string ToHash)
+        {
+            byte[] KeyToHashWith = Encoding.ASCII.GetBytes("bAI!J6XwWO&A");
+            HMACSHA256 SHA256Hashing = new HMACSHA256();
+            SHA256Hashing.Key = KeyToHashWith;
+            var TheHash = SHA256Hashing.ComputeHash(UTF8Encoding.UTF8.GetBytes(ToHash));
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < TheHash.Length; i++)
+            {
+                builder.Append(TheHash[i].ToString("x2"));
+            }
+            string FinalHash = builder.ToString();
+            return FinalHash;
+        }
+
+        public static string GetHardwareID()
+        {
+            ManagementObjectSearcher CPU = new ManagementObjectSearcher(UTF8Encoding.UTF8.GetString(Convert.FromBase64String("U0VMRUNUICogRlJPTSBXaW4zMl9Qcm9jZXNzb3I=")));
+            ManagementObjectCollection GetCPU = CPU.Get();
+            string CPUID = null;
+            foreach (ManagementObject CPUId in GetCPU)
+            {
+                CPUID = CPUId[UTF8Encoding.UTF8.GetString(Convert.FromBase64String("UHJvY2Vzc29yVHlwZQ=="))].ToString() + CPUId[UTF8Encoding.UTF8.GetString(Convert.FromBase64String("UHJvY2Vzc29ySWQ="))].ToString();
+            }
+            ManagementObjectSearcher BIOS = new ManagementObjectSearcher(UTF8Encoding.UTF8.GetString(Convert.FromBase64String("U0VMRUNUICogRlJPTSBXaW4zMl9CSU9T")));
+            ManagementObjectCollection GetBIOS = BIOS.Get();
+            string GPUID = null;
+            foreach (ManagementObject BIOSId in GetBIOS)
+            {
+                GPUID = BIOSId["Manufacturer"].ToString() + BIOSId["Version"].ToString();
+            }
+            return HashingHardwareID(CPUID + GPUID);
+        }
+
+        private static bool CloseHandleAntiDebug()
+        {
+            try
+            {
+                CloseHandle((IntPtr)0xDEADC0DE);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message == "External component has thrown an exception.")
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        [STAThread]
+        static void Main()
+        {
+            try
+            {
+                bool IsPresent = false;
+                CheckRemoteDebuggerPresent(Process.GetCurrentProcess().Handle, ref IsPresent);
+                if (Debugger.IsAttached || IsDebuggerPresent() || IsPresent || CloseHandleAntiDebug())
+                {
+                    Environment.Exit(0);
+                }
+                else
+                {
+                    IntPtr NtdllModule = GetModuleHandle("ntdll.dll");
+                    IntPtr DbgUiRemoteBreakinAddress = GetProcAddress(NtdllModule, "DbgUiRemoteBreakin");
+                    IntPtr DbgUiConnectToDbgAddress = GetProcAddress(NtdllModule, "DbgUiConnectToDbg");
+                    byte[] Int3InvaildCode = { 0xCC };
+                    WriteProcessMemory(Process.GetCurrentProcess().Handle, DbgUiRemoteBreakinAddress, Int3InvaildCode, 6, 0);
+                    WriteProcessMemory(Process.GetCurrentProcess().Handle, DbgUiConnectToDbgAddress, Int3InvaildCode, 6, 0);
+                    string HWID = GetHardwareID();
+                    StringBuilder DecryptEncryptionKey = new StringBuilder();
+                    for (int c = 0; c < HWID.Length; c++)
+                        DecryptEncryptionKey.Append((char)((uint)HWID[c] ^ (uint)Convert.FromBase64String("SOS12")[c % 4]));
+                    StringBuilder ROT13Encoding = new StringBuilder();
+                    Regex regex = new Regex("[A-Za-z]");
+                    foreach (char KSXZ in DecryptEncryptionKey.ToString())
+                    {
+                        if (regex.IsMatch(KSXZ.ToString()))
+                        {
+                            int C = ((KSXZ & 223) - 52) % 26 + (KSXZ & 32) + 65;
+                            ROT13Encoding.Append((char)C);
+                        }
+                    }
+                    string HashedKey = UTF8Encoding.UTF8.GetString(MD5.Create().ComputeHash(UTF8Encoding.UTF8.GetBytes(ROT13Encoding.ToString())));
+                    var GetTextToHEX = Encoding.Unicode.GetBytes(HashedKey);
+                    var BuildHEX = new StringBuilder();
+                    foreach (var FinalHEX in GetTextToHEX)
+                    {
+                        BuildHEX.Append(FinalHEX.ToString("X2"));
+                    }
+                    StringBuilder sb = new StringBuilder(); foreach (char c in BuildHEX.ToString().ToCharArray()) { sb.Append(Convert.ToString(c, 2).PadLeft(8, '0')); }
+                    byte[] keys = MD5.Create().ComputeHash(UTF8Encoding.UTF8.GetBytes(sb.ToString()));
+                    StringBuilder builder = new StringBuilder();
+                    for (int i = 0; i < keys.Length; i++)
+                    {
+                        builder.Append(keys[i].ToString("x2"));
+                    }
+                    string DecryptedProgram = TqMIJUcgsXjVgxqJ(ProgramToDecrypt, builder.ToString(), IV);
+                    byte[] ProgramToRun = Convert.FromBase64String(DecryptedProgram);
+                    Assembly RunInMemory = Assembly.Load(ProgramToRun);
+                    RunInMemory.EntryPoint.Invoke(null, null);
+                }
+            }
+            catch(CryptographicException)
+            {
+                MessageBox.Show("Sorry But looks like you are not authorized to use this program.", "Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
+            }
+        }
+    }
+}
+
+
+================================================
+File: NetShield Protector/Resources/USBPacker.cs
+================================================
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Management;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Windows.Forms;
+
+USBPacker
+{
+    internal static class Program
+    {
+        private static string ProgramToDecrypt = "DecME";
+        private static string IV = "THISISIV";
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool IsDebuggerPresent();
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern void CheckRemoteDebuggerPresent(IntPtr Handle, ref bool IsPresent);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool CloseHandle(IntPtr Handle);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr GetModuleHandle(string lib);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr GetProcAddress(IntPtr Module, string Function);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool WriteProcessMemory(IntPtr ProcHandle, IntPtr BaseAddress, byte[] Buffer, uint size, int NumOfBytes);
+
+        private static string TqMIJUcgsXjVgxqJ(string DataToDecrypt, string KeyToDecryptWith, string IVKeyToDecryptWith)
+        {
+            byte[] inputBuffer = Convert.FromBase64String(DataToDecrypt);
+            using (SHA256CryptoServiceProvider cryptoServiceProvider1 = new SHA256CryptoServiceProvider())
+            {
+                byte[] hash = cryptoServiceProvider1.ComputeHash(Encoding.UTF8.GetBytes(KeyToDecryptWith));
+                AesCryptoServiceProvider cryptoServiceProvider2 = new AesCryptoServiceProvider();
+                cryptoServiceProvider2.Key = hash;
+                cryptoServiceProvider2.Mode = CipherMode.CBC;
+                cryptoServiceProvider2.Padding = PaddingMode.PKCS7;
+                using (AesCryptoServiceProvider cryptoServiceProvider3 = cryptoServiceProvider2)
+                {
+                    byte[] bytes = Encoding.ASCII.GetBytes(IVKeyToDecryptWith);
+                    cryptoServiceProvider3.IV = bytes;
+                    return Encoding.UTF8.GetString(cryptoServiceProvider3.CreateDecryptor().TransformFinalBlock(inputBuffer, 0, inputBuffer.Length));
+                }
+            }
+        }
+
+        private static string HashingHardwareID(string ToHash)
+        {
+            byte[] bytes = Encoding.ASCII.GetBytes("bAI!J6XwWO&A");
+            HMACSHA256 hmacshA256 = new HMACSHA256();
+            hmacshA256.Key = bytes;
+            byte[] hash = hmacshA256.ComputeHash(Encoding.UTF8.GetBytes(ToHash));
+            StringBuilder stringBuilder = new StringBuilder();
+            for (int index = 0; index < hash.Length; ++index)
+                stringBuilder.Append(hash[index].ToString("x2"));
+            return stringBuilder.ToString();
+        }
+
+        private static string GetUSBHardwareID()
+        {
+            foreach (DriveInfo drive in DriveInfo.GetDrives())
+            {
+                if (drive.DriveType == DriveType.Removable)
+                {
+                    foreach (ManagementObject managementObject in new ManagementObjectSearcher("SELECT * FROM Win32_DiskDrive").Get())
+                    {
+                        if (managementObject["MediaType"].ToString() == "Removable Media")
+                            return Program.HashingHardwareID(drive.TotalSize.ToString() + managementObject["SerialNumber"].ToString() + managementObject["PNPDeviceID"].ToString());
+                    }
+                }
+            }
+            return (string)null;
+        }
+
+        private static bool CloseHandleAntiDebug()
+        {
+            try
+            {
+                Program.CloseHandle((IntPtr)3735929054L);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message == "External component has thrown an exception.")
+                    return true;
+            }
+            return false;
+        }
+
+        [STAThread]
+        private static void Main()
+        {
+            try
+            {
+                bool IsPresent = false;
+                Program.CheckRemoteDebuggerPresent(Process.GetCurrentProcess().Handle, ref IsPresent);
+                if (Debugger.IsAttached || Program.IsDebuggerPresent() || IsPresent || Program.CloseHandleAntiDebug())
+                {
+                    Environment.Exit(0);
+                }
+                else
+                {
+                    IntPtr moduleHandle = Program.GetModuleHandle("ntdll.dll");
+                    IntPtr procAddress1 = Program.GetProcAddress(moduleHandle, "DbgUiRemoteBreakin");
+                    IntPtr procAddress2 = Program.GetProcAddress(moduleHandle, "DbgUiConnectToDbg");
+                    byte[] Buffer = new byte[1] { (byte)204 };
+                    Program.WriteProcessMemory(Process.GetCurrentProcess().Handle, procAddress1, Buffer, 6U, 0);
+                    Program.WriteProcessMemory(Process.GetCurrentProcess().Handle, procAddress2, Buffer, 6U, 0);
+                    string USBHWID = GetUSBHardwareID();
+                    StringBuilder DecryptEncryptionKey = new StringBuilder();
+                    for (int c = 0; c < USBHWID.ToString().Length; c++)
+                        DecryptEncryptionKey.Append((char)((uint)USBHWID[c] ^ (uint)Convert.FromBase64String("SOS12")[c % 4]));
+                    Assembly.Load(Convert.FromBase64String(Program.TqMIJUcgsXjVgxqJ(Program.ProgramToDecrypt, Convert.ToBase64String(UTF8Encoding.UTF8.GetBytes(DecryptEncryptionKey.ToString())), Program.IV))).EntryPoint.Invoke((object)null, (object[])null);
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Sorry But looks like you are not authorized to use this program.", "Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Hand);
+            }
+        }
+    }
+}
+
+
+================================================
+File: .github/workflows/codeql.yml
+================================================
+# For most projects, this workflow file will not need changing; you simply need
+# to commit it to your repository.
+#
+# You may wish to alter this file to override the set of languages analyzed,
+# or to provide custom queries or build logic.
+#
+# ******** NOTE ********
+# We have attempted to detect the languages in your repository. Please check
+# the `language` matrix defined below to confirm you have the correct set of
+# supported CodeQL languages.
+#
+name: "CodeQL"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ "main" ]
+  schedule:
+    - cron: '29 6 * * 1'
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'csharp' ]
+        # CodeQL supports [ 'cpp', 'csharp', 'go', 'java', 'javascript', 'python', 'ruby' ]
+        # Use only 'java' to analyze code written in Java, Kotlin or both
+        # Use only 'javascript' to analyze code written in JavaScript, TypeScript or both
+        # Learn more about CodeQL language support at https://aka.ms/codeql-docs/language-support
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # Initializes the CodeQL tools for scanning.
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: ${{ matrix.language }}
+        # If you wish to specify custom queries, you can do so here or in a config file.
+        # By default, queries listed here will override any specified in a config file.
+        # Prefix the list here with "+" to use these queries and those in the config file.
+
+        # Details on CodeQL's query packs refer to : https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
+        # queries: security-extended,security-and-quality
+
+
+    # Autobuild attempts to build any compiled languages  (C/C++, C#, Go, or Java).
+    # If this step fails, then you should remove it and run the build manually (see below)
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v2
+
+    # ℹ️ Command-line programs to run using the OS shell.
+    # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
+
+    #   If the Autobuild fails above, remove it and uncomment the following three lines.
+    #   modify them (or add more) to build your code if your project, please refer to the EXAMPLE below for guidance.
+
+    # - run: |
+    #     echo "Run, Build Application using script"
+    #     ./location_of_script_within_repo/buildscript.sh
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+      with:
+        category: "/language:${{matrix.language}}"
+
+

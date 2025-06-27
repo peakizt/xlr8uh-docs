@@ -1,0 +1,913 @@
+Directory structure:
+└── mira-ta-cil-examining/
+    ├── README.md
+    ├── CILExamining.csproj
+    ├── CILExamining.sln
+    ├── Program.cs
+    ├── packages.config
+    ├── Obfuscations/
+    │   ├── IObfuscation.cs
+    │   ├── JunkObfuscation.cs
+    │   ├── ReferenceProxyObfuscation.cs
+    │   ├── RenameObfuscation.cs
+    │   ├── Details/
+    │   │   ├── MethodDefLocalsRename.cs
+    │   │   └── MethodDefParamsRename.cs
+    │   └── Utilities/
+    │       └── RenameUtility.cs
+    └── Properties/
+        └── AssemblyInfo.cs
+
+================================================
+File: README.md
+================================================
+# .NET CILExamining
+
+*CILExamining* - is an obfuscator written in C# using `dnlib` library on .NET Framework (.NET Core in the future). This is an experiment for me, owner of the repository, since I was 
+bad in RE and some elseshit.
+
+Inspired by [charterino/AsStrongAsFuck](https://github.com/charterino/AsStrongAsFuck) obfuscator.
+
+## Running it
+
+Currently it's only `coding based` running, all parameters are being set just in code to test features manually. Soon it'll be refactored.
+
+## Code basis
+
+### Obfuscations
+
+All obfuscations are implementing `IObfuscation` interface, which contains a method `Execute` with one passed parameter - `dnlib.ModuleDef` instance.
+
+To write own obfuscations just make a class implementing `IObfuscation` interface.
+
+```C#
+
+using CILExamining.Obfuscations;
+
+...
+
+public sealed class FooBarObfuscation : IObfuscation {
+    ...
+    public void Execute(ModuleDef moduleDef) {
+        ...
+        // Here you can implement logic which will execute obfuscations
+        // like executing own methods here.
+
+        // Example:
+
+        this.ObfuscateMethods(moduleDef.Types.Where(k => k.Name.StartsWith("DoObfuscate_")));
+        ...
+    }
+    ...
+}
+
+...
+```
+
+This class will be found in bootstrap and will have been casted as 
+`IObfuscation` will be executed.
+
+
+
+================================================
+File: CILExamining.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{E0A5AFE0-257C-4A11-871E-179133569C08}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>CILExamining</RootNamespace>
+    <AssemblyName>CILExamining</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib, Version=3.2.0.0, Culture=neutral, PublicKeyToken=50e96378b6e77999, processorArchitecture=MSIL">
+      <HintPath>packages\dnlib.3.2.0\lib\net45\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Obfuscations\Details\MethodDefLocalsRename.cs" />
+    <Compile Include="Obfuscations\Details\MethodDefParamsRename.cs" />
+    <Compile Include="Obfuscations\IObfuscation.cs" />
+    <Compile Include="Obfuscations\JunkObfuscation.cs" />
+    <Compile Include="Obfuscations\ReferenceProxyObfuscation.cs" />
+    <Compile Include="Obfuscations\RenameObfuscation.cs" />
+    <Compile Include="Obfuscations\Utilities\RenameUtility.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: CILExamining.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29123.88
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CILExamining", "CILExamining.csproj", "{E0A5AFE0-257C-4A11-871E-179133569C08}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E0A5AFE0-257C-4A11-871E-179133569C08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0A5AFE0-257C-4A11-871E-179133569C08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0A5AFE0-257C-4A11-871E-179133569C08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0A5AFE0-257C-4A11-871E-179133569C08}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E42FFEF2-9B9E-4F30-987B-F59CC2C76DFC}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: Program.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+
+namespace CILExamining
+{
+    public static class Program {
+        public static void Main(string[] args) {
+            string path = "../Release/CILExamining.exe";
+
+            ModuleDefMD m = ModuleDefMD.Load(path);
+            AssemblyResolver ar = new AssemblyResolver();
+            ModuleContext mc = new ModuleContext(ar);
+            foreach (AssemblyRef assemblyRef in m.GetAssemblyRefs())
+                ar.ResolveThrow(assemblyRef, m);
+            ar.PostSearchPaths.Add(path);
+
+            m.Context = mc;
+
+            Obfuscations.Utilities.RenameUtility ru = new Obfuscations.Utilities.RenameUtility();
+
+            new Obfuscations.ReferenceProxyObfuscation(ru.Random).Execute(m);
+            //new Obfuscations.RenameObfuscation(ru).Execute(m);
+            //new Obfuscations.JunkObfuscation(ru).Execute(m);
+
+            m.Write(path + ".o");
+        }
+    }
+}
+
+
+
+================================================
+File: packages.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<packages>
+  <package id="dnlib" version="3.2.0" targetFramework="net461" />
+</packages>
+
+
+================================================
+File: Obfuscations/IObfuscation.cs
+================================================
+ï»¿using dnlib.DotNet;
+
+namespace CILExamining.Obfuscations {
+    public interface IObfuscation {
+        void Execute(ModuleDefMD moduleDef);
+        bool TryExecute(ModuleDefMD moduleDef);
+    }
+}
+
+
+
+================================================
+File: Obfuscations/JunkObfuscation.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+using CILExamining.Obfuscations.Utilities;
+
+namespace CILExamining.Obfuscations {
+    public class JunkObfuscation : IObfuscation {
+        protected readonly int junksAmount;
+        protected readonly int junksMethodsA, junksMethodsB;
+        protected readonly int junksFieldsA, junksFieldsB;
+        protected readonly int junksNamespaces;
+
+        protected readonly RenameUtility renamer;
+        protected Random random => renamer.Random;
+
+        public JunkObfuscation() {
+            this.junksAmount = 128;
+            this.junksMethodsA = 32;
+            this.junksMethodsB = 64;
+            this.junksNamespaces = 32;
+            this.junksFieldsA = 8;
+            this.junksFieldsB = 12;
+            this.renamer = new RenameUtility();
+        }
+
+        public JunkObfuscation(RenameUtility renamer) {
+            this.junksAmount = 32;
+            this.junksMethodsA = 32;
+            this.junksMethodsB = 64;
+            this.junksFieldsA = 8;
+            this.junksFieldsB = 12;
+            this.junksNamespaces = 8;
+            this.renamer = renamer;
+        }
+
+        public JunkObfuscation(int seed) {
+            this.junksAmount = 32;
+            this.junksMethodsA = 32;
+            this.junksMethodsB = 64;
+            this.junksFieldsA = 8;
+            this.junksFieldsB = 12;
+            this.junksNamespaces = 8;
+            this.renamer = new RenameUtility(seed);
+        }
+
+        public JunkObfuscation(int seed, int junksAmount, int junksMethodsA, int junksMethodsB, int junksFieldsA, int junksFieldsB, int junksNamespaces) {
+            this.junksAmount = junksAmount;
+            this.junksMethodsA = junksMethodsA;
+            this.junksMethodsB = junksMethodsB;
+            this.junksFieldsA = junksFieldsA;
+            this.junksFieldsB = junksFieldsB;
+            this.junksNamespaces = junksNamespaces;
+            this.renamer = new RenameUtility(seed);
+        }
+
+        public JunkObfuscation(RenameUtility renamer, int junksAmount, int junksMethodsA, int junksMethodsB, int junksFieldsA, int junksFieldsB, int junksNamespaces) {
+            this.junksAmount = junksAmount;
+            this.junksMethodsA = junksMethodsA;
+            this.junksMethodsB = junksMethodsB;
+            this.junksFieldsA = junksFieldsA;
+            this.junksFieldsB = junksFieldsB;
+            this.junksNamespaces = junksNamespaces;
+            this.renamer = renamer;
+        }
+
+        public IEnumerable<TypeDefUser> Execute(ICorLibTypes types) {
+            string current_namespace = "DEFAULT_IF_NOT_EXISTS";
+            for (int i = 0; i < junksAmount; i++) {
+                if (i % 4 == 0)
+                    current_namespace = renamer.GetObfuscated(false);
+
+                TypeDefUser tdu = new TypeDefUser(current_namespace, renamer.GetObfuscated(false));
+                tdu.Attributes = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed;
+
+                MethodDef md_obf = createObfuscatedByMethod(types, tdu);
+
+                for (int fields_i = 0; fields_i < random.Next(junksFieldsA, junksFieldsB); fields_i++)
+                    tdu.Fields.Add(new FieldDefUser(renamer.GetObfuscated(false), new FieldSig(getRandomTypeSigForField(types)), fields_i % 3 == 0 ? FieldAttributes.Private : FieldAttributes.Public));
+
+                for (int methods_i = 0; methods_i < random.Next(junksFieldsA, junksFieldsB); methods_i++) {
+                    MethodDefUser mdu = new MethodDefUser(renamer.GetObfuscated(false), new MethodSig(CallingConvention.Default, 0, types.String), methods_i % 3 == 0 ? MethodAttributes.Public : MethodAttributes.Private);
+                    mdu.Body = new CilBody(true, new Instruction[] {
+                        OpCodes.Nop.ToInstruction(),
+                        OpCodes.Ldstr.ToInstruction("Obfuscated by Wisser Tg"),
+                        OpCodes.Callvirt.ToInstruction(md_obf),
+                        OpCodes.Ret.ToInstruction()
+                    }, new ExceptionHandler[0], new Local[0]);
+                    tdu.Methods.Add(mdu);
+                }
+
+                yield return tdu;
+            }
+        }
+
+        private MethodDef createObfuscatedByMethod(ICorLibTypes types, TypeDefUser typeDef) {
+            MethodDefUser mdu = new MethodDefUser("You are fooled!", new MethodSig(CallingConvention.Default, 0, types.String, types.String), MethodAttributes.Public);
+            mdu.Body = new CilBody(false, new Instruction[] {
+                OpCodes.Nop.ToInstruction(),
+                OpCodes.Ldarg_0.ToInstruction(),
+                OpCodes.Ret.ToInstruction()
+            }, new ExceptionHandler[0], new Local[0]);
+
+            mdu.Parameters[0].CreateParamDef();
+            mdu.Parameters[0].ParamDef.Name = "wisser_tg";
+
+            typeDef.Methods.Add(mdu);
+            return mdu;
+        }
+
+        private TypeSig getRandomTypeSigForField(ICorLibTypes types) {
+            switch (random.Next(6)) {
+                case 0:
+                    return types.Byte;
+                case 1:
+                    return types.Char;
+                case 2:
+                    return types.Boolean;
+                case 3:
+                    return types.String;
+                case 4:
+                    return types.Object;
+                case 5:
+                    return types.Int16;
+                default:
+                    return types.Byte;
+            }
+        }
+
+        public void Execute(ModuleDefMD moduleDef) {
+            foreach (TypeDefUser tdu in Execute(moduleDef.CorLibTypes))
+                moduleDef.Types.Add(tdu);
+        }
+
+        public bool TryExecute(ModuleDefMD moduleDef) {
+            try {
+                Execute(moduleDef);
+            }
+            catch {
+                return false;
+            }
+            return true;
+        }
+    }
+}
+
+
+
+================================================
+File: Obfuscations/ReferenceProxyObfuscation.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace CILExamining.Obfuscations {
+    public class ReferenceProxyObfuscation : IObfuscation {
+        protected readonly Random random;
+        private Stack<Action> add_methods;
+
+        public ReferenceProxyObfuscation() {
+            this.random = new Random();
+            this.add_methods = new Stack<Action>();
+        }
+
+        public ReferenceProxyObfuscation(int seed) {
+            this.random = new Random(seed);
+            this.add_methods = new Stack<Action>();
+        }
+
+        public ReferenceProxyObfuscation(Random random) {
+            this.random = random;
+            this.add_methods = new Stack<Action>();
+        }
+
+        public int Execute(IEnumerable<MethodDef> methods) {
+            int sumOfAddedProxies = 0;
+
+            MethodDef[] mds = methods.ToArray();
+
+            for (int i = 0; i < mds.Length; i++)
+                sumOfAddedProxies += setReferenceProxiesForInstructions(mds[i]);
+
+            return sumOfAddedProxies;
+        }
+
+        protected int setReferenceProxiesForInstructions(MethodDef methodDef) {
+            if (!methodDef.HasBody)
+                return 0;
+
+            Dictionary<string, IMethod> proxy = new Dictionary<string, IMethod>();
+            methodDef.Body.KeepOldMaxStack = true;
+
+            for (int i = 0; i < methodDef.Body.Instructions.Count; i++) {
+                Instruction instruction = methodDef.Body.Instructions[i];
+
+                if (instruction.OpCode != OpCodes.Call)
+                    continue;
+
+                IMethod call_target = (IMethod)instruction.Operand;
+
+                if (call_target.ResolveMethodDef() == null)
+                    continue;
+
+                if (!proxy.ContainsKey(call_target.FullName))
+                    proxy.Add(call_target.FullName, createProxy(methodDef.DeclaringType.Module, call_target.ResolveMethodDef()));
+
+                //methodDef.Body.Instructions.Insert(i++, OpCodes.Ldstr.ToInstruction("Obfuscated by Wisser Tg"));
+
+                instruction.Operand = proxy[call_target.FullName];
+            }
+
+            return proxy.Count;
+        }
+
+        protected MethodDef createProxy(ModuleDef moduleDef, MethodDef target) {
+            MethodSig proxy_signature = createProxySig(moduleDef, target);
+
+            TypeDefUser new_type = new TypeDefUser("DEFAULT_TYPE_DEF" + target.FullName);
+            new_type.Attributes |= TypeAttributes.Public | TypeAttributes.AutoClass;
+
+            // Creating delegate type.
+            // TODO: Add caching system.
+            // TODO: Add string parameter support to make string parameter "Obfuscated by Wisser Tg"
+
+            TypeDefUser new_delegate = new TypeDefUser("Delegate_" + target.FullName, moduleDef.CorLibTypes.GetTypeRef("System", "MulticastDelegate"));
+            new_delegate.Attributes = target.ResolveMethodDefThrow().DeclaringType.Attributes;
+            {
+                MethodDefUser ctor = new MethodDefUser(".ctor", MethodSig.CreateInstance(moduleDef.CorLibTypes.Void, moduleDef.CorLibTypes.Object, moduleDef.CorLibTypes.IntPtr));
+                ctor.Attributes = MethodAttributes.Assembly | MethodAttributes.HideBySig | MethodAttributes.RTSpecialName | MethodAttributes.SpecialName;
+                ctor.ImplAttributes = MethodImplAttributes.Runtime;
+
+                MethodDefUser invoke = new MethodDefUser("Invoke", proxy_signature.Clone());
+                invoke.MethodSig.HasThis = true;
+                invoke.ImplAttributes = MethodImplAttributes.Runtime;
+                invoke.Attributes = MethodAttributes.Assembly | MethodAttributes.HideBySig | MethodAttributes.Virtual | MethodAttributes.NewSlot | MethodAttributes.Public;
+
+                new_delegate.Methods.Add(invoke);
+                new_delegate.Methods.Add(ctor);
+
+                moduleDef.Types.Add(new_delegate);
+            }
+
+            FieldDefUser field = new FieldDefUser("Delegate_holder_", new FieldSig(new ClassSig(new_delegate)), FieldAttributes.Private | FieldAttributes.Static);
+
+            {
+                ModuleDefMD mscorlib = ModuleDefMD.Load(typeof(void).Assembly.Modules.First());
+                MethodDef cctor = target.DeclaringType.FindOrCreateStaticConstructor();
+                if (cctor.Body.Instructions.Last().OpCode == OpCodes.Ret)
+                    cctor.Body.Instructions.Remove(cctor.Body.Instructions.Last());
+
+                cctor.Body.Instructions.Add(OpCodes.Nop.ToInstruction());
+                cctor.Body.Instructions.Add(OpCodes.Ldtoken.ToInstruction(new_delegate));
+                cctor.Body.Instructions.Add(OpCodes.Call.ToInstruction(mscorlib.Find("System.Type", true).FindMethod("GetTypeFromHandle")));
+                cctor.Body.Instructions.Add(OpCodes.Ldtoken.ToInstruction(moduleDef.Import(target.DeclaringType)));
+                cctor.Body.Instructions.Add(OpCodes.Call.ToInstruction(mscorlib.Find("System.Type", true).FindMethod("GetTypeFromHandle")));
+                cctor.Body.Instructions.Add(OpCodes.Callvirt.ToInstruction(mscorlib.Import(mscorlib.Find("System.Reflection.Module", true).FindMethod("get_Module"))));
+                cctor.Body.Instructions.Add(OpCodes.Ldc_I4.ToInstruction((int)target.MDToken.Raw));
+                cctor.Body.Instructions.Add(OpCodes.Callvirt.ToInstruction(mscorlib.Import(mscorlib.Find("System.Reflection.Module", true).FindMethod("ResolveMethod"))));
+                cctor.Body.Instructions.Add(OpCodes.Isinst.ToInstruction(mscorlib.Import(mscorlib.Find("System.Reflection.MethodInfo", true))));
+                var b = mscorlib.Find("System.Delegate", true).FindMethod("CreateDelegate",
+                    MethodSig.CreateStatic(mscorlib.Find("System.Delegate", true).ToTypeSig(), mscorlib.Find("System.Type", true).ToTypeSig(), mscorlib.Find("System.Reflection.MethodInfo", true).ToTypeSig()));
+                cctor.Body.Instructions.Add(OpCodes.Call.ToInstruction(mscorlib.Find("System.Delegate", true).FindMethod("CreateDelegate",
+                    MethodSig.CreateStatic(mscorlib.Find("System.Delegate", true).ToTypeSig(), mscorlib.Find("System.Type", true).ToTypeSig(), mscorlib.Find("System.Reflection.MethodInfo", true).ToTypeSig()))));
+                cctor.Body.Instructions.Add(OpCodes.Castclass.ToInstruction(new_delegate));
+                cctor.Body.Instructions.Add(OpCodes.Stsfld.ToInstruction(field));
+                cctor.Body.Instructions.Add(OpCodes.Ret.ToInstruction());
+
+                // TODO: Check for Ret instruction existance.
+            }
+
+            MethodDefUser proxy_methodDef = new MethodDefUser("Proxy_method__" + target.FullName, proxy_signature);
+            proxy_methodDef.Attributes = MethodAttributes.PrivateScope | MethodAttributes.Static;
+            proxy_methodDef.ImplAttributes = MethodImplAttributes.Managed | MethodImplAttributes.IL;
+
+            proxy_methodDef.Body = new CilBody();
+            proxy_methodDef.Body.Instructions.Add(OpCodes.Ldsfld.ToInstruction(field));
+            for (int i = 0; i < target.Parameters.Count; i++)
+                proxy_methodDef.Body.Instructions.Add(OpCodes.Ldarg.ToInstruction(proxy_methodDef.Parameters[i]));
+            proxy_methodDef.Body.Instructions.Add(OpCodes.Callvirt.ToInstruction(new_delegate.FindMethod("Invoke")));
+            proxy_methodDef.Body.Instructions.Add(OpCodes.Ret.ToInstruction());
+
+            target.DeclaringType.Methods.Add(proxy_methodDef);
+
+            return proxy_methodDef;
+        }
+
+        protected MethodSig createProxySig(ModuleDef moduleDef, IMethod target) {
+            List<TypeSig> parameters = new List<TypeSig>(target.MethodSig.Params);
+
+            if (target.MethodSig.HasThis && !target.MethodSig.ExplicitThis)
+                parameters.Insert(0, new Importer(moduleDef, ImporterOptions.TryToUseTypeDefs).Import(target.DeclaringType.ResolveTypeDefThrow()).ToTypeSig());
+
+            return MethodSig.CreateStatic(target.MethodSig.RetType, parameters.ToArray());
+        }
+
+        public void Execute(ModuleDefMD moduleDef) {
+            for (int i = 0; i < moduleDef.Types.Count; i++)
+                Console.WriteLine($"Added {Execute(moduleDef.Types[i].Methods)} proxies to {moduleDef.Types[i].FullName}");
+
+            while (add_methods.Count > 0)
+                add_methods.Pop().Invoke();
+        }
+
+        public bool TryExecute(ModuleDefMD moduleDef) {
+            try {
+                Execute(moduleDef);
+            }
+            catch {
+                return false;
+            }
+            return true;
+        }
+    }
+}
+
+
+
+================================================
+File: Obfuscations/RenameObfuscation.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+using CILExamining.Obfuscations.Utilities;
+using CILExamining.Obfuscations.Details;
+
+namespace CILExamining.Obfuscations {
+    public class RenameObfuscation : IObfuscation {
+        protected readonly RenameUtility renamer;
+        protected Random random => renamer.Random;
+
+        public RenameObfuscation() {
+            this.renamer = new RenameUtility();
+        }
+
+        public RenameObfuscation(int seed) {
+            this.renamer = new RenameUtility(seed);
+        }
+
+        public RenameObfuscation(RenameUtility renamer) {
+            this.renamer = renamer;
+        }
+
+        public void Execute(IEnumerable<TypeDef> types, IEnumerable<MethodDef> methods = null, IEnumerable<FieldDef> fields = null, IEnumerable<PropertyDef> properties = null) {
+            List<MethodDef> method_list = new List<MethodDef>();
+            if (methods != null)
+                method_list.AddRange(methods);
+            foreach (IEnumerable<MethodDef> methods_i in types.Select(k => k.Methods))
+                method_list.AddRange(methods_i);
+
+            List<FieldDef> field_list = new List<FieldDef>();
+            if (fields != null)
+                field_list.AddRange(fields);
+            foreach (IEnumerable<FieldDef> fields_i in types.Select(k => k.Fields))
+                field_list.AddRange(fields_i);
+
+            List<PropertyDef> property_list = new List<PropertyDef>();
+            if (properties != null)
+                property_list.AddRange(properties);
+            foreach (IEnumerable<PropertyDef> properties_i in types.Select(k => k.Properties))
+                property_list.AddRange(properties_i);
+
+            executeTypes(types);
+            executeMethods(method_list);
+            executeFields(field_list);
+            executeProperties(property_list);
+        }
+
+        protected void executeTypes(IEnumerable<TypeDef> types) {
+            string current_namespace = "DEFAULT_IF_NOT_EXISTS";
+            int current_namespace_indexer = 0;
+
+            foreach (TypeDef td in types) {
+                if (td.IsPublic)
+                    continue;
+
+                if (current_namespace_indexer++ % 4 == 0)
+                    current_namespace = renamer.GetObfuscated(false);
+
+                td.Namespace = current_namespace;
+                td.Name = renamer.GetObfuscated(false);
+            }
+        }
+
+        protected void executeMethods(IEnumerable<MethodDef> methods) {
+            // TODO: Implement overrides support.
+            // Example
+            // public int hasfhdh() { }
+            // public void hasfhdh(float b) { }
+
+            foreach (MethodDef md in methods) {
+                if (!((md.Access & MethodAttributes.Public) == MethodAttributes.Public
+                 && (md.DeclaringType.Attributes & TypeAttributes.Public) == TypeAttributes.Public)) {
+                    md.Name = renamer.GetObfuscated(false);
+                }
+
+                //if (md.Body != null)
+                //    new MethodDefLocalsRename(md, renamer).ChangeLocals();
+
+                new MethodDefParamsRename(md, renamer).ChangeParams();
+            }
+        }
+        
+        protected void executeFields(IEnumerable<FieldDef> fields) {
+            foreach (FieldDef fd in fields) {
+                if ((fd.Access & FieldAttributes.Public) == FieldAttributes.Public
+                 && (fd.DeclaringType.Attributes & TypeAttributes.Public) == TypeAttributes.Public)
+                    continue;
+
+                fd.Name = renamer.GetObfuscated(false);
+            }
+        }
+
+        protected void executeProperties(IEnumerable<PropertyDef> properties) {
+            foreach (PropertyDef pd in properties) {
+                if ((pd.DeclaringType.Attributes & TypeAttributes.Public) == TypeAttributes.Public)
+                    if ((pd.GetMethod != null && pd.GetMethod.Access == MethodAttributes.Public) || (pd.SetMethod != null && pd.SetMethod.Access == MethodAttributes.Public))
+                        continue;
+
+                pd.Name = renamer.GetObfuscated(false);
+            }
+        }
+        protected void executeModule(IModule module) {
+            module.Name = renamer.GetObfuscated(false);
+        }
+
+        public void Execute(ModuleDefMD moduleDef) {
+            Execute(moduleDef.Types);
+            //executeModule(moduleDef);
+        }
+
+        public bool TryExecute(ModuleDefMD moduleDef) {
+            try {
+                Execute(moduleDef);
+            }
+            catch {
+                return false;
+            }
+            return true;
+        }
+    }
+}
+
+
+
+================================================
+File: Obfuscations/Details/MethodDefLocalsRename.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+using CILExamining.Obfuscations.Utilities;
+
+namespace CILExamining.Obfuscations.Details {
+    [Obsolete]
+    public class MethodDefLocalsRename {
+        protected readonly MethodDef methodDef;
+        protected readonly RenameUtility renamer;
+        protected Random random => renamer.Random;
+
+        public MethodDefLocalsRename(MethodDef methodDef) {
+            this.methodDef = methodDef;
+            this.renamer = new RenameUtility();
+        }
+
+        public MethodDefLocalsRename(MethodDef methodDef, int seed) {
+            this.methodDef = methodDef;
+            this.renamer = new RenameUtility(seed);
+        }
+
+        public MethodDefLocalsRename(MethodDef methodDef, RenameUtility renameUtility) {
+            this.methodDef = methodDef;
+            this.renamer = renameUtility;
+        }
+
+        public void ChangeLocals() {
+            LocalList ll = new LocalList(methodDef.Body.Variables.Select(k => new Local(k.Type, renamer.GetObfuscated(false), k.Index)).ToList());
+            methodDef.Body = new CilBody(methodDef.Body.InitLocals, methodDef.Body.Instructions, methodDef.Body.ExceptionHandlers, ll);
+        }
+
+        public void ChangeLocals(IEnumerable<string> names) {
+            IEnumerator<string> en = names.GetEnumerator();
+
+            foreach (Local local in methodDef.Body.Variables) {
+                if (!en.MoveNext())
+                    throw new ArgumentOutOfRangeException("Not enough names to change method's locals names.");
+                local.Name = en.Current;
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: Obfuscations/Details/MethodDefParamsRename.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+
+using dnlib.DotNet;
+
+using CILExamining.Obfuscations.Utilities;
+
+namespace CILExamining.Obfuscations.Details {
+    public class MethodDefParamsRename {
+        protected readonly MethodDef methodDef;
+        protected readonly RenameUtility renamer;
+        protected Random random => renamer.Random;
+
+        public MethodDefParamsRename(MethodDef methodDef) {
+            this.methodDef = methodDef;
+            this.renamer = new RenameUtility();
+        }
+        
+        public MethodDefParamsRename(MethodDef methodDef, int seed) {
+            this.methodDef = methodDef;
+            this.renamer = new RenameUtility(seed);
+        }
+
+        public MethodDefParamsRename(MethodDef methodDef, RenameUtility renameUtility) {
+            this.methodDef = methodDef;
+            this.renamer = renameUtility;
+        }
+
+        public void ChangeParams() {
+            foreach (Parameter param in methodDef.Parameters) {
+                param.CreateParamDef();
+                param.Name = renamer.GetObfuscated(false);
+            }
+        }
+
+        public void ChangeParams(IEnumerable<string> names) {
+            IEnumerator<string> en = names.GetEnumerator();
+
+            foreach (Parameter param in methodDef.Parameters) {
+                param.CreateParamDef();
+                if (!en.MoveNext())
+                    throw new ArgumentOutOfRangeException("Not enough names to change method's parameters names.");
+
+                param.Name = en.Current;
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: Obfuscations/Utilities/RenameUtility.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace CILExamining.Obfuscations.Utilities {
+    public sealed class RenameUtility {
+        private Random random;
+        public Random Random => random;
+        private HashSet<string> used;
+        private int index;
+        private const string set = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
+
+        public RenameUtility() {
+            this.random = new Random();
+            this.used = new HashSet<string>();
+            this.index = 32;
+        }
+
+        public RenameUtility(int seed) {
+            this.random = new Random(seed);
+            this.used = new HashSet<string>();
+            this.index = 32;
+        }
+
+        public RenameUtility(int seed, IEnumerable<string> exclude) {
+            this.random = new Random(seed);
+            this.used = new HashSet<string>(exclude);
+            this.index = 32;
+        }
+
+        public string GetBase64Encode(string from) {
+            throw new NotImplementedException();
+        }
+
+        public string GetMD5Hash(string from) {
+            throw new NotImplementedException();
+        }
+
+        public string GetObfuscated(bool allowSame) {
+            return "What the fuck?" + GetRandomString(false, 128);
+        }
+
+        public string GetRandomString(bool allowSame) {
+            StringBuilder sb = new StringBuilder();
+
+            for (int i = 0; i < random.Next(64) + 1; i++)
+                sb.Append(set[random.Next(set.Length)]);
+            if (!allowSame && used.Contains(sb.ToString()))
+                return GetRandomString(false);
+            else
+                return sb.ToString();
+        }
+
+        public string GetRandomString(bool allowSame, int length) {
+            StringBuilder sb = new StringBuilder();
+
+            for (int i = 0; i < length; i++)
+                sb.Append(set[random.Next(set.Length)]);
+            if (!allowSame && used.Contains(sb.ToString()))
+                return GetRandomString(false);
+            else
+                return sb.ToString();
+        }
+    }
+}
+
+
+
+================================================
+File: Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("CILExamining")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("MICROSOFT")]
+[assembly: AssemblyProduct("CILExamining")]
+[assembly: AssemblyCopyright("Copyright Â© MICROSOFT 2019")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Setting ComVisible to false makes the types in this assembly not visible
+// to COM components.  If you need to access a type in this assembly from
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("e0a5afe0-257c-4a11-871e-179133569c08")]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+

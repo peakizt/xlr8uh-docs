@@ -1,0 +1,198 @@
+Directory structure:
+└── alehacksp-confuserex-anti-debug-remover/
+    ├── Anti-Debug Remover.csproj
+    ├── LICENSE
+    ├── Program.cs
+    └── Properties/
+        └── AssemblyInfo.cs
+
+================================================
+File: Anti-Debug Remover.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{0C4D1839-B21C-49FD-ADA6-4B0A2F92D528}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Anti_Debug_Remover</RootNamespace>
+    <AssemblyName>Anti-Debug Remover</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="F1nder.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Documents\Tools\CrIsT Protector\dnlib\src\dnlib.csproj">
+      <Project>{fdfc1237-143f-4919-8318-4926901f4639}</Project>
+      <Name>dnlib</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: LICENSE
+================================================
+MIT License
+
+Copyright (c) 2018 CrIsT
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+
+================================================
+File: Program.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Text;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using dnlib;
+using dnlib.DotNet.Writer;
+
+namespace Anti_Debug_Remover
+{
+    static class Program
+    {
+        static int Run(this MethodDef method)
+        {
+            var i = 0;
+            foreach (var instruction in method.Body.Instructions)
+            {
+                if (instruction.OpCode != OpCodes.Ldstr) continue;
+                var value = instruction.Operand.ToString();
+                if (value.Contains("GetEnvironmentVariable")) i++;
+            }
+            return i;
+        }
+        static void Main(string[] args)
+        {
+            try
+            {
+                ModuleDefMD module = ModuleDefMD.Load(args[0]);
+                Console.WriteLine("Assembly Loaded !");
+                var instruÃ§oes = module.GlobalType.FindStaticConstructor().Body.Instructions;
+                foreach (var instruction in instruÃ§oes)
+                {
+                    if (instruction.OpCode != OpCodes.Call)
+                        continue;
+                    var Metodo = instruction.Operand as MethodDef;
+                    if (Metodo == null)
+                        continue;
+                    if (!Metodo.DeclaringType.IsGlobalModuleType)
+                        continue;
+                    if (Metodo.Run() != 1)
+                        continue;
+                    instruction.OpCode = OpCodes.Nop;
+                    instruction.Operand = null;
+                    ModuleWriterOptions writerOptions = new ModuleWriterOptions(module);
+                    writerOptions.MetaDataOptions.Flags |= MetaDataFlags.PreserveAll;
+                    writerOptions.Logger = DummyLogger.NoThrowInstance;
+                    module.Write(args[0].Replace(".exe", "_DeobF.exe"), writerOptions);
+                    Console.WriteLine("Saved !");
+                    Console.ReadLine();
+                }
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Error In load Assembly !");
+                Console.ReadLine();
+            }
+        }
+
+    }
+}
+
+
+
+================================================
+File: Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// As informaÃ§Ãµes gerais sobre um assembly sÃ£o controladas por
+// conjunto de atributos. Altere estes valores de atributo para modificar as informaÃ§Ãµes
+// associada a um assembly.
+[assembly: AssemblyTitle("Anti-Debug Remover")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("Anti-Debug Remover")]
+[assembly: AssemblyCopyright("Copyright Â©  2018")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Definir ComVisible como false torna os tipos neste assembly invisÃ­veis
+// para componentes COM. Caso precise acessar um tipo neste assembly de
+// COM, defina o atributo ComVisible como true nesse tipo.
+[assembly: ComVisible(false)]
+
+// O GUID a seguir serÃ¡ destinado Ã  ID de typelib se este projeto for exposto para COM
+[assembly: Guid("0c4d1839-b21c-49fd-ada6-4b0a2f92d528")]
+
+// As informaÃ§Ãµes da versÃ£o de um assembly consistem nos quatro valores a seguir:
+//
+//      VersÃ£o Principal
+//      VersÃ£o SecundÃ¡ria 
+//      NÃºmero da VersÃ£o
+//      RevisÃ£o
+//
+// Ã‰ possÃ­vel especificar todos os valores ou usar como padrÃ£o os NÃºmeros de Build e da RevisÃ£o
+// utilizando o "*" como mostrado abaixo:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+

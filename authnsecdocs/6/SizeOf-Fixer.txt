@@ -1,0 +1,405 @@
+Directory structure:
+└── rivatesu-sizeof-fixer/
+    ├── README.md
+    └── SizeOf Fixer/
+        ├── MathsEquations.cs
+        ├── Program.cs
+        ├── SizeOf Fixer.csproj
+        ├── SizeOf Fixer.sln
+        ├── SizeOf.cs
+        ├── app.config
+        ├── Properties/
+        │   └── AssemblyInfo.cs
+        └── lib/
+
+================================================
+File: README.md
+================================================
+# Simple SizeOf Fixer
+
+Features:
+<br />
+	- Replaces SizeOf<br />
+	- Solves Mathematical Equations
+
+
+
+================================================
+File: SizeOf Fixer/MathsEquations.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace SizeOf_Fixer
+{
+    internal class MathsEquations
+    {
+        public static void MathsFixer(ModuleDefMD module)
+        {
+            foreach (TypeDef type in module.Types)
+            {
+                foreach (MethodDef method in type.Methods)
+                {
+                    if (method.HasBody)
+                    {
+                        for (int index = 0; index < method.Body.Instructions.Count; ++index)
+                        {
+                            if (method.Body.Instructions[index].OpCode == OpCodes.Add)
+                            {
+                                if (method.Body.Instructions[index - 1].IsLdcI4() && method.Body.Instructions[index - 2].IsLdcI4())
+                                {
+                                    int num = method.Body.Instructions[index - 2].GetLdcI4Value() + method.Body.Instructions[index - 1].GetLdcI4Value();
+                                    method.Body.Instructions[index].OpCode = OpCodes.Ldc_I4;
+                                    method.Body.Instructions[index].Operand = num;
+                                    method.Body.Instructions[index - 2].OpCode = OpCodes.Nop;
+                                    method.Body.Instructions[index - 1].OpCode = OpCodes.Nop;
+                                    ++Program.MathsAmount;
+                                }
+                            }
+                            else if (method.Body.Instructions[index].OpCode == OpCodes.Mul)
+                            {
+                                if (method.Body.Instructions[index - 1].IsLdcI4() && method.Body.Instructions[index - 2].IsLdcI4())
+                                {
+                                    int num = method.Body.Instructions[index - 2].GetLdcI4Value() * method.Body.Instructions[index - 1].GetLdcI4Value();
+                                    method.Body.Instructions[index].OpCode = OpCodes.Ldc_I4;
+                                    method.Body.Instructions[index].Operand = num;
+                                    method.Body.Instructions[index - 2].OpCode = OpCodes.Nop;
+                                    method.Body.Instructions[index - 1].OpCode = OpCodes.Nop;
+                                    ++Program.MathsAmount;
+                                }
+                            }
+                            else if (method.Body.Instructions[index].OpCode == OpCodes.Sub && (method.Body.Instructions[index - 1].IsLdcI4() && method.Body.Instructions[index - 2].IsLdcI4()))
+                            {
+                                int num = method.Body.Instructions[index - 2].GetLdcI4Value() - method.Body.Instructions[index - 1].GetLdcI4Value();
+                                method.Body.Instructions[index].OpCode = OpCodes.Ldc_I4;
+                                method.Body.Instructions[index].Operand = num;
+                                method.Body.Instructions[index - 2].OpCode = OpCodes.Nop;
+                                method.Body.Instructions[index - 1].OpCode = OpCodes.Nop;
+                                ++Program.MathsAmount;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: SizeOf Fixer/Program.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Writer;
+using System;
+using System.IO;
+
+namespace SizeOf_Fixer
+{
+    internal class Program
+    {
+        public static string Asmpath;
+        public static ModuleDefMD AsmethodMdOriginal;
+        public static int SizeOFAmount;
+        public static int MathsAmount;
+
+        private static void Main(string[] args)
+        {
+            Console.Title = "SizeOf Fixer - iYaReM";
+            
+            if (args.Length == 0)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Drag'n drop file.");
+                Console.ReadKey();
+                return;
+            }
+
+            try
+            {
+                AsmethodMdOriginal = ModuleDefMD.Load(args[0]);
+                Asmpath = args[0];
+
+
+                string directoryName = Path.GetDirectoryName(args[0]);
+
+                if (!directoryName.EndsWith("\\"))
+                {
+                    directoryName += "\\";
+                }
+
+
+                SizeOf.SizeOfFixer(AsmethodMdOriginal);
+
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("[!] " + SizeOFAmount + " SizeOf's Replaced");
+
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("[+] Write y to ennable Math fix.");
+                if (Console.ReadLine().ToString().ToLower() == "y")
+                {
+                    MathsEquations.MathsFixer(AsmethodMdOriginal);
+                    MathsEquations.MathsFixer(AsmethodMdOriginal);
+
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine("[+] " + MathsAmount + " Maths Equations Solved");
+                }
+                string filename = string.Format("{0}{1}-SizeOfsFixed{2}", directoryName, Path.GetFileNameWithoutExtension(args[0]), Path.GetExtension(args[0]));
+
+                if (!AsmethodMdOriginal.Is32BitRequired)
+                {
+                    ModuleWriterOptions moduleWriterOptions = new ModuleWriterOptions(AsmethodMdOriginal);
+                    moduleWriterOptions.MetaDataLogger = DummyLogger.NoThrowInstance;
+                    moduleWriterOptions.MetaDataOptions.Flags = MetaDataFlags.PreserveAll;
+                    AsmethodMdOriginal.Write(filename, moduleWriterOptions);
+                }
+                else
+                {
+                    NativeModuleWriterOptions moduleWriterOptions = new NativeModuleWriterOptions(AsmethodMdOriginal);
+                    moduleWriterOptions.MetaDataLogger = DummyLogger.NoThrowInstance;
+                    moduleWriterOptions.MetaDataOptions.Flags = MetaDataFlags.PreserveAll;
+                    AsmethodMdOriginal.NativeWrite(filename, moduleWriterOptions);
+                }
+               
+
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("");
+                Console.WriteLine("Done! Saving Assembly...");
+            }
+            catch { Console.ForegroundColor = ConsoleColor.Red; Console.WriteLine("Invalid file."); }
+            Console.ReadKey();
+        }
+    }
+}
+
+
+
+================================================
+File: SizeOf Fixer/SizeOf Fixer.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!--Project was exported from assembly: C:\Users\iYaReM\Desktop\SizeOfs Fixer\SizeOf Fixer.exe-->
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{878EE792-3551-44DC-875B-AEFC2D7140C7}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>SizeOf Fixer</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <ApplicationVersion>1.0.0.0</ApplicationVersion>
+    <FileAlignment>512</FileAlignment>
+    <RootNamespace>SizeOf's_Fixer</RootNamespace>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>SizeOf_Fixer.Program</StartupObject>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Fix.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib">
+      <HintPath>lib\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="MathsEquations.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SizeOf.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Fix.ico" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: SizeOf Fixer/SizeOf Fixer.sln
+================================================
+
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SizeOf'sFixer", "SizeOf Fixer.csproj", "{878EE792-3551-44DC-875B-AEFC2D7140C7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{878EE792-3551-44DC-875B-AEFC2D7140C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{878EE792-3551-44DC-875B-AEFC2D7140C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{878EE792-3551-44DC-875B-AEFC2D7140C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{878EE792-3551-44DC-875B-AEFC2D7140C7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: SizeOf Fixer/SizeOf.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System;
+using System.Runtime.InteropServices;
+
+namespace SizeOf_Fixer
+{
+    internal class SizeOf
+    {
+        public static void SizeOfFixer(ModuleDefMD module)
+        {
+            foreach (TypeDef type in module.Types)
+                foreach (MethodDef method in type.Methods)
+                {
+                    if (!method.HasBody) continue;
+                    for (int index = 0; index < method.Body.Instructions.Count; ++index)
+                        if (method.Body.Instructions[index].OpCode == OpCodes.Sizeof)
+                        {
+                            switch ((method.Body.Instructions[index].Operand as ITypeDefOrRef).ToString())
+                            {
+                                case "System.Boolean":
+                                    method.Body.Instructions[index].OpCode = OpCodes.Ldc_I4_1;
+                                    ++Program.SizeOFAmount;
+                                    break;
+                                case "System.Byte":
+                                    method.Body.Instructions[index].OpCode = OpCodes.Ldc_I4_1;
+                                    ++Program.SizeOFAmount;
+                                    break;
+                                case "System.Decimal":
+                                    method.Body.Instructions[index] = OpCodes.Ldc_I4.ToInstruction(16);
+                                    ++Program.SizeOFAmount;
+                                    break;
+                                case "System.Double":
+                                case "System.Int64":
+                                case "System.UInt64":
+                                    method.Body.Instructions[index].OpCode = OpCodes.Ldc_I4_8;
+                                    ++Program.SizeOFAmount;
+                                    break;
+                                case "System.Guid":
+                                    method.Body.Instructions[index] = OpCodes.Ldc_I4.ToInstruction(16);
+                                    ++Program.SizeOFAmount;
+                                    break;
+                                case "System.Int16":
+                                case "System.UInt16":
+                                    method.Body.Instructions[index].OpCode = OpCodes.Ldc_I4_2;
+                                    ++Program.SizeOFAmount;
+                                    break;
+                                case "System.Int32":
+                                case "System.Single":
+                                case "System.UInt32":
+                                    method.Body.Instructions[index].OpCode = OpCodes.Ldc_I4_4;
+                                    ++Program.SizeOFAmount;
+                                    break;
+                                case "System.SByte":
+                                    method.Body.Instructions[index].OpCode = OpCodes.Ldc_I4_1;
+                                    ++Program.SizeOFAmount;
+                                    break;
+                            }
+                            if (!method.Body.Instructions[index].IsLdcI4())
+                            {
+                                int sizeOf = getSizeOfValue(method.Body.Instructions[index].Operand.ToString());
+                                if (sizeOf != 0)
+                                {
+                                    method.Body.Instructions[index] = OpCodes.Ldc_I4.ToInstruction(sizeOf);
+                                    ++Program.SizeOFAmount;
+                                }
+                            }
+                        }
+                }
+        }
+        static int getSizeOfValue(string operand)
+        {
+            try
+            {
+                Type x = Type.GetType(operand);
+                if (x != null)
+                    return Marshal.SizeOf(x);
+                return 0;
+            }
+            catch { return 0; }
+        }
+    }
+}
+
+
+
+================================================
+File: SizeOf Fixer/app.config
+================================================
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+<startup><supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.7.2"/></startup></configuration>
+
+
+
+================================================
+File: SizeOf Fixer/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// As informaÃ§Ãµes gerais sobre um assembly sÃ£o controladas por
+// conjunto de atributos. Altere estes valores de atributo para modificar as informaÃ§Ãµes
+// associada a um assembly.
+[assembly: AssemblyTitle("SizeOf Fixer")]
+[assembly: AssemblyDescription("SizeOf Fixer")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("Sugar")]
+[assembly: AssemblyProduct("SizeOf Fixer")]
+[assembly: AssemblyCopyright("Copyleft Â© 2019 iYaReM")]
+[assembly: AssemblyTrademark("Sugar")]
+[assembly: AssemblyCulture("")]
+
+// Definir ComVisible como false torna invisÃ­veis os tipos neste assembly
+// para componentes COM.  Caso precise acessar um tipo neste assembly a partir de 
+// COM, defina o atributo ComVisible como true nesse tipo.
+[assembly: ComVisible(false)]
+
+// O GUID a seguir serÃ¡ destinado Ã  ID de typelib se este projeto for exposto para COM
+[assembly: Guid("7AC8DAD9-A401-48B3-ACF0-0A4FB98E83FD")]
+
+// As informaÃ§Ãµes da versÃ£o de um assembly consistem nos quatro valores a seguir:
+//
+//      VersÃ£o Principal
+//      VersÃ£o SecundÃ¡ria 
+//      NÃºmero da VersÃ£o
+//      RevisÃ£o
+//
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+

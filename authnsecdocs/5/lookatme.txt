@@ -1,0 +1,1585 @@
+Directory structure:
+└── pjc0247-lookatme/
+    ├── readme.md
+    ├── lookatme.sln
+    ├── lookatme/
+    │   ├── App.config
+    │   ├── Obfuscator.cs
+    │   ├── Program.cs
+    │   ├── lookatme.csproj
+    │   ├── packages.config
+    │   ├── IL/
+    │   │   ├── IlCursor.cs
+    │   │   ├── IlHelper.cs
+    │   │   ├── Injector.cs
+    │   │   └── Resolver.cs
+    │   ├── Pattern/
+    │   │   ├── EncodeStringLiteral.cs
+    │   │   ├── ForceInlining.cs
+    │   │   ├── PatternBase.cs
+    │   │   ├── RenameField.cs
+    │   │   └── RuntimeCodeGeneration.cs
+    │   └── Properties/
+    │       └── AssemblyInfo.cs
+    ├── lookatme.corelib/
+    │   ├── AssemblyTag.cs
+    │   ├── Reconstructor.cs
+    │   ├── StringDecoder.cs
+    │   ├── lookatme.corelib.csproj
+    │   ├── Models/
+    │   │   └── StoredIL.cs
+    │   └── Properties/
+    │       └── AssemblyInfo.cs
+    ├── sampleapp/
+    │   ├── App.config
+    │   ├── Program.cs
+    │   ├── sampleapp.csproj
+    │   └── Properties/
+    │       └── AssemblyInfo.cs
+    └── sampleapp2/
+        ├── App.config
+        ├── Program.cs
+        ├── sampleapp2.csproj
+        └── Properties/
+            └── AssemblyInfo.cs
+
+================================================
+File: readme.md
+================================================
+lookatme
+====
+
+.NET obfuscator for Studying purpose.
+
+Goal
+----
+* Implements well-known obfuscation patterns with as simple as possible codes.
+  * 실제로 복잡한 난독화 코드를 생성하기보단 각 패턴들을 짧게짧게 구현하는것이 목표
+* Generates `exe` which runs exactly same as original.
+
+Patterns
+----
+* [x] Encode/Decode string literals
+  * [x] by Assembly Injection (merging)
+* [x] Force inlining
+* [x] Change field names.
+* [ ] Change method names.
+  * [ ] Also supports `System.Reflection`.
+* [ ] Change method symbols.
+* [ ] Runtime code generation.
+
+
+
+
+================================================
+File: lookatme.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2036
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lookatme", "lookatme\lookatme.csproj", "{32B6BDE8-A67C-4A5E-842F-4E9A69D9E921}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sampleapp", "sampleapp\sampleapp.csproj", "{AD4A8A49-B127-44CA-B35E-48C49165A017}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lookatme.corelib", "lookatme.corelib\lookatme.corelib.csproj", "{9C9F90E0-F18B-44B0-AD64-A20F584F08EE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sampleapp2", "sampleapp2\sampleapp2.csproj", "{98D7EA95-7A44-4517-83D4-9BED1E3D3492}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{32B6BDE8-A67C-4A5E-842F-4E9A69D9E921}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32B6BDE8-A67C-4A5E-842F-4E9A69D9E921}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32B6BDE8-A67C-4A5E-842F-4E9A69D9E921}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32B6BDE8-A67C-4A5E-842F-4E9A69D9E921}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD4A8A49-B127-44CA-B35E-48C49165A017}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD4A8A49-B127-44CA-B35E-48C49165A017}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD4A8A49-B127-44CA-B35E-48C49165A017}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD4A8A49-B127-44CA-B35E-48C49165A017}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C9F90E0-F18B-44B0-AD64-A20F584F08EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C9F90E0-F18B-44B0-AD64-A20F584F08EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C9F90E0-F18B-44B0-AD64-A20F584F08EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C9F90E0-F18B-44B0-AD64-A20F584F08EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98D7EA95-7A44-4517-83D4-9BED1E3D3492}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98D7EA95-7A44-4517-83D4-9BED1E3D3492}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98D7EA95-7A44-4517-83D4-9BED1E3D3492}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98D7EA95-7A44-4517-83D4-9BED1E3D3492}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {83D2F4C9-FC76-428C-A91A-2F1B8406B8C0}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: lookatme/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.6.1" />
+    </startup>
+</configuration>
+
+
+================================================
+File: lookatme/Obfuscator.cs
+================================================
+ï»¿using System;
+using System.Reflection;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+using Mono.Cecil.Mdb;
+using Mono.CompilerServices.SymbolWriter;
+
+namespace lookatme
+{
+    public class Obfuscator
+    {
+        public static void Run(string inputPath, string outputPath)
+        {
+            var module = ModuleDefinition.ReadModule(inputPath);
+
+            // Injects `corelib` into target assembly.
+            Injector.Inject(module, typeof(lookatme.corelib.AssemblyTag).Assembly);
+
+            foreach (var type in Assembly.GetExecutingAssembly().GetTypes())
+            {
+                if (type.BaseType != (typeof(PatternBase))) continue;
+
+                var inst = Activator.CreateInstance(type);
+                typeof(PatternBase).GetMethod(nameof(PatternBase.Execute)).Invoke(inst, new object[] { module });
+            }
+
+            module.Write(outputPath);
+        }
+    }
+}
+
+
+
+================================================
+File: lookatme/Program.cs
+================================================
+ï»¿using System;
+using System.Reflection;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace lookatme
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            try
+            {
+                Obfuscator.Run(
+                    "..\\..\\..\\sampleapp\\bin\\Debug\\sampleapp.exe",
+                    "output.exe");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: lookatme/lookatme.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{32B6BDE8-A67C-4A5E-842F-4E9A69D9E921}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>lookatme</RootNamespace>
+    <AssemblyName>lookatme</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Mono.Cecil, Version=0.10.0.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Mono.Cecil.0.10.0\lib\net40\Mono.Cecil.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Mdb, Version=0.10.0.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Mono.Cecil.0.10.0\lib\net40\Mono.Cecil.Mdb.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Pdb, Version=0.10.0.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Mono.Cecil.0.10.0\lib\net40\Mono.Cecil.Pdb.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Rocks, Version=0.10.0.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Mono.Cecil.0.10.0\lib\net40\Mono.Cecil.Rocks.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="IL\IlCursor.cs" />
+    <Compile Include="IL\IlHelper.cs" />
+    <Compile Include="IL\Injector.cs" />
+    <Compile Include="IL\Resolver.cs" />
+    <Compile Include="Obfuscator.cs" />
+    <Compile Include="Pattern\EncodeStringLiteral.cs" />
+    <Compile Include="Pattern\ForceInlining.cs" />
+    <Compile Include="Pattern\PatternBase.cs" />
+    <Compile Include="Pattern\RenameField.cs" />
+    <Compile Include="Pattern\RuntimeCodeGeneration.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\lookatme.corelib\lookatme.corelib.csproj">
+      <Project>{9c9f90e0-f18b-44b0-ad64-a20f584f08ee}</Project>
+      <Name>lookatme.corelib</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: lookatme/packages.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<packages>
+  <package id="Mono.Cecil" version="0.10.0" targetFramework="net461" />
+  <package id="Newtonsoft.Json" version="11.0.2" targetFramework="net461" />
+</packages>
+
+
+================================================
+File: lookatme/IL/IlCursor.cs
+================================================
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+
+namespace lookatme
+{
+    class ILCursor
+    {
+        private ILProcessor ilProcessor { get; set; }
+        private Instruction cursor { get; set; }
+
+        // 가상의 Head -1 를 가리키는 상태를 나타냄
+        private bool emptyHead { get; set; }
+
+        public Instruction current
+        {
+            get
+            {
+                return cursor;
+            }
+        }
+        public ILCursor clone
+        {
+            get
+            {
+                return new ILCursor(ilProcessor, cursor);
+            }
+        }
+
+        public ILCursor(ILProcessor ilProcessor)
+        {
+            this.ilProcessor = ilProcessor;
+            this.cursor = ilProcessor.Body.Instructions.First();
+        }
+        public ILCursor(ILProcessor ilProcessor, bool emptyHead)
+        {
+            this.ilProcessor = ilProcessor;
+            this.cursor = ilProcessor.Body.Instructions.First();
+            this.emptyHead = true;
+        }
+        public ILCursor(ILProcessor ilProcessor, Instruction cursor)
+        {
+            this.ilProcessor = ilProcessor;
+            this.cursor = cursor;
+        }
+
+        /// <summary>
+        /// 커서 오른쪽에 끼워넣는다.
+        /// 커서는 새로 넣어진 명령어를 가리킨다.
+        /// </summary>
+        /// <param name="inst">명렁어</param>
+        public void Emit(Instruction inst)
+        {
+            if (emptyHead)
+            {
+                ilProcessor.InsertBefore(cursor, inst);
+                cursor = inst;
+                emptyHead = false;
+            }
+            else
+            {
+                ilProcessor.InsertAfter(cursor, inst);
+                cursor = cursor.Next;
+            }
+        }
+        public void Emit(params Instruction[] insts)
+        {
+            foreach (var inst in insts)
+                Emit(inst);
+        }
+
+        /// <summary>
+        /// 커서 왼쪽에 끼워넣는다.
+        /// 커서는 변하지 않는다.
+        /// </summary>
+        /// <param name="inst">명렁어</param>
+        public void EmitBefore(Instruction inst)
+        {
+            ilProcessor.InsertBefore(cursor, inst);
+        }
+        public void EmitBefore(params Instruction[] insts)
+        {
+            foreach (var inst in insts)
+                EmitBefore(inst);
+        }
+
+        /// <summary>
+        /// 현재 커서 명령을 새로운 명령으로 교체한다.
+        /// 커서의 위치 자체는 바뀌지 않는다.
+        /// </summary>
+        /// <param name="inst">명령어</param>
+        public void Replace(Instruction inst)
+        {
+            ilProcessor.Replace(cursor, inst);
+            cursor = inst;
+        }
+
+        /// <summary>
+        /// 현재 커서 명령을 삭제한다.
+        /// 커서는 현재 커서의 Next로 변화한다.
+        /// </summary>
+        /// <param name="inst"></param>
+        public void Remove()
+        {
+            var next = cursor.Next;
+            ilProcessor.Remove(cursor);
+            cursor = next;
+        }
+
+        #region SHORTCUTS
+        public void LdThis(ILProcessor ilgen)
+        {
+            Emit(ilgen.Create(OpCodes.Ldarg_0));
+        }
+        public void LdStr(ILProcessor ilgen, string str)
+        {
+            Emit(ilgen.Create(OpCodes.Ldstr, str));
+        }
+        public void Call(ILProcessor ilgen, MethodReference method)
+        {
+            Emit(ilgen.Create(OpCodes.Call, method));
+        }
+        public void Callvirt(ILProcessor ilgen, MethodReference method)
+        {
+            Emit(ilgen.Create(OpCodes.Callvirt, method));
+        }
+        public void Dup(ILProcessor ilgen)
+        {
+            Emit(ilgen.Create(OpCodes.Dup));
+        }
+        #endregion // SHORTCUTS
+    }
+}
+
+
+================================================
+File: lookatme/IL/IlHelper.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+using Mono.Cecil.Mdb;
+using Mono.CompilerServices.SymbolWriter;
+
+namespace lookatme
+{
+    static class IlHelper
+    {
+        public static Instruction Clone(this Instruction inst, ModuleDefinition module)
+        {
+            if (inst.Operand is TypeReference)
+                inst.Operand = module.ImportReference((TypeReference)inst.Operand);
+            else if (inst.Operand is FieldReference)
+                inst.Operand = module.ImportReference((FieldReference)inst.Operand);
+
+            if (inst.OpCode == OpCodes.Newobj ||
+                inst.OpCode == OpCodes.Callvirt || inst.OpCode == OpCodes.Calli || inst.OpCode == OpCodes.Call)
+            {
+                inst.Operand = module.ImportReference((MethodReference)inst.Operand);
+            }
+
+            return inst;
+        }
+
+        public static bool IsCall(this Instruction inst)
+        {
+            return inst.OpCode == OpCodes.Call || inst.OpCode == OpCodes.Calli || inst.OpCode == OpCodes.Callvirt;
+        }
+
+        public static bool IsStfld(this Instruction inst)
+        {
+            return inst.OpCode == OpCodes.Stfld || inst.OpCode == OpCodes.Stsfld;
+        }
+        public static bool IsLdfld(this Instruction inst)
+        {
+            return inst.OpCode == OpCodes.Ldsfld || inst.OpCode == OpCodes.Ldsflda ||
+                inst.OpCode == OpCodes.Ldfld || inst.OpCode == OpCodes.Ldflda || inst.OpCode == OpCodes.Ldftn;
+        }
+        public static bool IsLdarg(this Instruction inst)
+        {
+            return inst.OpCode == OpCodes.Ldarg
+                || inst.OpCode == OpCodes.Ldarga || inst.OpCode == OpCodes.Ldarga_S
+                || inst.OpCode == OpCodes.Ldarg_0 || inst.OpCode == OpCodes.Ldarg_1
+                || inst.OpCode == OpCodes.Ldarg_2 || inst.OpCode == OpCodes.Ldarg_3
+                || inst.OpCode == OpCodes.Ldarg_S;
+        }
+        public static bool IsLdloc(this Instruction inst)
+        {
+            return inst.OpCode == OpCodes.Ldloc
+                || inst.OpCode == OpCodes.Ldloca || inst.OpCode == OpCodes.Ldloca_S
+                || inst.OpCode == OpCodes.Ldloc_0 || inst.OpCode == OpCodes.Ldloc_1
+                || inst.OpCode == OpCodes.Ldloc_2 || inst.OpCode == OpCodes.Ldloc_3
+                || inst.OpCode == OpCodes.Ldloc_S;
+        }
+        public static bool IsStloc(this Instruction inst)
+        {
+            return inst.OpCode == OpCodes.Stloc
+                || inst.OpCode == OpCodes.Stloc_0 || inst.OpCode == OpCodes.Stloc_1 || inst.OpCode == OpCodes.Stloc_2
+                || inst.OpCode == OpCodes.Stloc_3 || inst.OpCode == OpCodes.Stloc_S;
+        }
+    }
+}
+
+
+
+================================================
+File: lookatme/IL/Injector.cs
+================================================
+ï»¿using System;
+using System.Reflection;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+
+namespace lookatme
+{
+    /// <summary>
+    /// Combines two assembly into one
+    /// </summary>
+    public class Injector
+    {
+        public static void Inject(ModuleDefinition module, Assembly asm)
+        {
+            var moduleToInect = ModuleDefinition.ReadModule(asm.Location);
+
+            foreach (var type in moduleToInect.Types)
+            {
+                if (module.Types.Any(x => x.FullName == type.FullName))
+                    continue;
+
+                module.Types.Add(CloneType(module, type));
+            }
+        }
+
+        private static MethodDefinition CloneMethod(ModuleDefinition module, MethodDefinition method)
+        {
+            var clone = new MethodDefinition(method.Name, method.Attributes, method.ReturnType);
+            clone.Body = new Mono.Cecil.Cil.MethodBody(method)
+            {
+                InitLocals = method.Body.InitLocals,
+                LocalVarToken = method.Body.LocalVarToken,
+                MaxStackSize = method.Body.MaxStackSize
+            };
+
+            clone.Body.Instructions.Clear();
+            foreach (var inst in method.Body.Instructions)
+            {
+                if (inst.OpCode == OpCodes.Newobj || inst.IsCall())
+                    inst.Operand = module.ImportReference((MethodReference)inst.Operand);
+
+                clone.Body.Instructions.Add(inst);
+            }
+            foreach (var p in method.Parameters)
+                clone.Parameters.Add(p);
+            foreach (var eh in method.Body.ExceptionHandlers)
+                clone.Body.ExceptionHandlers.Add(eh);
+            foreach (var v in method.Body.Variables)
+                clone.Body.Variables.Add(v);
+
+            return clone;
+        }
+        private static TypeDefinition CloneType(ModuleDefinition module, TypeDefinition type)
+        {
+            var clone = new TypeDefinition(type.Namespace, type.Name, type.Attributes);
+
+            foreach (var method in type.Methods)
+                clone.Methods.Add(CloneMethod(module, method));
+
+            clone.BaseType = type.BaseType;
+
+            return clone;
+        }
+    }
+}
+
+
+
+================================================
+File: lookatme/IL/Resolver.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+using Mono.Cecil.Mdb;
+using Mono.CompilerServices.SymbolWriter;
+
+namespace lookatme
+{
+    class Resolver
+    {
+        public static MethodReference GetMethodReference(
+            ModuleDefinition _module, string typeName, string methodName, Type[] types = null)
+        {
+            var modules = new ModuleDefinition[] { _module };
+            foreach (var module in modules)
+            {
+                var candidate = module.Types
+                    .Where(x => x.Name == typeName)
+                    .FirstOrDefault();
+
+                if (candidate == null)
+                    continue;
+
+                var methodCandidates = candidate.Methods
+                    .Where(x => x.Name == methodName);
+
+                foreach (var method in methodCandidates)
+                {
+                    if (types == null)
+                        return module.ImportReference(method);
+                    if (types.Length != method.Parameters.Count)
+                        continue;
+
+                    bool flag = true;
+                    for (int i = 0; i < types.Length; i++)
+                    {
+                        if (types[i].FullName != method.Parameters[i].ParameterType.FullName)
+                        {
+                            flag = false;
+                            break;
+                        }
+                    }
+
+                    if (flag)
+                        return module.ImportReference(method);
+                }
+            }
+
+            return null;
+        }
+    }
+}
+
+
+
+================================================
+File: lookatme/Pattern/EncodeStringLiteral.cs
+================================================
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+
+namespace lookatme
+{
+    /* 스트링 리터럴을 암호화한다.
+     *   스트링 리터럴은 디어셈블리 시 바로 노출되므로
+     *   암호화 해서 알기 어렵게 한다.
+     *   
+     * flow
+     *   1. 암호화/복호화 코드를 타겟 어셈블리에 Inject한다. (See Injector.cs)
+     *   2. 모든 Ldstr을 
+     *         ldstr "ENCODED STRING"
+     *         call  StringEncoder.Decode
+     *      로 치환한다.
+     */
+    class EncodeStringLiteral : PatternBase
+    {
+        public override void EachMethod(MethodDefinition method)
+        {
+            var p = method.Body.GetILProcessor();
+
+            var instructions = method.Body.Instructions;
+            for (int i = 0; i < instructions.Count; i++)
+            {
+                var il = instructions[i];
+
+                if (il.Operand is string)
+                {
+                    instructions.RemoveAt(i);
+                    instructions.Insert(i, p.Create(OpCodes.Ldstr, corelib.StringDecoder.Encode((string)il.Operand)));
+                    instructions.Insert(i + 1, p.Create(OpCodes.Call, Resolver.GetMethodReference(module, nameof(corelib.StringDecoder), nameof(corelib.StringDecoder.Decode))));
+                    i++;
+                }
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: lookatme/Pattern/ForceInlining.cs
+================================================
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+
+namespace lookatme
+{
+    /* 함수 콜을 강제적으로 인라이닝한다.
+     *   함수 콜을 하지 않기 떄문에 함수 이름으로부터 힌트를 얻을 수 없고
+     *   한개의 메소드가 매우 길어져서 읽기 힘들게 된다.
+     * 
+     * flow
+     *   1. 만약 instance call이면 ldarg0 역할을 할 지역변수를 만든다.
+     *   2. 호출 전에는 파라미터가 스택에 저장되어 있으므로 해당 파라미터를 지역변수에 모두 담는다.
+     *   3. 인스트럭션을 순회하면서 ret은 jmp로 변경한다,
+     *   4. ldarg는 1번에서 저장한 지역변수에서 가져오도록 변경한다.
+     */
+    class ForceInlining : PatternBase
+    {
+        public override void EachMethod(MethodDefinition method)
+        {
+            // This breaks callstack, So never inlining methods with ExceptionHandlers.
+            if (method.Body.HasExceptionHandlers) return;
+            if (method.IsIL == false) return;
+
+            method.Body.InitLocals = true;
+
+            var p = method.Body.GetILProcessor();
+            var instructions = method.Body.Instructions;
+            for (int i = 0; i < instructions.Count; i++)
+            {
+                var il = instructions[i];
+
+                if (il.IsCall() == false) continue;
+
+                var operand = ((MethodReference)il.Operand).Resolve();
+                if (operand.Module != method.Module)
+                    continue;
+
+                var offset = i;
+                var parameters = new List<VariableDefinition>();
+
+                if (operand.IsIL == false || operand.Body == null) continue;
+
+                // 스택을 지역 변수에 저장해야 하므로 파라미터만큼 지역변수를 만든다.
+                foreach (var v in operand.Body.Variables)
+                    method.Body.Variables.Add(v);
+
+                // Instance call needs `this(arg0)`.
+                if (operand.IsStatic == false)
+                    parameters.Add(new VariableDefinition(module.ImportReference(operand.DeclaringType)));
+                foreach (var v in operand.Parameters)
+                {
+                    parameters.Add(new VariableDefinition(module.ImportReference(v.ParameterType)));
+                    method.Body.Variables.Add(parameters.Last());
+                }
+
+                var nopTarget = p.Create(OpCodes.Nop);
+                p.Replace(il, nopTarget);
+
+                // STACK => LOCAL
+                var instrcutionsToCopy = operand.Body.Instructions;
+                foreach (var param in parameters)
+                {
+                    instructions.Insert(i, p.Create(OpCodes.Stloc, param));
+
+                    offset++;
+                    i++;
+                }
+                i--;
+                // MODIFY INSTRUCTIONS
+                foreach (var inst in instrcutionsToCopy)
+                {
+                    // Ret must be changed to `simple jump`
+                    if (inst.OpCode == OpCodes.Ret)
+                        instructions.Insert(offset, p.Create(OpCodes.Br_S, nopTarget));
+
+                    // Ldarg must be changed to `ldloc`.
+                    else if (inst.IsLdarg())
+                    {
+                        var idx = 0;
+                        if (inst.OpCode == OpCodes.Ldarg_0) idx = 0;
+                        else if (inst.OpCode == OpCodes.Ldarg_1) idx = 1;
+                        else if (inst.OpCode == OpCodes.Ldarg_2) idx = 2;
+                        else if (inst.OpCode == OpCodes.Ldarg_3) idx = 3;
+                        else idx = (byte)inst.Operand;
+
+                        instructions.Insert(offset, p.Create(OpCodes.Ldloc, parameters[idx]));
+                    }
+
+                    // Just copy
+                    else
+                        instructions.Insert(offset, inst.Clone(module));
+
+                    offset++;
+                    i++;
+                }
+                i--;
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: lookatme/Pattern/PatternBase.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+using Mono.Cecil;
+
+namespace lookatme
+{
+    class PatternBase
+    {
+        protected ModuleDefinition module;
+
+        public void Execute(ModuleDefinition _module)
+        {
+            module = _module;
+
+            Apply(module);
+
+            foreach (var type in module.Types)
+            {
+                EachType(type);
+
+                foreach (var method in type.Methods)
+                {
+                    if (method.HasBody == false)
+                        continue;
+                    EachMethod(method);
+                }
+            }
+        }
+
+        public virtual void Apply(ModuleDefinition module)
+        {
+            /* Override */
+        }
+
+        public virtual void EachType(TypeDefinition type)
+        {
+            /* Override */
+        }
+        public virtual void EachMethod(MethodDefinition method)
+        {
+            /* Override */
+        }
+    }
+}
+
+
+
+================================================
+File: lookatme/Pattern/RenameField.cs
+================================================
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+
+namespace lookatme
+{
+    /* 필드 이름을 변경한다.
+     *   필드 이름은 local과 달리 어셈블리에 이름이 그대로 노출되므로
+     *   해당 변수의 역할을 이름으로부터 추측하기가 쉽다.
+     *   
+     * flow
+     *   1.
+     */ 
+    class RenameField : PatternBase
+    {
+        private bool IsRenamable(FieldDefinition field)
+        {
+            // Only private fields can be renamed currently
+            return field.IsPrivate;
+        }
+
+        public override void EachType(TypeDefinition type)
+        {
+            var offset = 0;
+            var mapping = new Dictionary<string, FieldDefinition>();
+
+            foreach (var field in type.Fields)
+            {
+                if (IsRenamable(field) == false) continue;
+
+                var newName = "a" + offset;
+                var newFIeld = new FieldDefinition(newName, field.Attributes, module.ImportReference(field.FieldType));
+
+                mapping[field.Name] = newFIeld;
+
+                offset++;
+            }
+
+            type.Fields.Clear();
+            foreach (var pair in mapping)
+                type.Fields.Add(pair.Value);
+
+            foreach (var method in type.Methods)
+            {
+                if (method.IsIL == false) continue;
+
+                var p = method.Body.GetILProcessor();
+                for (int i=0;i<method.Body.Instructions.Count;i++)
+                {
+                    var inst = method.Body.Instructions[i];
+
+                    if (inst.IsStfld() || inst.IsLdfld())
+                    {
+                        var operand = (FieldReference)inst.Operand;
+
+                        if (mapping.ContainsKey(operand.Name) == false) continue;
+                        //if (operand.DeclaringType != type) continue;
+
+                        p.Replace(inst, p.Create(inst.OpCode, mapping[operand.Name]));
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: lookatme/Pattern/RuntimeCodeGeneration.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+
+using Newtonsoft.Json;
+
+namespace lookatme
+{
+    class RuntimeCodeGeneration : PatternBase
+    {
+        private class StoredInstruction
+        {
+            public OpCode opcode;
+            public object operand;
+        }
+        private class StoredFieldReference
+        {
+            public string name;
+        }
+        private class StoredMethodReference
+        {
+            public string name;
+            public StoredTypeReference returnType;
+        }
+        private class StoredVariableReference
+        {
+            public StoredTypeReference type;
+        }
+        private class StoredTypeReference
+        {
+            public string ns;
+            public string name;
+        }
+        private class MethodData
+        {
+            public StoredInstruction[] instructions;
+        }
+
+        private MethodData PackMethod(MethodDefinition method)
+        {
+            var sinst = new List<StoredInstruction>();
+            foreach (var inst in method.Body.Instructions)
+            {
+                if (inst.Operand is Instruction)
+                    continue;
+
+                var _op = inst.Operand;
+                if (_op is TypeReference)
+                {
+                    var op = (TypeReference)_op;
+                    _op = new StoredTypeReference()
+                    {
+                        name = op.Name,
+                        ns = op.Namespace
+                    };
+                }
+                else if (_op is FieldReference)
+                {
+                    var op = (FieldReference)_op;
+                    _op = new StoredFieldReference()
+                    {
+                        name = op.Name
+                    };
+                }
+                else if (_op is MethodReference)
+                {
+                    var op = (MethodReference)_op;
+                    _op = new StoredMethodReference()
+                    {
+                        name = op.Name
+                    };
+                }
+                else if (_op is VariableReference)
+                {
+                    var op = (VariableReference)_op;
+                    _op = new StoredVariableReference()
+                    {
+                    };
+                }
+
+                sinst.Add(new StoredInstruction()
+                {
+                    opcode = inst.OpCode,
+                    operand = _op
+                });
+
+                if (inst.Operand != null)
+                    Console.WriteLine(inst.Operand.GetType());
+            }
+
+            var methodData = new MethodData()
+            {
+                instructions = sinst.ToArray()
+            };
+
+            Console.WriteLine(JsonConvert.SerializeObject(methodData, new JsonSerializerSettings()
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            }));
+
+            return methodData;
+        }
+
+        public override void EachType(TypeDefinition type)
+        {
+            foreach (var method in type.Methods)
+            {
+                PackMethod(method);
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: lookatme/Properties/AssemblyInfo.cs
+================================================
+﻿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// 어셈블리에 대한 일반 정보는 다음 특성 집합을 통해 
+// 제어됩니다. 어셈블리와 관련된 정보를 수정하려면
+// 이러한 특성 값을 변경하세요.
+[assembly: AssemblyTitle("lookatme")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("lookatme")]
+[assembly: AssemblyCopyright("Copyright ©  2018")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// ComVisible을 false로 설정하면 이 어셈블리의 형식이 COM 구성 요소에 
+// 표시되지 않습니다. COM에서 이 어셈블리의 형식에 액세스하려면
+// 해당 형식에 대해 ComVisible 특성을 true로 설정하세요.
+[assembly: ComVisible(false)]
+
+// 이 프로젝트가 COM에 노출되는 경우 다음 GUID는 typelib의 ID를 나타냅니다.
+[assembly: Guid("32b6bde8-a67c-4a5e-842f-4e9a69d9e921")]
+
+// 어셈블리의 버전 정보는 다음 네 가지 값으로 구성됩니다.
+//
+//      주 버전
+//      부 버전 
+//      빌드 번호
+//      수정 버전
+//
+// 모든 값을 지정하거나 아래와 같이 '*'를 사용하여 빌드 번호 및 수정 번호가 자동으로
+// 지정되도록 할 수 있습니다.
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+
+================================================
+File: lookatme.corelib/AssemblyTag.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace lookatme.corelib
+{
+    public class AssemblyTag
+    {
+    }
+}
+
+
+
+================================================
+File: lookatme.corelib/Reconstructor.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace lookatme.corelib
+{
+    public class Reconstructor
+    {
+        public static void Reconstruct(string data)
+        {
+
+        }
+    }
+}
+
+
+
+================================================
+File: lookatme.corelib/StringDecoder.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace lookatme.corelib
+{
+    public class StringDecoder
+    {
+        public static string Encode(string input)
+        {
+            var buffer = input.ToCharArray();
+            for (int i = 0; i < input.Length; i++)
+                buffer[i] = (char)(buffer[i] ^ 26);
+            return new string(buffer);
+        }
+        public static string Decode(string input)
+        {
+            var buffer = input.ToCharArray();
+            for (int i = 0; i < input.Length; i++)
+                buffer[i] = (char)(buffer[i] ^ 26);
+            return new string(buffer);
+        }
+    }   
+}
+
+
+
+================================================
+File: lookatme.corelib/lookatme.corelib.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{9C9F90E0-F18B-44B0-AD64-A20F584F08EE}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>lookatme.corelib</RootNamespace>
+    <AssemblyName>lookatme.corelib</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyTag.cs" />
+    <Compile Include="StringDecoder.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: lookatme.corelib/Models/StoredIL.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace lookatme.corelib
+{
+}
+
+
+
+================================================
+File: lookatme.corelib/Properties/AssemblyInfo.cs
+================================================
+﻿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// 어셈블리에 대한 일반 정보는 다음 특성 집합을 통해 
+// 제어됩니다. 어셈블리와 관련된 정보를 수정하려면
+// 이러한 특성 값을 변경하세요.
+[assembly: AssemblyTitle("lookatme.corelib")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("lookatme.corelib")]
+[assembly: AssemblyCopyright("Copyright ©  2018")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// ComVisible을 false로 설정하면 이 어셈블리의 형식이 COM 구성 요소에 
+// 표시되지 않습니다. COM에서 이 어셈블리의 형식에 액세스하려면
+// 해당 형식에 대해 ComVisible 특성을 true로 설정하세요.
+[assembly: ComVisible(false)]
+
+// 이 프로젝트가 COM에 노출되는 경우 다음 GUID는 typelib의 ID를 나타냅니다.
+[assembly: Guid("9c9f90e0-f18b-44b0-ad64-a20f584f08ee")]
+
+// 어셈블리의 버전 정보는 다음 네 가지 값으로 구성됩니다.
+//
+//      주 버전
+//      부 버전 
+//      빌드 번호
+//      수정 버전
+//
+// 모든 값을 지정하거나 아래와 같이 '*'를 사용하여 빌드 번호 및 수정 번호를
+// 기본값으로 할 수 있습니다.
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+
+================================================
+File: sampleapp/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.6.1" />
+    </startup>
+</configuration>
+
+
+================================================
+File: sampleapp/Program.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace sampleapp
+{
+    class Program
+    {
+        private static int balue = 1;
+
+        static int Foo(int a, int b)
+        {
+            return a + b;
+        }
+
+        static void Main(string[] args)
+        {
+            Console.WriteLine(balue);
+            Console.Write(Foo(5, 10));
+            Console.WriteLine("Hello World");
+
+            Console.Read();
+        }
+    }
+}
+
+
+
+================================================
+File: sampleapp/sampleapp.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{AD4A8A49-B127-44CA-B35E-48C49165A017}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>sampleapp</RootNamespace>
+    <AssemblyName>sampleapp</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: sampleapp/Properties/AssemblyInfo.cs
+================================================
+﻿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// 어셈블리에 대한 일반 정보는 다음 특성 집합을 통해 
+// 제어됩니다. 어셈블리와 관련된 정보를 수정하려면
+// 이러한 특성 값을 변경하세요.
+[assembly: AssemblyTitle("sampleapp")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("sampleapp")]
+[assembly: AssemblyCopyright("Copyright ©  2018")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// ComVisible을 false로 설정하면 이 어셈블리의 형식이 COM 구성 요소에 
+// 표시되지 않습니다. COM에서 이 어셈블리의 형식에 액세스하려면
+// 해당 형식에 대해 ComVisible 특성을 true로 설정하세요.
+[assembly: ComVisible(false)]
+
+// 이 프로젝트가 COM에 노출되는 경우 다음 GUID는 typelib의 ID를 나타냅니다.
+[assembly: Guid("ad4a8a49-b127-44ca-b35e-48c49165a017")]
+
+// 어셈블리의 버전 정보는 다음 네 가지 값으로 구성됩니다.
+//
+//      주 버전
+//      부 버전 
+//      빌드 번호
+//      수정 버전
+//
+// 모든 값을 지정하거나 아래와 같이 '*'를 사용하여 빌드 번호 및 수정 번호가 자동으로
+// 지정되도록 할 수 있습니다.
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+
+================================================
+File: sampleapp2/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.6.1" />
+    </startup>
+</configuration>
+
+
+================================================
+File: sampleapp2/Program.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+using lookatme.corelib;
+
+namespace sampleapp2
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine(StringDecoder.Decode("Hello World"));
+
+            Console.Read();
+        }
+    }
+}
+
+
+
+================================================
+File: sampleapp2/sampleapp2.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{98D7EA95-7A44-4517-83D4-9BED1E3D3492}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>sampleapp2</RootNamespace>
+    <AssemblyName>sampleapp2</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\lookatme.corelib\lookatme.corelib.csproj">
+      <Project>{9c9f90e0-f18b-44b0-ad64-a20f584f08ee}</Project>
+      <Name>lookatme.corelib</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: sampleapp2/Properties/AssemblyInfo.cs
+================================================
+﻿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// 어셈블리에 대한 일반 정보는 다음 특성 집합을 통해 
+// 제어됩니다. 어셈블리와 관련된 정보를 수정하려면
+// 이러한 특성 값을 변경하세요.
+[assembly: AssemblyTitle("sampleapp2")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("sampleapp2")]
+[assembly: AssemblyCopyright("Copyright ©  2018")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// ComVisible을 false로 설정하면 이 어셈블리의 형식이 COM 구성 요소에 
+// 표시되지 않습니다. COM에서 이 어셈블리의 형식에 액세스하려면
+// 해당 형식에 대해 ComVisible 특성을 true로 설정하세요.
+[assembly: ComVisible(false)]
+
+// 이 프로젝트가 COM에 노출되는 경우 다음 GUID는 typelib의 ID를 나타냅니다.
+[assembly: Guid("98d7ea95-7a44-4517-83d4-9bed1e3d3492")]
+
+// 어셈블리의 버전 정보는 다음 네 가지 값으로 구성됩니다.
+//
+//      주 버전
+//      부 버전 
+//      빌드 번호
+//      수정 버전
+//
+// 모든 값을 지정하거나 아래와 같이 '*'를 사용하여 빌드 번호 및 수정 번호가 자동으로
+// 지정되도록 할 수 있습니다.
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+

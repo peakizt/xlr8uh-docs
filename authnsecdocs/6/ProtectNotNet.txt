@@ -1,0 +1,328 @@
+Directory structure:
+└── netlool-protectnotnet/
+    ├── README.md
+    ├── ProtectNotNet.sln
+    ├── ProtectNotNet/
+    │   ├── App.config
+    │   ├── Program.cs
+    │   ├── ProtectNotNet.csproj
+    │   ├── packages.config
+    │   ├── Properties/
+    │   │   └── AssemblyInfo.cs
+    │   └── bin/
+    │       └── Debug/
+    │           └── ProtectNotNet.exe.config
+    └── packages/
+        └── dnlib.1.6.1/
+            └── lib/
+
+================================================
+File: README.md
+================================================
+# ProtectNotNet
+Decrypts Protect.NET encrypted strings
+
+
+
+================================================
+File: ProtectNotNet.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2006
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtectNotNet", "ProtectNotNet\ProtectNotNet.csproj", "{A10199C0-DDD1-4D94-84A0-F467EA69A71D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A10199C0-DDD1-4D94-84A0-F467EA69A71D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A10199C0-DDD1-4D94-84A0-F467EA69A71D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A10199C0-DDD1-4D94-84A0-F467EA69A71D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A10199C0-DDD1-4D94-84A0-F467EA69A71D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F8842CF6-BB90-4B15-BC5F-99DC2C3C4E91}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: ProtectNotNet/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.6.1" />
+    </startup>
+</configuration>
+
+
+================================================
+File: ProtectNotNet/Program.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System;
+using System.Text;
+
+namespace ProtectNotNet
+{
+    class Program
+    {
+        static string Author()
+        {
+            return "lool";
+        }
+
+        public static int count = 0;
+
+        static string methodname = String.Empty;
+
+        static void Main(string[] args)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("Protect.NET Deobfuscator [by lool]");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("Choose Assembly:");
+            var filename = Console.ReadLine();
+            ModuleDefMD md = ModuleDefMD.Load(filename);
+            if (SearchStringDecryptor(md))
+            {
+                DecryptStrings(md);
+
+                md.Write(FixName(filename));
+                Console.WriteLine("Decrypted " + count + " strings!");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine("Saved to: " + FixName(filename));
+
+            } else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Could not identificate Protect.NET Obfuscator, if this is an Assembly protected by Protect.NET contact me on Github");
+            }
+            Console.ReadKey();
+
+
+        }
+        public static bool SearchStringDecryptor(ModuleDefMD md)
+        {
+            foreach (var type in md.Types)
+            {
+                foreach (var method in type.Methods)
+                {
+                    if (!method.HasBody) { continue; }
+                    CilBody body = method.Body;
+                    for (int i = 0; i < body.Instructions.Count; i++)
+                    {
+                        if (body.Instructions[i].OpCode == OpCodes.Nop && body.Instructions[i + 1].OpCode == OpCodes.Newobj
+                            && body.Instructions[i + 2].OpCode == OpCodes.Stloc_0 && body.Instructions[i+3].OpCode == OpCodes.Ldc_I4_0
+                            && body.Instructions[i+4].OpCode == OpCodes.Stloc_1 && body.Instructions[i+5].OpCode == OpCodes.Br_S)
+                        {
+                            methodname = method.Name;
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.WriteLine("Found string decryption method");
+                            return true;
+                        }
+
+                    }
+                }
+            }
+            return false;
+        }
+        private static void DecryptStrings(ModuleDefMD md)
+        {
+            foreach (var type in md.Types)
+            {
+                foreach (var method in type.Methods)
+                {
+                    if (!method.HasBody) { continue; }
+                    CilBody body = method.Body;
+                    for (int i = 0; i < body.Instructions.Count; i++)
+                    {
+                        if (body.Instructions[i].OpCode == OpCodes.Ldstr && body.Instructions[i + 1].OpCode == OpCodes.Ldstr
+                            && body.Instructions[i + 2].OpCode == OpCodes.Call && body.Instructions[i + 2].Operand.ToString().Contains(methodname))
+                        {
+                            var param1 = body.Instructions[i].Operand.ToString();
+                            var param2 = body.Instructions[i + 1].Operand.ToString();
+                            body.Instructions[i].Operand = decryptionmethod(param1, param2);
+
+                            body.Instructions[i + 1].OpCode = OpCodes.Nop;
+                            body.Instructions[i + 1].Operand = null;
+                            body.Instructions[i + 2].OpCode = OpCodes.Nop;
+                            body.Instructions[i + 2].Operand = null;
+                            count++;
+                        }
+                    }
+                }
+            }
+        }
+        private static string decryptionmethod(string text, string key)
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+            for (int i = 0; i < text.Length; i++)
+            {
+                char c = text[i];
+                uint num = (uint)c;
+                int index = i % key.Length;
+                char c2 = key[index];
+                uint num2 = (uint)c2;
+                uint num3 = num ^ num2;
+                char value = (char)num3;
+                stringBuilder.Append(value);
+            }
+            return stringBuilder.ToString();
+        }
+        private static string FixName(string name)
+        {
+            if(name.Contains(".exe"))
+            {
+                name = name.Replace(".exe", "-deobf.exe");
+
+            }
+            else if(name.Contains(".dll"))
+            {
+                name = name.Replace(".dll", "-deobf.dll");
+            }
+            return name;
+        }
+
+
+    }
+
+}
+
+
+
+
+================================================
+File: ProtectNotNet/ProtectNotNet.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{A10199C0-DDD1-4D94-84A0-F467EA69A71D}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>ProtectNotNet</RootNamespace>
+    <AssemblyName>ProtectNotNet</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib, Version=1.6.0.0, Culture=neutral, PublicKeyToken=50e96378b6e77999, processorArchitecture=MSIL">
+      <HintPath>..\packages\dnlib.1.6.1\lib\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: ProtectNotNet/packages.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<packages>
+  <package id="dnlib" version="1.6.1" targetFramework="net461" />
+</packages>
+
+
+================================================
+File: ProtectNotNet/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// Allgemeine Informationen Ã¼ber eine Assembly werden Ã¼ber die folgenden
+// Attribute gesteuert. Ã„ndern Sie diese Attributwerte, um die Informationen zu Ã¤ndern,
+// die einer Assembly zugeordnet sind.
+[assembly: AssemblyTitle("ProtectNotNet")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("ProtectNotNet")]
+[assembly: AssemblyCopyright("Copyright Â©  2018")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Durch Festlegen von ComVisible auf FALSE werden die Typen in dieser Assembly
+// fÃ¼r COM-Komponenten unsichtbar.  Wenn Sie auf einen Typ in dieser Assembly von
+// COM aus zugreifen mÃ¼ssen, sollten Sie das ComVisible-Attribut fÃ¼r diesen Typ auf "True" festlegen.
+[assembly: ComVisible(false)]
+
+// Die folgende GUID bestimmt die ID der Typbibliothek, wenn dieses Projekt fÃ¼r COM verfÃ¼gbar gemacht wird
+[assembly: Guid("a10199c0-ddd1-4d94-84a0-f467ea69a71d")]
+
+// Versionsinformationen fÃ¼r eine Assembly bestehen aus den folgenden vier Werten:
+//
+//      Hauptversion
+//      Nebenversion
+//      Buildnummer
+//      Revision
+//
+// Sie kÃ¶nnen alle Werte angeben oder Standardwerte fÃ¼r die Build- und Revisionsnummern verwenden,
+// Ã¼bernehmen, indem Sie "*" eingeben:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+
+================================================
+File: ProtectNotNet/bin/Debug/ProtectNotNet.exe.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.6.1" />
+    </startup>
+</configuration>
+
+

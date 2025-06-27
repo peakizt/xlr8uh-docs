@@ -1,0 +1,1253 @@
+Directory structure:
+└── alxs009-octopusobfuscator/
+    ├── README.md
+    ├── OctopusObfuscator.csproj
+    ├── OctopusObfuscator.sln
+    ├── Program.cs
+    ├── Core/
+    │   ├── Engine.cs
+    │   └── IProtections.cs
+    ├── Dependency/
+    ├── Helper/
+    │   ├── CryptoRandom.cs
+    │   └── InjectHelper.cs
+    ├── Properties/
+    │   └── AssemblyInfo.cs
+    └── Protections/
+        ├── AntiTamper/
+        │   └── AntiTamper.cs
+        ├── Mutations/
+        │   └── Mutation.cs
+        ├── RenamerProtection/
+        │   ├── Renamer.cs
+        │   └── Utils.cs
+        └── StringEncoder/
+            ├── StringEncoder.cs
+            └── Runtime/
+                └── Decoder.cs
+
+================================================
+File: README.md
+================================================
+OctopusObfuscator
+=============================================
+Basic obfuscator for .NET
+
+Usage:
+------
+- **Compile solution**
+- **Drag on drop file in console**
+- **Done**
+
+
+
+================================================
+File: OctopusObfuscator.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{656D35CF-1DA6-4101-9F5E-1662EF1E9D6A}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>OctopusObfuscator</RootNamespace>
+    <AssemblyName>OctopusObfuscator</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <LangVersion>8</LangVersion>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib, Version=1.5.0.1500, Culture=neutral, PublicKeyToken=50e96378b6e77999">
+      <HintPath>Dependency\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Core\Engine.cs" />
+    <Compile Include="Core\IProtections.cs" />
+    <Compile Include="Helper\InjectHelper.cs" />
+    <Compile Include="Helper\CryptoRandom.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Protections\AntiTamper\AntiTamper.cs" />
+    <Compile Include="Protections\Mutations\Mutation.cs" />
+    <Compile Include="Protections\RenamerProtection\Renamer.cs" />
+    <Compile Include="Protections\RenamerProtection\Utils.cs" />
+    <Compile Include="Protections\StringEncoder\Runtime\Decoder.cs" />
+    <Compile Include="Protections\StringEncoder\StringEncoder.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+         Other similar extension points exist, see Microsoft.Common.targets.
+    <Target Name="BeforeBuild">
+    </Target>
+    <Target Name="AfterBuild">
+    </Target>
+    -->
+</Project>
+
+
+================================================
+File: OctopusObfuscator.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OctopusObfuscator", "OctopusObfuscator.csproj", "{656D35CF-1DA6-4101-9F5E-1662EF1E9D6A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{656D35CF-1DA6-4101-9F5E-1662EF1E9D6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{656D35CF-1DA6-4101-9F5E-1662EF1E9D6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{656D35CF-1DA6-4101-9F5E-1662EF1E9D6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{656D35CF-1DA6-4101-9F5E-1662EF1E9D6A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: Program.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using dnlib.DotNet;
+using OctopusObfuscator.Core;
+using OctopusObfuscator.Helper;
+using OctopusObfuscator.Protections;
+using OctopusObfuscator.Protections.AntiTamper;
+using OctopusObfuscator.Protections.Mutations;
+using OctopusObfuscator.Protections.RenamerProtection;
+using OctopusObfuscator.Protections.StringEncoder;
+
+namespace OctopusObfuscator
+{
+    class Program
+    {
+        private static List<IProtections> _protectionses =
+            new List<IProtections>
+            {
+                // Your can support more protections
+                // if want
+                new StringEncoder(),
+                new Mutation(),
+                new Renamer(),
+                new AntiTamper()
+            };
+
+        static void Main(string[] args)
+        {
+            var engine = new Engine(_protectionses);
+            engine.Initialize();
+            engine.Obfuscate();
+            Console.ReadLine();
+        }
+    }
+
+    class Logger
+    {
+        public enum TypeLine
+        {
+            Default,
+            NewLine
+        }
+
+        public static void Push(object arg, TypeLine typeLine = TypeLine.NewLine)
+        {
+            switch (typeLine)
+            {
+                case TypeLine.Default:
+                    Console.Write($"[{DateTime.Now}]: {arg}");
+                    break;
+                case TypeLine.NewLine:
+                    Console.WriteLine($"[{DateTime.Now}]: {arg}");
+                    break;
+            }
+        }
+    }
+}
+
+
+================================================
+File: Core/Engine.cs
+================================================
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using dnlib.DotNet;
+
+namespace OctopusObfuscator.Core
+{
+    public class Engine
+    {
+        private ModuleDefMD _moduleDefMd;
+
+        private readonly List<IProtections> _protectionses;
+
+        private readonly Stopwatch _stopwatch;
+
+        public Engine(List<IProtections> protectionses)
+        {
+            _protectionses = protectionses;
+            _stopwatch = new Stopwatch();
+        }
+
+        public void Initialize()
+        {
+            Logger.Push("Input assembly: ", Logger.TypeLine.Default);
+            var assembly = Console.ReadLine();
+            _moduleDefMd = LoadAssembly(assembly);
+
+            _stopwatch.Start();
+
+            Logger.Push("Resolving dependency...");
+            ResolveDependency(_moduleDefMd);
+        }
+
+        public void Obfuscate()
+        {
+            var i = 0;
+            _protectionses.ForEach(x => { Logger.Push($"{++i}) {x.Name}: {x.Description}"); });
+
+            Logger.Push("Select options: ", Logger.TypeLine.Default);
+            var prefers = Console.ReadLine()?.ToCharArray().Select(x => int.Parse(x.ToString()) - 1).ToList();
+            if (prefers != null)
+                foreach (var options in prefers)
+                    _protectionses[options].Run(_moduleDefMd);
+
+            void Watermark()
+            {
+                Logger.Push("Watermarking...");
+                var attribute = new TypeDefUser("", "OctopusObfuscator",
+                    _moduleDefMd.ImportAsTypeSig(typeof(Attribute)).ToTypeDefOrRef());
+                _moduleDefMd.Types.Add(attribute);
+
+                var body = new MethodDefUser(
+                    "_" + Guid.NewGuid().ToString("n").ToUpper().Substring(2, 5),
+                    MethodSig.CreateStatic(_moduleDefMd.ImportAsTypeSig(typeof(void))),
+                    MethodAttributes.Static | MethodAttributes.Public);
+                attribute.Methods.Add(body);
+                _moduleDefMd.CustomAttributes.Add(new CustomAttribute(body));
+            }
+
+            Watermark();
+
+            SaveAssembly(_moduleDefMd);
+            _stopwatch.Stop();
+            Logger.Push($"Obfuscation task finished. Time elapsed: {_stopwatch.Elapsed}");
+        }
+
+        /// <summary>
+        /// Load assembly from path
+        /// </summary>
+        /// <param name="path">Path to .NET executable file</param>
+        /// <returns>Return <see cref="ModuleDefMD"/></returns>
+        private ModuleDefMD LoadAssembly(string path) => !string.IsNullOrEmpty(path) ? ModuleDefMD.Load(path) : null;
+
+        /// <summary>
+        /// Saving assembly with prefix '_protected'
+        /// </summary>
+        /// <param name="moduleDefMd">Current <see cref="ModuleDefMD"/></param>
+        private void SaveAssembly(ModuleDefMD moduleDefMd) =>
+            moduleDefMd.Write(Path.Combine(
+                Path.GetDirectoryName(moduleDefMd.Location) ?? throw new InvalidOperationException(),
+                Path.GetFileNameWithoutExtension(moduleDefMd.Location) + "_protected" +
+                Path.GetExtension(moduleDefMd.Location)));
+
+        private void ResolveDependency(ModuleDefMD moduleDefMd)
+        {
+            var resolver = new AssemblyResolver();
+            try
+            {
+                foreach (var assemblyRef in moduleDefMd.GetAssemblyRefs().Where(x => x != null))
+                {
+                    var resolved = resolver.Resolve(assemblyRef.FullName, moduleDefMd); // Resolve assemblyDef
+                    if (moduleDefMd.Context.AssemblyResolver.AddToCache(resolved))
+                        Logger.Push($"Resolved dependency: {resolved.Name}");
+                }
+            }
+            catch (AssemblyResolveException)
+            {
+                Logger.Push("Failed resolve dependency. Make sure dependency is near with executable file");
+            }
+            catch (Exception ex)
+            {
+                Logger.Push($"Unknown exception message: {ex.Message}");
+            }
+        }
+    }
+}
+
+
+================================================
+File: Core/IProtections.cs
+================================================
+using dnlib.DotNet;
+
+namespace OctopusObfuscator.Core
+{
+    public interface IProtections
+    {
+        string Name { get; }
+        string Description { get; }
+        void Run(ModuleDefMD moduleDefMd);
+    }
+}
+
+
+
+================================================
+File: Helper/CryptoRandom.cs
+================================================
+ï»¿using System;
+using System.Security.Cryptography;
+
+// https://gist.github.com/prettycode/5471944
+
+namespace OctopusObfuscator.Helper
+{
+    public sealed class CryptoRandom : Random, IDisposable
+    {
+        private RNGCryptoServiceProvider cryptoProvider = new RNGCryptoServiceProvider();
+        private byte[] uint32Buffer = new byte[sizeof(uint)];
+
+        /// <summary>
+        /// An implementation of System.Random used for cryptographically-strong random number generation.
+        /// </summary>
+        public CryptoRandom()
+        {
+        }
+
+        /// <summary>
+        /// An implementation of System.Random used for cryptographically-strong random number generation.
+        /// </summary>
+        public CryptoRandom(int seedIgnored)
+        {
+        }
+
+        /// <summary>
+        /// Returns a nonnegative random number.
+        /// </summary>
+        /// <returns>
+        /// A 32-bit signed integer greater than or equal to zero and less than <see cref="F:System.Int32.MaxValue"/>.
+        /// </returns>
+        public override int Next()
+        {
+            cryptoProvider.GetBytes(uint32Buffer);
+            return BitConverter.ToInt32(uint32Buffer, 0) & 0x7FFFFFFF;
+        }
+
+        /// <summary>
+        /// Returns a nonnegative random number less than the specified maximum.
+        /// </summary>
+        /// <returns>
+        /// A 32-bit signed integer greater than or equal to zero, and less than <paramref name="maxValue"/>; that is, the range of return values ordinarily includes zero but not <paramref name="maxValue"/>. However, if <paramref name="maxValue"/> equals zero, <paramref name="maxValue"/> is returned.
+        /// </returns>
+        /// <param name="maxValue">The exclusive upper bound of the random number to be generated. <paramref name="maxValue"/> must be greater than or equal to zero.</param>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="maxValue"/> is less than zero.</exception>
+        public override int Next(int maxValue)
+        {
+            if (maxValue < 0) throw new ArgumentOutOfRangeException("maxValue");
+            return Next(0, maxValue);
+        }
+
+        /// <summary>
+        /// Returns a random number within a specified range.
+        /// </summary>
+        /// <returns>
+        /// A 32-bit signed integer greater than or equal to <paramref name="minValue"/> and less than <paramref name="maxValue"/>; that is, the range of return values includes <paramref name="minValue"/> but not <paramref name="maxValue"/>. If <paramref name="minValue"/> equals <paramref name="maxValue"/>, <paramref name="minValue"/> is returned.
+        /// </returns>
+        /// <param name="minValue">The inclusive lower bound of the random number returned.</param>
+        /// <param name="maxValue">The exclusive upper bound of the random number returned. <paramref name="maxValue"/> must be greater than or equal to <paramref name="minValue"/>.</param>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="minValue"/> is greater than <paramref name="maxValue"/>.</exception>
+        public override int Next(int minValue, int maxValue)
+        {
+            if (minValue > maxValue) throw new ArgumentOutOfRangeException("minValue");
+            if (minValue == maxValue) return minValue;
+
+            long diff = maxValue - minValue;
+            long max = (1 + (long) uint.MaxValue);
+            long remainder = max % diff;
+
+            while (true)
+            {
+                cryptoProvider.GetBytes(uint32Buffer);
+                uint rand = BitConverter.ToUInt32(uint32Buffer, 0);
+                if (rand < max - remainder)
+                {
+                    return (int) (minValue + (rand % diff));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns a random number between 0.0 and 1.0.
+        /// </summary>
+        /// <returns>
+        /// A double-precision floating point number greater than or equal to 0.0, and less than 1.0.
+        /// </returns>
+        public override double NextDouble()
+        {
+            cryptoProvider.GetBytes(uint32Buffer);
+            uint rand = BitConverter.ToUInt32(uint32Buffer, 0);
+            return rand / (1.0 + uint.MaxValue);
+        }
+
+        /// <summary>
+        /// Fills the elements of a specified array of bytes with random numbers.
+        /// </summary>
+        /// <param name="buffer">An array of bytes to contain random numbers.</param>
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="buffer"/> is null.
+        public override void NextBytes(byte[] buffer)
+        {
+            if (buffer == null) throw new ArgumentNullException("buffer");
+            cryptoProvider.GetBytes(buffer);
+        }
+
+        public void Dispose()
+        {
+            InternalDispose();
+        }
+
+        ~CryptoRandom()
+        {
+            InternalDispose();
+        }
+
+        void InternalDispose()
+        {
+            if (cryptoProvider != null)
+            {
+                cryptoProvider.Dispose();
+                cryptoProvider = null;
+            }
+        }
+    }
+}
+
+
+================================================
+File: Helper/InjectHelper.cs
+================================================
+ï»¿using System.Collections.Generic;
+using System.Linq;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+// https://github.com/yck1509/ConfuserEx/blob/master/Confuser.Core/Helpers/InjectHelper.cs
+
+namespace OctopusObfuscator.Helper
+{
+    /// <summary>
+    ///     Provides methods to inject a <see cref="TypeDef" /> into another module.
+    /// </summary>
+    public static class InjectHelper
+    {
+        /// <summary>
+        ///     Clones the specified origin TypeDef.
+        /// </summary>
+        /// <param name="origin">The origin TypeDef.</param>
+        /// <returns>The cloned TypeDef.</returns>
+        static TypeDefUser Clone(TypeDef origin)
+        {
+            var ret = new TypeDefUser(origin.Namespace, origin.Name) {Attributes = origin.Attributes};
+
+            if (origin.ClassLayout != null)
+                ret.ClassLayout = new ClassLayoutUser(origin.ClassLayout.PackingSize, origin.ClassSize);
+
+            foreach (var genericParam in origin.GenericParameters)
+                ret.GenericParameters.Add(new GenericParamUser(genericParam.Number, genericParam.Flags, "-"));
+
+            return ret;
+        }
+
+        /// <summary>
+        ///     Clones the specified origin MethodDef.
+        /// </summary>
+        /// <param name="origin">The origin MethodDef.</param>
+        /// <returns>The cloned MethodDef.</returns>
+        static MethodDefUser Clone(MethodDef origin)
+        {
+            var ret = new MethodDefUser(origin.Name, null, origin.ImplAttributes, origin.Attributes);
+
+            foreach (var genericParam in origin.GenericParameters)
+                ret.GenericParameters.Add(new GenericParamUser(genericParam.Number, genericParam.Flags, "-"));
+
+            return ret;
+        }
+
+        /// <summary>
+        ///     Clones the specified origin FieldDef.
+        /// </summary>
+        /// <param name="origin">The origin FieldDef.</param>
+        /// <returns>The cloned FieldDef.</returns>
+        static FieldDefUser Clone(FieldDef origin)
+        {
+            var ret = new FieldDefUser(origin.Name, null, origin.Attributes);
+            return ret;
+        }
+
+        /// <summary>
+        ///     Populates the context mappings.
+        /// </summary>
+        /// <param name="typeDef">The origin TypeDef.</param>
+        /// <param name="ctx">The injection context.</param>
+        /// <returns>The new TypeDef.</returns>
+        static TypeDef PopulateContext(TypeDef typeDef, InjectContext ctx)
+        {
+            TypeDef ret;
+            IDnlibDef existing;
+            if (!ctx.Map.TryGetValue(typeDef, out existing))
+            {
+                ret = Clone(typeDef);
+                ctx.Map[typeDef] = ret;
+            }
+            else
+                ret = (TypeDef) existing;
+
+            foreach (var nestedType in typeDef.NestedTypes)
+                ret.NestedTypes.Add(PopulateContext(nestedType, ctx));
+
+            foreach (var method in typeDef.Methods)
+                ret.Methods.Add((MethodDef) (ctx.Map[method] = Clone(method)));
+
+            foreach (var field in typeDef.Fields)
+                ret.Fields.Add((FieldDef) (ctx.Map[field] = Clone(field)));
+
+            return ret;
+        }
+
+        /// <summary>
+        ///     Copies the information from the origin type to injected type.
+        /// </summary>
+        /// <param name="typeDef">The origin TypeDef.</param>
+        /// <param name="ctx">The injection context.</param>
+        static void CopyTypeDef(TypeDef typeDef, InjectContext ctx)
+        {
+            var newTypeDef = (TypeDef) ctx.Map[typeDef];
+
+            newTypeDef.BaseType = (ITypeDefOrRef) ctx.Importer.Import(typeDef.BaseType);
+
+            foreach (var ice in typeDef.Interfaces)
+                newTypeDef.Interfaces.Add(new InterfaceImplUser((ITypeDefOrRef) ctx.Importer.Import(ice.Interface)));
+        }
+
+        /// <summary>
+        ///     Copies the information from the origin method to injected method.
+        /// </summary>
+        /// <param name="methodDef">The origin MethodDef.</param>
+        /// <param name="ctx">The injection context.</param>
+        static void CopyMethodDef(MethodDef methodDef, InjectContext ctx)
+        {
+            var newMethodDef = (MethodDef) ctx.Map[methodDef];
+
+            newMethodDef.Signature = ctx.Importer.Import(methodDef.Signature);
+            newMethodDef.Parameters.UpdateParameterTypes();
+
+            if (methodDef.ImplMap != null)
+                newMethodDef.ImplMap =
+                    new ImplMapUser(new ModuleRefUser(ctx.TargetModule, methodDef.ImplMap.Module.Name),
+                        methodDef.ImplMap.Name, methodDef.ImplMap.Attributes);
+
+            foreach (var ca in methodDef.CustomAttributes)
+                newMethodDef.CustomAttributes.Add(
+                    new CustomAttribute((ICustomAttributeType) ctx.Importer.Import(ca.Constructor)));
+
+            if (methodDef.HasBody)
+            {
+                newMethodDef.Body = new CilBody(methodDef.Body.InitLocals, new List<Instruction>(),
+                    new List<ExceptionHandler>(), new List<Local>()) {MaxStack = methodDef.Body.MaxStack};
+
+                var bodyMap = new Dictionary<object, object>();
+
+                foreach (var local in methodDef.Body.Variables)
+                {
+                    var newLocal = new Local(ctx.Importer.Import(local.Type));
+                    newMethodDef.Body.Variables.Add(newLocal);
+                    newLocal.Name = local.Name;
+                    newLocal.PdbAttributes = local.PdbAttributes;
+
+                    bodyMap[local] = newLocal;
+                }
+
+                foreach (var instr in methodDef.Body.Instructions)
+                {
+                    var newInstr = new Instruction(instr.OpCode, instr.Operand) {SequencePoint = instr.SequencePoint};
+
+                    if (newInstr.Operand is IType type)
+                        newInstr.Operand = ctx.Importer.Import(type);
+
+                    else if (newInstr.Operand is IMethod method)
+                        newInstr.Operand = ctx.Importer.Import(method);
+
+                    else if (newInstr.Operand is IField field)
+                        newInstr.Operand = ctx.Importer.Import(field);
+
+                    newMethodDef.Body.Instructions.Add(newInstr);
+                    bodyMap[instr] = newInstr;
+                }
+
+                foreach (var instr in newMethodDef.Body.Instructions)
+                {
+                    if (instr.Operand != null && bodyMap.ContainsKey(instr.Operand))
+                        instr.Operand = bodyMap[instr.Operand];
+
+                    else if (instr.Operand is Instruction[] instructions)
+                        instr.Operand = instructions.Select(target => (Instruction) bodyMap[target])
+                            .ToArray();
+                }
+
+                foreach (var eh in methodDef.Body.ExceptionHandlers)
+                    newMethodDef.Body.ExceptionHandlers.Add(new ExceptionHandler(eh.HandlerType)
+                    {
+                        CatchType = eh.CatchType == null ? null : (ITypeDefOrRef) ctx.Importer.Import(eh.CatchType),
+                        TryStart = (Instruction) bodyMap[eh.TryStart],
+                        TryEnd = (Instruction) bodyMap[eh.TryEnd],
+                        HandlerStart = (Instruction) bodyMap[eh.HandlerStart],
+                        HandlerEnd = (Instruction) bodyMap[eh.HandlerEnd],
+                        FilterStart = eh.FilterStart == null ? null : (Instruction) bodyMap[eh.FilterStart]
+                    });
+
+                newMethodDef.Body.SimplifyMacros(newMethodDef.Parameters);
+            }
+        }
+
+        /// <summary>
+        ///     Copies the information from the origin field to injected field.
+        /// </summary>
+        /// <param name="fieldDef">The origin FieldDef.</param>
+        /// <param name="ctx">The injection context.</param>
+        static void CopyFieldDef(FieldDef fieldDef, InjectContext ctx)
+        {
+            var newFieldDef = (FieldDef) ctx.Map[fieldDef];
+
+            newFieldDef.Signature = ctx.Importer.Import(fieldDef.Signature);
+        }
+
+        /// <summary>
+        ///     Copies the information to the injected definitions.
+        /// </summary>
+        /// <param name="typeDef">The origin TypeDef.</param>
+        /// <param name="ctx">The injection context.</param>
+        /// <param name="copySelf">if set to <c>true</c>, copy information of <paramref name="typeDef" />.</param>
+        static void Copy(TypeDef typeDef, InjectContext ctx, bool copySelf)
+        {
+            if (copySelf)
+                CopyTypeDef(typeDef, ctx);
+
+            foreach (var nestedType in typeDef.NestedTypes)
+                Copy(nestedType, ctx, true);
+
+            foreach (var method in typeDef.Methods)
+                CopyMethodDef(method, ctx);
+
+            foreach (var field in typeDef.Fields)
+                CopyFieldDef(field, ctx);
+        }
+
+        /// <summary>
+        ///     Injects the specified TypeDef to another module.
+        /// </summary>
+        /// <param name="typeDef">The source TypeDef.</param>
+        /// <param name="target">The target module.</param>
+        /// <returns>The injected TypeDef.</returns>
+        public static TypeDef Inject(TypeDef typeDef, ModuleDef target)
+        {
+            var ctx = new InjectContext(typeDef.Module, target);
+            PopulateContext(typeDef, ctx);
+            Copy(typeDef, ctx, true);
+            return (TypeDef) ctx.Map[typeDef];
+        }
+
+        /// <summary>
+        ///     Injects the specified MethodDef to another module.
+        /// </summary>
+        /// <param name="methodDef">The source MethodDef.</param>
+        /// <param name="target">The target module.</param>
+        /// <returns>The injected MethodDef.</returns>
+        public static MethodDef Inject(MethodDef methodDef, ModuleDef target)
+        {
+            var ctx = new InjectContext(methodDef.Module, target);
+            ctx.Map[methodDef] = Clone(methodDef);
+            CopyMethodDef(methodDef, ctx);
+            return (MethodDef) ctx.Map[methodDef];
+        }
+
+        /// <summary>
+        ///     Injects the members of specified TypeDef to another module.
+        /// </summary>
+        /// <param name="typeDef">The source TypeDef.</param>
+        /// <param name="newType">The new type.</param>
+        /// <param name="target">The target module.</param>
+        /// <returns>Injected members.</returns>
+        public static IEnumerable<IDnlibDef> Inject(TypeDef typeDef, TypeDef newType, ModuleDef target)
+        {
+            var ctx = new InjectContext(typeDef.Module, target);
+            ctx.Map[typeDef] = newType;
+            PopulateContext(typeDef, ctx);
+            Copy(typeDef, ctx, false);
+            return ctx.Map.Values.Except(new[] {newType});
+        }
+
+        /// <summary>
+        ///     Context of the injection process.
+        /// </summary>
+        class InjectContext : ImportResolver
+        {
+            /// <summary>
+            ///     The mapping of origin definitions to injected definitions.
+            /// </summary>
+            public readonly Dictionary<IDnlibDef, IDnlibDef> Map = new Dictionary<IDnlibDef, IDnlibDef>();
+
+            /// <summary>
+            ///     The module which source type originated from.
+            /// </summary>
+            private readonly ModuleDef OriginModule;
+
+            /// <summary>
+            ///     The module which source type is being injected to.
+            /// </summary>
+            public readonly ModuleDef TargetModule;
+
+            /// <summary>
+            ///     Initializes a new instance of the <see cref="InjectContext" /> class.
+            /// </summary>
+            /// <param name="module">The origin module.</param>
+            /// <param name="target">The target module.</param>
+            public InjectContext(ModuleDef module, ModuleDef target)
+            {
+                OriginModule = module;
+                TargetModule = target;
+                Importer = new Importer(target, ImporterOptions.TryToUseTypeDefs) {Resolver = this};
+            }
+
+            /// <summary>
+            ///     Gets the importer.
+            /// </summary>
+            /// <value>The importer.</value>
+            public Importer Importer { get; }
+
+            /// <inheritdoc />
+            public override TypeDef Resolve(TypeDef typeDef)
+            {
+                if (Map.ContainsKey(typeDef))
+                    return (TypeDef) Map[typeDef];
+                return null;
+            }
+
+            /// <inheritdoc />
+            public override MethodDef Resolve(MethodDef methodDef)
+            {
+                if (Map.ContainsKey(methodDef))
+                    return (MethodDef) Map[methodDef];
+                return null;
+            }
+
+            /// <inheritdoc />
+            public override FieldDef Resolve(FieldDef fieldDef)
+            {
+                if (Map.ContainsKey(fieldDef))
+                    return (FieldDef) Map[fieldDef];
+                return null;
+            }
+        }
+    }
+}
+
+
+================================================
+File: Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following 
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("OctopusObfuscator")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("OctopusObfuscator")]
+[assembly: AssemblyCopyright("Copyright Â©  2019")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Setting ComVisible to false makes the types in this assembly not visible 
+// to COM components.  If you need to access a type in this assembly from 
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("656D35CF-1DA6-4101-9F5E-1662EF1E9D6A")]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version 
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers 
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+================================================
+File: Protections/AntiTamper/AntiTamper.cs
+================================================
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using OctopusObfuscator.Core;
+using MethodBody = System.Reflection.MethodBody;
+using OpCodes = dnlib.DotNet.Emit.OpCodes;
+
+namespace OctopusObfuscator.Protections.AntiTamper
+{
+    public class AntiTamper : IProtections
+    {
+        public string Name => "Anti Tamper Protection";
+        public string Description => "Prevent change .exe";
+
+        public void Run(ModuleDefMD moduleDefMd)
+        {
+            var memoryStream = new MemoryStream {Position = 0};
+            var antiTamperData = new AntiTamperData(moduleDefMd);
+            antiTamperData.Initialize();
+            var released = new List<Tuple<MethodDef, List<Instruction>>>();
+            foreach (var typeDef in moduleDefMd.GetTypes().Where(x => x.HasMethods && !x.IsGlobalModuleType))
+            {
+                foreach (var methodDef in typeDef.Methods.Where(x =>
+                    x.HasBody && x.ReturnType == moduleDefMd.ImportAsTypeSig(typeof(void))))
+                {
+                    var boolean = new Local(moduleDefMd.ImportAsTypeSig(typeof(bool)));
+                    methodDef.Body.Variables.Add(boolean);
+                    var instructions = methodDef.Body.Instructions;
+                    instructions.Insert(0,
+                        OpCodes.Newobj.ToInstruction(antiTamperData.GetMethod(".ctor")));
+                    instructions.Insert(1, OpCodes.Ldc_I4.ToInstruction(0));
+                    instructions.Insert(2, OpCodes.Callvirt.ToInstruction(antiTamperData.GetMethod("GetFrame")));
+                    instructions.Insert(3, OpCodes.Callvirt.ToInstruction(antiTamperData.GetMethod("GetMethod")));
+                    instructions.Insert(4, OpCodes.Callvirt.ToInstruction(antiTamperData.GetMethod("GetMethodBody")));
+                    instructions.Insert(5,
+                        OpCodes.Callvirt.ToInstruction(antiTamperData.GetMethod("GetILAsByteArray")));
+                    instructions.Insert(6, OpCodes.Ldlen.ToInstruction());
+                    instructions.Insert(7, OpCodes.Conv_I4.ToInstruction());
+                    instructions.Insert(8, OpCodes.Ldc_I4.ToInstruction(methodDef.Body.GetILAsByteArray().Length));
+                    instructions.Insert(9, OpCodes.Ceq.ToInstruction());
+                    instructions.Insert(10, OpCodes.Stloc.ToInstruction(boolean));
+                    instructions.Insert(11, OpCodes.Ldloc.ToInstruction(boolean));
+                    instructions.Insert(12, OpCodes.Brfalse.ToInstruction(instructions[instructions.Count - 1]));
+                    released.Add(new Tuple<MethodDef, List<Instruction>>(methodDef, instructions.ToList()));
+                }
+            }
+
+            moduleDefMd.Write(memoryStream);
+            released.ForEach(x =>
+            {
+                /* Overriding size of il, because new instructions have been added */
+                x.Item2[8].Operand = OpCodes.Ldc_I4;
+                x.Item2[8].Operand = GetIlLength((x.Item1, memoryStream.ToArray()));
+            });
+        }
+
+        private int GetIlLength((MethodDef, byte[]) data) => Assembly.Load(data.Item2).ManifestModule
+            .ResolveMethod(data.Item1.MDToken.ToInt32()).GetMethodBody().GetILAsByteArray().Length;
+    }
+
+    class AntiTamperData
+    {
+        private List<IMethod> MethodDefs { get; }
+
+        private readonly ModuleDefMD _moduleDefMd;
+
+        public AntiTamperData(ModuleDefMD moduleDefMd)
+        {
+            _moduleDefMd = moduleDefMd;
+            MethodDefs = new List<IMethod>();
+        }
+
+        public void Initialize()
+        {
+            MethodDefs.Add(_moduleDefMd.Import(typeof(StackTrace).GetConstructor(new Type[0])));
+            MethodDefs.Add(_moduleDefMd.Import(typeof(StackTrace).GetMethod("GetFrame", new Type[] {typeof(int)})));
+            MethodDefs.Add(_moduleDefMd.Import(typeof(StackFrame).GetMethod("GetMethod")));
+            MethodDefs.Add(_moduleDefMd.Import(typeof(MethodBase).GetMethod("GetMethodBody")));
+            MethodDefs.Add(_moduleDefMd.Import(typeof(MethodBody).GetMethod("GetILAsByteArray")));
+        }
+
+        public IMethod GetMethod(string methodName) => MethodDefs.Find(x => x.Name == methodName);
+    }
+}
+
+
+================================================
+File: Protections/Mutations/Mutation.cs
+================================================
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using OctopusObfuscator.Core;
+using OctopusObfuscator.Helper;
+
+namespace OctopusObfuscator.Protections.Mutations
+{
+    class Mutation : IProtections
+    {
+        public string Name => "Mutations";
+        public string Description => "Split all numbers in assembly";
+
+        private ModuleDefMD _moduleDefMd;
+
+        public void Run(ModuleDefMD moduleDefMd)
+        {
+            _moduleDefMd = moduleDefMd;
+            Console.ForegroundColor = ConsoleColor.Green;
+            Logger.Push($"Running {nameof(Mutation)}");
+            Console.ForegroundColor = ConsoleColor.Gray;
+
+            using var cryptoRandom = new CryptoRandom();
+            foreach (var typeDef in moduleDefMd.GetTypes())
+            {
+                var listMethod = new List<MethodDef>(); // List of proxy methods to be added in typeDef
+                foreach (var methodDef in typeDef.Methods.Where(x => x.HasBody))
+                {
+                    var instructions = methodDef.Body.Instructions;
+                    for (var i = 0; i < instructions.Count; i++)
+                    {
+                        if (instructions[i].IsLdcI4() && IsSafe(instructions.ToList(), i))
+                        {
+                            MethodDef refMethod = null;
+                            int operand = instructions[i].GetLdcI4Value();
+                            instructions[i].OpCode = OpCodes.Ldc_R8;
+                            switch (cryptoRandom.Next(0, 3))
+                            {
+                                case 0:
+                                    refMethod = GenerateRefMethod("Floor");
+                                    instructions[i].Operand = Convert.ToDouble(operand + cryptoRandom.NextDouble());
+                                    break;
+                                case 1:
+                                    refMethod = GenerateRefMethod("Sqrt");
+                                    instructions[i].Operand = Math.Pow(Convert.ToDouble(operand), 2);
+                                    break;
+                                case 2:
+                                    refMethod = GenerateRefMethod("Round");
+                                    instructions[i].Operand = Convert.ToDouble(operand);
+                                    break;
+                            }
+
+                            instructions.Insert(i + 1, OpCodes.Call.ToInstruction(refMethod));
+                            instructions.Insert(i + 2, OpCodes.Conv_I4.ToInstruction());
+                            i += 2;
+                            listMethod.Add(refMethod);
+                        }
+                    }
+
+                    methodDef.Body.SimplifyMacros(methodDef.Parameters);
+                }
+
+                foreach (var method in listMethod)
+                    typeDef.Methods.Add(method);
+            }
+        }
+
+        private MethodDef GenerateRefMethod(string methodName)
+        {
+            var refMethod = new MethodDefUser(
+                "_" + Guid.NewGuid().ToString("D").ToUpper().Substring(2, 5),
+                MethodSig.CreateStatic(_moduleDefMd.ImportAsTypeSig(typeof(double))),
+                MethodAttributes.Private | MethodAttributes.Static | MethodAttributes.HideBySig)
+            {
+                Signature = new MethodSig
+                {
+                    Params = {_moduleDefMd.ImportAsTypeSig(typeof(double))},
+                    RetType = _moduleDefMd.ImportAsTypeSig(typeof(double))
+                }
+            };
+            
+            var cil = new CilBody
+            {
+                Instructions =
+                {
+                    OpCodes.Ldarg_0.ToInstruction(),
+                    OpCodes.Call.ToInstruction(GetMethod(typeof(Math),
+                        methodName, new[] {typeof(double)})),
+                    OpCodes.Stloc_0.ToInstruction(),
+                    OpCodes.Ldloc_0.ToInstruction(),
+                    OpCodes.Ret.ToInstruction()
+                }
+            };
+            refMethod.Body = cil;
+            refMethod.Body.Variables.Add(new Local(_moduleDefMd.ImportAsTypeSig(typeof(double))));
+            return refMethod.ResolveMethodDef();
+        }
+
+        private bool IsSafe(List<Instruction> instructions, int i)
+        {
+            if (new[] {-2, -1, 0, 1, 2}.Contains(instructions[i].GetLdcI4Value())) // Skipping min values
+                return false;
+            return true;
+        }
+
+        private IMethod GetMethod(Type type, string methodName, Type[] types)
+        {
+            return _moduleDefMd.Import(type.GetMethod(methodName, types));
+        }
+    }
+}
+
+
+================================================
+File: Protections/RenamerProtection/Renamer.cs
+================================================
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using dnlib.DotNet;
+using OctopusObfuscator.Core;
+using TypeData = OctopusObfuscator.Protections.RenamerProtection.Utils.TypeData;
+
+namespace OctopusObfuscator.Protections.RenamerProtection
+{
+    public class Renamer : IProtections
+    {
+        public string Name => "Rename Protection";
+        public string Description => "Rename all types, methods, fields & property";
+
+        public void Run(ModuleDefMD moduleDefMd)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Logger.Push($"Running {nameof(Renamer)}");
+            Console.ForegroundColor = ConsoleColor.Gray;
+
+            var utils = new Utils();
+            utils.Initialize();
+
+            foreach (var typeDef in moduleDefMd.GetTypes()
+                .Where(x => x.HasMethods && !x.IsSerializable /* We exclude class with this attribute */
+                                         && !x.IsGlobalModuleType))
+            {
+                typeDef.Name = utils.GetName(TypeData.Type);
+                typeDef.Methods.Where(x => x.HasBody && !x.IsConstructor).ToList()
+                    .ForEach(y => y.Name = utils.GetName(TypeData.Method));
+                typeDef.Fields.ToList().ForEach(x => x.Name = utils.GetName(TypeData.Field));
+                typeDef.Properties.ToList().ForEach(x => x.Name = utils.GetName(TypeData.Property));
+            }
+        }
+    }
+}
+
+
+================================================
+File: Protections/RenamerProtection/Utils.cs
+================================================
+using System.Collections.Generic;
+using System.Linq;
+using OctopusObfuscator.Helper;
+
+namespace OctopusObfuscator.Protections.RenamerProtection
+{
+    public class Utils : Renamer
+    {
+        private readonly CryptoRandom _cryptoRandom;
+        private List<string> _types;
+        private List<string> _methods;
+        private List<string> _fields;
+        private List<string> _properties;
+
+        public Utils()
+        {
+            _cryptoRandom = new CryptoRandom();
+            _types = new List<string>();
+            _methods = new List<string>();
+            _fields = new List<string>();
+            _properties = new List<string>();
+        }
+
+        /// <summary>
+        /// Filling of all lists of the names of the mscorlib
+        /// </summary>
+        public void Initialize()
+        {
+            var module = typeof(void).Module; // Get module mscorlib
+            foreach (var types in module.GetTypes())
+            {
+                // Adding names to list
+
+                _types.Add(types.Name);
+                types.GetMethods().ToList().ForEach(x => _methods.Add(x.Name));
+                types.GetFields().ToList().ForEach(x => _fields.Add(x.Name));
+                types.GetProperties().ToList().ForEach(x => _properties.Add(x.Name));
+            }
+
+            _types = _types.Distinct().ToList();
+            _methods = _methods.Distinct().ToList();
+            _fields = _fields.Distinct().ToList();
+            _properties = _properties.Distinct().ToList();
+        }
+
+        /// <summary>
+        /// Getting name from mscorlib
+        /// https://docs.microsoft.com/ru-ru/dotnet/csharp/whats-new/csharp-8#more-patterns-in-more-places
+        /// </summary>
+        /// <param name="typeData">Type for rename</param>
+        /// <returns></returns>
+        public string GetName(TypeData typeData) =>
+            typeData switch
+            {
+                TypeData.Type => _types[_cryptoRandom.Next(0, _types.Count)],
+                TypeData.Method => _methods[_cryptoRandom.Next(0, _methods.Count)],
+                TypeData.Field => _fields[_cryptoRandom.Next(0, _fields.Count)],
+                TypeData.Property => _properties[_cryptoRandom.Next(0, _properties.Count)]
+            };
+
+        public enum TypeData
+        {
+            Type,
+            Method,
+            Field,
+            Property
+        }
+    }
+}
+
+
+================================================
+File: Protections/StringEncoder/StringEncoder.cs
+================================================
+using System;
+using System.Linq;
+using System.Text;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using OctopusObfuscator.Core;
+using OctopusObfuscator.Helper;
+using Decoder = OctopusObfuscator.Protections.StringEncoder.Runtime.Decoder;
+
+namespace OctopusObfuscator.Protections.StringEncoder
+{
+    class StringEncoder : IProtections
+    {
+        public string Name => "String Encoder";
+        public string Description => "Encode all strings in assembly";
+
+        public void Run(ModuleDefMD moduleDefMd)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Logger.Push($"Running {nameof(StringEncoder)}");
+            Console.ForegroundColor = ConsoleColor.Gray;
+
+            var module = ModuleDefMD.Load(typeof(Decoder).Module);
+            var type = module.ResolveTypeDef(MDToken.ToRID(typeof(Decoder).MetadataToken));
+            var decoderMethod =
+                InjectHelper.Inject(type, moduleDefMd.GlobalType, moduleDefMd).SingleOrDefault() as MethodDef;
+
+            using var cryptoRandom = new CryptoRandom();
+            foreach (var typeDef in moduleDefMd.GetTypes().Where(x => x.HasMethods))
+            {
+                foreach (var methodDef in typeDef.Methods.Where(x => x.HasBody))
+                {
+                    var instructions = methodDef.Body.Instructions;
+                    for (var i = 0; i < instructions.Count; i++)
+                    {
+                        if (instructions[i].OpCode == OpCodes.Ldstr &&
+                            !string.IsNullOrEmpty(instructions[i].Operand.ToString()))
+                        {
+                            var key = methodDef.Name.Length + cryptoRandom.Next();
+
+                            var encryptedString =
+                                EncryptString(new Tuple<string, int>(instructions[i].Operand.ToString(), key));
+
+                            instructions[i].OpCode = OpCodes.Ldstr;
+                            instructions[i].Operand = encryptedString;
+                            instructions.Insert(i + 1, OpCodes.Ldc_I4.ToInstruction(key));
+                            instructions.Insert(i + 2, OpCodes.Call.ToInstruction(decoderMethod));
+                            i += 2;
+                        }
+                    }
+
+                    methodDef.Body.SimplifyMacros(methodDef.Parameters);
+                }
+            }
+        }
+
+        private string EncryptString(Tuple<string, int> values)
+        {
+            var stringBuilder = new StringBuilder();
+            int key = values.Item2;
+            foreach (var symbol in values.Item1)
+                stringBuilder.Append((char) (symbol ^ key));
+            return stringBuilder.ToString();
+        }
+    }
+}
+
+
+================================================
+File: Protections/StringEncoder/Runtime/Decoder.cs
+================================================
+using System.Reflection;
+using System.Text;
+
+namespace OctopusObfuscator.Protections.StringEncoder.Runtime
+{
+    internal static class Decoder
+    {
+        public static string Initialization(string encodedString, int key)
+        {
+            if (Assembly.GetExecutingAssembly().FullName == Assembly.GetCallingAssembly().FullName)
+            {
+                var stringBuilder = new StringBuilder();
+                foreach (var symbol in encodedString)
+                    stringBuilder.Append((char) (symbol ^ key));
+                return stringBuilder.ToString();
+            }
+
+            return null;
+        }
+    }
+}
+

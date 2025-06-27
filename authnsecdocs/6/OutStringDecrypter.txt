@@ -1,0 +1,482 @@
+Directory structure:
+└── virility-outstringdecrypter/
+    ├── OutStringDecrypter.sln
+    ├── Libraries/
+    └── OutStringDecrypter/
+        ├── App.config
+        ├── OutStringDecrypter.csproj
+        ├── Program.cs
+        ├── Build/
+        ├── Core/
+        │   ├── Enums/
+        │   │   └── CleanType.cs
+        │   ├── Helpers/
+        │   │   ├── Deobfuscator.cs
+        │   │   └── Misc.cs
+        │   └── Methods/
+        │       ├── DeobfuscateMethodAttribute.cs
+        │       ├── IDeobfuscateMethod.cs
+        │       └── StringDeobfuscator.cs
+        └── Properties/
+            └── AssemblyInfo.cs
+
+================================================
+File: OutStringDecrypter.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutStringDecrypter", "OutStringDecrypter\OutStringDecrypter.csproj", "{E05C5844-F88B-4D11-B9A4-6841BF213630}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E05C5844-F88B-4D11-B9A4-6841BF213630}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E05C5844-F88B-4D11-B9A4-6841BF213630}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E05C5844-F88B-4D11-B9A4-6841BF213630}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E05C5844-F88B-4D11-B9A4-6841BF213630}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
+
+
+
+
+================================================
+File: OutStringDecrypter/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.5.1" />
+    </startup>
+</configuration>
+
+
+================================================
+File: OutStringDecrypter/OutStringDecrypter.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{E05C5844-F88B-4D11-B9A4-6841BF213630}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>OutStringDecrypter</RootNamespace>
+    <AssemblyName>OutStringDecrypter</AssemblyName>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib, Version=1.5.0.1500, Culture=neutral, PublicKeyToken=50e96378b6e77999, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libraries\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Core\Enums\CleanType.cs" />
+    <Compile Include="Core\Helpers\Deobfuscator.cs" />
+    <Compile Include="Core\Helpers\Misc.cs" />
+    <Compile Include="Core\Methods\DeobfuscateMethodAttribute.cs" />
+    <Compile Include="Core\Methods\IDeobfuscateMethod.cs" />
+    <Compile Include="Core\Methods\StringDeobfuscator.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Build\obfuscated.exe" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
+
+
+================================================
+File: OutStringDecrypter/Program.cs
+================================================
+ï»¿using System;
+using System.IO;
+using dnlib.DotNet;
+using OutStringDecrypter.Core.Helpers;
+
+namespace OutStringDecrypter
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            if (args.Length != 1 || !File.Exists(args[0]))
+                return;
+
+            var filePath = args[0];
+
+            Console.WriteLine("Loading module..");
+            var module = ModuleDefMD.Load(filePath);
+
+            Console.WriteLine("Initializing deobfuscator..");
+            var deobfuscator = new Deobfuscator(module, filePath);
+
+            var outputPath = Misc.GetOutPath(filePath);
+            var result = deobfuscator.Process(outputPath);
+
+            var message = result
+                ? "Successfully deobfuscated.."
+                : "Failed to deobfuscate..";
+
+            Console.WriteLine(message);
+            Console.Read();
+        }
+    }
+}
+
+
+
+================================================
+File: OutStringDecrypter/Core/Enums/CleanType.cs
+================================================
+ï»¿namespace OutStringDecrypter.Core.Enums
+{
+    public enum CleanType
+    {
+        String
+    }
+}
+
+
+================================================
+File: OutStringDecrypter/Core/Helpers/Deobfuscator.cs
+================================================
+ï»¿using System;            
+using dnlib.DotNet;
+using OutStringDecrypter.Core.Methods;
+
+namespace OutStringDecrypter.Core.Helpers
+{
+    public class Deobfuscator
+    {
+        private static readonly DeobfuscateMethod[] DeobfuscateMethods;
+
+        public ModuleDef Module { get; set; }
+
+        static Deobfuscator()
+        {
+            DeobfuscateMethods = new DeobfuscateMethod[]
+            {
+                new StringDeobfuscator()
+            };
+        }
+
+        public Deobfuscator(ModuleDef module, string filePath)
+        {
+            if (module == null)
+                throw new ArgumentNullException(nameof(module));
+
+            if (string.IsNullOrWhiteSpace(filePath))
+                throw new ArgumentNullException(nameof(filePath));
+                                 
+            Module = module;
+        }
+
+        public bool Process(string filePath)
+        {
+            try
+            {             
+                foreach (var deobfuscateMethod in DeobfuscateMethods)
+                    deobfuscateMethod.Deobfuscate(Module);
+
+                Module.Write(filePath);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("An error occured: {0}", ex.Message);
+                Console.WriteLine(ex.StackTrace);
+            }
+
+            return false;
+        }
+    }
+}                     
+
+
+================================================
+File: OutStringDecrypter/Core/Helpers/Misc.cs
+================================================
+ï»¿using System;
+using System.IO;
+
+namespace OutStringDecrypter.Core.Helpers
+{
+    public static class Misc
+    {
+        public static string GetExtension(this string value)
+        {
+            var extension = Path.GetExtension(value);
+            return extension == null
+                ? string.Empty
+                : extension.Replace(".", string.Empty);
+        }
+
+        public static string GetOutPath(string filePath)
+        {
+            var baseDirectory = Path.GetDirectoryName(filePath);
+            if (baseDirectory == null)
+                throw new InvalidOperationException("Directory is null.");
+
+            if (!baseDirectory.EndsWith("\\"))
+                baseDirectory += "\\";
+
+            return Path.Combine(
+                baseDirectory,
+                Path.GetFileNameWithoutExtension(filePath) + "_cleaned.exe");
+        }
+    }
+}
+
+
+================================================
+File: OutStringDecrypter/Core/Methods/DeobfuscateMethodAttribute.cs
+================================================
+using System;
+
+namespace OutStringDecrypter.Core.Methods
+{
+    public class DeobfuscateMethodAttribute : Attribute
+    {
+        public string Description { get; set; }
+
+        public DeobfuscateMethodAttribute(string description)
+        {
+            Description = description;
+        }
+    }
+}
+
+
+================================================
+File: OutStringDecrypter/Core/Methods/IDeobfuscateMethod.cs
+================================================
+ï»¿using dnlib.DotNet;
+
+namespace OutStringDecrypter.Core.Methods
+{
+    public abstract class DeobfuscateMethod
+    {
+        public abstract void Deobfuscate(ModuleDef moduleDef);
+    }
+}    
+
+
+================================================
+File: OutStringDecrypter/Core/Methods/StringDeobfuscator.cs
+================================================
+ï»¿using System;
+using dnlib.DotNet;
+using System.Reflection;
+using dnlib.DotNet.Emit;
+
+namespace OutStringDecrypter.Core.Methods
+{
+    [DeobfuscateMethodAttribute("Decrypts all strings in an assembly.")]
+    public class StringDeobfuscator : DeobfuscateMethod
+    {      
+        private MethodDef FindStringDecryptionMethod(ModuleDef moduleDef)
+        {
+            foreach (var type in moduleDef.Types)
+            {
+                foreach (var method in type.Methods)
+                {
+                    if (!method.HasBody || !method.Body.HasInstructions)
+                        continue;
+
+                    var instructions = method.Body.Instructions;
+                    if (instructions.Count >= 30)
+                        continue;
+
+                    var hasLibraryString = false;
+                    var hasDecryptionString = false;
+
+                    foreach (var instruction in instructions)
+                    {
+                        if (instruction.OpCode.Code != Code.Ldstr)
+                            continue;
+
+                        var operandValue = instruction.Operand.ToString();
+                        if (!hasLibraryString)
+                            hasLibraryString = operandValue.Equals("Protect.NET_Lib.Encryption");
+                        else
+                            hasDecryptionString = operandValue.Equals("Decrypt");
+
+                        if (hasLibraryString && hasDecryptionString)
+                            return method;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private int DecryptStrings(ModuleDef moduleDef, IMDTokenProvider decryptionMethod, IFullName declaringType)
+        {
+            var assembly = Assembly.LoadFile(moduleDef.Location);
+            var decryptCount = 0;
+
+            foreach (var type in moduleDef.Types)
+            {
+                foreach (var method in type.Methods)
+                {
+                    if (!method.HasBody || !method.Body.HasInstructions)
+                        continue;
+
+                    var instructions = method.Body.Instructions;
+
+                    for (var i = 0; i < instructions.Count; i++)
+                    {
+                        if (instructions[i].OpCode != OpCodes.Ldstr)
+                            continue;
+
+                        if (instructions[i + 1].OpCode != OpCodes.Ldstr)
+                            continue;
+
+                        if (!instructions[i + 2].Operand.ToString().
+                            Equals(decryptionMethod.ToString()))
+                            continue;
+
+                        var param1 = instructions[i].Operand.ToString();
+                        var param2 = instructions[i + 1].Operand.ToString();
+
+                        var methodType = assembly.GetType(declaringType.Name);
+                        if (methodType == null)
+                            continue;
+
+                        var metaData = decryptionMethod.MDToken.ToInt32();
+                        var methodBase = methodType.Module.ResolveMethod(metaData);
+                        if (methodBase == null)
+                            continue;
+
+                        var parameters = methodBase.GetParameters();
+                        if (parameters.Length == 0)
+                            continue;
+
+                        var result
+                            = methodBase.Invoke(null, new object[] { param1, param2 });
+
+                        var body = method.Body;
+
+                        body.Instructions[i].OpCode = OpCodes.Ldstr;
+                        body.Instructions[i].Operand = result.ToString();
+
+                        body.Instructions.RemoveAt(i + 1);
+                        body.Instructions.RemoveAt(i + 1);
+
+                        decryptCount++;
+                    }
+                }
+            }
+
+            return decryptCount;
+        }
+
+        public override void Deobfuscate(ModuleDef moduleDef)
+        {                                           
+            Console.WriteLine("Cleaning strings..");
+
+            var decryptionMethod = FindStringDecryptionMethod(moduleDef);
+            if (decryptionMethod == null)
+                return;
+
+            var declaringType = decryptionMethod.DeclaringType;
+
+            var cleanedCount = DecryptStrings(moduleDef, decryptionMethod, declaringType);
+            Console.WriteLine("Successfully decrypted {0} strings..", cleanedCount);
+        }
+    }
+}        
+
+
+================================================
+File: OutStringDecrypter/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following 
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("OutStringDecrypter")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("OutStringDecrypter")]
+[assembly: AssemblyCopyright("Copyright Â©  2015")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Setting ComVisible to false makes the types in this assembly not visible 
+// to COM components.  If you need to access a type in this assembly from 
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("3438a3f5-d156-4827-82a9-7f2508ba0ca7")]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version 
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers 
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+

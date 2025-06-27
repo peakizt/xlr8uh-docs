@@ -1,0 +1,5435 @@
+Directory structure:
+└── dariushoule-x64dbg-automate-pyclient/
+    ├── README.md
+    ├── LICENSE
+    ├── TODO
+    ├── mkdocs.yml
+    ├── pyproject.toml
+    ├── docs/
+    │   ├── index.md
+    │   ├── installation.md
+    │   ├── quickstart.md
+    │   └── api/
+    │       ├── annotations.md
+    │       ├── assembler-disassembler.md
+    │       ├── breakpoints.md
+    │       ├── commands.md
+    │       ├── debug-control.md
+    │       ├── gui.md
+    │       ├── memory-control.md
+    │       ├── registers-expressions.md
+    │       ├── session-control.md
+    │       └── settings.md
+    ├── docs_custom/
+    │   └── base.html
+    ├── examples/
+    │   ├── assemble_and_disassemble.py
+    │   ├── attach.py
+    │   ├── breakpoints.py
+    │   ├── debug_control.py
+    │   ├── expressions_and_registers.py
+    │   ├── hello64.py
+    │   ├── memory_control.py
+    │   ├── reference_view.py
+    │   └── sessions.py
+    ├── tests/
+    │   ├── __init__.py
+    │   ├── conftest.py
+    │   ├── test_connect_config.py
+    │   ├── test_hla_commands.py
+    │   └── test_xauto_commands.py
+    ├── x64dbg_automate/
+    │   ├── __init__.py
+    │   ├── client_base.py
+    │   ├── commands_xauto.py
+    │   ├── events.py
+    │   ├── hla_xauto.py
+    │   ├── models.py
+    │   └── win32.py
+    └── .github/
+        └── workflows/
+            └── gh-pages.yml
+
+================================================
+File: README.md
+================================================
+# x64dbg Automate: Reference Python Client
+
+This is the reference client of x64dbg Automate. The library builds on x64dbg's command execution engine and plugin API to provide an expressive, modern, and easy to use Python client. x64dbg Automate is useful in a wide variety of malware analysis, reverse engineering, and vulnerability hunting tasks. 
+
+The client implements the full RPC protocol provided by [x64dbg-automate](https://github.com/dariushoule/x64dbg-automate). 
+
+## Documentation
+
+Full project documentation is published on: [https://dariushoule.github.io/x64dbg-automate-pyclient/](https://dariushoule.github.io/x64dbg-automate-pyclient/)
+
+See: [Installation](https://dariushoule.github.io/x64dbg-automate-pyclient/installation/) and [Quickstart](https://dariushoule.github.io/x64dbg-automate-pyclient/quickstart/)
+
+🔔 _All examples and sample code assume x64dbg is configured to stop on entry and system breakpoints, skipping TLS breakpoints._
+
+## Development and Testing
+
+The client's environment is managed with [poetry](https://python-poetry.org/docs/). 
+
+Update `tests/conftest.py` or provide the requisite environment to allow tests to pass. 
+
+```powershell
+poetry install
+poetry env activate
+python -m pytest # Test
+python .\examples\assemble_and_disassemble.py C:\<you>\x64dbg\release\x64\x64dbg.exe # Run an example
+```
+
+**Documentation is built using mkdocs**
+
+```powershell
+python -m mkdocs serve # dev
+python -m mkdocs build # publish
+```
+
+# Contributing
+
+Issues, feature-requests, and pull-requests are welcome on this project ❤️🐛
+
+My commitment to the community will be to be a responsive maintainer. Discuss with me before implementing major breaking changes or feature additions.
+
+
+================================================
+File: LICENSE
+================================================
+Copyright 2025 Dariush Houle
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+================================================
+File: TODO
+================================================
+- Terminate session when x64dbg side exits cleanly
+- Debugger panes: right click context menu script registration
+
+
+================================================
+File: mkdocs.yml
+================================================
+site_name: "x64dbg Automate"
+site_description: "Full documentation for the x64dbg Automate plugin - Easy Scriptable and Repeatable Debug Sessions"
+site_author: "Darbonzo (darius@x64.ooo)"
+nav:
+  - "Home": index.md
+  - "Installation": installation.md
+  - "Quickstart": quickstart.md
+  - "Client Reference":
+    - "Session Control": api/session-control.md
+    - "Debug Control": api/debug-control.md
+    - "Memory Control": api/memory-control.md
+    - "Breakpoints": api/breakpoints.md
+    - "Registers and Expressions": api/registers-expressions.md
+    - "Assembling and Disassembling": api/assembler-disassembler.md
+    - "Commands and Extensibility": api/commands.md
+    - "Labels, Comments, Bookmarks": api/annotations.md
+    - "Settings": api/settings.md
+    - "Gui": api/gui.md
+plugins:
+  - search
+  - mkdocstrings
+  - autorefs
+theme:
+  name: mkdocs
+  custom_dir: docs_custom/
+
+
+================================================
+File: pyproject.toml
+================================================
+[project]
+name = "x64dbg_automate"
+version = "0.4.2"
+description = "A Python library to automate x64dbg"
+authors = [{ name = "Darius Houle", email = "darius@x64.ooo" }]
+readme = "README.md"
+keywords = ["x64dbg", "debugger", "instrumentation", "plugin", "dynamic-analysis"]
+
+[project.urls]
+Homepage = "https://dariushoule.github.io/x64dbg-automate-pyclient/"
+Repository = "https://github.com/dariushoule/x64dbg-automate-pyclient"
+Issues = "https://github.com/dariushoule/x64dbg-automate-pyclient/issues"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pyzmq = "^26.2.0"
+msgpack = "^1.1.0"
+pydantic = "^2.10.6"
+psutil = "^6.1.1"
+
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+mkdocstrings = {extras = ["python"], version = "^0.28.0"}
+mkdocs = "^1.6.1"
+mkdocs-autorefs = "^1.3.0"
+pytest = "^8.3.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+
+================================================
+File: docs/index.md
+================================================
+# x64dbg Automate Home
+
+x64dbg Automate is a plugin + client library that adds enhanced scripting and automation capabilities to x64dbg.
+
+<p align="center">
+<img src="art.png" alt="Python + x64dbg homepage graphic"/>
+</p>
+
+The heart of the project is the native plugin that externalizes the bridge and scripting interfaces of x64dbg. This is the foundation on which the Python reference client for x64dbg Automate is built.
+
+## Core Principles
+
+- **First-class Python Support**: Bring your own interpreter to automate debug and analysis tasks.
+- **Enhanced Features**: Automate provides abstractions on top of debugger functionality for easy, concise, and reproducible scripting. 
+- **Maintained/Modern Plugin and Client**: Automate aims to target both the latest x64dbg and Python versions.
+- **Clear Documentation**: The features of Automate are easy to understand and well documented.
+- **Extensible**: Build on top of Automate to extend its capabilities even further.
+
+## Getting Started
+
+To get started with x64dbg Automate, it's recommended to visit [Installation](installation.md) and [Quickstart](quickstart.md).
+
+ðŸ”” _All examples and sample code assume x64dbg is configured to stop on entry and system breakpoints, skipping TLS breakpoints._
+
+## Source
+
+- Plugin Repository: [https://github.com/dariushoule/x64dbg-automate](https://github.com/dariushoule/x64dbg-automate)
+- Python Reference Client Repository: [https://github.com/dariushoule/x64dbg-automate-pyclient](https://github.com/dariushoule/x64dbg-automate-pyclient)
+
+## Contributing
+
+I welcome contributions from the community! Please leave issues or suggest features on the GitHub repositories for the project.
+
+## Support
+
+You can reach out to me at darius[at]x64.ooo
+
+
+================================================
+File: docs/installation.md
+================================================
+# Installation
+
+### Step 1: Dependencies
+
+Ensure you have the latest Visual C++ Runtime Redistributable. 
+
+Available from Microsoft at: [vc_redist.x64.exe](https://aka.ms/vs/17/release/vc_redist.x64.exe) and [vc_redist.x86.exe](https://aka.ms/vs/17/release/vc_redist.x86.exe) (64 and 32 bit respectively).
+
+### Step 2: Plugin
+
+Download the latest plugin release from [https://github.com/dariushoule/x64dbg-automate/releases](https://github.com/dariushoule/x64dbg-automate/releases)
+
+Extract the entire contents of the archive into your debugger's `plugins` directory, creating it as needed.
+
+| Install directory | Bitness |
+| ----------------- | ------- |
+| x64dbg\release\x64\plugins | 64-bit |
+| x64dbg\release\x32\plugins | 32-bit |
+
+### Step 3: Client Library
+
+```sh
+pip install x64dbg_automate --upgrade
+```
+
+ðŸ”” Important: The Microsoft Store builds of Python are restricted such that the client library may not function well. Use them at your own risk.
+
+
+### Troubleshooting
+
+If you receive an error like the following:
+```
+AssertionError: Incompatible x64dbg plugin and client versions abc != xyz
+```
+
+Either your client or plugin is out of date, update them to resolve. 
+
+
+================================================
+File: docs/quickstart.md
+================================================
+# x64dbg Automate Quickstart
+
+An automation session can be launched with four steps:
+
+**One: Instantiate `X64DbgClient` and orient it against your installation**
+```
+from x64dbg_automate import X64DbgClient
+client = X64DbgClient(x64dbg_path=r"C:\x64dbg\release\x64\x64dbg.exe")
+```
+
+**Two: Start a new debug session or attach to an existing one**
+```
+client.start_session(r'my_cool_program.exe')
+```
+
+**Three: Act!**
+```
+client.set_breakpoint('GetModuleHandleA')
+client.go()
+```
+
+_See Client Reference sections for full capabilities._
+
+**Four: Clean up**
+
+```
+client.detach_session()
+```
+
+### Example: Hello World
+```python
+"""
+Example: Hello x64dbg Automate (64 bit)
+"""
+import sys
+from x64dbg_automate import X64DbgClient
+
+if len(sys.argv) != 2:
+    print("Usage: python hello64.py <x64dbg_path>")
+    quit(1)
+
+print('[+] Creating a new x64dbg Automate session')
+client = X64DbgClient(x64dbg_path=sys.argv[1])
+client.start_session(r'c:\Windows\system32\winver.exe')
+
+print('[+] Allocating memory in the debugee and writing a string to it')
+mem = client.virt_alloc()
+client.write_memory(mem, 'x64dbg Automate Rocks!'.encode('utf-16le'))
+
+print('[+] Breakpointing ShellAboutW and running until we hit it')
+client.set_breakpoint('ShellAboutW', singleshoot=True)
+client.go() # Entrypoint breakpoint
+client.wait_until_stopped()
+client.go() # ShellAboutW
+client.wait_until_stopped()
+
+print('[+] Replacing the ShellAboutW App name with our string')
+client.set_reg('rdx', mem)
+client.go()
+
+print('[+] Bye bye! Go check out the title bar of the winver window! ðŸ¥³')
+client.detach_session()
+```
+
+**Output**
+```
+[+] Creating a new x64dbg Automate session
+[+] Allocating memory in the debugee and writing a string to it
+[+] Breakpointing ShellAboutW and running until we hit it
+[+] Replacing the ShellAboutW App name with our string
+[+] Bye bye! Go check out the title bar of the winver window! ðŸ¥³
+```
+
+![Output in Winver](rocks.png)
+
+# More Examples
+
+More examples of x64dbg Automate's capabilities can be seen in: [https://github.com/dariushoule/x64dbg-automate-pyclient/tree/main/examples](https://github.com/dariushoule/x64dbg-automate-pyclient/tree/main/examples)
+
+
+================================================
+File: docs/api/annotations.md
+================================================
+# Annotations (Labels, Comments, Bookmarks)
+
+### What is an annotation?
+
+Annotations refer to labels, comments, and bookmarks. 
+
+x64dbg automate supports setting and removing labels / comments, with bookmark support coming soon. 
+
+### API Method Reference
+
+::: x64dbg_automate.X64DbgClient.set_label_at
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.del_label_at
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.set_comment_at
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.del_comment_at
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.get_label_at
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.get_comment_at
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+
+================================================
+File: docs/api/assembler-disassembler.md
+================================================
+# Assembling and Disassembling
+
+The Assembler and Disassembler features of x64dbg are supported in Automate. Symbols and expressions are supported in the assembler as they are in the UI.
+
+
+### Example: Assemble and Disassemble
+
+```python
+"""
+Example: Assemble and Disassemble (64 bit)
+"""
+import sys
+from x64dbg_automate import X64DbgClient
+
+if len(sys.argv) != 2:
+    print("Usage: python hello64.py <x64dbg_path>")
+    quit(1)
+
+print('[+] Creating a new x64dbg Automate session')
+client = X64DbgClient(x64dbg_path=sys.argv[1])
+client.start_session(r'c:\Windows\system32\winver.exe')
+
+print('[+] Getting the value of RIP')
+rip = client.get_reg('rip')
+print(f'\tRIP: 0x{rip:X}')
+
+print('[+] Assembling instructions')
+k32_base, _ = client.eval_sync('kernel32')
+client.set_label_at(k32_base, 'my_cool_label')
+
+i = rip
+i = i + client.assemble_at(i, 'mov rax, OutputDebugStringA') # Symbol
+i = i + client.assemble_at(i, 'mov rdx, 0x401000') # Constant
+i = i + client.assemble_at(i, 'mov rcx, my_cool_label') # Label
+i = i + client.assemble_at(i, 'lea rcx, [rcx * 2 + 4]') # Scale
+i = i + client.assemble_at(i, 'mov rbx, gs:[0]') # Segmentation
+i = i + client.assemble_at(i, f'mov rdi, 0x{client.virt_alloc():x}') # Interpolation
+
+print('[+] Disassembling instructions')
+i = rip
+for _ in range(6):
+    ins = client.disassemble_at(i)
+    print(f'\t{i:016X}: {ins.instruction}')
+    i = i + ins.instr_size
+
+print('[+] Cleaning up')
+client.terminate_session()
+```
+
+```
+[+] Creating a new x64dbg Automate session
+[+] Getting the value of RIP
+        RIP: 0x7FF962D4C135
+[+] Assembling instructions
+[+] Disassembling instructions
+        00007FF962D4C135: mov rax, 0x7FF961A698C0
+        00007FF962D4C13F: mov rdx, 0x401000
+        00007FF962D4C146: mov rcx, 0x7FF961A50000
+        00007FF962D4C150: lea rcx, ds:[rcx*2+0x04]
+        00007FF962D4C158: mov rbx, qword ptr gs:[0x0000000000000000]
+        00007FF962D4C161: mov rdi, 0x21CBEDC0000
+[+] Cleaning up
+```
+
+### API Method Reference
+
+
+::: x64dbg_automate.X64DbgClient.assemble_at
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.disassemble_at
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+### API Model Reference
+
+::: x64dbg_automate.models.Instruction
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: false
+
+
+::: x64dbg_automate.models.DisasmInstrType
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: false
+
+
+::: x64dbg_automate.models.DisasmArgType
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: false
+
+
+::: x64dbg_automate.models.InstructionArg
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: false
+
+::: x64dbg_automate.models.SegmentReg
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: false
+
+
+================================================
+File: docs/api/breakpoints.md
+================================================
+# Breakpoints
+
+Management of breakpoints are supported nearly completely by x64dbg Automate. 
+
+Software, hardware, and memory breakpoints are usable, but their condition and log components are not yet exposed.
+
+
+### Example: Breakpoints
+
+```python
+"""
+Example: Breakpoints (64 bit)
+"""
+"""
+Example: Breakpoints (64 bit)
+"""
+import sys
+from x64dbg_automate import X64DbgClient
+from x64dbg_automate.events import EventType
+
+if len(sys.argv) != 2:
+    print("Usage: python sessions.py <x64dbg_path>")
+    quit(1)
+
+print('[+] Creating the x64dbg Automate session')
+client = X64DbgClient(x64dbg_path=sys.argv[1])
+client.start_session(r'c:\Windows\system32\winver.exe')
+
+print('[+] Writing shellcode to demonstrate breakpoint features')
+sys_entry, _ = client.eval_sync('rip')
+i = sys_entry
+i = i + client.assemble_at(i, 'mov rax, GetCurrentProcessId')
+i = i + client.assemble_at(i, 'call rax')
+
+print('[+] Setting a standard breakpoint at GetCurrentProcessId')
+client.set_breakpoint('GetCurrentProcessId', singleshoot=True)
+client.go()
+
+print('[+] Waiting until the debugee is stopped at the software breakpoint')
+bp = client.wait_for_debug_event(EventType.EVENT_BREAKPOINT)
+client.clear_debug_events()
+print(f'[+] Breakpoint "{bp.event_data.name}" hit at {bp.event_data.addr:X} with singleshoot={bp.event_data.singleshoot}')
+
+print('[+] Resetting and setting a hardware breakpoint at GetCurrentProcessId')
+client.set_reg('rip', sys_entry)
+client.set_hardware_breakpoint('GetCurrentProcessId')
+client.go()
+
+print('[+] Waiting until the debugee is stopped at the hardware breakpoint')
+client.wait_for_debug_event(EventType.EVENT_BREAKPOINT)
+client.clear_debug_events()
+
+print('[+] Clearing hardware breakpoint')
+client.clear_hardware_breakpoint('GetCurrentProcessId')
+
+print('[+] Resetting and setting a memory breakpoint at GetCurrentProcessId')
+client.set_reg('rip', sys_entry)
+client.set_memory_breakpoint('GetCurrentProcessId', singleshoot=True)
+client.go()
+
+print('[+] Waiting until the debugee is stopped at the memory breakpoint')
+client.wait_for_debug_event(EventType.EVENT_BREAKPOINT)
+client.clear_debug_events()
+
+print('[+] Cleaning up')
+client.terminate_session()
+```
+
+```
+[+] Creating the x64dbg Automate session
+[+] Writing shellcode to demonstrate breakpoint features
+[+] Setting a standard breakpoint at GetCurrentProcessId
+[+] Waiting until the debugee is stopped at the software breakpoint
+[+] Breakpoint "bpx_GetCurrentProcessId" hit at 7FFC973A36E0 with singleshoot=True
+[+] Resetting and setting a hardware breakpoint at GetCurrentProcessId
+[+] Waiting until the debugee is stopped at the hardware breakpoint
+[+] Clearing hardware breakpoint
+[+] Resetting and setting a memory breakpoint at GetCurrentProcessId
+[+] Waiting until the debugee is stopped at the memory breakpoint
+[+] Cleaning up
+```
+
+
+### API Method Reference
+
+
+::: x64dbg_automate.X64DbgClient.get_breakpoints
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.set_breakpoint
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.set_hardware_breakpoint
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.set_memory_breakpoint
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.clear_breakpoint
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.clear_hardware_breakpoint
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.clear_memory_breakpoint
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.toggle_breakpoint
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.toggle_hardware_breakpoint
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.toggle_memory_breakpoint
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+### API Model Reference
+
+::: x64dbg_automate.models.Breakpoint
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: false
+
+::: x64dbg_automate.models.BreakpointType
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: false
+
+::: x64dbg_automate.models.StandardBreakpointType
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: false
+
+::: x64dbg_automate.models.HardwareBreakpointType
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: false
+
+::: x64dbg_automate.models.MemoryBreakpointType
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: false
+
+
+================================================
+File: docs/api/commands.md
+================================================
+# Commands and Extensibility
+
+While x64dbg Automate strives to provide an idiomatic and easy to understand abstraction layer on top of the command execution abilities of x64dbg, it would be foolhardy to say every feature is covered perfectly for every use case.
+
+Raw command execution capabilities allow users to extend and customize x64dbg Automate beyond the built-in abstractions.
+
+
+### API Method Reference
+
+
+::: x64dbg_automate.X64DbgClient.cmd_sync
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+
+
+================================================
+File: docs/api/debug-control.md
+================================================
+# Debug Control
+
+### What is Debug Control?
+
+Debug control refers to performing actions that change the state of the running debugger. 
+
+Examples include:
+
+- Loading/unloading a debugee
+- Transitioning from stopped to running or visa-versa
+- Switching thread contexts
+- Single-stepping
+- Running until return
+
+It's helpful to think of changing the debuggers state as two-steps:
+
+1. Requesting the change in state
+2. Waiting for the expected state
+
+Without explicit waits its easy to end up with race conditions and poor repeatability in scripts. 
+
+```
+# Good
+client.set_breakpoint(0x00401000, singleshoot=True)
+client.go()
+client.wait_for_debug_event(EventType.EVENT_BREAKPOINT)
+    # Retrieved RIP after debugger reached target state
+print(client.get_reg('eip'))
+
+# Bad
+client.set_breakpoint(0x00401000, singleshoot=True)
+client.go()
+    # Retrieved RIP without wait. It's possible to read an unintended value before the breakpoint is hit
+print(client.get_reg('eip'))
+```
+
+### Example: Debug Control
+
+```python
+"""
+Example: Debug Control (32/64 bit)
+"""
+import sys
+from x64dbg_automate import X64DbgClient
+
+if len(sys.argv) != 2:
+    print("Usage: python sessions.py <x64dbg_path>")
+    quit(1)
+
+print('[+] Creating the x64dbg Automate session')
+client = X64DbgClient(x64dbg_path=sys.argv[1])
+client.start_session()
+
+print('[+] Loading notepad and asking it to open a file')
+client.load_executable('C:\\Windows\\System32\\notepad.exe', 'C:\\Users\\desktop.ini')
+
+print('[+] Resuming from system breakpoint')
+client.go()
+
+print('[+] Waiting until the debugee is stopped at the entrypoint')
+client.wait_until_stopped()
+
+print('[+] Stepping-in 3 times')
+client.stepi(3)
+
+print('[+] Resuming from entrypoint + 3 step-ins')
+client.go()
+
+print('[+] Pausing the debugee')
+client.pause()
+
+print('[+] Resuming the debugee')
+client.go()
+
+print('[+] Unloading notepad')
+client.unload_executable()
+
+print('[+] Detaching the session')
+client.detach_session()
+```
+
+```
+[+] Creating the x64dbg Automate session
+[+] Loading notepad and asking it to open a file
+[+] Resuming from system breakpoint
+[+] Waiting until the debugee is stopped at the entrypoint
+[+] Stepping-in 3 times
+[+] Resuming from entrypoint + 3 step-ins
+[+] Pausing the debugee
+[+] Resuming the debugee
+[+] Unloading notepad
+[+] Detaching the session
+```
+
+### API Method Reference
+
+::: x64dbg_automate.X64DbgClient.load_executable
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.unload_executable
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.attach
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.detach
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.go
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.pause
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.stepi
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.stepo
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.skip
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.ret
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.thread_create
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.thread_terminate
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.thread_pause
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.thread_resume
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.switch_thread
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.wait_for_debug_event
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.clear_debug_events
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.watch_debug_event
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.unwatch_debug_event
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.get_latest_debug_event
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.peek_latest_debug_event
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.wait_until_debugging
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.wait_until_not_debugging
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.wait_until_running
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.wait_until_stopped
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.wait_cmd_ready
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.hide_debugger_peb
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.debugee_pid
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.get_debugger_pid
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.is_running
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.is_debugging
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+### API Model Reference
+
+::: x64dbg_automate.events.DbgEvent
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: false
+
+
+::: x64dbg_automate.events.EventType
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: false
+
+
+================================================
+File: docs/api/gui.md
+================================================
+# GUI Control
+
+User interface control is partially implemented at this point. There exists the ability to trigger a refresh and populate a reference view.
+
+### Example: Populate a Reference View
+
+```python
+"""
+Example: Populate Reference View (32/64 bit)
+"""
+import sys
+from x64dbg_automate import X64DbgClient
+from x64dbg_automate.models import ReferenceViewRef
+
+if len(sys.argv) != 2:
+    print("Usage: python sessions.py <x64dbg_path>")
+    quit(1)
+
+client = X64DbgClient(x64dbg_path=sys.argv[1])
+client.start_session(r'c:\Windows\system32\winver.exe')
+
+print('[+] Creating a reference view')
+client.gui_show_reference_view(
+    'Example Reference View', [
+        ReferenceViewRef(
+            address=client.eval_sync('cip')[0],
+            text='Example Reference 1: "Current Instruction Pointer"'
+        ),
+        ReferenceViewRef(
+            address=client.eval_sync('IsDebuggerPresent')[0],
+            text='Example Reference 2: "IsDebuggerPresent"'
+        )
+    ]
+)
+
+print('[+] Cleaning up')
+client.detach_session()
+```
+
+
+### API Method Reference
+
+::: x64dbg_automate.X64DbgClient.log
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.gui_refresh_views
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.gui_show_reference_view
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+### API Model Reference
+
+::: x64dbg_automate.models.ReferenceViewRef
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: false
+
+
+
+================================================
+File: docs/api/memory-control.md
+================================================
+# Memory Control
+
+### What is Memory Control?
+
+Memory control refers to reading, writing, inspecting, allocating, freeing, and protecting memory. 
+
+### Example: Memory Control
+
+```python
+"""
+Example: Memory Control (64 bit)
+"""
+import queue
+import sys
+from x64dbg_automate import X64DbgClient
+from x64dbg_automate.events import DbgEvent, EventType
+from x64dbg_automate.models import MemPage, PageRightsConfiguration
+
+if len(sys.argv) != 2:
+    print("Usage: python hello64.py <x64dbg_path>")
+    quit(1)
+
+print('[+] Creating a new x64dbg Automate session')
+client = X64DbgClient(x64dbg_path=sys.argv[1])
+client.start_session(r'c:\Windows\system32\winver.exe')
+client.go() # Continue from system breakpoint
+client.wait_until_stopped()
+client.go() # Continue from entrypoint
+
+print('[+] Registering a callback for debug string events')
+received: queue.Queue[DbgEvent] = queue.Queue()
+callback = lambda x: received.put(x)
+client.watch_debug_event(EventType.EVENT_OUTPUT_DEBUG_STRING, callback)
+
+print('[+] Allocating memory for shellcode and debug string')
+shellcode = client.virt_alloc()
+debug_string = client.virt_alloc()
+
+print('[+] Retrieving memory protection on debug string memory')
+mem: MemPage = client.virt_query(debug_string)
+print(f'\tMemory Protection: 0x{mem.allocation_protect:X}')
+
+print('[+] Setting memory protection on debug string memory to readonly')
+client.virt_protect(debug_string, PageRightsConfiguration.ReadOnly)
+
+print('[+] Writing debug string to debugee memory')
+client.write_memory(debug_string, b'https://www.youtube.com/watch?v=FKROYzWRiQ0')
+
+print('[+] Writing shellcode to debugee memory')
+i = shellcode
+i = i + client.assemble_at(i, 'push rcx')
+i = i + client.assemble_at(i, 'push rcx')
+i = i + client.assemble_at(i, 'push rcx')
+i = i + client.assemble_at(i, 'mov rax, OutputDebugStringA')
+i = i + client.assemble_at(i, 'call rax')
+i = i + client.assemble_at(i, 'pop rcx')
+i = i + client.assemble_at(i, 'pop rcx')
+i = i + client.assemble_at(i, 'pop rcx')
+i = i + client.assemble_at(i, 'ret')
+
+print('[+] Executing shellcode')
+client.thread_create(shellcode, debug_string)
+
+ev = received.get(timeout=4)
+print('[+] Received debug string event')
+print('\tEvent Type:', ev.event_type)
+print('\tlpDebugStringData:', ev.event_data.lpDebugStringData.decode('utf-8').strip('\0'))
+
+print('[+] Freeing memory')
+client.virt_free(shellcode)
+client.virt_free(debug_string)
+
+print('[+] Retrieving full memory map and finding all *.DLL references')
+pages: list[MemPage] = client.memmap()
+for page in pages:
+    if '.dll' in page.info.lower():
+        print(f'\t{page.allocation_base:X} - {page.region_size:X} {page.protect} {page.info}')
+
+print('[+] Terminating the session')
+client.terminate_session()
+```
+
+```
+[+] Creating a new x64dbg Automate session
+[+] Registering a callback for debug string events
+[+] Allocating memory for shellcode and debug string
+[+] Retrieving memory protection on debug string memory
+        Memory Protection: 0x40
+[+] Setting memory protection on debug string memory to readonly
+[+] Writing debug string to debugee memory
+[+] Writing shellcode to debugee memory
+[+] Executing shellcode
+[+] Received debug string event
+        Event Type: EVENT_OUTPUT_DEBUG_STRING
+        lpDebugStringData: https://www.youtube.com/watch?v=FKROYzWRiQ0
+[+] Freeing memory
+[+] Retrieving full memory map and finding all *.DLL references
+        13B701B0000 - 63000 2 \Device\HarddiskVolume3\Windows\System32\en-US\shell32.dll.mui
+        13B70250000 - 3000 2 \Device\HarddiskVolume3\Windows\WinSxS\amd64_microsoft.windows.c..-controls.resources_6595b64144ccf1df_6.0.26100.1591_en-us_541af4fe0fd3faf0\comctl32.dll.mui
+        13B70270000 - 3000 2 \Device\HarddiskVolume3\Windows\System32\oleaccrc.dll
+        7FFC726F0000 - 1000 2 oleacc.dll
+        7FFC77140000 - 1000 2 comctl32.dll
+        7FFC80AD0000 - 1000 2 textshaping.dll
+        7FFC82A30000 - 1000 2 textinputframework.dll
+        7FFC84210000 - 1000 2 winbrand.dll
+        7FFC8DA80000 - 1000 2 coreuicomponents.dll
+        7FFC903D0000 - 1000 2 coremessaging.dll
+        7FFC910D0000 - 1000 2 wintypes.dll
+        7FFC92380000 - 1000 2 uxtheme.dll
+        7FFC93F10000 - 1000 2 kernel.appcore.dll
+        7FFC94620000 - 1000 2 cryptbase.dll
+        7FFC95290000 - 1000 2 ucrtbase.dll
+        7FFC95470000 - 1000 2 gdi32full.dll
+        7FFC955A0000 - 1000 2 win32u.dll
+        7FFC955D0000 - 1000 2 kernelbase.dll
+        7FFC95990000 - 1000 2 msvcp_win.dll
+        7FFC95A40000 - 1000 2 bcryptprimitives.dll
+        7FFC95D40000 - 1000 2 shcore.dll
+        7FFC95E30000 - 1000 2 gdi32.dll
+        7FFC95FD0000 - 1000 2 user32.dll
+        7FFC96260000 - 1000 2 combase.dll
+        7FFC96A80000 - 1000 2 oleaut32.dll
+        7FFC96BB0000 - 1000 2 shell32.dll
+        7FFC972C0000 - 1000 2 advapi32.dll
+        7FFC97380000 - 1000 2 kernel32.dll
+        7FFC97450000 - 1000 2 msctf.dll
+        7FFC975B0000 - 1000 2 sechost.dll
+        7FFC976D0000 - 1000 2 shlwapi.dll
+        7FFC97730000 - 1000 2 clbcatq.dll
+        7FFC97860000 - 1000 2 msvcrt.dll
+        7FFC97930000 - 1000 2 imm32.dll
+        7FFC97970000 - 1000 2 rpcrt4.dll
+        7FFC97D40000 - 1000 2 ntdll.dll
+[+] Terminating the session
+```
+
+### API Method Reference
+
+
+::: x64dbg_automate.X64DbgClient.write_memory
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.read_memory
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.read_word
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.read_dword
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.read_qword
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.memmap
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.virt_alloc
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.virt_protect
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.virt_query
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.virt_free
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.memset
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.check_valid_read_ptr
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+### API Model Reference
+
+::: x64dbg_automate.models.MemPage
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: false
+
+::: x64dbg_automate.models.PageRightsConfiguration
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: false
+
+
+================================================
+File: docs/api/registers-expressions.md
+================================================
+# Registers and Expressions
+
+### What is an Expression?
+
+An expression is a statement evaluated in the context of the debugger. It can be as simple as 2+2, or a complex calculation involving symbols, scales, and segments. 
+x64dbg Automate provides the debugger's full evaluation capabilities, and adds some convenience methods.
+
+When you request a register in x64dbg Automate it's really just shorthand for evaluating an expression where the only value is your register. This is true unless
+a full register dump is requested. This is the exception to the above rule - instead providing a full thread context dump in the format the debugger uses internally. 
+
+The full register dump can be useful for accessing more nuanced parts of thread state, but is generally overkill for common tasks like retrieving a common register value.
+
+### Example: Expressions and Registers
+
+```python
+"""
+Example: Expressions and Registers (64 bit)
+"""
+import sys
+from x64dbg_automate import X64DbgClient
+from x64dbg_automate.models import RegDump64
+
+if len(sys.argv) != 2:
+    print("Usage: python hello64.py <x64dbg_path>")
+    quit(1)
+
+print('[+] Creating a new x64dbg Automate session')
+client = X64DbgClient(x64dbg_path=sys.argv[1])
+client.start_session(r'c:\Windows\system32\winver.exe')
+
+print('[+] Getting the value of RIP')
+rip = client.get_reg('rip')
+print(f'\tRIP: 0x{rip:X}')
+
+print('[+] Setting the value of RIP')
+client.set_reg('rip', 0x1234)
+
+print('[+] Setting the value of RIP to an expression')
+value, _ = client.eval_sync('LoadLibraryA + 0x20')
+client.set_reg('rip', value)
+
+print('[+] Setting the value of a subregister')
+client.set_reg('rax', 0)
+client.set_reg('ah', 0x99)
+
+print('[+] Performing a full register dump')
+dump: RegDump64 = client.get_regs()
+print(f'\tRIP: 0x{dump.context.rip:X}')
+print(f'\tRAX: 0x{dump.context.rax:X}')
+
+print('[+] Cleaning up')
+client.terminate_session()
+```
+
+```
+[+] Creating a new x64dbg Automate session
+[+] Getting the value of RIP
+        RIP: 0x7FFC97E6142A
+[+] Setting the value of RIP
+[+] Setting the value of RIP to an expression
+[+] Setting the value of a subregister
+[+] Performing a full register dump
+        RIP: 0x7FFC973C2DA0
+        RAX: 0x9900
+[+] Cleaning up
+```
+
+### API Method Reference
+
+::: x64dbg_automate.X64DbgClient.get_reg
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+::: x64dbg_automate.X64DbgClient.get_regs
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+::: x64dbg_automate.X64DbgClient.set_reg
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+::: x64dbg_automate.X64DbgClient.eval_sync
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+::: x64dbg_automate.X64DbgClient.get_symbol_at
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+### API Model Reference
+
+::: x64dbg_automate.models.RegDump
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: true
+
+::: x64dbg_automate.models.RegDump64
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: true
+
+::: x64dbg_automate.models.RegDump32
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: true
+
+::: x64dbg_automate.models.Context64
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: true
+
+::: x64dbg_automate.models.Context32
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: true
+
+::: x64dbg_automate.models.X87Fpu
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: true
+
+::: x64dbg_automate.models.Flags
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: true
+
+::: x64dbg_automate.models.FpuReg
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: true
+
+::: x64dbg_automate.models.MxcsrFields
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: true
+
+::: x64dbg_automate.models.X87StatusWordFields
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: true
+
+::: x64dbg_automate.models.X87ControlWordFields
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: true
+
+::: x64dbg_automate.models.Symbol
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: true
+
+::: x64dbg_automate.models.SymbolType
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: true
+
+::: x64dbg_automate.models.MutableRegister
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: true
+
+
+================================================
+File: docs/api/session-control.md
+================================================
+# Session Control
+
+### What are Sessions?
+
+A session refers to an automation-enabled running instance of x64dbg.
+
+Each instance of the debugger you launch or attach to has a session ID allocated to it. The automation client relies on sessions 
+to know which debugger instance to communicate with. For all intents and purposes the session ID is equivalent to the debugger PID.
+
+After launching x64dbg with the plugin installed its session ID and port binds can be seen in the startup log:
+```
+[x64dbg-automate] Allocated session ID: 12584
+[x64dbg-automate] Allocated PUB/SUB port: 49759
+[x64dbg-automate] Allocated REQ/REP port: 52085
+```
+
+Sessions can also be discovered programmatically - with PIDs, command lines, working directories, and window titles provided for disambiguation.
+
+### Example: Sessions
+
+```python
+"""
+Example: Session Control (32/64 bit)
+"""
+import subprocess
+import sys
+from x64dbg_automate import X64DbgClient
+
+if len(sys.argv) != 2:
+    print("Usage: python sessions.py <x64dbg_path>")
+    quit(1)
+
+print('[+] Creating an x64dbg Automate session using start_session')
+client1 = X64DbgClient(x64dbg_path=sys.argv[1])
+client1.start_session(r'c:\Windows\system32\winver.exe')
+
+print('[+] Starting an unconnected session using subprocess.Popen')
+client2 = X64DbgClient(x64dbg_path=sys.argv[1])
+proc = subprocess.Popen([sys.argv[1]], executable=sys.argv[1])
+
+print('[+] Waiting for the unconnected session to start')
+X64DbgClient.wait_for_session(proc.pid)
+
+print('[+] Listing running sessions')
+sessions = X64DbgClient.list_sessions()
+print(sessions)
+
+print('[+] Terminating the first session')
+client1.terminate_session()
+
+print('[+] Listing running sessions')
+sessions = X64DbgClient.list_sessions()
+print(sessions)
+
+print('[+] Attaching to the second session')
+client2.attach_session(sessions[0].pid)
+
+print('[+] Detaching from the second session')
+client2.detach_session()
+
+print('[+] Re-attaching to the second session')
+client2.attach_session(sessions[0].pid)
+
+print('[+] Terminating the second session')
+client2.terminate_session()
+```
+
+```
+[+] Creating an x64dbg Automate session using start_session
+[+] Starting an unconnected session using subprocess.Popen
+[+] Waiting for the unconnected session to start
+[+] Listing running sessions
+[DebugSession(pid=11396, lockfile_path='C:\\Users\\dariu\\AppData\\Local\\Temp\\xauto_session.11396.lock', cmdline=['C:\\re\\x64dbg_dev\\release\\x64\\x64dbg.exe'], cwd='C:\\re\\x64dbg_dev\\release\\x64', window_title='winver.exe - PID: 30944 - Module: ntdll.dll - Thread: Main Thread 20648 - x64dbg', sess_req_rep_port=54561, sess_pub_sub_port=60710), DebugSession(pid=26000, lockfile_path='C:\\Users\\dariu\\AppData\\Local\\Temp\\xauto_session.26000.lock', cmdline=['C:\\re\\x64dbg_dev\\release\\x64\\x64dbg.exe'], cwd='C:\\re\\x64dbg_dev\\release\\x64', window_title='x64dbg', sess_req_rep_port=53337, sess_pub_sub_port=61219)]
+[+] Terminating the first session
+[+] Listing running sessions
+[DebugSession(pid=26000, lockfile_path='C:\\Users\\dariu\\AppData\\Local\\Temp\\xauto_session.26000.lock', cmdline=['C:\\re\\x64dbg_dev\\release\\x64\\x64dbg.exe'], cwd='C:\\re\\x64dbg_dev\\release\\x64', window_title='x64dbg', sess_req_rep_port=53337, sess_pub_sub_port=61219)]   
+[+] Attaching to the second session
+[+] Detaching from the second session
+[+] Re-attaching to the second session
+[+] Terminating the second session
+```
+
+### API Method Reference
+
+::: x64dbg_automate.X64DbgClient.start_session
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.start_session_attach
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.attach_session
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.detach_session
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.terminate_session
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.list_sessions
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+::: x64dbg_automate.X64DbgClient.wait_for_session
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+
+
+### API Model Reference
+
+::: x64dbg_automate.models.DebugSession
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: false
+
+
+================================================
+File: docs/api/settings.md
+================================================
+# Settings
+
+Debugger settings can be controlled at runtime. Setting up consistent defaults may be important for scripts to run reproducibly. 
+
+### API Method Reference
+
+::: x64dbg_automate.X64DbgClient.get_setting_str
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: false
+
+::: x64dbg_automate.X64DbgClient.get_setting_int
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: false
+
+::: x64dbg_automate.X64DbgClient.set_setting_str
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: false
+
+::: x64dbg_automate.X64DbgClient.set_setting_int
+    options:
+        show_root_heading: true
+        show_root_full_path: false
+        show_bases: false
+
+
+================================================
+File: docs_custom/base.html
+================================================
+<!DOCTYPE html>
+<html lang="{{ config.theme.locale|default('en') }}" data-bs-theme="{{ config.theme.color_mode }}">
+    <head>
+      {%- block site_meta %}
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        {% if page and page.is_homepage %}<meta name="description" content="{{ config.site_description }}">{% endif %}
+        {% if config.site_author %}<meta name="author" content="{{ config.site_author }}">{% endif %}
+        {% if page and page.canonical_url %}<link rel="canonical" href="{{ page.canonical_url }}">{% endif %}
+        {% if config.site_favicon %}<link rel="shortcut icon" href="{{ config.site_favicon|url }}">
+        {% else %}<link rel="shortcut icon" href="{{ 'img/favicon.ico'|url }}">{% endif %}
+        <meta property="og:url" content="{{ page.canonical_url }}">
+        <meta property="og:type" content="website">
+        <meta property="og:title" content="x64dbg Automate">
+        <meta property="og:description" content="{{ config.site_description }}">
+        <meta property="og:image" content="">
+      {%- endblock %}
+
+      {%- block htmltitle %}
+        <title>{% if page and page.title and not page.is_homepage %}{{ page.title }} - {% endif %}{{ config.site_name }}</title>
+      {%- endblock %}
+
+      {%- block styles %}
+        <link href="{{ 'css/bootstrap.min.css'|url }}" rel="stylesheet">
+        <link href="{{ 'css/fontawesome.min.css'|url }}" rel="stylesheet">
+        <link href="{{ 'css/brands.min.css'|url }}" rel="stylesheet">
+        <link href="{{ 'css/solid.min.css'|url }}" rel="stylesheet">
+        <link href="{{ 'css/v4-font-face.min.css'|url }}" rel="stylesheet">
+        <link href="{{ 'css/base.css'|url }}" rel="stylesheet">
+        {%- if config.theme.highlightjs %}
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/{{ config.theme.hljs_style }}.min.css" {% if config.theme.color_mode != "light" %}disabled{% endif %}>
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/{{ config.theme.hljs_style_dark }}.min.css" {% if config.theme.color_mode != "dark" %}disabled{% endif %}>
+        {%- endif %}
+        {%- for path in config.extra_css %}
+        <link href="{{ path|url }}" rel="stylesheet">
+        {%- endfor %}
+      {%- endblock %}
+
+      {%- block libs %}
+        {%- if config.theme.highlightjs %}
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        {%- for lang in config.theme.hljs_languages %}
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/{{lang}}.min.js"></script>
+        {%- endfor %}
+        <script>hljs.highlightAll();</script>
+        {%- endif %}
+      {%- endblock %}
+
+      {%- block analytics %}
+        {%- if config.theme.analytics.gtag %}
+        <script async src="https://www.googletagmanager.com/gtag/js?id={{ config.theme.analytics.gtag }}"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', {{ config.theme.analytics.gtag|tojson }});
+        </script>
+        {%- elif config.google_analytics %}
+        <script>
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+            ga('create', {{ config.google_analytics[0]|tojson }}, {{ config.google_analytics[1]|tojson }});
+            ga('send', 'pageview');
+        </script>
+        {%- endif %}
+      {%- endblock %}
+
+      {%- block extrahead %} {% endblock %}
+    </head>
+
+    <body{% if page and page.is_homepage %} class="homepage"{% endif %}>
+        <div class="navbar fixed-top navbar-expand-lg navbar-{% if config.theme.nav_style == "light" %}light{% else %}dark{% endif %} bg-{{ config.theme.nav_style }}">
+            <div class="container">
+
+                {%- block site_name %}
+                <a class="navbar-brand" href="{{ nav.homepage.url|url }}">{{ config.site_name }}</a>
+                {%- endblock %}
+
+                {%- if nav|length>1 or (page and (page.next_page or page.previous_page)) or config.repo_url %}
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                {%- endif %}
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                  {%- block site_nav %}
+                    {%- if nav|length>1 %}
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                        {%- for nav_item in nav %}
+                        {%- if nav_item.children %}
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle{% if nav_item.active %} active" aria-current="page{% endif %}" role="button" data-bs-toggle="dropdown"  aria-expanded="false">{{ nav_item.title }}</a>
+                                <ul class="dropdown-menu">
+                                {%- for nav_item in nav_item.children %}
+                                    {% include "nav-sub.html" %}
+                                {%- endfor %}
+                                </ul>
+                            </li>
+                        {%- else %}
+                            <li class="nav-item">
+                                <a href="{{ nav_item.url|url }}" class="nav-link{% if nav_item.active %} active" aria-current="page{% endif %}">{{ nav_item.title }}</a>
+                            </li>
+                        {%- endif %}
+                        {%- endfor %}
+                        </ul>
+                    {%- endif %}
+                  {%- endblock %}
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                      {%- block search_button %}
+                        {%- if 'search' in config.plugins %}
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> {% trans %}Search{% endtrans %}
+                            </a>
+                        </li>
+                        {%- endif %}
+                      {%- endblock %}
+
+                      {%- block next_prev %}
+                        {%- if page and (page.next_page or page.previous_page) %}
+                            <li class="nav-item">
+                                <a rel="prev" {% if page.previous_page %}href="{{ page.previous_page.url|url }}" class="nav-link"{% else %}class="nav-link disabled"{% endif %}>
+                                    <i class="fa fa-arrow-left"></i> {% trans %}Previous{% endtrans %}
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" {% if page.next_page %}href="{{ page.next_page.url|url }}" class="nav-link"{% else %}class="nav-link disabled"{% endif %}>
+                                    {% trans %}Next{% endtrans %} <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                        {%- endif %}
+                      {%- endblock %}
+
+                      {%- block repo %}
+                        {%- if page and page.edit_url %}
+                            <li class="nav-item">
+                                <a href="{{ page.edit_url }}" class="nav-link">
+                                    {%- if config.repo_name == 'GitHub' -%}
+                                        <i class="fa-brands fa-github"></i> {% trans repo_name=config.repo_name %}Edit on {{ repo_name }}{% endtrans %}
+                                    {%- elif config.repo_name == 'Bitbucket' -%}
+                                        <i class="fa-brands fa-bitbucket"></i> {% trans repo_name=config.repo_name %}Edit on {{ repo_name }}{% endtrans %}
+                                    {%- elif config.repo_name == 'GitLab' -%}
+                                        <i class="fa-brands fa-gitlab"></i> {% trans repo_name=config.repo_name %}Edit on {{ repo_name }}{% endtrans %}
+                                    {%- elif config.repo_name -%}
+                                        {% trans repo_name=config.repo_name%}Edit on {{ repo_name }}{% endtrans %}
+                                    {% else %}
+                                        {% trans repo_name=config.repo_name%}Edit{% endtrans %}
+                                    {%- endif -%}
+                                </a>
+                            </li>
+                        {%- elif config.repo_url %}
+                            <li class="nav-item">
+                                <a href="{{ config.repo_url }}" class="nav-link">
+                                    {%- if config.repo_name == 'GitHub' -%}
+                                        <i class="fa-brands fa-github"></i> {{ config.repo_name }}
+                                    {%- elif config.repo_name == 'Bitbucket' -%}
+                                        <i class="fa-brands fa-bitbucket"></i> {{ config.repo_name }}
+                                    {%- elif config.repo_name == 'GitLab' -%}
+                                        <i class="fa-brands fa-gitlab"></i> {{ config.repo_name }}
+                                    {%- else -%}
+                                    {{ config.repo_name }}
+                                    {%- endif -%}
+                                </a>
+                            </li>
+                        {%- endif %}
+                      {%- endblock %}
+                      {%- if config.theme.user_color_mode_toggle %}
+                            <li class="nav-item dropdown">
+                              <button id="theme-menu" aria-expanded="false" data-bs-toggle="dropdown" data-bs-display="static" aria-label="Toggle theme" class="nav-link dropdown-toggle">
+                                <i class="fa-solid fa-circle-half-stroke fa-fw"></i>
+                                <span class="d-lg-none ms-2">Toggle theme</span>
+                              </button>
+                              <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                  <button class="dropdown-item d-flex align-items-center" data-bs-theme-value="light" aria-pressed="{% if config.theme.color_mode == 'light' %}true{% else %}false{% endif %}">
+                                    <i class="fa-solid fa-sun fa-fw"></i>
+                                    <span class="ms-2">Light</span>
+                                    <i class="fa-solid fa-check ms-auto{% if config.theme.color_mode != 'light' %} d-none{% endif %}"></i>
+                                  </button>
+                                </li>
+                                <li>
+                                  <button class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark" aria-pressed="{% if config.theme.color_mode == 'dark' %}true{% else %}false{% endif %}">
+                                    <i class="fa-solid fa-moon fa-fw"></i>
+                                    <span class="ms-2">Dark</span>
+                                    <i class="fa-solid fa-check ms-auto{% if config.theme.color_mode != 'dark' %} d-none{% endif %}"></i>
+                                  </button>
+                                </li>
+                                <li>
+                                  <button class="dropdown-item d-flex align-items-center" data-bs-theme-value="auto" aria-pressed="{% if config.theme.color_mode == 'auto' %}true{% else %}false{% endif %}">
+                                    <i class="fa-solid fa-circle-half-stroke fa-fw"></i>
+                                    <span class="ms-2">Auto</span>
+                                    <i class="fa-solid fa-check ms-auto{% if config.theme.color_mode != 'auto' %} d-none{% endif %}"></i>
+                                  </button>
+                                </li>
+                              </ul>
+                            </li>
+                    {%- endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {%- if config.theme.color_mode != "light" or config.theme.user_color_mode_toggle %}
+        <script src="{{ 'js/darkmode.js'|url }}"></script>
+        {%- endif %}
+
+        <div class="container">
+            <div class="row">
+                {%- block content %}
+                    <div class="col-md-3">{% include "toc.html" %}</div>
+                    <div class="col-md-9" role="main">{% include "content.html" %}</div>
+                {%- endblock %}
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+          {%- block footer %}
+            <hr>
+            {%- if config.copyright %}
+                <p>{{ config.copyright }}</p>
+            {%- endif %}
+            <p>{% trans mkdocs_link='<a href="https://www.mkdocs.org/">MkDocs</a>' %}Documentation built with {{ mkdocs_link }}.{% endtrans %}</p>
+          {%- endblock %}
+        </footer>
+
+      {%- block scripts %}
+        <script src="{{ 'js/bootstrap.bundle.min.js'|url }}"></script>
+        <script>
+            var base_url = {{ base_url|tojson }},
+                shortcuts = {{ config.theme.shortcuts|tojson }};
+        </script>
+        <script src="{{ 'js/base.js'|url }}"></script>
+        {%- for script in config.extra_javascript %}
+        {{ script|script_tag }}
+        {%- endfor %}
+      {%- endblock %}
+
+        {% if 'search' in config.plugins %}{%- include "search-modal.html" %}{% endif %}
+        {%- include "keyboard-modal.html" %}
+
+    </body>
+</html>
+{% if page and page.is_homepage %}
+<!--
+MkDocs version : {{ mkdocs_version }}
+Build Date UTC : {{ build_date_utc }}
+-->
+{% endif %}
+
+
+================================================
+File: examples/assemble_and_disassemble.py
+================================================
+"""
+Example: Assemble and Disassemble (64 bit)
+"""
+import sys
+from x64dbg_automate import X64DbgClient
+
+if len(sys.argv) != 2:
+    print("Usage: python hello64.py <x64dbg_path>")
+    quit(1)
+
+print('[+] Creating a new x64dbg Automate session')
+client = X64DbgClient(x64dbg_path=sys.argv[1])
+client.start_session(r'c:\Windows\system32\winver.exe')
+
+print('[+] Getting the value of RIP')
+rip = client.get_reg('rip')
+print(f'\tRIP: 0x{rip:X}')
+
+print('[+] Assembling instructions')
+k32_base, _ = client.eval_sync('kernel32')
+client.set_label_at(k32_base, 'my_cool_label')
+
+i = rip
+i = i + client.assemble_at(i, 'mov rax, OutputDebugStringA') # Symbol
+i = i + client.assemble_at(i, 'mov rdx, 0x401000') # Constant
+i = i + client.assemble_at(i, 'mov rcx, my_cool_label') # Label
+i = i + client.assemble_at(i, 'lea rcx, [rcx * 2 + 4]') # Scale
+i = i + client.assemble_at(i, 'mov rbx, gs:[0]') # Segmentation
+i = i + client.assemble_at(i, f'mov rdi, 0x{client.virt_alloc():x}') # Interpolation
+
+print('[+] Disassembling instructions')
+i = rip
+for _ in range(6):
+    ins = client.disassemble_at(i)
+    print(f'\t{i:016X}: {ins.instruction}')
+    i = i + ins.instr_size
+
+print('[+] Cleaning up')
+client.terminate_session()
+
+
+
+================================================
+File: examples/attach.py
+================================================
+"""
+Example: Attach to a Running Process with x64dbg
+"""
+import subprocess
+import sys
+from x64dbg_automate import X64DbgClient
+
+if len(sys.argv) != 2:
+    print("Usage: python attach.py <x64dbg_path>")
+    quit(1)
+
+x64dbg_path = sys.argv[1]
+
+print("[+] Spawning winver.exe")
+proc = subprocess.Popen([r"c:\Windows\system32\winver.exe"], executable=r"c:\Windows\system32\winver.exe")
+
+print(f"[+] winver.exe started with PID: {proc.pid}")
+
+print("[+] Starting x64dbg session")
+client = X64DbgClient(x64dbg_path=x64dbg_path)
+client.start_session()
+
+print("[+] Attaching to winver.exe")
+if client.attach(proc.pid):
+    print("[+] Successfully attached to winver.exe")
+else:
+    print("[-] Failed to attach to winver.exe")
+    quit(1)
+
+print("[+] Listing running x64dbg sessions")
+sessions = X64DbgClient.list_sessions()
+print(sessions)
+
+print("[+] Detaching from winver.exe")
+client.detach()
+
+print("[+] Terminating x64dbg session")
+client.terminate_session()
+
+print("[+] Done")
+
+
+
+================================================
+File: examples/breakpoints.py
+================================================
+"""
+Example: Breakpoints (64 bit)
+"""
+import sys
+from x64dbg_automate import X64DbgClient
+from x64dbg_automate.events import EventType
+
+if len(sys.argv) != 2:
+    print("Usage: python sessions.py <x64dbg_path>")
+    quit(1)
+
+print('[+] Creating the x64dbg Automate session')
+client = X64DbgClient(x64dbg_path=sys.argv[1])
+client.start_session(r'c:\Windows\system32\winver.exe')
+
+print('[+] Writing shellcode to demonstrate breakpoint features')
+sys_entry, _ = client.eval_sync('rip')
+i = sys_entry
+i = i + client.assemble_at(i, 'mov rax, GetCurrentProcessId')
+i = i + client.assemble_at(i, 'call rax')
+
+print('[+] Setting a standard breakpoint at GetCurrentProcessId')
+client.set_breakpoint('GetCurrentProcessId', singleshoot=True)
+client.go()
+
+print('[+] Waiting until the debugee is stopped at the software breakpoint')
+bp = client.wait_for_debug_event(EventType.EVENT_BREAKPOINT)
+client.clear_debug_events()
+print(f'[+] Breakpoint "{bp.event_data.name}" hit at {bp.event_data.addr:X} with singleshoot={bp.event_data.singleshoot}')
+
+print('[+] Resetting and setting a hardware breakpoint at GetCurrentProcessId')
+client.set_reg('rip', sys_entry)
+client.set_hardware_breakpoint('GetCurrentProcessId')
+client.go()
+
+print('[+] Waiting until the debugee is stopped at the hardware breakpoint')
+client.wait_for_debug_event(EventType.EVENT_BREAKPOINT)
+client.clear_debug_events()
+
+print('[+] Clearing hardware breakpoint')
+client.clear_hardware_breakpoint('GetCurrentProcessId')
+
+print('[+] Resetting and setting a memory breakpoint at GetCurrentProcessId')
+client.set_reg('rip', sys_entry)
+client.set_memory_breakpoint('GetCurrentProcessId', singleshoot=True)
+client.go()
+
+print('[+] Waiting until the debugee is stopped at the memory breakpoint')
+client.wait_for_debug_event(EventType.EVENT_BREAKPOINT)
+client.clear_debug_events()
+
+print('[+] Cleaning up')
+client.terminate_session()
+
+
+================================================
+File: examples/debug_control.py
+================================================
+"""
+Example: Debug Control (32/64 bit)
+"""
+import sys
+from x64dbg_automate import X64DbgClient
+
+if len(sys.argv) != 2:
+    print("Usage: python sessions.py <x64dbg_path>")
+    quit(1)
+
+print('[+] Creating the x64dbg Automate session')
+client = X64DbgClient(x64dbg_path=sys.argv[1])
+client.start_session()
+
+print('[+] Loading notepad and asking it to open a file')
+client.load_executable('C:\\Windows\\System32\\notepad.exe', 'C:\\Users\\desktop.ini')
+
+print('[+] Resuming from system breakpoint')
+client.go()
+
+print('[+] Waiting until the debugee is stopped at the entrypoint')
+client.wait_until_stopped()
+
+print('[+] Stepping-in 3 times')
+client.stepi(3)
+
+print('[+] Resuming from entrypoint + 3 step-ins')
+client.go()
+
+print('[+] Pausing the debugee')
+client.pause()
+
+print('[+] Resuming the debugee')
+client.go()
+
+print('[+] Unloading notepad')
+client.unload_executable()
+
+print('[+] Detaching the session')
+client.detach_session()
+
+
+================================================
+File: examples/expressions_and_registers.py
+================================================
+"""
+Example: Expressions and Registers (64 bit)
+"""
+import sys
+from x64dbg_automate import X64DbgClient
+from x64dbg_automate.models import RegDump64
+
+if len(sys.argv) != 2:
+    print("Usage: python hello64.py <x64dbg_path>")
+    quit(1)
+
+print('[+] Creating a new x64dbg Automate session')
+client = X64DbgClient(x64dbg_path=sys.argv[1])
+client.start_session(r'c:\Windows\system32\winver.exe')
+
+print('[+] Getting the value of RIP')
+rip = client.get_reg('rip')
+print(f'\tRIP: 0x{rip:X}')
+
+print('[+] Setting the value of RIP')
+client.set_reg('rip', 0x1234)
+
+print('[+] Setting the value of RIP to an expression')
+value, _ = client.eval_sync('LoadLibraryA + 0x20')
+client.set_reg('rip', value)
+
+print('[+] Setting the value of a subregister')
+client.set_reg('rax', 0)
+client.set_reg('ah', 0x99)
+
+print('[+] Performing a full register dump')
+dump: RegDump64 = client.get_regs()
+print(f'\tRIP: 0x{dump.context.rip:X}')
+print(f'\tRAX: 0x{dump.context.rax:X}')
+
+print('[+] Cleaning up')
+client.terminate_session()
+
+
+
+================================================
+File: examples/hello64.py
+================================================
+"""
+Example: Hello x64dbg Automate (64 bit)
+"""
+import sys
+from x64dbg_automate import X64DbgClient
+
+if len(sys.argv) != 2:
+    print("Usage: python hello64.py <x64dbg_path>")
+    quit(1)
+
+print('[+] Creating a new x64dbg Automate session')
+client = X64DbgClient(x64dbg_path=sys.argv[1])
+client.start_session(r'c:\Windows\system32\winver.exe')
+
+print('[+] Allocating memory in the debugee and writing a string to it')
+mem = client.virt_alloc()
+client.write_memory(mem, 'x64dbg Automate Rocks!'.encode('utf-16le'))
+
+print('[+] Breakpointing ShellAboutW and running until we hit it')
+client.set_breakpoint('ShellAboutW', singleshoot=True)
+client.go() # Entrypoint breakpoint
+client.wait_until_stopped()
+client.go() # ShellAboutW
+client.wait_until_stopped()
+
+print('[+] Replacing the ShellAboutW App name with our string')
+client.set_reg('rdx', mem)
+client.go()
+
+print('[+] Bye bye! Go check out the title bar of the winver window! ðŸ¥³')
+client.detach_session()
+
+
+
+================================================
+File: examples/memory_control.py
+================================================
+"""
+Example: Memory Control (64 bit)
+"""
+import queue
+import sys
+from x64dbg_automate import X64DbgClient
+from x64dbg_automate.events import DbgEvent, EventType
+from x64dbg_automate.models import MemPage, PageRightsConfiguration
+
+if len(sys.argv) != 2:
+    print("Usage: python hello64.py <x64dbg_path>")
+    quit(1)
+
+print('[+] Creating a new x64dbg Automate session')
+client = X64DbgClient(x64dbg_path=sys.argv[1])
+client.start_session(r'c:\Windows\system32\winver.exe')
+client.go() # Continue from system breakpoint
+client.wait_until_stopped()
+client.go() # Continue from entrypoint
+
+print('[+] Registering a callback for debug string events')
+received: queue.Queue[DbgEvent] = queue.Queue()
+callback = lambda x: received.put(x)
+client.watch_debug_event(EventType.EVENT_OUTPUT_DEBUG_STRING, callback)
+
+print('[+] Allocating memory for shellcode and debug string')
+shellcode = client.virt_alloc()
+debug_string = client.virt_alloc()
+
+print('[+] Retrieving memory protection on debug string memory')
+mem: MemPage = client.virt_query(debug_string)
+print(f'\tMemory Protection: 0x{mem.allocation_protect:X}')
+
+print('[+] Setting memory protection on debug string memory to readonly')
+client.virt_protect(debug_string, PageRightsConfiguration.ReadOnly)
+
+print('[+] Writing debug string to debugee memory')
+client.write_memory(debug_string, b'https://www.youtube.com/watch?v=FKROYzWRiQ0')
+
+print('[+] Writing shellcode to debugee memory')
+i = shellcode
+i = i + client.assemble_at(i, 'push rcx')
+i = i + client.assemble_at(i, 'push rcx')
+i = i + client.assemble_at(i, 'push rcx')
+i = i + client.assemble_at(i, 'mov rax, OutputDebugStringA')
+i = i + client.assemble_at(i, 'call rax')
+i = i + client.assemble_at(i, 'pop rcx')
+i = i + client.assemble_at(i, 'pop rcx')
+i = i + client.assemble_at(i, 'pop rcx')
+i = i + client.assemble_at(i, 'ret')
+
+print('[+] Executing shellcode')
+client.thread_create(shellcode, debug_string)
+
+ev = received.get(timeout=4)
+print('[+] Received debug string event')
+print('\tEvent Type:', ev.event_type)
+print('\tlpDebugStringData:', ev.event_data.lpDebugStringData.decode('utf-8').strip('\0'))
+
+print('[+] Freeing memory')
+client.virt_free(shellcode)
+client.virt_free(debug_string)
+
+print('[+] Retrieving full memory map and finding all *.DLL references')
+pages: list[MemPage] = client.memmap()
+for page in pages:
+    if '.dll' in page.info.lower():
+        print(f'\t{page.allocation_base:X} - {page.region_size:X} {page.protect} {page.info}')
+
+print('[+] Terminating the session')
+client.terminate_session()
+
+
+================================================
+File: examples/reference_view.py
+================================================
+"""
+Example: Populate Reference View (32/64 bit)
+"""
+import sys
+from x64dbg_automate import X64DbgClient
+from x64dbg_automate.models import ReferenceViewRef
+
+if len(sys.argv) != 2:
+    print("Usage: python sessions.py <x64dbg_path>")
+    quit(1)
+
+client = X64DbgClient(x64dbg_path=sys.argv[1])
+client.start_session(r'c:\Windows\system32\winver.exe')
+
+print('[+] Creating a reference view')
+client.gui_show_reference_view(
+    'Example Reference View', [
+        ReferenceViewRef(
+            address=client.eval_sync('cip')[0],
+            text='Example Reference 1: "Current Instruction Pointer"'
+        ),
+        ReferenceViewRef(
+            address=client.eval_sync('IsDebuggerPresent')[0],
+            text='Example Reference 2: "IsDebuggerPresent"'
+        )
+    ]
+)
+
+print('[+] Cleaning up')
+client.detach_session()
+
+
+
+================================================
+File: examples/sessions.py
+================================================
+"""
+Example: Session Control (32/64 bit)
+"""
+import subprocess
+import sys
+from x64dbg_automate import X64DbgClient
+
+if len(sys.argv) != 2:
+    print("Usage: python sessions.py <x64dbg_path>")
+    quit(1)
+
+print('[+] Creating an x64dbg Automate session using start_session')
+client1 = X64DbgClient(x64dbg_path=sys.argv[1])
+client1.start_session(r'c:\Windows\system32\winver.exe')
+
+print('[+] Starting an unconnected session using subprocess.Popen')
+client2 = X64DbgClient(x64dbg_path=sys.argv[1])
+proc = subprocess.Popen([sys.argv[1]], executable=sys.argv[1])
+
+print('[+] Waiting for the unconnected session to start')
+X64DbgClient.wait_for_session(proc.pid)
+
+print('[+] Listing running sessions')
+sessions = X64DbgClient.list_sessions()
+print(sessions)
+
+print('[+] Terminating the first session')
+client1.terminate_session()
+
+print('[+] Listing running sessions')
+sessions = X64DbgClient.list_sessions()
+print(sessions)
+
+print('[+] Attaching to the second session')
+client2.attach_session(sessions[0].pid)
+
+print('[+] Detaching from the second session')
+client2.detach_session()
+
+print('[+] Re-attaching to the second session')
+client2.attach_session(sessions[0].pid)
+
+print('[+] Terminating the second session')
+client2.terminate_session()
+
+
+
+================================================
+File: tests/__init__.py
+================================================
+
+
+
+================================================
+File: tests/conftest.py
+================================================
+import os
+import pytest
+
+from x64dbg_automate import X64DbgClient
+
+TEST_BITNESS = int(os.getenv("TEST_BITNESS", "32"))
+X64DBG_PATH = os.getenv("X64DBG_PATH", f"E:\\re\\x64dbg_dev\\release\\x{TEST_BITNESS}\\x{TEST_BITNESS}dbg.exe")
+
+
+@pytest.fixture
+def client():
+    client = X64DbgClient(x64dbg_path=X64DBG_PATH)
+    yield client
+    client.terminate_session()
+
+
+
+================================================
+File: tests/test_connect_config.py
+================================================
+import os
+import subprocess
+from tests.conftest import TEST_BITNESS, X64DBG_PATH
+from x64dbg_automate import X64DbgClient
+
+
+def test_connect(client: X64DbgClient):
+    client.start_session()
+
+
+def test_reconnect(client: X64DbgClient):
+    sid = client.start_session()
+    client.detach_session()
+    client.attach_session(sid)
+
+
+def test_compat_version(client: X64DbgClient):
+    client.start_session()
+    client._assert_connection_compat()
+
+
+def test_bitness(client: X64DbgClient):
+    client.start_session()
+    assert client.debugee_bitness() == TEST_BITNESS
+
+
+def test_debugger_version(client: X64DbgClient):
+    client.start_session()
+    assert client.get_debugger_version() > 18 # TODO: what is the lowest version we support?
+
+
+def test_dbg_is_elevated(client: X64DbgClient):
+    client.start_session()
+    assert client.debugger_is_elevated() == False
+
+
+def test_dbg_is_debugging(client: X64DbgClient):
+    client.start_session()
+    assert client.is_debugging() == False
+    assert client.load_executable(r'c:\Windows\system32\winver.exe') == True
+    assert client.is_debugging() == True
+
+
+def test_dbg_is_running(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    assert client.is_running() == False
+    assert client.cmd_sync('g') == True
+    assert client.is_running() == True
+
+
+def test_dbg_load_cwd(client: X64DbgClient):
+    client.start_session(r'winver.exe', "", r'c:\Windows\system32')
+    assert client.is_running() == False
+    assert client.cmd_sync('g') == True
+    assert client.is_running() == True
+
+
+def test_dbg_load_shortpath(client: X64DbgClient):
+    os.chdir(r'c:\Windows\system32')
+    client.start_session(r'winver.exe')
+    assert client.is_running() == False
+    assert client.cmd_sync('g') == True
+    assert client.is_running() == True
+
+
+def test_config_get_set(client: X64DbgClient):
+    client.start_session()
+    assert client.get_setting_str('Shortcuts', 'ActionFind') == 'Ctrl+F'
+    assert client.set_setting_str('Shortcuts', 'ActionFind', 'Ctrl+G') == True
+    assert client.get_setting_str('Shortcuts', 'ActionFind') == 'Ctrl+G'
+    assert client.get_setting_int('Deleted Tabs', 'BreakpointsTab') == 0
+    assert client.set_setting_int('Deleted Tabs', 'BreakpointsTab', 9000) == True
+    assert client.get_setting_int('Deleted Tabs', 'BreakpointsTab') == 9000
+
+
+def test_attach_session(client: X64DbgClient):
+    proc = subprocess.Popen([X64DBG_PATH])
+    client.wait_for_session(proc.pid)
+    client.attach_session(proc.pid)
+    assert client.is_debugging() == False
+
+
+def test_attach_debugee_1(client: X64DbgClient):
+    if TEST_BITNESS == 32:
+        debugee_proc = subprocess.Popen([r"c:\Windows\SysWOW64\winver.exe"], executable=r"c:\Windows\SysWOW64\winver.exe")
+    else:
+        debugee_proc = subprocess.Popen([r"c:\Windows\system32\winver.exe"], executable=r"c:\Windows\system32\winver.exe")
+    client.start_session_attach(debugee_proc.pid)
+    assert client.is_debugging() == True
+    assert client.is_running() == True
+    assert client.eval_sync('winver')[0] > 0
+    assert client.detach() == True
+    assert client.wait_until_not_debugging() == True
+    debugee_proc.terminate()
+    debugee_proc.wait()
+
+
+def test_attach_debugee_2(client: X64DbgClient):
+    if TEST_BITNESS == 32:
+        debugee_proc = subprocess.Popen([r"c:\Windows\SysWOW64\winver.exe"], executable=r"c:\Windows\SysWOW64\winver.exe")
+    else:
+        debugee_proc = subprocess.Popen([r"c:\Windows\system32\winver.exe"], executable=r"c:\Windows\system32\winver.exe")
+    client.start_session()
+    client.attach(debugee_proc.pid)
+    assert client.is_debugging() == True
+    assert client.is_running() == True
+    assert client.eval_sync('winver')[0] > 0
+    assert client.detach() == True
+    assert client.wait_until_not_debugging() == True
+    debugee_proc.terminate()
+    debugee_proc.wait()
+
+
+
+================================================
+File: tests/test_hla_commands.py
+================================================
+import queue
+import time
+import pytest
+from tests.conftest import TEST_BITNESS
+from x64dbg_automate import X64DbgClient
+from x64dbg_automate.events import CreateThreadEventData, DbgEvent, EventType, ExceptionEventData
+from x64dbg_automate.models import BreakpointType, HardwareBreakpointType, MemoryBreakpointType, PageRightsConfiguration, StandardBreakpointType
+from x64dbg_automate.win32 import OpenProcess, CreateRemoteThread, WaitForSingleObject, CloseHandle
+
+
+def test_stepi(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    assert client.stepi(2)
+    assert client.stepi(swallow_exceptions=True)
+    assert client.stepi(pass_exceptions=True)
+    with pytest.raises(ValueError):
+        assert client.stepi(pass_exceptions=True, swallow_exceptions=True)
+
+
+def test_stepo(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    assert client.stepo(2)
+    assert client.stepo(swallow_exceptions=True)
+    assert client.stepo(pass_exceptions=True)
+    with pytest.raises(ValueError):
+        assert client.stepo(pass_exceptions=True, swallow_exceptions=True)
+
+
+def test_go_and_pause(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    assert client.set_setting_int('Events', 'TlsCallbacks', 0)
+    assert client.set_setting_int('Events', 'TlsCallbacksSystem', 0)
+    assert client.go()
+    assert client.wait_until_stopped()
+    assert client.go()
+    assert client.pause()
+
+
+def test_skip(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    assert client.skip(2)
+
+
+def test_ret(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    assert client.ret(1)
+    assert client.ret(1)
+
+
+def test_rw_regs(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    ip_reg = 'rip' if TEST_BITNESS == 64 else 'eip'
+    if TEST_BITNESS == 64:
+        client.set_reg('rax', 0x1234567812345678)
+        assert client.get_regs().context.rax == 0x1234567812345678
+    else:
+        client.set_reg('eax', 0x12345678)
+        assert client.get_regs().context.eax == 0x12345678
+    client.set_reg('di', 0xB33F)
+    assert client.get_reg('di') == 0xB33F
+    if TEST_BITNESS == 64:
+        assert client.get_regs().context.rdi & 0xFFFF == 0xB33F
+    else:
+        assert client.get_regs().context.edi & 0xFFFF == 0xB33F
+    client.set_reg(ip_reg, 0x1000)
+    assert client.get_reg(ip_reg) == 0x1000
+
+
+def test_memset(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    addr = client.virt_alloc()
+    assert addr > 0
+    assert client.memset(addr, ord('Z'), 16)
+    assert client.read_memory(addr, 16) == b'Z' * 16
+
+
+def test_virt_query(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    rip = client.get_reg('rip' if TEST_BITNESS == 64 else 'eip')
+    page = client.virt_query(rip)
+    assert page
+    assert page.allocation_base != rip
+    assert page.allocation_base % 0x1000 == 0
+    assert page.protect == 0x20
+
+
+def test_virt_protect(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    addr = client.virt_alloc()
+    page = client.virt_query(addr)
+    assert page
+    assert page.protect == 0x40
+    assert client.virt_protect(addr, PageRightsConfiguration.NoAccess)
+    page = client.virt_query(addr)
+    assert page
+    assert page.protect == 0x1
+
+
+def test_breakpoint(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    ip_reg = 'rip' if TEST_BITNESS == 64 else 'eip'
+    assert client.clear_breakpoint()
+    ip = client.get_reg(ip_reg)
+    assert client.write_memory(ip, b'\x90\x90\x90\x90')
+    assert client.set_breakpoint(ip+3)
+    assert client.go()
+    assert client.wait_until_stopped()
+    assert client.get_reg(ip_reg) == ip+3
+    assert client.clear_breakpoint(ip+3)
+
+
+def test_breakpoint_ss(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    ip_reg = 'rip' if TEST_BITNESS == 64 else 'eip'
+    assert client.clear_breakpoint()
+    ip = client.get_reg(ip_reg)
+    assert client.write_memory(ip, b'\x90\x90\x90\x90')
+    assert client.set_breakpoint(ip+3, singleshoot=True)
+    assert client.go()
+    assert client.wait_until_stopped()
+    assert client.get_reg(ip_reg) == ip+3
+
+
+def test_label(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    ip_reg = 'rip' if TEST_BITNESS == 64 else 'eip'
+    ip = client.get_reg(ip_reg)
+    client.del_label_at(ip)
+    assert client.get_label_at(ip) == ""
+    assert client.set_label_at(ip, "https://www.youtube.com/watch?v=tJ94VwZ51Wo")
+    assert client.get_label_at(ip) == "https://www.youtube.com/watch?v=tJ94VwZ51Wo"
+    assert client.del_label_at(ip)
+    assert client.get_label_at(ip) == ""
+
+
+def test_comment(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    ip_reg = 'rip' if TEST_BITNESS == 64 else 'eip'
+    rip = client.get_reg(ip_reg)
+    client.del_comment_at(rip)
+    assert client.get_comment_at(rip) == ""
+    assert client.set_comment_at(rip, "https://www.youtube.com/watch?v=mNjmGuJY5OE")
+    assert client.get_comment_at(rip) == "https://www.youtube.com/watch?v=mNjmGuJY5OE"
+    assert client.del_comment_at(rip)
+    assert client.get_comment_at(rip) == ""
+
+
+def test_start_stop(client: X64DbgClient):
+    client.start_session()
+    assert client.load_executable(r'c:\Windows\system32\winver.exe')
+    assert client.unload_executable()
+
+
+def test_event_queue_inline(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    ip_reg = 'rip' if TEST_BITNESS == 64 else 'eip'
+    ip = client.get_reg(ip_reg)
+    assert client.write_memory(ip, b'\x90\x90\x90\x90')
+    assert client.set_breakpoint(ip+3, singleshoot=True)
+    assert client.go()
+    assert client.wait_for_debug_event(EventType.EVENT_BREAKPOINT)
+    assert client.get_reg(ip_reg) == ip+3
+    assert client.clear_breakpoint()
+
+
+def test_event_queue_callback(client: X64DbgClient):
+    received: queue.Queue[DbgEvent] = queue.Queue()
+    callback = lambda x: received.put(x)
+    client.watch_debug_event(EventType.EVENT_SYSTEMBREAKPOINT, callback)
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    assert received.get().event_type == EventType.EVENT_SYSTEMBREAKPOINT
+    assert received.empty()
+    client.unload_executable()
+    client.unwatch_debug_event(EventType.EVENT_SYSTEMBREAKPOINT, callback)
+    client.load_executable(r'c:\Windows\system32\winver.exe')
+    assert received.empty()
+
+
+def test_event_create_thread(client: X64DbgClient):
+    received: queue.Queue[DbgEvent] = queue.Queue()
+    callback = lambda x: received.put(x)
+    client.watch_debug_event(EventType.EVENT_CREATE_THREAD, callback)
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    ev = received.get()
+    tev: CreateThreadEventData = ev.event_data
+    assert ev.event_type == EventType.EVENT_CREATE_THREAD
+    assert tev.dwThreadId > 0
+    assert tev.lpStartAddress > 0
+
+
+def test_assemble(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    ip_reg = 'rip' if TEST_BITNESS == 64 else 'eip'
+    ip = client.get_reg(ip_reg)
+    if TEST_BITNESS == 64:
+        assert client.assemble_at(ip, 'mov rax, 0x45678ABCDEF54321') == 10
+        assert client.read_memory(ip, 10) == bytes.fromhex('48 B8 21 43 F5 DE BC 8A 67 45')
+    else:
+        assert client.assemble_at(ip, 'mov eax, 0x45678ABC') == 5
+        assert client.read_memory(ip, 5) == bytes.fromhex('B8 BC 8A 67 45')
+
+
+def test_event_exit_thread(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    assert client.set_setting_int('Events', 'TlsCallbacks', 0)
+    assert client.set_setting_int('Events', 'TlsCallbacksSystem', 0)
+    
+    page = client.virt_alloc()
+    if TEST_BITNESS == 64:
+        mov_siz = client.assemble_at(page, 'mov rax, 0x10101010')
+        assert mov_siz == 7
+    else:
+        mov_siz = client.assemble_at(page, 'mov eax, 0x10101010')
+        assert mov_siz == 5
+    assert client.assemble_at(page + mov_siz, 'ret') == 1
+
+    client.go()
+    client.wait_until_stopped()
+    client.go()
+    client.wait_until_running()
+    client.clear_debug_events(EventType.EVENT_EXIT_THREAD)
+
+    hProc = OpenProcess(0x1fffff, False, client.debugee_pid())
+    hThread = CreateRemoteThread(hProc, None, 0, page, None, 0, None)
+    WaitForSingleObject(hThread, -1)
+    CloseHandle(hThread)
+    CloseHandle(hProc)
+
+    ev = client.wait_for_debug_event(EventType.EVENT_EXIT_THREAD, 3)
+    assert ev
+    assert ev.event_type == EventType.EVENT_EXIT_THREAD
+    assert ev.event_data.dwThreadId > 0
+    assert ev.event_data.dwExitCode == 0x10101010
+
+
+def test_event_load_unload_dll(client: X64DbgClient):
+    received: queue.Queue[DbgEvent] = queue.Queue()
+    callback = lambda x: received.put(x)
+    client.watch_debug_event(EventType.EVENT_LOAD_DLL, callback)
+    client.watch_debug_event(EventType.EVENT_UNLOAD_DLL, callback)
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    client.wait_for_debug_event(EventType.EVENT_SYSTEMBREAKPOINT)
+    client.go()
+    client.wait_until_stopped()
+    client.go()
+
+    shellcode = client.virt_alloc()
+    sz_dll = client.virt_alloc()
+    client.write_memory(sz_dll, r'c:\Windows\system32\lz32.dll'.encode() + b'\0')
+
+    if TEST_BITNESS == 64:
+        i = shellcode
+        i = i + client.assemble_at(i, f'mov rcx, 0x{sz_dll:x}')
+        i = i + client.assemble_at(i, 'mov rax, LoadLibraryA')
+        i = i + client.assemble_at(i, 'push rcx')
+        i = i + client.assemble_at(i, 'push rcx')
+        i = i + client.assemble_at(i, 'push rcx')
+        i = i + client.assemble_at(i, 'call rax')
+        i = i + client.assemble_at(i, 'mov rdx, FreeLibrary')
+        i = i + client.assemble_at(i, 'mov rcx, rax')
+        i = i + client.assemble_at(i, 'call rdx')
+        i = i + client.assemble_at(i, 'pop rcx')
+        i = i + client.assemble_at(i, 'pop rcx')
+        i = i + client.assemble_at(i, 'pop rcx')
+        i = i + client.assemble_at(i, 'ret')
+    else:
+        i = shellcode
+        i = i + client.assemble_at(i, f'push 0x{sz_dll:x}')
+        i = i + client.assemble_at(i, f'push LoadLibraryA')
+        i = i + client.assemble_at(i, f'pop eax')
+        i = i + client.assemble_at(i, f'call eax')
+        i = i + client.assemble_at(i, f'push eax')
+        i = i + client.assemble_at(i, f'push FreeLibrary')
+        i = i + client.assemble_at(i, f'pop eax')
+        i = i + client.assemble_at(i, f'call eax')
+        i = i + client.assemble_at(i, 'ret')
+
+    hProc = OpenProcess(0x1fffff, False, client.debugee_pid())
+    hThread = CreateRemoteThread(hProc, None, 0, shellcode, None, 0, None)
+    WaitForSingleObject(hThread, -1)
+    CloseHandle(hThread)
+    CloseHandle(hProc)
+
+    modbase = 0
+    while True:
+        mod = received.get(timeout=3)
+        if mod.event_type == EventType.EVENT_LOAD_DLL and mod.event_data.modname == r'lz32.dll':
+            assert mod.event_data.lpBaseOfDll > 0
+            modbase = mod.event_data.lpBaseOfDll
+        elif mod.event_type == EventType.EVENT_UNLOAD_DLL and mod.event_data.lpBaseOfDll == modbase:
+            break
+
+
+def test_event_output_dbg_str(client: X64DbgClient):
+    received: queue.Queue[DbgEvent] = queue.Queue()
+    callback = lambda x: received.put(x)
+    client.watch_debug_event(EventType.EVENT_OUTPUT_DEBUG_STRING, callback)
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    client.wait_for_debug_event(EventType.EVENT_SYSTEMBREAKPOINT)
+    client.go()
+    client.wait_until_stopped()
+    client.go()
+
+    shellcode = client.virt_alloc()
+    sz_str = client.virt_alloc()
+    client.write_memory(sz_str, b'duck duck goose')
+
+    if TEST_BITNESS == 64:
+        i = shellcode
+        i = i + client.assemble_at(i, f'mov rcx, 0x{sz_str:x}')
+        i = i + client.assemble_at(i, 'mov rax, OutputDebugStringA')
+        i = i + client.assemble_at(i, 'push rcx')
+        i = i + client.assemble_at(i, 'push rcx')
+        i = i + client.assemble_at(i, 'push rcx')
+        i = i + client.assemble_at(i, 'call rax')
+        i = i + client.assemble_at(i, 'pop rcx')
+        i = i + client.assemble_at(i, 'pop rcx')
+        i = i + client.assemble_at(i, 'pop rcx')
+        i = i + client.assemble_at(i, 'ret')
+    else:
+        i = shellcode
+        i = i + client.assemble_at(i, f'push 0x{sz_str:x}')
+        i = i + client.assemble_at(i, 'push OutputDebugStringA')
+        i = i + client.assemble_at(i, 'pop eax')
+        i = i + client.assemble_at(i, 'call eax')
+        i = i + client.assemble_at(i, 'ret')
+
+    hProc = OpenProcess(0x1fffff, False, client.debugee_pid())
+    hThread = CreateRemoteThread(hProc, None, 0, shellcode, None, 0, None)
+    WaitForSingleObject(hThread, -1)
+    CloseHandle(hThread)
+    CloseHandle(hProc)
+
+    ev = received.get(timeout=3)
+    assert ev.event_type == EventType.EVENT_OUTPUT_DEBUG_STRING
+    assert ev.event_data.lpDebugStringData == b'duck duck goose\0'
+
+
+def test_event_exception(client: X64DbgClient):
+    received: queue.Queue[DbgEvent] = queue.Queue()
+    callback = lambda x: received.put(x)
+    client.watch_debug_event(EventType.EVENT_EXCEPTION, callback)
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    client.wait_for_debug_event(EventType.EVENT_SYSTEMBREAKPOINT)
+
+    if TEST_BITNESS == 64:
+        i = client.get_reg('rip')
+        i = i + client.assemble_at(i, 'mov rcx, 0x1234')
+        i = i + client.assemble_at(i, 'call rcx')
+    else:
+        i = client.get_reg('eip')
+        i = i + client.assemble_at(i, 'mov ecx, 0x1234')
+        i = i + client.assemble_at(i, 'call ecx')
+    client.go()
+
+    ev = received.get(timeout=3)
+    xcpt_data: ExceptionEventData = ev.event_data
+    assert ev.event_type == EventType.EVENT_EXCEPTION
+    assert xcpt_data.ExceptionCode == 0xC0000005
+    assert xcpt_data.dwFirstChance == True
+    assert xcpt_data.ExceptionAddress == 0x1234
+    assert xcpt_data.NumberParameters == 2
+    assert xcpt_data.ExceptionInformation == [8, 4660]
+
+
+def test_debug_hide_peb(client: X64DbgClient):
+    received: queue.Queue[DbgEvent] = queue.Queue()
+    callback = lambda x: received.put(x)
+    client.watch_debug_event(EventType.EVENT_EXCEPTION, callback)
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    client.wait_for_debug_event(EventType.EVENT_SYSTEMBREAKPOINT)
+    assert client.hide_debugger_peb()
+
+
+def test_thread_control(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    client.wait_for_debug_event(EventType.EVENT_SYSTEMBREAKPOINT)
+    client.go()
+    client.wait_until_stopped()
+    client.go()
+
+    shellcode = client.virt_alloc()
+    client.write_memory(shellcode, b'\xeb\xfe') # jmp $-2
+
+    tid = client.thread_create(shellcode)
+    time.sleep(.2) # todo: method to check if thread is running?
+    assert tid > 0
+    assert client.thread_pause(tid)
+    assert client.switch_thread(tid)
+    assert client.thread_resume(tid)
+    assert client.thread_terminate(tid)
+    time.sleep(.2)
+    assert client.thread_resume(tid) == False
+
+
+def test_breakpoint_toggle_and_clear_standard_with_name_and_symbols(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    assert client.clear_breakpoint()
+    assert client.clear_hardware_breakpoint()
+    assert client.clear_memory_breakpoint()
+
+    addr, _ = client.eval_sync('GetCurrentProcessId')
+    assert client.set_breakpoint(addr, "charlie", StandardBreakpointType.Short, True)
+    bps = client.get_breakpoints(BreakpointType.BpNormal)
+    assert len(bps) == 1
+    assert bps[0].name == "charlie"
+    assert bps[0].type == BreakpointType.BpNormal
+    assert bps[0].enabled == True
+    assert bps[0].singleshoot == True
+    assert bps[0].active == True
+    assert bps[0].addr == addr  
+    assert bps[0].mod == 'kernel32.dll'
+    # TODO: investigate, this may be an issue in x64dbg
+    # assert client.toggle_breakpoint("charlie") 
+    # assert client.get_breakpoints(BreakpointType.BpNormal)[0].enabled == False
+    assert client.toggle_breakpoint("GetCurrentProcessId", False)
+    assert client.get_breakpoints(BreakpointType.BpNormal)[0].enabled == False
+    assert client.toggle_breakpoint(addr, True)
+    assert client.get_breakpoints(BreakpointType.BpNormal)[0].enabled == True
+    # TODO: investigate, this may be an issue in x64dbg
+    # assert client.clear_breakpoint("charlie")
+    assert client.clear_breakpoint("GetCurrentProcessId")
+    assert len(client.get_breakpoints(BreakpointType.BpNormal)) == 0
+    assert client.set_breakpoint('GetCurrentProcessId', bp_type=StandardBreakpointType.Ud2)
+    bps = client.get_breakpoints(BreakpointType.BpNormal)
+    assert len(bps) == 1
+    assert bps[0].name == "bpx_GetCurrentProcessId"
+    assert bps[0].type == BreakpointType.BpNormal
+    assert bps[0].enabled == True
+    assert client.clear_breakpoint(addr)
+    assert len(client.get_breakpoints(BreakpointType.BpNormal)) == 0
+
+
+def test_breakpoint_toggle_and_clear_hardware_with_name_and_symbols(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    assert client.clear_breakpoint()
+    assert client.clear_hardware_breakpoint()
+    assert client.clear_memory_breakpoint()
+
+    addr, _ = client.eval_sync('GetCurrentProcessId')
+    assert client.set_hardware_breakpoint(addr, HardwareBreakpointType.r, 4)
+    bps = client.get_breakpoints(BreakpointType.BpHardware)
+    assert len(bps) == 1
+    assert bps[0].type == BreakpointType.BpHardware
+    assert bps[0].enabled == True
+    assert bps[0].singleshoot == False
+    assert bps[0].active == True
+    assert bps[0].addr == addr  
+    assert bps[0].hwSize == 2  
+    assert bps[0].mod == 'kernel32.dll'
+
+    assert client.toggle_hardware_breakpoint("GetCurrentProcessId", False)
+    assert client.get_breakpoints(BreakpointType.BpHardware)[0].enabled == False
+    assert client.toggle_hardware_breakpoint(addr, True)
+    assert client.get_breakpoints(BreakpointType.BpHardware)[0].enabled == True
+    assert client.clear_hardware_breakpoint("GetCurrentProcessId")
+    assert len(client.get_breakpoints(BreakpointType.BpHardware)) == 0
+    assert client.set_hardware_breakpoint('GetCurrentProcessId', bp_type=HardwareBreakpointType.x)
+    bps = client.get_breakpoints(BreakpointType.BpHardware)
+    assert len(bps) == 1
+    assert bps[0].type == BreakpointType.BpHardware
+    assert bps[0].enabled == True
+    assert client.clear_hardware_breakpoint(addr)
+    assert len(client.get_breakpoints(BreakpointType.BpHardware)) == 0
+
+
+def test_breakpoint_toggle_and_clear_memory_with_name_and_symbols(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    assert client.clear_breakpoint()
+    assert client.clear_hardware_breakpoint()
+    assert client.clear_memory_breakpoint()
+
+    addr, _ = client.eval_sync('GetCurrentProcessId')
+    mem = client.virt_query(addr)
+    addr_base = mem.base_address
+    assert client.set_memory_breakpoint(addr, MemoryBreakpointType.a, singleshoot=True)
+    bps = client.get_breakpoints(BreakpointType.BpMemory)
+    assert len(bps) == 1
+    assert bps[0].type == BreakpointType.BpMemory
+    assert bps[0].enabled == True
+    assert bps[0].singleshoot == True
+    assert bps[0].active == True
+    assert bps[0].addr == addr_base
+    assert bps[0].mod == 'kernel32.dll'
+
+    # TODO: Symbols can't be toggled, only their memory bases (do we try to do this automatically for people?)
+    assert client.toggle_memory_breakpoint("GetCurrentProcessId", False) == False
+    assert client.get_breakpoints(BreakpointType.BpMemory)[0].enabled == True
+
+    assert client.toggle_memory_breakpoint(addr_base, True)
+    assert client.get_breakpoints(BreakpointType.BpMemory)[0].enabled == True
+
+    assert client.clear_memory_breakpoint("GetCurrentProcessId") == False
+    assert len(client.get_breakpoints(BreakpointType.BpMemory)) == 1
+    assert client.set_memory_breakpoint('GetCurrentProcessId', bp_type=MemoryBreakpointType.x, singleshoot=False)
+    bps = client.get_breakpoints(BreakpointType.BpMemory)
+    assert len(bps) == 1
+    assert bps[0].type == BreakpointType.BpMemory
+    assert bps[0].enabled == True
+    client.clear_memory_breakpoint(addr_base)
+    assert len(client.get_breakpoints(BreakpointType.BpMemory)) == 0
+
+
+def test_read_word(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    addr, _ = client.eval_sync('winver')
+    assert client.read_word(addr) == 0x5a4d
+    assert client.read_dword(addr) == 0x905a4d
+    assert client.read_qword(addr) == 0x300905a4d
+
+
+def test_log(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    if TEST_BITNESS == 64:
+        assert client.log('this is a test {mem;8@rsp}')
+    else:
+        assert client.log('this is a test {mem;4@esp}')
+
+
+
+================================================
+File: tests/test_xauto_commands.py
+================================================
+from tests.conftest import TEST_BITNESS
+from x64dbg_automate import X64DbgClient
+from x64dbg_automate.models import BreakpointType, DisasmInstrType, SegmentReg
+
+
+def test_dbg_eval_not_debugging(client: X64DbgClient):
+    client.start_session()
+    assert client.eval_sync('9*9') == [81, True]
+    assert client.eval_sync('9*') == [0, False]
+
+
+def test_dbg_eval_debugging(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    assert client.eval_sync('9*9') == [81, True]
+    assert client.eval_sync('9*') == [0, False]
+    addr, success = client.eval_sync('GetModuleHandleA+1')
+    assert success
+    assert addr > 0
+
+
+def test_dbg_command_exec_sync(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    assert client.cmd_sync('sto') == True
+    assert client.wait_cmd_ready() == True
+    assert client.cmd_sync('bad_command') == False
+
+
+def test_dbg_memmap(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    mm = client.memmap()
+    assert len(mm) > 1
+    assert mm[0].base_address > 0
+    assert mm[0].region_size > 0
+    assert isinstance(mm[0].info, str)
+
+
+def test_gui_refresh_views(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    assert client.gui_refresh_views() == True
+
+
+def test_valid_read_ptr(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    addr, success = client.eval_sync('GetModuleHandleA')
+    assert success
+    assert client.check_valid_read_ptr(addr)
+    assert client.check_valid_read_ptr(0) == False
+
+
+def test_disassemble(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    ip_reg = 'rip' if TEST_BITNESS == 64 else 'eip'
+    ip = client.get_reg(ip_reg)
+    assert client.write_memory(ip, b'\x90\xeb\xfe')
+    instr = client.disassemble_at(ip)
+    assert instr.instruction == 'nop'
+    instr = client.disassemble_at(ip+1)
+    if TEST_BITNESS == 64:
+        assert instr.instruction == f'jmp 0x{ip+1:016X}'
+    else:
+        assert instr.instruction == f'jmp 0x{ip+1:08X}'
+    assert instr.type == DisasmInstrType.Branch
+    assert instr.argcount == 1
+    assert instr.instr_size == 2
+    assert instr.arg[0].mnemonic == f'{ip+1:X}'
+    assert instr.arg[0].constant == ip+1
+    assert instr.arg[0].value == ip+1
+    assert instr.arg[0].type == SegmentReg.SegDefault
+    assert instr.arg[1].mnemonic == f''
+
+
+def test_breakpoints_normal(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    ip_reg = 'rip' if TEST_BITNESS == 64 else 'eip'
+    assert client.clear_breakpoint()
+    assert client.clear_hardware_breakpoint()
+    assert client.clear_memory_breakpoint()
+    ip = client.get_reg(ip_reg)
+    assert client.write_memory(ip, b'\x90\x90\x90\x90')
+    assert client.set_breakpoint(ip+3)
+    bps = client.get_breakpoints(BreakpointType.BpNormal)
+    assert len(bps) == 1
+    assert bps[0].type == BreakpointType.BpNormal
+    assert bps[0].addr == ip+3
+    assert client.toggle_breakpoint(ip+3, False)
+    bps = client.get_breakpoints(BreakpointType.BpNormal)
+    assert not bps[0].enabled
+    assert client.clear_breakpoint()
+
+
+def test_breakpoints_hardware(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    ip_reg = 'rip' if TEST_BITNESS == 64 else 'eip'
+    assert client.clear_breakpoint()
+    assert client.clear_hardware_breakpoint()
+    assert client.clear_memory_breakpoint()
+    ip = client.get_reg(ip_reg)
+    assert client.write_memory(ip, b'\x90\x90\x90\x90')
+    assert client.set_hardware_breakpoint(ip+3)
+    bps = client.get_breakpoints(BreakpointType.BpHardware)
+    assert len(bps) == 1
+    assert bps[0].type == BreakpointType.BpHardware
+    assert bps[0].addr == ip+3
+    assert bps[0].enabled
+    assert client.toggle_hardware_breakpoint(ip+3, False)
+    bps = client.get_breakpoints(BreakpointType.BpHardware)
+    assert not bps[0].enabled
+    assert client.clear_hardware_breakpoint()
+
+
+def test_breakpoints_memory(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    ip_reg = 'rip' if TEST_BITNESS == 64 else 'eip'
+    assert client.clear_breakpoint()
+    assert client.clear_hardware_breakpoint()
+    assert client.clear_memory_breakpoint()
+    ip = client.get_reg(ip_reg)
+    assert client.write_memory(ip, b'\x90\x90\x90\x90')
+    assert client.set_memory_breakpoint(ip+3)
+    bps = client.get_breakpoints(BreakpointType.BpMemory)
+    assert len(bps) == 1
+    assert bps[0].type == BreakpointType.BpMemory
+    mem = client.virt_query(ip+3)
+    assert bps[0].addr == mem.base_address
+    assert bps[0].enabled
+    assert client.toggle_memory_breakpoint(mem.base_address, False)
+    bps = client.get_breakpoints(BreakpointType.BpMemory)
+    assert not bps[0].enabled
+    assert client.clear_memory_breakpoint()
+
+
+def test_rw_memory(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    ip_reg = 'rip' if TEST_BITNESS == 64 else 'eip'
+    ip = client.get_reg(ip_reg)
+    assert client.write_memory(ip, b'\x90\x90\x90\x90')
+    assert client.read_memory(ip, 16).startswith(b'\x90\x90\x90\x90')
+
+
+def test_get_symbol_at(client: X64DbgClient):
+    client.start_session(r'c:\Windows\system32\winver.exe')
+    x, _ = client.eval_sync('NtQueryInformationProcess')
+    assert client.get_symbol_at(x).decoratedSymbol in ('NtQueryInformationProcess', 'ZwQueryInformationProcess')
+
+
+
+================================================
+File: x64dbg_automate/__init__.py
+================================================
+import ctypes
+import glob
+import logging
+import os
+from pathlib import Path
+import subprocess
+import threading
+import time
+import msgpack
+import psutil
+import shutil
+import zmq
+
+from x64dbg_automate.events import DebugEventQueueMixin
+from x64dbg_automate.hla_xauto import XAutoHighLevelCommandAbstractionMixin
+from x64dbg_automate.models import DebugSession
+from x64dbg_automate.win32 import GetTempPathW, SetConsoleCtrlHandler, EnumWindows, GetWindowTextW, GetWindowThreadProcessId
+
+
+COMPAT_VERSION = "bitter_oyster" # TODO: externalize
+logger = logging.getLogger(__name__)
+all_instances: list['X64DbgClient'] = []
+
+
+def ctrl_c_handler(sig_t: int) -> bool:
+    logger.warning(f'Received exit signal {sig_t}, detaching and exiting')
+    for i in all_instances:
+        i.detach_session()
+    import psutil
+    psutil.Process().terminate()
+    return True
+ctrl_c_handler = SetConsoleCtrlHandler.argtypes[0](ctrl_c_handler)
+SetConsoleCtrlHandler(ctrl_c_handler, True)
+
+
+class ClientConnectionFailedError(Exception):
+    pass
+
+class X64DbgClient(XAutoHighLevelCommandAbstractionMixin, DebugEventQueueMixin):
+    def __init__(self, x64dbg_path: str = "x64dbg"):
+        self.x64dbg_path = x64dbg_path
+        if not Path(self.x64dbg_path).is_file():
+            self.x64dbg_path = shutil.which(x64dbg_path)
+        if self.x64dbg_path is None or not Path(self.x64dbg_path).is_file():
+            raise FileNotFoundError(f"x64dbg executable not found at {x64dbg_path} or in PATH")
+        self.session_pid = None
+        self.context = zmq.Context()
+        self.req_socket = None
+        self.sub_socket = None
+        self.sess_req_rep_port = 0
+        self.sess_pub_sub_port = 0
+        all_instances.append(self)
+
+    def __del__(self):
+        all_instances.remove(self)
+    
+    def _sub_thread(self) -> None:
+        while True:
+            try:
+                if self.sub_socket is None:
+                    break
+                msg = msgpack.unpackb(self.sub_socket.recv(zmq.DONTWAIT))
+                self.debug_event_publish(msg)
+            except zmq.error.Again:
+                # No messages on socket
+                time.sleep(0.2)
+                pass
+            except KeyboardInterrupt:
+                # Quitting, expected exit
+                break
+            except zmq.error.ZMQError:
+                logger.exception("Unhandled ZMQError, retrying")
+
+    
+    def _init_connection(self) -> None:
+        if self.req_socket is not None:
+            self._close_connection()
+
+        self.req_socket = self.context.socket(zmq.REQ)
+        self.req_socket.setsockopt(zmq.CONNECT_TIMEOUT, 6000)
+        self.req_socket.setsockopt(zmq.SNDTIMEO, 6000)
+        self.req_socket.setsockopt(zmq.RCVTIMEO, 10000)
+        self.req_socket.connect(f"tcp://localhost:{self.sess_req_rep_port}")
+        self.req_socket.send(msgpack.packb("PING"))
+        if msgpack.unpackb(self.req_socket.recv()) != "PONG":
+            raise ClientConnectionFailedError(f"Connection to x64dbg failed on port {self.sess_req_rep_port}")
+        
+        self.sub_socket = self.context.socket(zmq.SUB)
+        self.sub_socket.setsockopt(zmq.CONNECT_TIMEOUT, 6000)
+        self.sub_socket.setsockopt(zmq.SNDTIMEO, 6000)
+        self.sub_socket.setsockopt(zmq.RCVTIMEO, 10000)
+        self.sub_socket.connect(f"tcp://localhost:{self.sess_pub_sub_port}")
+        self.sub_socket.setsockopt_string(zmq.SUBSCRIBE, "")
+        self.sub_thread = threading.Thread(target=self._sub_thread)
+        self.sub_thread.start()
+
+    def _close_connection(self) -> None:
+        if self.req_socket is None:
+            return
+        self.req_socket.close()
+        self.sub_socket.close()
+        self.req_socket = None
+        self.sub_socket = None
+        self.sub_thread.join()
+        self.session_pid = None
+        self.proc = None
+        self.sess_req_rep_port = 0
+        self.sess_pub_sub_port = 0
+
+    def _send_request(self, request_type: str, *args) -> tuple:
+        self.req_socket.send(msgpack.packb((request_type, *args)))
+        msg = msgpack.unpackb(self.req_socket.recv())
+        if msg is None:
+            raise RuntimeError("Empty response from x64dbg")
+        if isinstance(msg, list) and len(msg) == 2 and isinstance(msg[0], str) and msg[0].startswith("XERROR_"):
+            raise RuntimeError(msg)
+        return msg
+
+    def _assert_connection_compat(self) -> None:
+        v = self._get_xauto_compat_version()
+        assert v == COMPAT_VERSION, f"Incompatible x64dbg plugin and client versions {v} != {COMPAT_VERSION}"
+        
+    def _launch_x64dbg(self) -> int:
+        self.proc = subprocess.Popen([self.x64dbg_path], executable=self.x64dbg_path)
+        self.session_pid = self.proc.pid
+        self.attach_session(self.session_pid)
+
+    def start_session(self, target_exe: str = "", cmdline: str = "", current_dir: str = "") -> int:
+        """
+        Start a new x64dbg session and optionally load an executable into it. If target_exe is not provided,
+        the debugger starts without any executable. This is useful for performing configuration before the debuggee is loaded.
+
+        Args:
+            target_exe: The path to the target executable (optional)
+            cmdline: The command line arguments to pass to the executable (optional)
+            current_dir: The current working directory to set for the executable (optional)
+
+        Returns:
+            The debug session ID
+        """
+        if len(target_exe.strip()) == 0 and (len(cmdline) > 0 or len(current_dir) > 0):
+            raise ValueError("cmdline and current_dir cannot be provided without target_exe")
+
+        self._launch_x64dbg()
+
+        if target_exe.strip() != "":
+            if not self.load_executable(target_exe.strip(), cmdline, current_dir):
+                self.terminate_session()
+                raise RuntimeError("Failed to load executable")
+            self.wait_cmd_ready()
+        return self.session_pid
+
+    def start_session_attach(self, pid: int) -> int:
+        """
+        Start a new x64dbg session and attach to an existing process identified by pid.
+
+        Args:
+            pid (int): Process Identifier (PID) of the process to attach to.
+
+        Returns:
+            int: The debug session ID (the PID of the x64dbg process).
+
+        Raises:
+            RuntimeError: If attaching to the process fails.
+        """
+        self._launch_x64dbg()
+
+        if not self.attach(pid):
+            self.terminate_session()
+            raise RuntimeError("Failed to attach to process")
+
+        self.wait_until_debugging()
+        return self.session_pid
+    
+    @staticmethod
+    def wait_for_session(session_pid: int, timeout: int = 10) -> DebugSession:
+        """
+        Wait for an x64dbg session to start
+
+        Args:
+            session_pid: The session ID to wait for (debugger PID)
+            timeout: The maximum time to wait in seconds
+
+        Returns:
+            The awaited debug session object
+        """
+        while timeout > 0:
+            sessions = X64DbgClient.list_sessions()
+            sessions = [s for s in sessions if s.pid == session_pid]
+            if session_pid in [s.pid for s in sessions]:
+                return sessions[0]
+            time.sleep(0.2)
+            timeout -= 0.2
+        raise TimeoutError("Session did not appear in a reasonable amount of time")
+    
+    def attach_session(self, session_pid: int) -> None:
+        """
+        Attach to an existing x64dbg session
+
+        Args:
+            session_pid: The session ID to attach to (debugger PID)
+        """
+        session = X64DbgClient.wait_for_session(session_pid)
+        self.sess_req_rep_port = session.sess_req_rep_port
+        self.sess_pub_sub_port = session.sess_pub_sub_port
+        self._init_connection()
+        self._assert_connection_compat()
+    
+    def detach_session(self) -> None:
+        """
+        Detach from the current x64dbg session, leaving the debugger process running.
+        """
+        self._close_connection()
+
+    def terminate_session(self) -> None:
+        """
+        End the current x64dbg session, terminating the debugger process.
+        """
+        sid = self.session_pid
+        self._xauto_terminate_session()
+        self._close_connection()
+        for _ in range(100):
+            time.sleep(0.2)
+            if sid not in [p.pid for p in self.list_sessions()]:
+                return
+        raise TimeoutError("Session did not terminate in a reasonable amount of time")
+    
+    @staticmethod
+    def _window_title_for_pid(pid: int) -> str:
+        wnd_title = ctypes.create_unicode_buffer(1024)
+        found_title = ''
+        def EnumWindowsCb(hwnd, pid):
+            nonlocal found_title
+            enum_process_id = ctypes.c_ulong()
+            GetWindowThreadProcessId(hwnd, ctypes.byref(enum_process_id))
+            if enum_process_id.value == pid:
+                GetWindowTextW(hwnd, wnd_title, 1024)
+                if 'x64dbg' in wnd_title.value.lower() or 'x32dbg' in wnd_title.value.lower():
+                    found_title = wnd_title.value if len(wnd_title.value) > len(found_title) else found_title
+            return True
+        EnumWindowsCb = EnumWindows.argtypes[0](EnumWindowsCb)
+        EnumWindows(EnumWindowsCb, pid)
+        return found_title
+
+    @staticmethod
+    def list_sessions() -> list[DebugSession]:
+        """
+        Lists all active x64dbg sessions
+
+        Returns:
+            A list of sessions
+        """
+        sessions: list[DebugSession] = []
+        temp_path_cstr = ctypes.create_unicode_buffer(1024)
+        if GetTempPathW(1024, temp_path_cstr) == 0:
+            temp_path = "c:\\windows\\temp\\"
+        else:
+            temp_path = temp_path_cstr.value
+        
+        locks = glob.glob(f'{temp_path}xauto_session.*.lock')
+        for lock in locks:
+            while True:
+                try:
+                    with open(lock, 'r') as f:
+                        sess_req_rep_port = int(f.readline().strip())
+                        sess_pub_sub_port = int(f.readline().strip())
+
+                    pid = int(lock.split('.')[-2])
+                    if psutil.pid_exists(pid):
+                        process = psutil.Process(pid)
+                        sessions.append(DebugSession(
+                            pid=pid,
+                            lockfile_path=lock,
+                            cmdline=process.cmdline(),
+                            cwd=process.cwd(),
+                            window_title=X64DbgClient._window_title_for_pid(pid),
+                            sess_req_rep_port=sess_req_rep_port,
+                            sess_pub_sub_port=sess_pub_sub_port
+                        ))
+                        break
+                    else:
+                        if time.time() - os.path.getctime(lock) > 10.0:
+                            logger.warning(f"Stale lockfile {lock}, removing")
+                            os.unlink(lock)
+                            break
+                except FileNotFoundError:
+                    # The process exited between the glob and the open
+                    break
+
+        return sessions
+    
+
+
+
+================================================
+File: x64dbg_automate/client_base.py
+================================================
+import subprocess
+import threading
+import zmq
+
+from abc import ABC, abstractmethod
+
+
+class XAutoClientBase(ABC):
+    proc: subprocess.Popen | None
+    context: zmq.Context | None
+    req_socket: zmq.SyncSocket | None
+    sub_socket: zmq.SyncSocket | None
+    sub_thread: threading.Thread
+    x64dbg_path: str | None
+    session_pid: int | None
+    sess_req_rep_port = 0
+    sess_pub_sub_port = 0
+
+    @abstractmethod
+    def _send_request(self, request_type: str, *args):
+        pass
+
+
+
+================================================
+File: x64dbg_automate/commands_xauto.py
+================================================
+from enum import StrEnum
+import time
+
+from x64dbg_automate.client_base import XAutoClientBase
+from x64dbg_automate.models import Breakpoint, BreakpointType, Context64, Context32, DisasmArgType, \
+    DisasmInstrType, Flags, FpuReg, Instruction, InstructionArg, MemPage, MxcsrFields, RegDump32, RegDump64, \
+    SegmentReg, Symbol, SymbolType, X87ControlWordFields, X87Fpu, X87StatusWordFields
+
+
+class XAutoCommand(StrEnum):
+    XAUTO_REQ_DEBUGGER_PID = "XAUTO_REQ_DEBUGGER_PID"
+    XAUTO_REQ_COMPAT_VERSION = "XAUTO_REQ_COMPAT_VERSION"
+    XAUTO_REQ_QUIT = "XAUTO_REQ_QUIT"
+    XAUTO_REQ_DBG_EVAL = "XAUTO_REQ_DBG_EVAL"
+    XAUTO_REQ_DBG_CMD_EXEC_DIRECT = "XAUTO_REQ_DBG_CMD_EXEC_DIRECT"
+    XAUTO_REQ_DBG_IS_RUNNING = "XAUTO_REQ_DBG_IS_RUNNING"
+    XAUTO_REQ_DBG_IS_DEBUGGING = "XAUTO_REQ_DBG_IS_DEBUGGING"
+    XAUTO_REQ_DBG_IS_ELEVATED = "XAUTO_REQ_DBG_IS_ELEVATED"
+    XAUTO_REQ_DEBUGGER_VERSION = "XAUTO_REQ_DEBUGGER_VERSION"
+    XAUTO_REQ_DBG_GET_BITNESS = "XAUTO_REQ_DBG_GET_BITNESS"
+    XAUTO_REQ_DBG_MEMMAP = "XAUTO_REQ_DBG_MEMMAP",
+    XAUTO_REQ_GUI_REFRESH_VIEWS = "XAUTO_REQ_GUI_REFRESH_VIEWS"
+    XAUTO_REQ_DBG_READ_REGISTERS = "XAUTO_REQ_DBG_READ_REGISTERS"
+    XAUTO_REQ_DBG_READ_MEMORY = "XAUTO_REQ_DBG_READ_MEMORY"
+    XAUTO_REQ_DBG_WRITE_MEMORY = "XAUTO_REQ_DBG_WRITE_MEMORY"
+    XAUTO_REQ_DBG_READ_SETTING_SZ = "XAUTO_REQ_DBG_READ_SETTING_SZ"
+    XAUTO_REQ_DBG_WRITE_SETTING_SZ = "XAUTO_REQ_DBG_WRITE_SETTING_SZ"
+    XAUTO_REQ_DBG_READ_SETTING_UINT = "XAUTO_REQ_DBG_READ_SETTING_UINT"
+    XAUTO_REQ_DBG_WRITE_SETTING_UINT = "XAUTO_REQ_DBG_WRITE_SETTING_UINT"
+    XAUTO_REQ_DBG_IS_VALID_READ_PTR = "XAUTO_REQ_DBG_IS_VALID_READ_PTR"
+    XAUTO_REQ_DISASSEMBLE = "XAUTO_REQ_DISASSEMBLE"
+    XAUTO_REQ_ASSEMBLE = "XAUTO_REQ_ASSEMBLE"
+    XAUTO_REQ_GET_BREAKPOINTS = "XAUTO_REQ_GET_BREAKPOINTS"
+    XAUTO_REQ_GET_LABEL = "XAUTO_REQ_GET_LABEL"
+    XAUTO_REQ_GET_COMMENT = "XAUTO_REQ_GET_COMMENT"
+    XAUTO_REQ_GET_SYMBOL = "XAUTO_REQ_GET_SYMBOL"
+
+
+class XAutoCommandsMixin(XAutoClientBase):
+    def get_debugger_pid(self) -> int:
+        """
+        Retrieves the PID of the x64dbg process
+
+        Returns:
+            The PID of the x64dbg process
+        """
+        return self._send_request(XAutoCommand.XAUTO_REQ_DEBUGGER_PID)
+    
+    def _get_xauto_compat_version(self) -> str:
+        return self._send_request(XAutoCommand.XAUTO_REQ_COMPAT_VERSION)
+    
+    def get_debugger_version(self) -> int:
+        """
+        Retrieves the version (numeric) of the x64dbg process
+
+        Returns:
+            The version of the x64dbg process
+        """
+        return self._send_request(XAutoCommand.XAUTO_REQ_DEBUGGER_VERSION)
+    
+    def _xauto_terminate_session(self):
+        assert self._send_request(XAutoCommand.XAUTO_REQ_QUIT) == "OK_QUITTING", "Failed to terminate x64dbg session"
+    
+    def eval_sync(self, eval_str) -> list[int, bool]:
+        """
+        Evaluates an expression that results in a numerical output
+        
+        Returns:
+            A list containing the result and a boolean indicating success
+        """
+        return self._send_request(XAutoCommand.XAUTO_REQ_DBG_EVAL, eval_str)
+    
+    def cmd_sync(self, cmd_str: str) -> bool:
+        """
+        Evaluates a command and returns the success or failure.
+
+        See: [https://help.x64dbg.com/en/latest/commands/](https://help.x64dbg.com/en/latest/commands/)
+
+        Args:
+            cmd_str: The command to execute
+
+        Returns:
+            Success
+        """
+        return self._send_request(XAutoCommand.XAUTO_REQ_DBG_CMD_EXEC_DIRECT, cmd_str)
+    
+    def is_running(self) -> bool:
+        """
+        Checks if the debugee's state is "running"
+
+        Returns:
+            True if the debugee is running, False otherwise
+        """
+        return self._send_request(XAutoCommand.XAUTO_REQ_DBG_IS_RUNNING)
+    
+    def is_debugging(self) -> bool:
+        """
+        Checks if the debugee's state is "debugging"
+
+        Returns:
+            True if the debugee is running, False otherwise
+        """
+        return self._send_request(XAutoCommand.XAUTO_REQ_DBG_IS_DEBUGGING)
+    
+    def debugger_is_elevated(self) -> bool:
+        """
+        Checks if the debugger is running with elevated privileges
+
+        Returns:
+            True if the debugger is elevated, False otherwise
+        """
+        return self._send_request(XAutoCommand.XAUTO_REQ_DBG_IS_ELEVATED)
+    
+    def debugee_bitness(self) -> bool:
+        """
+        Retrieves the bitness of the debugee
+
+        Returns:
+            The bitness of the debugee
+        """
+        return self._send_request(XAutoCommand.XAUTO_REQ_DBG_GET_BITNESS)
+    
+    def memmap(self) -> list[MemPage]:
+        """
+        Retrieves the memory map of the debugee
+
+        Returns:
+            A list of MemPage objects
+        """
+        resp = self._send_request(XAutoCommand.XAUTO_REQ_DBG_MEMMAP)
+        pages = []
+        for page in resp:
+            pages.append(MemPage(**{k: v for k, v in zip(MemPage.model_fields.keys(), page)}))
+        return pages
+    
+    def read_word(self, addr: int) -> int:
+        """
+        Reads word size data from the debugee's memory
+
+        Args:
+            addr: The address to read from
+
+        Returns:
+            The word read from memory
+        """
+        mem = self._send_request(XAutoCommand.XAUTO_REQ_DBG_READ_MEMORY, addr, 2)
+        return int.from_bytes(mem, 'little')
+    
+    def read_dword(self, addr: int) -> int:
+        """
+        Reads dword size data from the debugee's memory
+
+        Args:
+            addr: The address to read from
+
+        Returns:
+            The dword read from memory
+        """
+        mem = self._send_request(XAutoCommand.XAUTO_REQ_DBG_READ_MEMORY, addr, 4)
+        return int.from_bytes(mem, 'little')
+    
+    def read_qword(self, addr: int) -> int:
+        """
+        Reads qword size data from the debugee's memory
+
+        Args:
+            addr: The address to read from
+
+        Returns:
+            The qword read from memory
+        """
+        mem = self._send_request(XAutoCommand.XAUTO_REQ_DBG_READ_MEMORY, addr, 8)
+        return int.from_bytes(mem, 'little')
+    
+    def read_memory(self, addr: int, size: int) -> bytes:
+        """
+        Reads data from the debugee's memory
+
+        Args:
+            addr: The address to read from
+            size: The number of bytes to read
+
+        Returns:
+            Bytes read from memory
+        """
+        return self._send_request(XAutoCommand.XAUTO_REQ_DBG_READ_MEMORY, addr, size)
+     
+    def write_memory(self, addr: int, data: bytes) -> bool:
+        """
+        Writes data to the debugee's memory
+
+        Args:
+            addr: The address to write to
+            data: The data to be written
+
+        Returns:
+            Success
+        """
+        return self._send_request(XAutoCommand.XAUTO_REQ_DBG_WRITE_MEMORY, addr, data)
+    
+    def gui_refresh_views(self) -> bool:
+        """
+        Refreshes the GUI views of x64dbg
+
+        Returns:
+            Success
+        """
+        return self._send_request(XAutoCommand.XAUTO_REQ_GUI_REFRESH_VIEWS)
+    
+    def get_regs(self) -> list[RegDump32] | list[RegDump64]:
+        """
+        Dump the registers of the debugee
+
+        Returns:
+            A list of RegDump objects
+        """
+        raw_regs = self._send_request(XAutoCommand.XAUTO_REQ_DBG_READ_REGISTERS)
+        bitness = raw_regs[0]
+        raw_regs = raw_regs[1:]
+        if bitness == 64:
+            ctx = {k: v for k, v in zip(Context64.model_fields.keys(), raw_regs[0])}
+            ctx['x87_fpu'] = X87Fpu(**{k: v for k, v in zip(X87Fpu.model_fields.keys(), ctx['x87_fpu'])})
+            ctx['xmm_regs'] = [ctx['xmm_regs'][i:i+16] for i in range(0, len(ctx['xmm_regs']), 16)]
+            ctx['ymm_regs'] = [ctx['ymm_regs'][i:i+32] for i in range(0, len(ctx['ymm_regs']), 32)]
+            return RegDump64(
+                context=Context64(**ctx),
+                flags=Flags(**{k: v for k, v in zip(Flags.model_fields.keys(), raw_regs[1])}),
+                fpu=[FpuReg(data=raw_regs[2][i][0], st_value=raw_regs[2][i][1], tag=raw_regs[2][i][2]) for i in range(len(raw_regs[2]))],
+                mmx=raw_regs[3],
+                mxcsr_fields=MxcsrFields(**{k: v for k, v in zip(MxcsrFields.model_fields.keys(), raw_regs[4])}),
+                x87_status_word_fields=X87StatusWordFields(**{k: v for k, v in zip(X87StatusWordFields.model_fields.keys(), raw_regs[5])}),
+                x87_control_word_fields=X87ControlWordFields(**{k: v for k, v in zip(X87ControlWordFields.model_fields.keys(), raw_regs[6])}),
+                last_error=(raw_regs[7][0], raw_regs[7][1].decode().strip('\0')),
+                last_status=(raw_regs[8][0], raw_regs[8][1].decode().strip('\0'))
+            )
+        else:
+            ctx = {k: v for k, v in zip(Context32.model_fields.keys(), raw_regs[0])}
+            ctx['x87_fpu'] = X87Fpu(**{k: v for k, v in zip(X87Fpu.model_fields.keys(), ctx['x87_fpu'])})
+            ctx['xmm_regs'] = [ctx['xmm_regs'][i:i+16] for i in range(0, len(ctx['xmm_regs']), 16)]
+            ctx['ymm_regs'] = [ctx['ymm_regs'][i:i+32] for i in range(0, len(ctx['ymm_regs']), 32)]
+            return RegDump32(
+                context=Context32(**ctx),
+                flags=Flags(**{k: v for k, v in zip(Flags.model_fields.keys(), raw_regs[1])}),
+                fpu=[FpuReg(data=raw_regs[2][i][0], st_value=raw_regs[2][i][1], tag=raw_regs[2][i][2]) for i in range(len(raw_regs[2]))],
+                mmx=raw_regs[3],
+                mxcsr_fields=MxcsrFields(**{k: v for k, v in zip(MxcsrFields.model_fields.keys(), raw_regs[4])}),
+                x87_status_word_fields=X87StatusWordFields(**{k: v for k, v in zip(X87StatusWordFields.model_fields.keys(), raw_regs[5])}),
+                x87_control_word_fields=X87ControlWordFields(**{k: v for k, v in zip(X87ControlWordFields.model_fields.keys(), raw_regs[6])}),
+                last_error=(raw_regs[7][0], raw_regs[7][1]),
+                last_status=(raw_regs[8][0], raw_regs[8][1])
+            )
+    
+    def get_setting_str(self, section: str, setting_name: str) -> str | None:
+        """
+        Retrieves a string setting from the x64dbg configuration
+
+        Args:
+            section: The section of the setting
+            setting_name: The name of the setting
+
+        Returns:
+            The value of the setting or None if the setting was not found
+        """
+        res, setting = self._send_request(XAutoCommand.XAUTO_REQ_DBG_READ_SETTING_SZ, section, setting_name)
+        if not res:
+            return None
+        return setting
+    
+    def set_setting_str(self, section: str, setting_name: str, setting_val: str) -> bool:
+        """
+        Sets a string setting in the x64dbg configuration
+
+        Args:
+            section: The section of the setting
+            setting_name: The name of the setting
+            setting_val: The desired value of the setting
+
+        Returns:
+            Success
+        """
+        return self._send_request(XAutoCommand.XAUTO_REQ_DBG_WRITE_SETTING_SZ, section, setting_name, setting_val)
+    
+    def get_setting_int(self, section: str, setting_name: str) -> int | None:
+        """
+        Retrieves a numeric setting from the x64dbg configuration
+
+        Args:
+            section: The section of the setting
+            setting_name: The name of the setting
+
+        Returns:
+            The value of the setting or None if the setting was not found
+        """
+        res, setting = self._send_request(XAutoCommand.XAUTO_REQ_DBG_READ_SETTING_UINT, section, setting_name)
+        if not res:
+            return None
+        return setting
+    
+    def set_setting_int(self, section: str, setting_name: str, setting_val: int) -> bool:
+        """
+        Sets a numeric setting in the x64dbg configuration
+
+        Args:
+            section: The section of the setting
+            setting_name: The name of the setting
+            setting_val: The desired value of the setting
+
+        Returns:
+            Success
+        """
+        return self._send_request(XAutoCommand.XAUTO_REQ_DBG_WRITE_SETTING_UINT, section, setting_name, setting_val)
+    
+    def check_valid_read_ptr(self, addr: int) -> bool:
+        """
+        Checks if the specified address is accessible read memory in the debugee
+
+        Args:
+            addr: The address to check
+
+        Returns:
+            True if the address is valid, False otherwise
+        """
+        return self._send_request(XAutoCommand.XAUTO_REQ_DBG_IS_VALID_READ_PTR, addr)
+    
+    def disassemble_at(self, addr: int) -> Instruction | None:
+        """
+        Disassembles a single instruction at the specified address
+
+        Args:
+            addr: The address to disassemble at
+
+        Returns:
+            An Instruction object or None if the disassembly failed
+        """
+        res = self._send_request(XAutoCommand.XAUTO_REQ_DISASSEMBLE, addr)
+        if not res:
+            return None
+        return Instruction(
+            instruction=res[0],
+            argcount=res[1],
+            instr_size=res[2],
+            type=DisasmInstrType(res[3]),
+            arg=[InstructionArg(
+                    mnemonic=arg[0],
+                    type=DisasmArgType(arg[1]),
+                    segment=SegmentReg(arg[2]),
+                    constant=arg[3],
+                    value=arg[4],
+                    memvalue=arg[5],
+            ) for arg in res[4]]
+        )
+    
+    def _assemble_at(self, addr: int, instr: str) -> bool:
+        return self._send_request(XAutoCommand.XAUTO_REQ_ASSEMBLE, addr, instr)
+    
+    def get_breakpoints(self, bp_type: BreakpointType) -> list[Breakpoint]:
+        """
+        Retrieves all breakpoints of the specified type
+
+        Args:
+            bp_type: The type of breakpoint to get
+        
+        Returns:
+            A list of Breakpoint objects
+        """
+        resp = self._send_request(XAutoCommand.XAUTO_REQ_GET_BREAKPOINTS, bp_type)
+        return [Breakpoint(
+            type=BreakpointType(bp[0]),
+            addr=bp[1],
+            enabled=bp[2],
+            singleshoot=bp[3],
+            active=bp[4],
+            name=bp[5],
+            mod=bp[6],
+            slot=bp[7],
+            typeEx=bp[8],
+            hwSize=bp[9],
+            hitCount=bp[10],
+            fastResume=bp[11],
+            silent=bp[12],
+            breakCondition=bp[13],
+            logText=bp[14],
+            logCondition=bp[15],
+            commandText=bp[16],
+            commandCondition=bp[17]
+        ) for bp in resp]
+    
+    def get_label_at(self, addr: int, segment_reg: SegmentReg = SegmentReg.SegDefault) -> str:
+        """
+        Retrieves the label at the specified address
+
+        Args:
+            addr: The address to get the label for
+            segment_reg: The segment register to use
+
+        Returns:
+            The label or an empty string if no label was found
+        """
+        res, label = self._send_request(XAutoCommand.XAUTO_REQ_GET_LABEL, addr, segment_reg)
+        if not res:
+            return ""
+        return label
+    
+    def get_comment_at(self, addr: int) -> str:
+        """
+        Retrieves the comment at the specified address
+
+        Args:
+            addr: The address to get the comment for
+
+        Returns:
+            The label or an empty string if no comment was found
+        """
+        res, comment = self._send_request(XAutoCommand.XAUTO_REQ_GET_COMMENT, addr)
+        if not res:
+            return ""
+        return comment
+    
+    def get_symbol_at(self, addr: int) -> Symbol | None:
+        """
+        Retrieves the symbol at the specified address
+
+        Args:
+            addr: The address to get the symbol for
+
+        Returns:
+            A Symbol object or None if no symbol was found
+        """
+        res = self._send_request(XAutoCommand.XAUTO_REQ_GET_SYMBOL, addr)
+        if not res[0]:
+            return ""
+        return Symbol(
+            addr=res[1],
+            decoratedSymbol=res[2],
+            undecoratedSymbol=res[3],
+            type=SymbolType(res[4]),
+            ordinal=res[5]
+        )
+    
+    def wait_until_debugging(self, timeout: int = 10) -> bool:
+        """
+        Blocks until the debugger enters a debugging state
+
+        Args:
+            timeout: The maximum time to wait in seconds
+
+        Returns:
+            True if the debugger is debugging, False otherwise
+        """
+        slept = 0
+        while True:
+            if self.is_debugging():
+                return True
+            time.sleep(0.2)
+            slept += 0.2
+            if slept >= timeout:
+                return False
+    
+    def wait_until_not_debugging(self, timeout: int = 10) -> bool:
+        """
+        Blocks until the debugger enters a not-debugging state
+
+        Args:
+            timeout: The maximum time to wait in seconds
+
+        Returns:
+            True if the debugger is not-debugging, False otherwise
+        """
+        slept = 0
+        while True:
+            if not self.is_debugging():
+                return True
+            time.sleep(0.2)
+            slept += 0.2
+            if slept >= timeout:
+                return False
+    
+    def wait_until_running(self, timeout: int = 10) -> bool:
+        """
+        Blocks until the debugger enters a running state
+
+        Args:
+            timeout: The maximum time to wait in seconds
+
+        Returns:
+            True if the debugger is running, False otherwise
+        """
+        slept = 0
+        while True:
+            if self.is_running():
+                return True
+            time.sleep(0.08)
+            slept += 0.08
+            if slept >= timeout:
+                return False
+    
+    def wait_until_stopped(self, timeout: int = 10) -> bool:
+        """
+        Blocks until the debugger enters a stopped state
+
+        Args:
+            timeout: The maximum time to wait in seconds
+
+        Returns:
+            True if the debugger is stopped, False otherwise
+        """
+        slept = 0
+        while True:
+            if not self.is_running() or not self.is_debugging():
+                return True
+            time.sleep(0.2)
+            slept += 0.2
+            if slept >= timeout:
+                return False
+    
+    def wait_cmd_ready(self, timeout: int = 10) -> bool:
+        """
+        Blocks until the debugger is ready to accept debug control commands (debugging + stopped)
+
+        Args:
+            timeout: The maximum time to wait in seconds
+
+        Returns:
+            True if the debugger is ready, False otherwise
+        """
+        return self.wait_until_debugging(timeout) and self.wait_until_stopped(timeout)
+
+
+
+================================================
+File: x64dbg_automate/events.py
+================================================
+from enum import StrEnum
+import time
+
+from pydantic import BaseModel
+
+
+class EventType(StrEnum):
+    EVENT_BREAKPOINT = "EVENT_BREAKPOINT"
+    EVENT_SYSTEMBREAKPOINT = "EVENT_SYSTEMBREAKPOINT"
+    EVENT_CREATE_THREAD = "EVENT_CREATE_THREAD"
+    EVENT_EXIT_THREAD = "EVENT_EXIT_THREAD"
+    EVENT_LOAD_DLL = "EVENT_LOAD_DLL"
+    EVENT_UNLOAD_DLL = "EVENT_UNLOAD_DLL"
+    EVENT_OUTPUT_DEBUG_STRING = "EVENT_OUTPUT_DEBUG_STRING"
+    EVENT_EXCEPTION = "EVENT_EXCEPTION"
+
+
+class BreakpointEventData(BaseModel):
+    type: int
+    addr: int
+    enabled: bool
+    singleshoot: bool
+    active: bool
+    name: str
+    mod: str
+    slot: int
+    typeEx: int
+    hwSize: int
+    hitCount: int
+    fastResume: bool
+    silent: bool
+    breakCondition: str
+    logText: str
+    logCondition: str
+    commandText: str
+    commandCondition: str
+
+
+class SysBreakpointEventData(BaseModel):
+    reserved: int
+
+
+class CreateThreadEventData(BaseModel):
+    dwThreadId: int
+    lpThreadLocalBase: int
+    lpStartAddress: int
+
+
+class ExitThreadEventData(BaseModel):
+    dwThreadId: int
+    dwExitCode: int
+
+
+class LoadDllEventData(BaseModel):
+    modname: str
+    lpBaseOfDll: int
+
+
+class UnloadDllEventData(BaseModel):
+    lpBaseOfDll: int
+
+
+class OutputDebugStringEventData(BaseModel):
+    lpDebugStringData: bytes
+
+
+class ExceptionEventData(BaseModel):
+    ExceptionCode: int
+    ExceptionFlags: int
+    ExceptionRecord: int
+    ExceptionAddress: int
+    NumberParameters: int
+    ExceptionInformation: list[int]
+    dwFirstChance: bool
+
+
+EventTypes = BreakpointEventData | SysBreakpointEventData | CreateThreadEventData | ExitThreadEventData | \
+    LoadDllEventData | UnloadDllEventData | OutputDebugStringEventData | ExceptionEventData
+
+
+class DbgEvent():
+    def __init__(self, event_type: str, event_data: list[any]):
+        self.event_type = event_type
+
+        if event_type == EventType.EVENT_BREAKPOINT:
+            self.event_data = BreakpointEventData(
+                type=event_data[0],
+                addr=event_data[1],
+                enabled=event_data[2],
+                singleshoot=event_data[3],
+                active=event_data[4],
+                name=event_data[5],
+                mod=event_data[6],
+                slot=event_data[7],
+                typeEx=event_data[8],
+                hwSize=event_data[9],
+                hitCount=event_data[10],
+                fastResume=event_data[11],
+                silent=event_data[12],
+                breakCondition=event_data[13],
+                logText=event_data[14],
+                logCondition=event_data[15],
+                commandText=event_data[16],
+                commandCondition=event_data[17]
+            )
+        elif event_type == EventType.EVENT_SYSTEMBREAKPOINT:
+            self.event_data = SysBreakpointEventData(
+                reserved=event_data[0]
+            )
+        elif event_type == EventType.EVENT_CREATE_THREAD:
+            self.event_data = CreateThreadEventData(
+                dwThreadId=event_data[0],
+                lpThreadLocalBase=event_data[1],
+                lpStartAddress=event_data[2]
+            )
+        elif event_type == EventType.EVENT_EXIT_THREAD:
+            self.event_data = ExitThreadEventData(
+                dwThreadId=event_data[0],
+                dwExitCode=event_data[1]
+            )
+        elif event_type == EventType.EVENT_LOAD_DLL:
+            self.event_data = LoadDllEventData(
+                modname=event_data[0],
+                lpBaseOfDll=event_data[1]
+            )
+        elif event_type == EventType.EVENT_UNLOAD_DLL:
+            self.event_data = UnloadDllEventData(
+                lpBaseOfDll=event_data[0]
+            )
+        elif event_type == EventType.EVENT_OUTPUT_DEBUG_STRING:
+            self.event_data = OutputDebugStringEventData(
+                lpDebugStringData=event_data[0]
+            )
+        elif event_type == EventType.EVENT_EXCEPTION:
+            self.event_data = ExceptionEventData(
+                ExceptionCode=event_data[0],
+                ExceptionFlags=event_data[1],
+                ExceptionRecord=event_data[2],
+                ExceptionAddress=event_data[3],
+                NumberParameters=event_data[4],
+                ExceptionInformation=event_data[5],
+                dwFirstChance=event_data[6]
+            )
+        else:
+            raise ValueError(f"Unknown event type: {event_type}")
+
+
+class DebugEventQueueMixin():
+    _debug_events_q: list[DbgEvent] = []
+    listeners: dict[EventType, list[callable]] = {}
+
+    def debug_event_publish(self, raw_event_data: list[any]):
+        event = DbgEvent(raw_event_data[0], raw_event_data[1:])
+        while len(self._debug_events_q) > 100:
+            self._debug_events_q.pop(0)
+        self._debug_events_q.append(event)
+        for listener in self.listeners.get(event.event_type, []):
+            listener(event)
+        return event
+    
+    def get_latest_debug_event(self) -> DbgEvent | None:
+        """
+        Get the latest debug event that occurred in the debugee. The event is removed from the queue.
+        """
+        if len(self._debug_events_q) == 0:
+            return None
+        return self._debug_events_q.pop()
+    
+    def peek_latest_debug_event(self) -> DbgEvent | None:
+        """
+        Get the latest debug event that occurred in the debugee. The event is not removed from the queue.
+        """
+        if len(self._debug_events_q) == 0:
+            return None
+        return self._debug_events_q[-1]
+    
+    def clear_debug_events(self, event_type: EventType | None = None) -> None:
+        """
+        Clear the debug event queue. If `event_type` is specified, only events of that type will be removed.
+        
+        Args:
+            event_type: The type of event to clear. If None, all events will be cleared.
+        """
+        filtered = []
+        for _ in range(len(self._debug_events_q)):
+            event = self._debug_events_q.pop(0)
+            if event.event_type != event_type and event_type is not None:
+                filtered.append(event)
+        self._debug_events_q = filtered
+    
+    def wait_for_debug_event(self, event_type: EventType, timeout: int = 5) -> DbgEvent | None:
+        """
+        Wait for a debug event of a specific type to occur. This method returns the latest event of the specified type, which may have occurred before the method was called.
+
+        Returned events are removed from the queue. If the event has not occurred within the timeout, None is returned.
+
+        `clear_debug_events` can be used to ensure an empty debug event queue before calling this method.
+
+        Args:
+            event_type: The type of event to wait for
+            timeout: The maximum time to wait for the event in seconds
+
+        Returns:
+            DbgEvent | None: The latest event of the specified type, or None if the event did not occur within the timeout.
+        """
+        while timeout > 0:
+            for ix, event in enumerate(self._debug_events_q):
+                if event.event_type == event_type:
+                    return self._debug_events_q.pop(ix)
+            time.sleep(0.25)
+            timeout -= 0.25
+        return None
+    
+    def watch_debug_event(self, event_type: EventType, callback: callable):
+        """
+        Register a callback to be invoked when a debug event of a specific type occurs.
+
+        Args:
+            event_type: The type of event to watch
+            callback: The callback to invoke when the event occurs. The callback should accept a single argument of type `DbgEvent`.
+        """
+        self.listeners[event_type] = self.listeners.get(event_type, []) + [callback]
+
+    def unwatch_debug_event(self, event_type: EventType, callback: callable):
+        """
+        Remove a callback registered with `watch_debug_event`
+
+        Args:
+            event_type: The type of event to unwatch
+            callback: The callback instance to remove
+        """
+        self.listeners[event_type] = [x for x in self.listeners.get(event_type, []) if x != callback]
+
+
+
+================================================
+File: x64dbg_automate/hla_xauto.py
+================================================
+import os
+from x64dbg_automate.commands_xauto import XAutoCommandsMixin
+from x64dbg_automate.models import HardwareBreakpointType, MemPage, \
+    MemoryBreakpointType, MutableRegister, PageRightsConfiguration, ReferenceViewRef, StandardBreakpointType
+
+
+class XAutoHighLevelCommandAbstractionMixin(XAutoCommandsMixin):
+    """
+    Higher-level abstractions built on top of raw XAuto command primitives
+    """
+
+    def load_executable(self, target_exe: str, cmdline: str = "", current_dir: str = "", wait_timeout: int = 10) -> bool:
+        """
+        Loads a new executable into the debugger. This method will block until the debugee is ready to receive a command.
+
+        Args:
+            target_exe: Path to the executable to load
+            cmdline: Command line arguments to pass to the executable
+            current_dir: Current working directory for the executable
+            wait_timeout: Max time to wait for the debugee to be ready
+
+        Returns:
+            True if successful, False otherwise
+        """
+        cmdline = cmdline.replace('"', r'\"')
+        current_dir = current_dir.replace('"', r'\"')
+        if len(current_dir) == 0:
+            current_dir = "."
+        if current_dir == "." or current_dir == "":
+            target_exe = os.path.abspath(target_exe)
+        else:
+            target_exe = os.path.abspath(os.path.join(current_dir, target_exe))
+        if not self.cmd_sync(f'init "{target_exe}", "{cmdline}", "{current_dir}"'):
+            return False
+        return self.wait_cmd_ready(wait_timeout)
+
+    def attach(self, pid: int, wait_timeout: int = 10) -> bool:
+        """
+        Attaches the debugger to a running process. This method does *NOT* block until a breakpoint has been reached.
+
+        Args:
+            pid (int): Process Identifier (PID) of the running process.
+            wait_timeout (int): Maximum time (in seconds) to wait for the debugger to be ready.
+
+        Returns:
+            bool: True if the debugger attaches successfully, False otherwise.
+        """
+        if not self.cmd_sync(f"attach 0x{pid:x}"):
+            return False
+        return self.wait_until_debugging(wait_timeout)
+
+    def detach(self, wait_timeout: int = 10) -> bool:
+        """
+        Detaches the debugger from the currently debugged process.
+        This method will block until we are no longer debugging.
+
+        Args:
+            wait_timeout (int): Maximum time (in seconds) to wait for the debugger to be ready.
+
+        Returns:
+            bool: True if the debugger detaches successfully, False otherwise.
+        """
+        if not self.cmd_sync("detach"):
+            return False
+        return self.wait_until_not_debugging(wait_timeout)
+
+    def unload_executable(self, wait_timeout: int = 10) -> bool:
+        """
+        Unloads the currently loaded executable. This method will block until the debugger is no longer debugging.
+
+        Args:
+            wait_timeout: Max time to wait for the debugger finish unloading
+
+        Returns:
+            True if successful, False otherwise
+        """
+        if not self.cmd_sync(f'stop'):
+            return False
+        return self.wait_until_not_debugging(wait_timeout)
+
+    def stepi(self, step_count: int = 1, pass_exceptions: bool = False, swallow_exceptions: bool = False, wait_for_ready: bool = True, wait_timeout: int = 2) -> bool:
+        """
+        Steps into N instructions.
+        
+        Args:
+            step_count: Number of instructions to step through
+            pass_exceptions: Pass exceptions to the debugee during step
+            swallow_exceptions: Swallow exceptions during step
+            wait_for_ready: Block until debugger is stopped
+            wait_timeout: Maximum time in seconds to wait for debugger to stop
+        Returns:
+            bool: True if stepping operation was successful, False otherwise.
+        Raises:
+            ValueError: If both pass_exceptions and swallow_exceptions are True.
+        """
+        if pass_exceptions == True and swallow_exceptions == True:
+            raise ValueError("Cannot pass and swallow exceptions at the same time")
+        if pass_exceptions:
+            prefix = 'e'
+        elif swallow_exceptions:
+            prefix = 'se'
+        else:
+            prefix = ''
+        res = self.cmd_sync(f"{prefix}sti 0x{step_count:x}")
+        if res and wait_for_ready:
+            self.wait_until_stopped(wait_timeout)
+        return res
+    
+    def stepo(self, step_count: int = 1, pass_exceptions: bool = False, swallow_exceptions: bool = False, wait_for_ready: bool = True, wait_timeout: int = 2) -> bool:
+        """
+        Steps over N instructions.
+        
+        Args:
+            step_count: Number of instructions to step through
+            pass_exceptions: Pass exceptions to the debugee during step
+            swallow_exceptions: Swallow exceptions during step
+            wait_for_ready: Block until debugger is stopped
+            wait_timeout: Maximum time in seconds to wait for debugger to stop
+        Returns:
+            bool: True if stepping operation was successful, False otherwise.
+        Raises:
+            ValueError: If both pass_exceptions and swallow_exceptions are True.
+        """
+        if pass_exceptions == True and swallow_exceptions == True:
+            raise ValueError("Cannot pass and swallow exceptions at the same time")
+        if pass_exceptions:
+            prefix = 'e'
+        elif swallow_exceptions:
+            prefix = 'se'
+        else:
+            prefix = ''
+        res = self.cmd_sync(f"{prefix}sto 0x{step_count:x}")
+        if res and wait_for_ready:
+            self.wait_until_stopped(wait_timeout)
+        return res
+    
+    def skip(self, skip_count: int = 1, wait_for_ready: bool = True, wait_timeout: int = 2) -> bool:
+        """
+        Skips over N instructions.
+        
+        Args:
+            skip_count: Number of instructions to skip
+            wait_for_ready: Block until debugger is stopped
+            wait_timeout: Maximum time in seconds to wait for debugger to stop
+        Returns:
+            bool: True if stepping operation was successful, False otherwise.
+        """
+        res = self.cmd_sync(f"skip {skip_count}")
+        if res and wait_for_ready:
+            self.wait_until_stopped(wait_timeout)
+        return res
+    
+    def ret(self, frames: int = 1, wait_timeout: int = 10) -> bool:
+        """
+        Steps until a ret instruction is encountered.
+        
+        Args:
+            frames: Number of ret instructions to seek
+            wait_timeout: Maximum time in seconds to wait for debugger to stop
+        Returns:
+            bool: True if stepping operation was successful, False otherwise.
+        """
+        if not self.cmd_sync(f"rtr {frames}"):
+            return False
+        return self.wait_cmd_ready(wait_timeout)
+    
+    def go(self, pass_exceptions: bool = False, swallow_exceptions: bool = False) -> bool:
+        """
+        Resumes the debugee. This method will block until the debugee is in the running state.
+
+        Args:
+            pass_exceptions: Pass exceptions to the debugee
+            swallow_exceptions: Swallow exceptions
+
+        Returns:
+            True if successful, False otherwise
+        """
+        if pass_exceptions == True and swallow_exceptions == True:
+            raise ValueError("Cannot pass and swallow exceptions at the same time")
+        if pass_exceptions:
+            prefix = 'e'
+        elif swallow_exceptions:
+            prefix = 'se'
+        else:
+            prefix = ''
+        ip_start = self.get_reg('cip')
+        if not self.cmd_sync(f"{prefix}go"):
+            return False
+        if self.get_reg('cip') == ip_start:
+            self.wait_until_running(timeout=1)
+        return True
+
+    
+    def virt_alloc(self, n: int = 0x1000, addr: int = 0) -> int:
+        """
+        Allocates memory in the debugee's address space
+
+        Args:
+            n: Size of memory to allocate
+            addr: Address to allocate memory at
+
+        Returns:
+            Address of the allocated memory
+        """
+        if not self.cmd_sync(f"alloc 0x{n:x}, 0x{addr:x}"):
+            raise ValueError("Failed to allocate memory")
+        addr, success = self.eval_sync("$result")
+        if not success:
+            raise ValueError("Failed to evaluate result")
+        return addr
+    
+    def virt_free(self, addr: int) -> bool:
+        """
+        Frees memory in the debugee's address space
+
+        Args:
+            addr: Address to free memory at
+
+        Returns:
+            Success
+        """
+        if not self.cmd_sync(f"free 0x{addr:x}"):
+            raise ValueError("Failed to free memory")
+        return True
+    
+    def virt_protect(self, addr: int, page_rights: PageRightsConfiguration, guard: bool = False) -> bool:
+        """
+        Changes a pages memory protection in the debugee's address space, optionally setting a page guard.
+
+        Args:
+            addr: Address to operate on
+            page_rights: New memory protection configuration
+            guard: page guard toggle
+
+        Returns:
+            Success
+        """
+        rights_str = str(page_rights)
+        if guard:
+            rights_str = f'G{rights_str}'
+        if not self.cmd_sync(f"setpagerights 0x{addr:x}, {rights_str}"):
+            raise ValueError("Failed to set memory protection")
+        return True
+    
+    def virt_query(self, addr: int) -> MemPage | None:
+        """
+        Retrieves information about a memory region.
+
+        Args:
+            addr: Address to query
+
+        Returns:
+            MemPage on success, None on failure
+        """
+        map = self.memmap()
+        for m in map:
+            if m.base_address <= addr < m.base_address + m.region_size:
+                return m
+        return None
+    
+    def memset(self, addr: int, byte_val: int, size: int) -> bool:
+        """
+        Sets memory in the debugee's address space to the specified value
+
+        Args:
+            addr: Address to set memory at
+            byte_val: Value to set memory to
+            size: Number of bytes to set
+
+        Returns:
+            Success
+        """
+        if not self.cmd_sync(f"memset 0x{addr:x}, 0x{byte_val:x}, 0x{size:x}"):
+            raise ValueError("Failed to set memory")
+        return True
+    
+    def set_reg(self, reg: MutableRegister | str, val: int) -> bool:
+        """
+        Set a single register or subregister to a value
+
+        Args:
+            reg: Register to set
+            val: Value to set
+
+        Returns:
+            Success
+        """
+        reg = MutableRegister(str(reg).lower())
+        if not isinstance(val, int):
+            raise TypeError("val must be an integer")
+        return self.cmd_sync(f'{reg}=0x{val:X}')
+    
+    def get_reg(self, reg: MutableRegister | str) -> int:
+        """
+        Get a single register or subregister
+
+        Args:
+            reg: Register to get
+
+        Returns:
+            Success
+        """
+        reg = MutableRegister(str(reg).lower())
+        res, success = self.eval_sync(f'{reg}')
+        if not success:
+            raise ValueError(f"Failed to evaluate register {reg}")
+        return res
+    
+    def pause(self) -> bool:
+        """
+        Pauses the debugee. This method will block until the debugee is in the stopped state.
+
+        Returns:
+            True if successful, False otherwise
+        """
+        if not self.cmd_sync(f"pause"):
+            return False
+        return self.wait_until_stopped()
+    
+    def set_breakpoint(self, address_or_symbol: int | str, name: str | None = None, bp_type: StandardBreakpointType = StandardBreakpointType.Short, singleshoot: bool = False) -> bool:
+        """
+        Sets a software breakpoint at the specified address or symbol.
+
+        Args:
+            address_or_symbol: Address or symbol to set the breakpoint at
+            name: Optional name for the breakpoint
+            bp_type: Type of software breakpoint to set
+            singleshoot: Set a single-shot breakpoint
+
+        Returns:
+            Success
+        """
+        bp_type_str = str(bp_type).lower()
+        if singleshoot and bp_type_str != "ss":
+            bp_type_str = f'ss{bp_type_str}'
+        if isinstance(address_or_symbol, int):
+            name = name or f"bpx_{address_or_symbol:x}"
+            return self.cmd_sync(f'bpx 0x{address_or_symbol:x}, "{name}", {bp_type_str}')
+        else:
+            name = name or f"bpx_{address_or_symbol.replace(' ', '_')}"
+            if '"' in name:
+                raise ValueError("Name cannot contain double quotes")
+            return self.cmd_sync(f'bpx {address_or_symbol}, "{name}", {bp_type_str}')
+    
+    def set_hardware_breakpoint(self, address_or_symbol: int | str, bp_type: HardwareBreakpointType = HardwareBreakpointType.x, size: int = 1) -> bool:
+        """
+        Sets a hardware breakpoint at the specified address or symbol.
+
+        Args:
+            address_or_symbol: Address or symbol to set the breakpoint at
+            bp_type: Type of software breakpoint to set
+            size: breakpoint size, one of [1, 2, 4, 8]
+
+        Returns:
+            Success
+        """
+        if size not in [1, 2, 4, 8]:
+            raise ValueError("Invalid size")
+        if isinstance(address_or_symbol, int):
+            return self.cmd_sync(f'bph 0x{address_or_symbol:x}, {bp_type}, {size}')
+        else:
+            return self.cmd_sync(f'bph {address_or_symbol}, {bp_type}, {size}')
+    
+    def set_memory_breakpoint(self, address_or_symbol: int | str, bp_type: MemoryBreakpointType = MemoryBreakpointType.a, singleshoot: bool = False) -> bool:
+        """
+        Sets a memory breakpoint at the specified address or symbol.
+
+        Args:
+            address_or_symbol: Address or symbol to set the breakpoint at
+            bp_type: Type of software breakpoint to set
+            singleshoot: Set a single-shot breakpoint
+
+        Returns:
+            Success
+        """
+        if isinstance(address_or_symbol, int):
+            return self.cmd_sync(f'bpm 0x{address_or_symbol:x}, {int(not singleshoot)}, {bp_type}')
+        else:
+            return self.cmd_sync(f'bpm {address_or_symbol}, {int(not singleshoot)}, {bp_type}')
+
+    def clear_breakpoint(self, address_name_symbol_or_none: int | str | None = None) -> bool:
+        """
+        Clears software breakpoint at the specified address, name, or symbol.
+
+        Args:
+            address_name_symbol_or_none: Address or symbol to remove the breakpoint at (None removes all breakpoints of this type)
+
+        Returns:
+            Success
+        """
+        if address_name_symbol_or_none is None:
+            return self.cmd_sync('bpc')
+        if isinstance(address_name_symbol_or_none, int):
+            return self.cmd_sync(f'bpc 0x{address_name_symbol_or_none:x}')
+        return self.cmd_sync(f'bpc "{address_name_symbol_or_none}"')
+    
+    def clear_hardware_breakpoint(self, address_symbol_or_none: int | str | None = None) -> bool:
+        """
+        Clears hardware breakpoint at the specified address or symbol.
+
+        Args:
+            address_symbol_or_none: Address or symbol to remove the breakpoint at (None removes all breakpoints of this type)
+            
+        Returns:
+            Success
+        """
+        if address_symbol_or_none is None:
+            return self.cmd_sync('bphc')
+        if isinstance(address_symbol_or_none, int):
+            return self.cmd_sync(f'bphc 0x{address_symbol_or_none:x}')
+        return self.cmd_sync(f'bphc {address_symbol_or_none}')
+    
+    def clear_memory_breakpoint(self, address_symbol_or_none: int | str | None = None) -> bool:
+        """
+        Clears memory breakpoint at the specified address or symbol.
+
+        Args:
+            address_symbol_or_none: Address or symbol to remove the breakpoint at (None removes all breakpoints of this type)
+            
+        Returns:
+            Success
+        """
+        if address_symbol_or_none is None:
+            return self.cmd_sync('bpmc')
+        if isinstance(address_symbol_or_none, int):
+            return self.cmd_sync(f'bpmc 0x{address_symbol_or_none:x}')
+        return self.cmd_sync(f'bpmc {address_symbol_or_none}')
+    
+    def toggle_breakpoint(self, address_name_symbol_or_none: int | str | None = None, on: bool = True) -> bool:
+        """
+        Toggles software breakpoint at the specified address or symbol.
+
+        Args:
+            address_name_symbol_or_none: Address, name, or symbol to toggle the breakpoint at
+            on: Enable or disable the breakpoint
+            
+        Returns:
+            Success
+        """
+        toggle_cmd = 'bpe' if on else 'bpd'
+        if isinstance(address_name_symbol_or_none, int):
+            return self.cmd_sync(f'{toggle_cmd} 0x{address_name_symbol_or_none:x}')
+        elif address_name_symbol_or_none is None:
+            return self.cmd_sync(f'{toggle_cmd}')
+        else:
+            return self.cmd_sync(f'{toggle_cmd} {address_name_symbol_or_none}')
+    
+    def toggle_hardware_breakpoint(self, address_symbol_or_none: int | str | None = None, on: bool = True) -> bool:
+        """
+        Toggles hardware breakpoint at the specified address or symbol.
+
+        Args:
+            address_symbol_or_none: Address or symbol to toggle the breakpoint at
+            on: Enable or disable the breakpoint
+            
+        Returns:
+            Success
+        """
+        toggle_cmd = 'bphe' if on else 'bphd'
+        if isinstance(address_symbol_or_none, int):
+            return self.cmd_sync(f'{toggle_cmd} 0x{address_symbol_or_none:x}')
+        elif address_symbol_or_none is None:
+            return self.cmd_sync(f'{toggle_cmd}')
+        else:
+            return self.cmd_sync(f'{toggle_cmd} {address_symbol_or_none}')
+    
+    def toggle_memory_breakpoint(self, address_symbol_or_none: int | str | None = None, on: bool = True) -> bool:
+        """
+        Toggles memory breakpoint at the specified address or symbol.
+
+        Args:
+            address_symbol_or_none: Address or symbol to toggle the breakpoint at
+            on: Enable or disable the breakpoint
+            
+        Returns:
+            Success
+        """
+        toggle_cmd = 'bpme' if on else 'bpmd'
+        if isinstance(address_symbol_or_none, int):
+            return self.cmd_sync(f'{toggle_cmd} 0x{address_symbol_or_none:x}')
+        elif address_symbol_or_none is None:
+            return self.cmd_sync(f'{toggle_cmd}')
+        else:
+            return self.cmd_sync(f'{toggle_cmd} {address_symbol_or_none}')
+
+    def set_label_at(self, address: int, text: str) -> bool:
+        """
+        Sets a label at the specified address
+
+        Args:
+            address: Address to set the label at
+            text: Label text
+
+        Returns:
+            Success
+        """
+        if '"' in text:
+            raise ValueError("Text cannot contain double quotes")
+        return self.cmd_sync(f'lblset 0x{address:x}, "{text}"')
+
+    def del_label_at(self, address: int) -> bool:
+        """
+        Deletes a label at the specified address
+
+        Args:
+            address: Address to clear the label at
+
+        Returns:
+            Success
+        """
+        return self.cmd_sync(f'lbldel 0x{address:x}')
+
+    def set_comment_at(self, address: int, text: str) -> bool:
+        """
+        Sets a comment at the specified address
+
+        Args:
+            address: Address to set the comment at
+            text: comment text
+
+        Returns:
+            Success
+        """
+        if '"' in text:
+            raise ValueError("Text cannot contain double quotes")
+        return self.cmd_sync(f'cmtset 0x{address:x}, "{text}"')
+
+    def del_comment_at(self, address: int) -> bool:
+        """
+        Deletes a comment at the specified address
+
+        Args:
+            address: Address to clear the comment at
+
+        Returns:
+            Success
+        """
+        return self.cmd_sync(f'cmtdel 0x{address:x}')
+
+    def hide_debugger_peb(self) -> bool:
+        """
+        Hides the debugger in the debugee's PEB
+
+        Returns:
+            Success
+        """
+        return self.cmd_sync(f'hide')
+
+    def debugee_pid(self) -> int | None:
+        """
+        Retrieves the PID of the debugee
+
+        Returns:
+            PID of the debugee, or None if the debugger is not debugging
+        """
+        if self.is_debugging():
+            pid, res = self.eval_sync(f'pid')
+            if res:
+                return pid
+        return None
+
+    def thread_create(self, addr: int, arg: int = 0) -> int | None:
+        """
+        Create a new thread in the debugee.
+
+        Args:
+            addr: Address of the thread entry point
+            arg: Argument to pass to the thread
+        """
+        success = self.cmd_sync(f'createthread 0x{addr:x}, 0x{arg:x}')
+        if not success:
+            return None
+        tid, success = self.eval_sync('$result')
+        if not success:
+            return None
+        return tid
+
+    def thread_terminate(self, tid: int):
+        """
+        Kills a thread in the debugee.
+
+        Args:
+            tid: Thread ID to kill
+        """
+        return self.cmd_sync(f'killthread 0x{tid:x}')
+
+    def thread_pause(self, tid: int):
+        """
+        Pauses a thread in the debugee.
+
+        Args:
+            tid: Thread ID to kill
+        """
+        return self.cmd_sync(f'suspendthread 0x{tid:x}')
+
+    def thread_resume(self, tid: int):
+        """
+        Resumes a thread in the debugee.
+
+        Args:
+            tid: Thread ID to kill
+        """
+        return self.cmd_sync(f'resumethread 0x{tid:x}')
+
+    def switch_thread(self, tid: int):
+        """
+        Switches the currently observed debugger thread.
+
+        Args:
+            tid: Thread ID to kill
+        """
+        return self.cmd_sync(f'switchthread 0x{tid:x}')
+    
+    def assemble_at(self, addr: int, instr: str) -> int | None:
+        """
+        Assembles a single instruction at the specified address
+
+        Args:
+            addr: Address to assemble at
+            instr: Instruction to assemble
+
+        Returns:
+            The size of the assembled instruction, or None on failure
+        """
+        res = self._assemble_at(addr, instr)
+        if not res:
+            return None
+        ins = self.disassemble_at(addr)
+        if not ins:
+            return None
+        return ins.instr_size
+    
+    # GUI Commands
+    
+    def log(self, fmt_str: str) -> int | None:
+        """
+        Logs a string to the x64dbg log window
+
+        Args:
+            fmt_str: format String to log
+
+        Returns:
+            Success
+        """
+        sanitized_str = fmt_str.replace('"', '\\"')
+        return self.cmd_sync(f'log "{sanitized_str}"')
+
+    def gui_show_reference_view(self, name: str, refs: list[ReferenceViewRef]) -> bool:
+        """
+        Shows a reference view populated with refs.
+
+        Args:
+            refs: A list of addresses and text to display in the reference view
+
+        Returns:
+            Success
+        """
+        name = name.replace('"', '\\"')
+        if not self.cmd_sync(f'refinit "{name}"'):
+            return False
+        for ref in refs:
+            text = ref.text.replace('"', '\\"')
+            if not self.cmd_sync(f'refadd 0x{ref.address:x}, "{text}"'):
+                return False
+
+
+
+================================================
+File: x64dbg_automate/models.py
+================================================
+from enum import IntEnum, StrEnum
+from pydantic import BaseModel
+
+
+class DebugSession(BaseModel):
+    """
+    Represents a debug session in x64dbg Automate
+    """
+    pid: int # The process ID of the debugger
+    lockfile_path: str # The path to the lockfile for the session
+    cmdline: list[str] # The command line arguments used to start the session
+    cwd: str # The current working directory of the session
+    window_title: str # The title of the x64dbg window
+    sess_req_rep_port: int # The port used for zmq request/reply communication
+    sess_pub_sub_port: int # The port used for zmq publish/subscribe communication
+
+
+class MemPage(BaseModel):
+    base_address: int
+    allocation_base: int
+    allocation_protect: int
+    partition_id: int
+    region_size: int
+    state: int
+    protect: int
+    type: int
+    info: str
+
+
+class X87Fpu(BaseModel):
+    ControlWord: int
+    StatusWord: int
+    TagWord: int
+    ErrorOffset: int
+    ErrorSelector: int
+    DataOffset: int
+    DataSelector: int
+    Cr0NpxState: int
+
+
+class X87StatusWordFields(BaseModel):
+    B: bool
+    C3: bool
+    C2: bool
+    C1: bool
+    C0: bool
+    ES: bool
+    SF: bool
+    P: bool
+    U: bool
+    O: bool
+    Z: bool
+    D: bool
+    I: bool
+    TOP: int
+
+
+class X87ControlWordFields(BaseModel):
+    IC: bool
+    IEM: bool
+    PM: bool
+    UM: bool
+    OM: bool
+    ZM: bool
+    DM: bool
+    IM: bool
+    RC: int
+    PC: int
+
+
+class Context64(BaseModel):
+    rax: int
+    rbx: int
+    rcx: int
+    rdx: int
+    rbp: int
+    rsp: int
+    rsi: int
+    rdi: int
+    r8: int
+    r9: int
+    r10: int
+    r11: int
+    r12: int
+    r13: int
+    r14: int
+    r15: int
+    rip: int
+    eflags: int
+    cs: int
+    ds: int
+    es: int
+    fs: int
+    gs: int
+    ss: int
+    dr0: int
+    dr1: int
+    dr2: int
+    dr3: int
+    dr6: int
+    dr7: int
+    reg_area: bytes
+    x87_fpu: X87Fpu
+    mxcsr: int
+    xmm_regs: list[bytes]
+    ymm_regs: list[bytes]
+
+
+class Context32(BaseModel):
+    eax: int
+    ebx: int
+    ecx: int
+    edx: int
+    ebp: int
+    esp: int
+    esi: int
+    edi: int
+    eip: int
+    eflags: int
+    cs: int
+    ds: int
+    es: int
+    fs: int
+    gs: int
+    ss: int
+    dr0: int
+    dr1: int
+    dr2: int
+    dr3: int
+    dr6: int
+    dr7: int
+    reg_area: bytes
+    x87_fpu: X87Fpu
+    mxcsr: int
+    xmm_regs: list[bytes]
+    ymm_regs: list[bytes]
+
+
+class Flags(BaseModel):
+    c: bool
+    p: bool
+    a: bool
+    z: bool
+    s: bool
+    t: bool
+    i: bool
+    d: bool
+    o: bool
+
+
+class MxcsrFields(BaseModel):
+    FZ: bool
+    PM: bool
+    UM: bool
+    OM: bool
+    ZM: bool
+    IM: bool
+    DM: bool
+    DAZ: bool
+    PE: bool
+    UE: bool
+    OE: bool
+    ZE: bool
+    DE: bool
+    IE: bool
+    RC: int
+
+
+class FpuReg(BaseModel):
+    data: bytes
+    st_value: int
+    tag: int
+
+
+class RegDump(BaseModel):
+    flags: Flags
+    fpu: list[FpuReg]
+    mmx: list[int]
+    mxcsr_fields: MxcsrFields
+    x87_status_word_fields: X87StatusWordFields
+    x87_control_word_fields: X87ControlWordFields
+    last_error: tuple[int, str]
+    last_status: tuple[int, str]
+
+
+class RegDump64(RegDump):
+    context: Context64
+
+
+class RegDump32(RegDump):
+    context: Context32
+
+
+class MutableRegister(StrEnum):
+    cip = 'cip'
+    rax = 'rax'
+    rbx = 'rbx'
+    rcx = 'rcx'
+    rdx = 'rdx'
+    rbp = 'rbp'
+    rsp = 'rsp'
+    rsi = 'rsi'
+    rdi = 'rdi'
+    r8 = 'r8'
+    r9 = 'r9'
+    r10 = 'r10'
+    r11 = 'r11'
+    r12 = 'r12'
+    r13 = 'r13'
+    r14 = 'r14'
+    r15 = 'r15'
+    rip = 'rip'
+    eip = 'eip'
+    eflags = 'eflags'
+    rflags = 'rflags'
+    cs = 'cs'
+    ds = 'ds'
+    es = 'es'
+    fs = 'fs'
+    gs = 'gs'
+    ss = 'ss'
+    dr0 = 'dr0'
+    dr1 = 'dr1'
+    dr2 = 'dr2'
+    dr3 = 'dr3'
+    dr6 = 'dr6'
+    dr7 = 'dr7'
+    eax = 'eax'
+    ebx = 'ebx'
+    ecx = 'ecx'
+    edx = 'edx'
+    ebp = 'ebp'
+    esp = 'esp'
+    esi = 'esi'
+    edi = 'edi'
+    ax = 'ax'
+    bx = 'bx'
+    cx = 'cx'
+    dx = 'dx'
+    si = 'si'
+    di = 'di'
+    bp = 'bp'
+    sp = 'sp'
+    al = 'al'
+    bl = 'bl'
+    cl = 'cl'
+    dl = 'dl'
+    ah = 'ah'
+    bh = 'bh'
+    ch = 'ch'
+    dh = 'dh'
+    sil = 'sil'
+    dil = 'dil'
+    bpl = 'bpl'
+    spl = 'spl'
+    r8d = 'r8d'
+    r9d = 'r9d'
+    r10d = 'r10d'
+    r11d = 'r11d'
+    r12d = 'r12d'
+    r13d = 'r13d'
+    r14d = 'r14d'
+    r15d = 'r15d'
+    r8w = 'r8w'
+    r9w = 'r9w'
+    r10w = 'r10w'
+    r11w = 'r11w'
+    r12w = 'r12w'
+    r13w = 'r13w'
+    r14w = 'r14w'
+    r15w = 'r15w'
+    r8b = 'r8b'
+    r9b = 'r9b'
+    r10b = 'r10b'
+    r11b = 'r11b'
+    r12b = 'r12b'
+    r13b = 'r13b'
+    r14b = 'r14b'
+    r15b = 'r15b'
+    # TODO: MM registers, these are tricker because they need to get loaded via something like: https://help.x64dbg.com/en/latest/commands/general-purpose/movdqu.html
+
+
+class PageRightsConfiguration(StrEnum):
+    Execute = "Execute"
+    ExecuteRead = "ExecuteRead"
+    ExecuteReadWrite = "ExecuteReadWrite"
+    ExecuteWriteCopy = "ExecuteWriteCopy"
+    NoAccess = "NoAccess"
+    ReadOnly = "ReadOnly"
+    ReadWrite = "ReadWrite"
+    WriteCopy = "WriteCopy"
+
+
+class StandardBreakpointType(StrEnum):
+    SingleShotInt3 = 'ss' # CC (SingleShoot)
+    Long = 'long' # CD03
+    Ud2 = 'ud2' # 0F0B
+    Short = 'short' # CC
+
+
+class HardwareBreakpointType(StrEnum):
+    r = 'r'
+    w = 'w'
+    x = 'x'
+
+
+class MemoryBreakpointType(StrEnum):
+    r = 'r'
+    w = 'w'
+    x = 'x'
+    a = 'a'
+
+
+class DisasmInstrType(IntEnum):
+    Normal = 0
+    Branch = 1
+    Stack = 2
+
+
+class DisasmArgType(IntEnum):
+    Normal = 0
+    Memory = 1
+
+
+class SegmentReg(IntEnum):
+    SegDefault = 0
+    SegEs = 1
+    SegDs = 2
+    SegFs = 3
+    SegGs = 4
+    SegCs = 5
+    SegSs = 6
+
+
+class InstructionArg(BaseModel):
+    mnemonic: str
+    type: DisasmArgType
+    segment: SegmentReg
+    constant: int
+    value: int
+    memvalue: int
+
+
+class Instruction(BaseModel):
+    instruction: str
+    argcount: int
+    instr_size: int
+    type: DisasmInstrType
+    arg: list[InstructionArg]
+
+
+class BreakpointType(IntEnum):
+    BpNone = 0,
+    BpNormal = 1,
+    BpHardware = 2,
+    BpMemory = 4,
+    BpDll = 8,
+    BpException = 16
+
+
+class Breakpoint(BaseModel):
+    type: BreakpointType
+    addr: int
+    enabled: bool
+    singleshoot: bool
+    active: bool
+    name: str
+    mod: str
+    slot: int
+    typeEx: int
+    hwSize: int
+    hitCount: int
+    fastResume: bool
+    silent: bool
+    breakCondition: str
+    logText: str
+    logCondition: str
+    commandText: str
+    commandCondition: str
+
+
+class SymbolType(IntEnum):
+    SymImport = 0
+    SymExport = 1
+    SymSymbol = 2
+
+
+class Symbol(BaseModel):
+    addr: int
+    decoratedSymbol: str
+    undecoratedSymbol: str
+    type: int
+    ordinal: int
+
+
+class ReferenceViewRef(BaseModel):
+    address: int
+    text: str
+
+
+
+================================================
+File: x64dbg_automate/win32.py
+================================================
+import ctypes
+
+
+K32 = ctypes.windll.kernel32
+U32 = ctypes.windll.user32
+
+CloseHandle = K32.CloseHandle
+CloseHandle.argtypes = [ctypes.c_void_p]
+
+OpenProcess = K32.OpenProcess
+OpenProcess.argtypes = [ctypes.c_uint32, ctypes.c_bool, ctypes.c_uint32]
+
+CreateRemoteThread = K32.CreateRemoteThread
+CreateRemoteThread.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_uint32, ctypes.c_void_p]
+
+WaitForSingleObject = K32.WaitForSingleObject
+WaitForSingleObject.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
+
+SetConsoleCtrlHandler = K32.SetConsoleCtrlHandler
+SetConsoleCtrlHandler.argtypes = [ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.c_int), ctypes.c_bool]
+
+GetTempPathW = K32.GetTempPathW
+GetTempPathW.argtypes = [ctypes.c_uint32, ctypes.c_wchar_p]
+
+EnumWindows = U32.EnumWindows
+EnumWindows.argtypes = [ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.c_void_p, ctypes.c_void_p), ctypes.c_void_p]
+
+GetWindowTextW = U32.GetWindowTextW
+GetWindowTextW.argtypes = [ctypes.c_void_p, ctypes.c_wchar_p, ctypes.c_int]
+
+GetWindowThreadProcessId = U32.GetWindowThreadProcessId
+GetWindowThreadProcessId.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+
+
+================================================
+File: .github/workflows/gh-pages.yml
+================================================
+name: Deploy Docs to GHP
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install mkdocs 'mkdocstrings[python]' mkdocs-autorefs
+
+      - name: Build
+        run: python -m mkdocs build
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+
+

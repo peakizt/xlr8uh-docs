@@ -1,0 +1,2030 @@
+Directory structure:
+└── kurapicabs-x64_tracer/
+    ├── README.md
+    ├── Kura.rc
+    ├── Tracing.cpp
+    ├── Tracing.h
+    ├── icons.h
+    ├── pluginmain.cpp
+    ├── pluginmain.h
+    ├── resource.h
+    ├── x64_tracer.sln
+    ├── x64_tracer.vcxproj
+    ├── x64_tracer.vcxproj.filters
+    ├── Win32/
+    │   ├── Debug/
+    │   │   └── empty.txt
+    │   └── Release/
+    │       └── empty.txt
+    ├── bin/
+    │   ├── x32/
+    │   │   └── empty.txt
+    │   └── x64/
+    │       └── empty.txt
+    ├── pluginsdk/
+    │   └── note.txt
+    └── x64/
+        ├── Debug/
+        │   └── empty.txt
+        └── Release/
+            └── empty.txt
+
+================================================
+File: README.md
+================================================
+# x64_tracer
+x64dbg conditional branches logger [Plugin]
+
+This is just a work in progress so don't expect too much.
+
+ 
+
+Please test it and report if you find bugs.
+
+ 
+
+I use it like this :
+
+ 
+
+First you need 2 break points to trace between, Start and End.
+
+ 
+
+1 - Throw your target in the debugger.
+
+2 - The Start point should break.
+
+3 - Start the plugin.
+
+4 - Enter the name of the module you are interested in, the plugin will try to detect the name where RIP is now.
+
+5 - Enter the target VA, i.e the point where logging should stop, It's your End point from above.
+
+ 
+
+There will be single stepping into this module but if RIP goes out of this module then there will be stepping over
+
+in those external modules unless there is a call back into the that target module then there will be a single step into the target module.
+
+ 
+
+5 - stepping will continue until we hit the 2nd point.
+
+6 - The plugin will show a message box telling we have ended tracing.
+
+7 - now you can save the result to a log file which looks like this in the image below.
+
+8 - you can use any diffing system to compare the results between 2 traces, here I used a plugin for Notepad++.
+
+
+
+================================================
+File: Kura.rc
+================================================
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United States) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_DIALOGMain DIALOGEX 0, 0, 274, 124
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Tracer"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    PUSHBUTTON      "FLUSH !",IDC_FLUSH,7,93,84,24
+    EDITTEXT        IDC_EDITEndAddress,144,12,120,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "SAVE",IDC_SAVE,7,50,84,24
+    LTEXT           "END VA : ",IDC_STATIC,102,15,36,12
+    LTEXT           "Module :",IDC_STATIC,102,39,37,12
+    EDITTEXT        IDC_EDITModule,144,36,120,14,ES_AUTOHSCROLL
+    LTEXT           "Enter the module name without the extension",IDC_STATIC,102,54,162,18
+    PUSHBUTTON      "GO !",IDC_START,6,6,86,24
+    CTEXT           "Coded by Kurapica !",IDC_STATIC,181,105,85,12,WS_DISABLED
+    CTEXT           "0",IDC_STATIC_Count,164,72,98,10,SS_SUNKEN
+    LTEXT           "Logged events : ",IDC_STATIC,101,72,60,12
+    CONTROL         "Disable GUI updates !",IDC_CHECKGUI,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,163,88,96,10
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_DIALOGMain, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 266
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 117
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_ICON1               ICON                    "icon2.ICO"
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+#endif    // English (United States) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
+
+
+
+================================================
+File: Tracing.cpp
+================================================
+#define WINVER 0x0501
+#define _WIN32_WINNT 0x0501
+
+#include "Tracing.h"
+#include "pluginsdk\TitanEngine\TitanEngine.h"
+#include <windows.h>
+#include <stdio.h>
+#include <psapi.h>
+#include "icons.h"
+#include <vector>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include "resource.h"
+#include <Commdlg.h>
+#include <exception>
+
+
+using namespace std;
+
+//Plugin module hinstance, used to locate resources
+HINSTANCE hInst;
+//used to set the main dialog icon
+HICON main_icon;
+
+
+//Global FLAG
+bool LoggingActive;
+//Events list
+vector<string> Events;
+
+//Stopping VA
+long long EndVA;
+
+//Handle of the main dialog
+HWND TracerWHandle;
+//Name of the target module, retrieved when start button is clicked !
+string TaregtModule;
+//Is main dialog shown or not ?
+bool FormDisplayed = false;
+//used to display messages and alerts !
+const WCHAR* MessageBoxTitle = L"x64_Tracer";
+
+//indcates if we can calc file offset in target module or not ?
+bool IsFileOffsetPossible;
+
+
+
+
+
+
+
+string Int64ToHexString ( long long Number )
+{
+ 
+	ostringstream ss;
+	ss << std::hex << Number;
+	return ss.str();
+}
+
+string Int64ToHexString ( void* Number )
+{
+	ostringstream ss;
+	ss << std::hex <<  *(long long*)(Number);
+	return ss.str();
+}
+
+string Int32ToHexString ( int Number )
+{
+	ostringstream ss;
+	ss << std::hex << Number;
+	return ss.str();
+}
+
+bool SaveFileDialog(char Buffer[MAX_PATH])
+{
+	OPENFILENAMEA sSaveFileName;
+
+	ZeroMemory(&sSaveFileName,sizeof(sSaveFileName));
+	sSaveFileName.hwndOwner = GuiGetWindowHandle();
+
+	const char szFilterString[] = "Text files (*.txt, *.log)\0*.txt;*.log\0All Files (*.*)\0*.*\0\0";
+	const char szDialogTitle[] = "Select dump file...";
+
+
+	sSaveFileName.lStructSize = sizeof(sSaveFileName);
+	sSaveFileName.lpstrFilter = szFilterString;
+
+
+	sSaveFileName.lpstrFile = Buffer;
+	sSaveFileName.nMaxFile = MAX_PATH;
+	sSaveFileName.Flags = OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY;
+	sSaveFileName.lpstrTitle = szDialogTitle;
+	sSaveFileName.lpstrDefExt = "txt";
+
+	return (FALSE != GetSaveFileNameA(&sSaveFileName));
+}
+
+bool CheckENDAddress(HWND hWnd)
+{
+
+	CHAR buffer[1024];
+
+	ZeroMemory(&buffer,sizeof(buffer));
+
+	GetWindowTextA(GetDlgItem(hWnd, IDC_EDITEndAddress), buffer, sizeof(buffer));
+
+	EndVA = DbgValFromString(buffer);
+
+	if(DbgIsValidExpression(buffer)  && EndVA > 0)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+bool CheckModuleName(HWND hWnd)
+{
+
+	CHAR buffer[1024];
+
+	ZeroMemory(&buffer,sizeof(buffer));
+
+	GetWindowTextA(GetDlgItem(hWnd, IDC_EDITModule), buffer, sizeof(buffer));
+
+	TaregtModule = string(buffer);
+
+	if(TaregtModule.length() > 1)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+//returns if check box is toggled or not ?
+bool ShouldDisableGUI()
+{
+ 
+	HWND CheckBoxHandle = GetDlgItem(TracerWHandle, IDC_CHECKGUI);
+
+	long IsChecked = (SendMessage(CheckBoxHandle, BM_GETCHECK, 0, 0));
+ 
+	if(IsChecked == BST_CHECKED)
+	{
+		return true;
+	}
+
+	return false;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+//Convert VA to RVA
+//64 bit
+DWORD VAtoRVA(duint VA, duint ImageBase)
+{
+
+	return (DWORD)(VA - ImageBase);
+
+}
+//32 bit 
+//DWORD VAtoRVA(UINT32 VA, UINT32 ImageBase)
+//{
+//
+//	return (DWORD)(VA - ImageBase);
+//
+//}
+
+
+
+//32
+ULONG RVA2FOA(DWORD ulRVA, PIMAGE_NT_HEADERS32 pNTHeader, IMAGE_SECTION_HEADER* SectionHeaders )
+{
+
+    int local = 0;
+    
+    for(int i = 0; i < pNTHeader->FileHeader.NumberOfSections; i++)
+    {
+        if ( (ulRVA >= SectionHeaders[i].VirtualAddress) && (ulRVA <= SectionHeaders[i].VirtualAddress + SectionHeaders[i].SizeOfRawData) )
+        {
+          return SectionHeaders[i].PointerToRawData + (ulRVA - SectionHeaders[i].VirtualAddress);
+        } 
+    }
+    return 0;
+}
+//64
+ULONG RVA2FOA(DWORD ulRVA, PIMAGE_NT_HEADERS64 pNTHeader, IMAGE_SECTION_HEADER* SectionHeaders )
+{
+
+    int local = 0;
+    
+    for(int i = 0; i < pNTHeader->FileHeader.NumberOfSections; i++)
+    {
+        if ( (ulRVA >= SectionHeaders[i].VirtualAddress) && (ulRVA <= SectionHeaders[i].VirtualAddress + SectionHeaders[i].SizeOfRawData) )
+        {
+          return SectionHeaders[i].PointerToRawData + (ulRVA - SectionHeaders[i].VirtualAddress);
+        } 
+    }
+    return 0;
+}
+
+
+//32 bit
+//DWORD VAtoFileOffset(UINT32 VA, UINT32 ImageBase)
+//{
+//
+//	//first convert to RVA
+//	DWORD RVA = VAtoRVA(VA, ImageBase);
+// 
+//	PIMAGE_NT_HEADERS32 pNTHeader = (PIMAGE_NT_HEADERS32)(NTdata);
+//
+//	IMAGE_SECTION_HEADER* SectionHeaders = (IMAGE_SECTION_HEADER*)(SectionHeadersData);
+//
+//	DWORD result = RVA2FOA(RVA, pNTHeader, SectionHeaders);
+// 
+//    return result;
+//
+//}
+//64
+DWORD VAtoFileOffset(duint VA, duint ImageBase)
+{
+
+	//first convert to RVA
+	DWORD RVA = VAtoRVA(VA, ImageBase);
+
+#if defined( _WIN64 )
+	PIMAGE_NT_HEADERS64 pNTHeader = (PIMAGE_NT_HEADERS64)(NTdata);
+#else
+	PIMAGE_NT_HEADERS32 pNTHeader = (PIMAGE_NT_HEADERS32)(NTdata);
+#endif
+
+	IMAGE_SECTION_HEADER* SectionHeaders = (IMAGE_SECTION_HEADER*)(SectionHeadersData);
+
+	DWORD result = RVA2FOA(RVA, pNTHeader, SectionHeaders);
+ 
+    return result;
+
+}
+
+
+//Read the NT headers and the sections data after it into 2 buffers
+void InitModuleNTData()
+{
+	
+	//Get target module name
+	char module[MAX_MODULE_SIZE] = "";
+	ZeroMemory(&module,sizeof(module));
+	GetWindowTextA(GetDlgItem(TracerWHandle, IDC_EDITModule), module, sizeof(module));
+
+	//get target module base
+	duint TargetImageBase = DbgModBaseFromName(module);
+	//check if we could the target module base ?
+	if(TargetImageBase > 0)
+	{
+		IsFileOffsetPossible = true;
+	}
+	else
+	{
+		IsFileOffsetPossible = false;
+		return;
+	}
+
+	//Free memory first 
+	free(SectionHeadersData);
+	
+	//Read 2 buffers only once when the start button is clicked !
+
+#if defined( _WIN64 )
+	
+	//get DOS Headers pointer
+	unsigned char DOSbuffer [0x40];
+	DbgMemRead( TargetImageBase , DOSbuffer, 0x40);
+
+	PIMAGE_DOS_HEADER DOS = (PIMAGE_DOS_HEADER)(DOSbuffer);
+
+
+	//NT headers offset
+	duint addr = (TargetImageBase + DOS->e_lfanew);
+	DbgMemRead( addr , NTdata, NT64dataSize);
+ 
+	PIMAGE_NT_HEADERS64 pNTHeader = (PIMAGE_NT_HEADERS64)(NTdata);
+ 
+
+	// X
+	int NumebrOfSections = pNTHeader->FileHeader.NumberOfSections;
+	// X * 40 
+	int sectionsDataSize = NumebrOfSections * NTSectionSize;
+
+	//create dynamic buffer to hold section headers data
+	SectionHeadersData = (unsigned char*)malloc(sectionsDataSize);
+	DbgMemRead(addr + NT64dataSize, SectionHeadersData, sectionsDataSize);
+
+#else
+
+	
+	//get DOS Headers pointer
+	unsigned char DOSbuffer [0x40];
+	DbgMemRead( TargetImageBase , DOSbuffer, 0x40);
+
+	PIMAGE_DOS_HEADER DOS = (PIMAGE_DOS_HEADER)(DOSbuffer);
+
+	//NT headers offset
+	duint addr = (TargetImageBase + DOS->e_lfanew);
+	DbgMemRead(addr, NTdata, NT32dataSize);
+ 
+	PIMAGE_NT_HEADERS32 pNTHeader = (PIMAGE_NT_HEADERS32)(NTdata);
+ 
+
+	// X
+	int NumebrOfSections = pNTHeader->FileHeader.NumberOfSections;
+	// X * 40 
+	int sectionsDataSize = NumebrOfSections * NTSectionSize;
+
+	//create dynamic buffer to hold section headers data
+	SectionHeadersData = (unsigned char*)malloc(sectionsDataSize);
+	DbgMemRead(addr + NT32dataSize, SectionHeadersData, sectionsDataSize);
+
+#endif
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//Compare two char arrays ignoring case
+bool iequals(const string& a, const string& b)
+{
+	unsigned int sz = a.size();
+	if (b.size() != sz)
+		return false;
+	for (unsigned int i = 0; i < sz; ++i)
+		if (tolower(a[i]) != tolower(b[i]))
+			return false;
+	return true;
+}
+
+//Show the GUI
+void ShowForm(HINSTANCE hInstance, HINSTANCE hPrevInstance)
+{
+
+	_plugin_logprintf("IsFileOffsetPossible : [%d] !\n", IsFileOffsetPossible);
+
+	//Global variable
+	hInst = hInstance;
+
+	//Prepare main dialog Icon
+	main_icon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_ICON1));
+
+	// Show dialog!
+	DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOGMain), 0, &DialogProc );
+
+}
+
+//Set the current Target module name in the text box
+void TrySetTargetModule()
+{
+
+	try
+	{
+		CHAR buffer[MAX_MODULE_SIZE];
+
+		//get Current RIP
+		duint entry = GetContextData(UE_CIP);
+
+		DbgGetModuleAt(entry, buffer);
+
+		SetWindowTextA(GetDlgItem(TracerWHandle, IDC_EDITModule), buffer );
+
+
+	}
+	catch (exception& e)
+	{
+		
+		_plugin_logprintf("[%s] : TrySetTargetModule failed !\n", plugin_name);
+
+	}
+
+}
+
+//Update the label which views number of events
+void UpdateCountLabel()
+{
+
+	CHAR buffer[20];
+
+	//get Current RIP
+	int count = Events.size();
+
+	itoa(count,buffer, 10);
+
+	SetWindowTextA(GetDlgItem(TracerWHandle, IDC_STATIC_Count), buffer );
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+VOID CALLBACK TimerProcSingleStep(HWND hWnd, UINT nMsg, UINT nIDEvent, DWORD dwTime) 
+{
+
+	KillTimer(hWnd, nIDEvent);
+
+	if(!LoggingActive)
+	{
+		return;
+	}
+
+	DbgCmdExec("eSingleStep");
+}
+
+VOID CALLBACK TimerProcStepOut(HWND hWnd, UINT nMsg, UINT nIDEvent, DWORD dwTime) 
+{
+
+	KillTimer(hWnd, nIDEvent);
+
+	if(!LoggingActive)
+	{
+		return;
+	}
+
+	DbgCmdExec("eStepOver");
+}
+
+void MyCallBack (CBTYPE cbType, void* callbackinfo)
+{
+ 
+
+	// If logging is not active then return !
+	if( !LoggingActive )
+	{
+		return;
+	}
+
+	//If the form was closed then return !
+	//Means plugin is not in use.
+	if( !FormDisplayed )
+	{
+		return;
+	}
+
+
+	//get Current RIP
+	duint entry = GetContextData(UE_CIP);
+
+	if(entry == EndVA)
+	{
+		GuiUpdateEnable(true);
+		LoggingActive = false;
+		MessageBoxW(hwndDlg, L"END of tracing reached" , MessageBoxTitle, MB_ICONINFORMATION);
+		return;
+
+	}
+
+
+	//Current Module name
+	char module[MAX_MODULE_SIZE] = "";
+
+	switch(cbType)
+	{
+
+	case CB_STEPPED:
+
+		//Now depending on the module we are in, we should choose the right command.
+
+		if (DbgGetModuleAt(entry,module))
+		{
+			if(LoggingActive == true)
+			{
+				//compare current module with our target module ?
+				if ( iequals(string(module), TaregtModule) )
+				{
+					//disassemble current line 
+					BASIC_INSTRUCTION_INFO basicinfo;
+					DbgDisasmFastAt(entry, &basicinfo);
+
+					//we will ignore calls, only log jmps
+					if ((basicinfo.branch))// && !(basicinfo.call)))
+					{
+
+						char disasm[GUI_MAX_DISASSEMBLY_SIZE] = "";
+						GuiGetDisassembly(entry, disasm);
+
+						bool IsTaken = DbgIsJumpGoingToExecute(entry);
+
+						//File offset
+						duint ImageBase = DbgModBaseFromName(module);
+						duint FileOffset = ConvertVAtoFileOffset(ImageBase, entry, false);
+
+						//
+						//char instr[GUI_MAX_DISASSEMBLY_SIZE] = "";
+						//DbgAssembleAt(entry, instr);
+
+						//
+						char Data[2048] = "";
+ 
+						string Row;
+						if(basicinfo.call)
+						{
+							Row = Int64ToHexString(entry) + "\t\t" + Int32ToHexString( VAtoRVA(entry, ImageBase)) + "\t\t" + (IsFileOffsetPossible ? Int32ToHexString( VAtoFileOffset(entry, ImageBase)) : Int32ToHexString( 0)) + "\t\t" + "\t-->\t\t\t\t"  + string(basicinfo.instruction);
+						}
+						else
+						{
+							Row = Int64ToHexString(entry) + "\t\t" + Int32ToHexString( VAtoRVA(entry, ImageBase)) + "\t\t" + (IsFileOffsetPossible ? Int32ToHexString( VAtoFileOffset(entry, ImageBase)) : Int32ToHexString( 0)) + "\t\t" + (IsTaken ? "\tYes\t\t\t\t" : "\tNot\t\t\t\t") + string(basicinfo.instruction);
+						}
+
+						Events.push_back(Row);
+
+						UpdateCountLabel();
+
+					}
+				}
+
+				//branch destination
+				duint destination = DbgGetBranchDestination(entry);
+
+				//branch destination module
+				char DestModule[MAX_MODULE_SIZE] = "";
+				DbgGetModuleAt(destination,DestModule);
+
+				//compare current module with our target module ?
+				//internal jmp ?
+				if ( iequals(string(module), TaregtModule) )
+				{
+					//we are inside our target module so step into
+					UINT_PTR TimerId = SetTimer(hwndDlg, 0, TimerStepMs, (TIMERPROC)TimerProcSingleStep);
+
+				}
+				else//
+				{
+
+					//we are outside the target module !
+					if(iequals(TaregtModule , DestModule))
+					{
+						//If the branch goes back to our target module then step into
+						UINT_PTR TimerId = SetTimer(hwndDlg, 0, TimerStepMs, (TIMERPROC)TimerProcSingleStep);
+					}
+					else
+					{	//If the jmp goes somewhere else then step over it
+						UINT_PTR TimerId = SetTimer(hwndDlg, 0, TimerStepMs, (TIMERPROC)TimerProcStepOut);
+					}
+
+					//After this the stepping event won't be fired
+					//we will face the PasuedDebug event there
+
+				}
+			}
+		}
+		else
+		{
+			//execute till return in this unknown module !
+			//UINT_PTR TimerId = SetTimer(hwndDlg, 0, TimerStepMs, (TIMERPROC)TimerProcStepOut);
+			//UINT_PTR TimerId = SetTimer(hwndDlg, 0, TimerStepMs, (TIMERPROC)TimerProcSingleStep);
+			//UINT_PTR TimerId = SetTimer(hwndDlg, 0, 10, (TIMERPROC)TimerProcStepOut);
+		}
+
+		break;
+
+	case CB_BREAKPOINT:
+
+		{
+
+		}
+		break;
+
+	case CB_PAUSEDEBUG:
+		{
+
+			//disassemble current line 
+			//BASIC_INSTRUCTION_INFO basicinfo;
+			//DbgDisasmFastAt(entry, &basicinfo);
+
+			//Are we at a "RET" instruction ?
+			//if( iequals( string(basicinfo.instruction) , "RET"))
+			//{
+				//DO a single step !
+
+				//UINT_PTR TimerId = SetTimer(hwndDlg, 0, 10, (TIMERPROC)TimerProcSingleStep);
+
+			//}
+
+		}
+		break;
+
+
+	case CB_RESUMEDEBUG:
+
+		break;
+
+	}
+
+}
+
+// Main Dialog Procedure
+INT_PTR CALLBACK DialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+
+	
+
+	switch (uMsg)
+	{
+
+
+	case WM_INITDIALOG:
+		{
+			//Save the dialog window handle
+			TracerWHandle = hWnd;
+
+			//Set the flag
+			FormDisplayed = true;
+
+			//Set dialog icon
+			SendMessage (hWnd, WM_SETICON, WPARAM (ICON_SMALL), LPARAM (main_icon));
+
+			//Set the initial target module name if possible !
+			TrySetTargetModule();
+
+		}
+
+
+		// +- BUTTON ROUTINES -+
+	case WM_COMMAND:
+		{
+
+			switch (LOWORD(wParam))
+			{
+
+			case IDC_START:
+				{
+
+					if(!DbgIsDebugging())
+					{
+						MessageBoxW(hWnd, (L"You need to be debugging to use this !"), MessageBoxTitle , MB_OK | MB_ICONHAND);
+					}
+					else if(!CheckENDAddress(hWnd))
+					{
+						MessageBoxW(hWnd, (L"Invalid END Address !"), MessageBoxTitle , MB_OK | MB_ICONHAND);
+					}
+					else if(!CheckModuleName(hWnd))
+					{
+						MessageBoxW(hWnd, (L"Invalid target module name !"), MessageBoxTitle, MB_OK | MB_ICONHAND);
+					}
+					else//Can go !
+					{
+						//read the target module NT header info !
+						InitModuleNTData();
+
+						LoggingActive = true;
+
+						DbgCmdExec("sst");
+					}
+
+				}
+				break;
+
+			case IDC_CHECKGUI:
+				{
+					//Check box was clicked so decide what to do ?
+					if(ShouldDisableGUI())
+					{
+						GuiUpdateDisable();
+					}
+					else
+					{
+						GuiUpdateEnable(true);
+					}
+
+				}
+				break;
+
+			case IDC_FLUSH:
+				{
+
+					Events.clear();
+					UpdateCountLabel();
+
+				}
+				break;
+
+			case IDC_SAVE:
+				{
+
+
+					if(Events.size() < 1)
+					{
+						MessageBoxW(hwndDlg, L"Logging buffer is empty !", MessageBoxTitle, MB_ICONHAND);
+					}
+					else
+					{
+						//suspend the debugee
+						DbgCmdExec("pause");
+
+						char szFileName[MAX_PATH];
+						ZeroMemory(szFileName, MAX_PATH);
+						if(SaveFileDialog(szFileName))
+						{
+
+
+							//print the header
+							string Row;
+ 
+							Row = "VA\t\t\t\tRVA\t\t\tOffset\t\t\tStatus\t\t\tInsturction";
+
+							ofstream Outfile(szFileName);
+
+							Outfile << "-----------------------------------------------------------------------------------------" << endl;
+							Outfile << Row << endl;
+							Outfile << "-----------------------------------------------------------------------------------------" << endl;
+
+							for(int t=0;t< Events.size();++t)
+							{
+								Outfile << Events[t] << endl;
+							}
+
+							MessageBoxW(hwndDlg, L"Log file saved !", MessageBoxTitle, MB_ICONINFORMATION);
+
+						}
+
+					}
+
+				}
+				break;
+
+
+			}
+		}
+		break;
+
+
+	case WM_CLOSE:
+		{
+
+			//If GUI was locked then unlock it at exit !
+			if(ShouldDisableGUI)
+			{
+				GuiUpdateEnable(true);
+			}
+
+			//Clean and reset !
+			hInst = NULL;
+			main_icon = NULL;
+
+			FormDisplayed = false;
+			LoggingActive = false;
+			IsFileOffsetPossible = false;
+
+			Events.clear();
+			EndVA = 0;
+			TracerWHandle = 0;
+
+
+			DestroyIcon(main_icon);
+			DestroyWindow(hWnd);
+		}
+		break;
+
+		return (DefWindowProc(hWnd, uMsg, wParam, lParam));
+	}
+	//prevents closing the dialog !
+	return FALSE;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//Called when the plugin menu is clicked !
+extern "C" __declspec(dllexport) void CBMENUENTRY(CBTYPE cbType, PLUG_CB_MENUENTRY* info)
+{
+	switch(info->hEntry)
+	{
+	case MENU_Start:
+		{
+			if(!DbgIsDebugging())
+			{
+				MessageBoxW(hwndDlg, (L"You need to be debugging to use this !"), MessageBoxTitle , MB_OK | MB_ICONHAND);
+				//_plugin_logputs("you need to be debugging to use this command");
+				return;
+			}
+			//If form is still displayed then bring it to front !
+			if(FormDisplayed)
+			{
+				BringWindowToTop(TracerWHandle);
+				return;
+			}
+
+			//Show the form if debugger is on !
+			ShowForm(GetModuleHandleA(plugin_DLLname),NULL);
+		}
+		break;
+
+	case MENU_Stop:
+		{
+
+		}
+		break;
+
+	case MENU_Save:
+		{
+
+
+		}
+		break;
+
+	case MENU_Abandon:
+		{
+
+		}
+		break;
+	}
+}
+
+//Called when a new debugging session starts !
+extern "C" __declspec(dllexport) void CBINITDEBUG(CBTYPE cbType, PLUG_CB_INITDEBUG* info)
+{
+	_plugin_logprintf("[TEST] debugging of file %s started!\n", (const char*)info->szFileName);
+}
+
+//Called when a debugging session ends
+extern "C" __declspec(dllexport) void CBSTOPDEBUG(CBTYPE cbType, PLUG_CB_STOPDEBUG* info)
+{
+	_plugin_logputs("[TEST] debugging stopped!");
+}
+
+
+bool cbTestCommand(int argc, char* argv[])
+{
+	//Show an input box !
+	char line[GUI_MAX_LINE_SIZE] = "";
+	if(!GuiGetLineWindow("Enter VA", line))
+	{
+		_plugin_logputs("[TEST] cancel pressed!");
+	}
+	else
+	{
+
+		duint VA = DbgValFromString(line);
+		
+		char module[MAX_MODULE_SIZE] = "";
+		
+		DbgGetModuleAt(VA, module);
+		
+		duint ImageBase = DbgModBaseFromName(module);
+
+		DWORD RVA = VAtoRVA(VA, ImageBase);
+
+
+		//_plugin_logprintf("[TEST] VA : \"%s\"\n", Int64ToHexString(VA));
+		//_plugin_logprintf("[TEST] module : \"%s\"\n", module);
+		//_plugin_logprintf("[TEST] ImageBase : \"%s\"\n", Int64ToHexString(ImageBase));
+
+		_plugin_logprintf("[TEST] VA to RVA : \"%d\"\n", RVA);
+
+	}
+
+	return true;
+}
+
+//Initialize plugin with host
+void testInit(PLUG_INITSTRUCT* initStruct)
+{
+	//This will print the plugin handle in the log screen
+	//_plugin_logprintf("[TEST] pluginHandle: %d\n", pluginHandle);
+
+
+	//Register a command "ktracer" which can be written in the command text box
+	//The command will be handled in the Method "cbTestCommand"
+	if(!_plugin_registercommand(pluginHandle, plugin_command, cbTestCommand, false))
+	{
+		_plugin_logputs("[TEST] error registering the \"ktracer\" command!");
+	}
+
+
+}
+
+//Called when closing the host !
+void testStop()
+{
+
+	_plugin_unregistercommand(pluginHandle, plugin_command);
+
+	_plugin_menuclear(hMenu);
+
+	EndDialog(TracerWHandle, NULL);
+
+}
+
+//Called once after the "init" event
+void testSetup()
+{
+	//Set the menu icon
+	ICONDATA rocket;
+	rocket.data = icon_rocket;
+	rocket.size = sizeof(icon_rocket);
+
+	_plugin_menuseticon(hMenu, &rocket);
+
+	//Set the menus
+	_plugin_menuaddentry(hMenu, MENU_Start, "&Start logging...");
+	//_plugin_menuaddentry(hMenu, MENU_Stop, "&Stop loging");
+	//_plugin_menuaddentry(hMenu, MENU_Save, "&Save to text file...");
+	//_plugin_menuaddentry(hMenu, MENU_Abandon, "&Clear logging buffer");
+
+
+	//Register debugging events callback
+	_plugin_registercallback(pluginHandle, CB_STEPPED, MyCallBack);
+	_plugin_registercallback(pluginHandle, CB_PAUSEDEBUG, MyCallBack);
+
+
+}
+
+
+
+================================================
+File: Tracing.h
+================================================
+#ifndef _TEST_H
+#define _TEST_H
+
+#include "pluginmain.h"
+#include <string>
+
+//plugin sub-menu identifiers
+#define MENU_Start 0
+#define MENU_Stop 1
+#define MENU_Save 2
+#define MENU_Abandon 3
+
+//Name of the plugin module, used later to get the hinstance of the plugin module
+//which will be used to load the dialog resources
+#if defined( _WIN64 )
+#define plugin_DLLname "Ktracer.dp64"
+#else
+#define plugin_DLLname "Ktracer.dp32"
+#endif
+
+//Interval of each step
+#define TimerStepMs 20
+
+//NT header size for 32 and 64 bit PE files
+#define NT32dataSize 0xF8 
+#define NT64dataSize 0x108
+//NT section size in PE files
+#define NTSectionSize 0x28
+
+//buffer used to read the NT header from the target module
+#if defined( _WIN64 )
+static unsigned char NTdata [NT64dataSize];
+#else
+static unsigned char NTdata [NT32dataSize];
+#endif
+
+//Pointer to an array of section headers, will be used to calc the file offset
+static unsigned char* SectionHeadersData;
+
+
+using namespace std;
+
+
+
+
+
+
+//functions
+void testInit(PLUG_INITSTRUCT* initStruct);
+void testStop();
+void testSetup();
+
+//Dialog callback procedure
+INT_PTR CALLBACK DialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+//used to show the main dialog of the plugin
+void ShowForm(HINSTANCE hInstance, HINSTANCE hPrevInstance);
+//checks if end VA is valid
+bool CheckENDAddress(HWND hWnd);
+//shows the save file dialog and returns true if OK is pressed
+bool SaveFileDialog(char Buffer[MAX_PATH]);
+
+//Convert numbers into HEX strings
+string Int32ToHexString ( int Number );
+string Int64ToHexString ( long long Number );
+string Int64ToHexString ( INT64* Number );
+
+//Plugin callback procedure from the host
+void MyCallBack (CBTYPE cbType, void* callbackinfo);
+
+
+DWORD VAtoRVA(duint VA, duint ImageBase);
+DWORD VAtoRVA(UINT32 VA, UINT32 ImageBase);
+ULONG RVA2FOA(DWORD ulRVA, PIMAGE_NT_HEADERS32 pNTHeader, IMAGE_SECTION_HEADER* SectionHeaders );
+void InitModuleNTData(INT64 TargetImageBase);
+DWORD VAtoFileOffset(UINT32 VA, UINT32 ImageBase);
+DWORD VAtoFileOffset(duint VA, duint ImageBase);
+
+//Timers call back functions which send a command to the host
+VOID CALLBACK TimerProcSingleStep(HWND hWnd, UINT nMsg, UINT nIDEvent, DWORD dwTime);
+VOID CALLBACK TimerProcStepOut(HWND hWnd, UINT nMsg, UINT nIDEvent, DWORD dwTime) ;
+
+
+#endif // _TEST_H
+
+
+
+================================================
+File: icons.h
+================================================
+#ifndef _ICONS_H
+#define _ICONS_H
+
+static unsigned char icon_rocket[762] =
+{
+    0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00,
+    0x00, 0x0D, 0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x10,
+    0x00, 0x00, 0x00, 0x10, 0x08, 0x06, 0x00, 0x00, 0x00, 0x1F,
+    0xF3, 0xFF, 0x61, 0x00, 0x00, 0x00, 0x19, 0x74, 0x45, 0x58,
+    0x74, 0x53, 0x6F, 0x66, 0x74, 0x77, 0x61, 0x72, 0x65, 0x00,
+    0x41, 0x64, 0x6F, 0x62, 0x65, 0x20, 0x49, 0x6D, 0x61, 0x67,
+    0x65, 0x52, 0x65, 0x61, 0x64, 0x79, 0x71, 0xC9, 0x65, 0x3C,
+    0x00, 0x00, 0x02, 0x9C, 0x49, 0x44, 0x41, 0x54, 0x78, 0xDA,
+    0x84, 0x53, 0x5F, 0x48, 0x53, 0x61, 0x14, 0xFF, 0x7D, 0x77,
+    0xB7, 0xCD, 0x70, 0xFD, 0xD9, 0x6A, 0xA4, 0x73, 0xEB, 0x1F,
+    0xC3, 0x94, 0xB6, 0x5D, 0x72, 0x62, 0xA1, 0x08, 0x8A, 0x84,
+    0x82, 0x42, 0x24, 0x95, 0xD1, 0xC3, 0x4A, 0xCB, 0xE8, 0xA9,
+    0x57, 0x09, 0x7A, 0x2C, 0x0A, 0x7B, 0xA8, 0x40, 0x82, 0x09,
+    0xBD, 0xF8, 0x62, 0x0F, 0xBE, 0x04, 0x3E, 0xA4, 0x0F, 0x19,
+    0xE4, 0x88, 0x89, 0x6D, 0x12, 0x2B, 0x88, 0x48, 0x99, 0xA3,
+    0x39, 0x75, 0x13, 0xAE, 0x4D, 0xE7, 0xEE, 0x76, 0xEF, 0xED,
+    0xFB, 0xAE, 0xDD, 0xE1, 0x14, 0xEA, 0xC0, 0x8F, 0xEF, 0xE3,
+    0x9C, 0xFB, 0xFB, 0x9D, 0x73, 0xBE, 0x73, 0x2E, 0xC1, 0x2E,
+    0x33, 0x18, 0x0C, 0xE0, 0x38, 0x0E, 0xB2, 0x2C, 0x43, 0x51,
+    0x94, 0x9D, 0x21, 0xE1, 0x27, 0x21, 0x8F, 0x56, 0x55, 0xD5,
+    0x9A, 0x05, 0x4C, 0x1B, 0xD4, 0x91, 0x00, 0x86, 0x79, 0xBB,
+    0xDD, 0x0E, 0x42, 0x88, 0x06, 0x66, 0xEC, 0x8C, 0xC7, 0xE3,
+    0xBB, 0x75, 0x05, 0x8A, 0xF3, 0xCE, 0x9C, 0xD4, 0x55, 0xE8,
+    0xB9, 0x86, 0xEA, 0xDA, 0x5A, 0x48, 0x0B, 0x0B, 0x78, 0x3B,
+    0x3A, 0x7A, 0x87, 0xAF, 0xAC, 0xAC, 0xD4, 0x32, 0x32, 0xE8,
+    0xB6, 0x4B, 0x40, 0x23, 0x4B, 0x52, 0x3E, 0x30, 0x37, 0x17,
+    0x81, 0xF3, 0xD5, 0x6B, 0x4C, 0x09, 0x35, 0xF0, 0xD5, 0xD7,
+    0xE3, 0x10, 0x20, 0x71, 0xF8, 0xB7, 0x15, 0xC9, 0xC1, 0xE0,
+    0x34, 0xAB, 0x0F, 0xE1, 0xF0, 0x17, 0x78, 0x83, 0xDF, 0xB0,
+    0x10, 0x8B, 0xE1, 0x08, 0x21, 0x5B, 0xDC, 0xFF, 0xC8, 0xB3,
+    0x9F, 0xC3, 0x81, 0xB3, 0x6E, 0x2F, 0x0E, 0x1C, 0x6F, 0xC1,
+    0xEC, 0xEC, 0x57, 0x58, 0x2C, 0x15, 0x88, 0x51, 0x72, 0xC5,
+    0xD8, 0xA4, 0x78, 0x14, 0xD8, 0x22, 0x3E, 0x9F, 0x6F, 0x4F,
+    0x0B, 0xA1, 0x50, 0xA8, 0x98, 0xB9, 0xF3, 0x72, 0x2F, 0x0E,
+    0x57, 0x35, 0x6B, 0xFE, 0x54, 0xEC, 0x03, 0x5E, 0x0C, 0x0E,
+    0xC2, 0x68, 0xE4, 0xC4, 0x8E, 0x8E, 0xC6, 0x97, 0x65, 0x65,
+    0x65, 0xEF, 0x78, 0x16, 0x50, 0x55, 0xF5, 0x3A, 0x7D, 0x71,
+    0x27, 0xBB, 0x67, 0x32, 0x99, 0x02, 0x7D, 0xC8, 0x8D, 0x5C,
+    0x4E, 0x0A, 0x2C, 0x2D, 0x25, 0xE0, 0x3C, 0xE9, 0x41, 0xB5,
+    0xD7, 0xA7, 0x09, 0x7C, 0xE7, 0xC5, 0x12, 0x32, 0xFD, 0xEE,
+    0x13, 0x11, 0x04, 0x96, 0x0C, 0x03, 0x43, 0x43, 0x43, 0x4F,
+    0x57, 0x56, 0x56, 0x90, 0x4E, 0xA7, 0xD1, 0xD4, 0xD4, 0x84,
+    0x48, 0x24, 0x82, 0x86, 0x86, 0x0B, 0xF8, 0x31, 0xBF, 0x86,
+    0x50, 0x34, 0xAD, 0x55, 0xD8, 0x5C, 0x57, 0x25, 0xF6, 0xDD,
+    0xEC, 0x2C, 0x92, 0xB5, 0xB1, 0x5B, 0xAD, 0x56, 0x36, 0x73,
+    0x79, 0x66, 0x66, 0xA6, 0xE0, 0x72, 0xB9, 0xEA, 0x19, 0x99,
+    0xF5, 0xC8, 0x19, 0x38, 0x4C, 0x87, 0x3F, 0xA2, 0xE6, 0x94,
+    0x00, 0xA1, 0xC6, 0x41, 0x71, 0x4C, 0xBC, 0x7A, 0xA5, 0xAD,
+    0x84, 0xAC, 0x8D, 0xDD, 0x66, 0xB3, 0xB1, 0x16, 0x58, 0xE6,
+    0xBB, 0xD1, 0x68, 0x34, 0xC0, 0xC8, 0x39, 0x29, 0x87, 0xE4,
+    0xEF, 0x24, 0x14, 0x5E, 0x01, 0x51, 0x09, 0x5A, 0xCF, 0x5D,
+    0x2A, 0x29, 0x5B, 0x27, 0x6F, 0x6E, 0x6E, 0x82, 0xEB, 0x5B,
+    0x5D, 0xC5, 0xED, 0x54, 0x0A, 0xFD, 0xAA, 0x9A, 0x77, 0xBB,
+    0xDD, 0xF7, 0x4D, 0xE5, 0xA6, 0x22, 0xD9, 0x62, 0xB1, 0xC0,
+    0xE1, 0x74, 0xAC, 0x7B, 0x3C, 0x27, 0x86, 0x77, 0x92, 0x19,
+    0x71, 0x71, 0x71, 0x51, 0x03, 0x3F, 0xB0, 0x2D, 0x66, 0x43,
+    0x05, 0x6E, 0x9C, 0xE9, 0xC1, 0x7C, 0x7B, 0x5B, 0xFB, 0x93,
+    0x91, 0xF1, 0x91, 0x07, 0xCC, 0x69, 0x2E, 0x37, 0xAF, 0x07,
+    0xC7, 0x83, 0x07, 0xCD, 0x66, 0x73, 0x3E, 0x9B, 0xCD, 0x6A,
+    0xE4, 0x14, 0x4D, 0xC6, 0x04, 0x74, 0xD3, 0x67, 0xD7, 0x02,
+    0x3F, 0x92, 0xBD, 0x5D, 0xEA, 0xE9, 0xC7, 0xF7, 0x14, 0xBB,
+    0xBF, 0xCB, 0xFF, 0x4C, 0x27, 0x7B, 0x1A, 0x3D, 0xAC, 0x45,
+    0x22, 0x8A, 0x22, 0x12, 0x89, 0x44, 0x09, 0x59, 0x17, 0xD8,
+    0x4F, 0xB3, 0x5B, 0x70, 0x11, 0x71, 0x4C, 0x22, 0xD9, 0x3F,
+    0xA6, 0xD8, 0x6F, 0xA9, 0xEA, 0xAF, 0xEE, 0xD6, 0xEE, 0xC0,
+    0xC4, 0xFB, 0x89, 0x37, 0x9C, 0x91, 0x43, 0x3E, 0x9F, 0xE7,
+    0xE8, 0x78, 0x51, 0x28, 0x14, 0xF6, 0x6C, 0x1B, 0x59, 0x03,
+    0x1C, 0xB2, 0x17, 0xEE, 0xEC, 0x32, 0x5C, 0x53, 0xCB, 0xC8,
+    0x3E, 0x07, 0x22, 0x73, 0x74, 0xC3, 0x68, 0xCC, 0xC4, 0xF3,
+    0x7C, 0x35, 0x1D, 0x5F, 0x1D, 0xAD, 0x60, 0x99, 0x8A, 0x8C,
+    0x53, 0x5F, 0x0E, 0xDB, 0x31, 0x06, 0x89, 0x81, 0x09, 0x58,
+    0xA9, 0x6E, 0xF9, 0x43, 0x40, 0x1C, 0x06, 0x58, 0x0A, 0x23,
+    0xC5, 0x3E, 0x0A, 0x5E, 0x5B, 0x7E, 0xBA, 0x67, 0x14, 0xEC,
+    0xBF, 0x66, 0x31, 0xF9, 0xEF, 0xA9, 0xDF, 0xE5, 0x3F, 0x02,
+    0x0C, 0x00, 0xA5, 0xE1, 0x2F, 0x71, 0xD8, 0x1A, 0xDF, 0xDB,
+    0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42,
+    0x60, 0x82
+};
+
+
+#endif //_ICONS_H
+
+
+================================================
+File: pluginmain.cpp
+================================================
+#include "pluginmain.h"
+#include "Tracing.h"
+
+
+using namespace std;
+
+
+
+
+//Plugin handle
+int pluginHandle;
+//GUI window handle
+HWND hwndDlg;
+//plugin menu handle
+int hMenu;
+ 
+
+
+//Called once on plugin loading event
+DLL_EXPORT bool pluginit(PLUG_INITSTRUCT* initStruct)
+{
+
+	_plugin_logprintf("[Ktracer] pluginHandle: %d : event %s \n", pluginHandle, "pluginit");
+
+    initStruct->pluginVersion = plugin_version;
+    initStruct->sdkVersion = PLUG_SDKVERSION;
+    strcpy(initStruct->pluginName, plugin_name);
+    pluginHandle = initStruct->pluginHandle;
+    testInit(initStruct);
+    return true;
+}
+
+//Called when plugin is stopped ?
+DLL_EXPORT bool plugstop()
+{
+	_plugin_logprintf("[Ktracer] pluginHandle: %d : event %s \n", pluginHandle, "plugstop");
+
+    testStop();
+    return true;
+}
+
+//Called after the init event
+DLL_EXPORT void plugsetup(PLUG_SETUPSTRUCT* setupStruct)
+{
+
+	_plugin_logprintf("[Ktracer] pluginHandle: %d : event %s \n", pluginHandle, "plugsetup");
+
+    hwndDlg = setupStruct->hwndDlg;
+    hMenu = setupStruct->hMenu;
+ 
+    testSetup();
+}
+
+extern "C" DLL_EXPORT BOOL APIENTRY DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
+{
+    return TRUE;
+}
+
+
+
+
+
+
+================================================
+File: pluginmain.h
+================================================
+#ifndef _PLUGINMAIN_H
+#define _PLUGINMAIN_H
+
+#include <windows.h>
+#include "pluginsdk\_plugins.h"
+
+#ifndef DLL_EXPORT
+#define DLL_EXPORT __declspec(dllexport)
+#endif //DLL_EXPORT
+
+//superglobal variables
+extern int pluginHandle;
+extern HWND hwndDlg;
+extern int hMenu;
+
+
+#define plugin_name "KTracer"
+#define plugin_command "ktracer"
+#define plugin_version 1
+
+
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+DLL_EXPORT bool pluginit(PLUG_INITSTRUCT* initStruct);
+DLL_EXPORT bool plugstop();
+DLL_EXPORT void plugsetup(PLUG_SETUPSTRUCT* setupStruct);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif //_PLUGINMAIN_H
+
+
+
+================================================
+File: resource.h
+================================================
+//{{NO_DEPENDENCIES}}
+// Microsoft Visual C++ generated include file.
+// Used by Kura.rc
+//
+#define IDD_DIALOGMain                  101
+#define IDI_ICON1                       105
+#define IDC_START                       1001
+#define IDC_FLUSH                       1002
+#define IDC_EDITEndAddress              1005
+#define IDC_SAVE                        1006
+#define IDC_STOP                        1007
+#define IDC_EDITModule                  1008
+#define IDC_STATIC_Count                1009
+#define IDC_CHECK1                      1010
+#define IDC_CHECKGUI                    1010
+
+// Next default values for new objects
+// 
+#ifdef APSTUDIO_INVOKED
+#ifndef APSTUDIO_READONLY_SYMBOLS
+#define _APS_NEXT_RESOURCE_VALUE        108
+#define _APS_NEXT_COMMAND_VALUE         40001
+#define _APS_NEXT_CONTROL_VALUE         1011
+#define _APS_NEXT_SYMED_VALUE           101
+#endif
+#endif
+
+
+
+================================================
+File: x64_tracer.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "x64_tracer", "x64_tracer.vcxproj", "{C1055F2B-A0C2-0005-0D1B-3C99DC93F137}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
+		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C1055F2B-A0C2-0005-0D1B-3C99DC93F137}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C1055F2B-A0C2-0005-0D1B-3C99DC93F137}.Debug|Win32.Build.0 = Debug|Win32
+		{C1055F2B-A0C2-0005-0D1B-3C99DC93F137}.Debug|x64.ActiveCfg = Debug|x64
+		{C1055F2B-A0C2-0005-0D1B-3C99DC93F137}.Debug|x64.Build.0 = Debug|x64
+		{C1055F2B-A0C2-0005-0D1B-3C99DC93F137}.Release|Win32.ActiveCfg = Release|Win32
+		{C1055F2B-A0C2-0005-0D1B-3C99DC93F137}.Release|Win32.Build.0 = Release|Win32
+		{C1055F2B-A0C2-0005-0D1B-3C99DC93F137}.Release|x64.ActiveCfg = Release|x64
+		{C1055F2B-A0C2-0005-0D1B-3C99DC93F137}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: x64_tracer.vcxproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="10.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pluginmain.cpp" />
+    <ClCompile Include="Tracing.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="icons.h" />
+    <ClInclude Include="pluginmain.h" />
+    <ClInclude Include="pluginsdk\bridgelist.h" />
+    <ClInclude Include="pluginsdk\bridgemain.h" />
+    <ClInclude Include="pluginsdk\capstone\arm.h" />
+    <ClInclude Include="pluginsdk\capstone\arm64.h" />
+    <ClInclude Include="pluginsdk\capstone\capstone.h" />
+    <ClInclude Include="pluginsdk\capstone\mips.h" />
+    <ClInclude Include="pluginsdk\capstone\platform.h" />
+    <ClInclude Include="pluginsdk\capstone\ppc.h" />
+    <ClInclude Include="pluginsdk\capstone\sparc.h" />
+    <ClInclude Include="pluginsdk\capstone\systemz.h" />
+    <ClInclude Include="pluginsdk\capstone\x86.h" />
+    <ClInclude Include="pluginsdk\capstone\xcore.h" />
+    <ClInclude Include="pluginsdk\dbghelp\dbghelp.h" />
+    <ClInclude Include="pluginsdk\DeviceNameResolver\DeviceNameResolver.h" />
+    <ClInclude Include="pluginsdk\jansson\jansson.h" />
+    <ClInclude Include="pluginsdk\jansson\jansson_config.h" />
+    <ClInclude Include="pluginsdk\lz4\lz4.h" />
+    <ClInclude Include="pluginsdk\lz4\lz4file.h" />
+    <ClInclude Include="pluginsdk\lz4\lz4hc.h" />
+    <ClInclude Include="pluginsdk\TitanEngine\TitanEngine.h" />
+    <ClInclude Include="pluginsdk\XEDParse\XEDParse.h" />
+    <ClInclude Include="pluginsdk\yara\yara.h" />
+    <ClInclude Include="pluginsdk\yara\yara\ahocorasick.h" />
+    <ClInclude Include="pluginsdk\yara\yara\arena.h" />
+    <ClInclude Include="pluginsdk\yara\yara\atoms.h" />
+    <ClInclude Include="pluginsdk\yara\yara\compiler.h" />
+    <ClInclude Include="pluginsdk\yara\yara\elf.h" />
+    <ClInclude Include="pluginsdk\yara\yara\error.h" />
+    <ClInclude Include="pluginsdk\yara\yara\exec.h" />
+    <ClInclude Include="pluginsdk\yara\yara\exefiles.h" />
+    <ClInclude Include="pluginsdk\yara\yara\filemap.h" />
+    <ClInclude Include="pluginsdk\yara\yara\globals.h" />
+    <ClInclude Include="pluginsdk\yara\yara\hash.h" />
+    <ClInclude Include="pluginsdk\yara\yara\hex_lexer.h" />
+    <ClInclude Include="pluginsdk\yara\yara\lexer.h" />
+    <ClInclude Include="pluginsdk\yara\yara\libyara.h" />
+    <ClInclude Include="pluginsdk\yara\yara\limits.h" />
+    <ClInclude Include="pluginsdk\yara\yara\mem.h" />
+    <ClInclude Include="pluginsdk\yara\yara\modules.h" />
+    <ClInclude Include="pluginsdk\yara\yara\object.h" />
+    <ClInclude Include="pluginsdk\yara\yara\parser.h" />
+    <ClInclude Include="pluginsdk\yara\yara\pe.h" />
+    <ClInclude Include="pluginsdk\yara\yara\proc.h" />
+    <ClInclude Include="pluginsdk\yara\yara\re.h" />
+    <ClInclude Include="pluginsdk\yara\yara\re_lexer.h" />
+    <ClInclude Include="pluginsdk\yara\yara\rules.h" />
+    <ClInclude Include="pluginsdk\yara\yara\scan.h" />
+    <ClInclude Include="pluginsdk\yara\yara\sizedstr.h" />
+    <ClInclude Include="pluginsdk\yara\yara\strutils.h" />
+    <ClInclude Include="pluginsdk\yara\yara\types.h" />
+    <ClInclude Include="pluginsdk\yara\yara\utils.h" />
+    <ClInclude Include="pluginsdk\_dbgfunctions.h" />
+    <ClInclude Include="pluginsdk\_plugins.h" />
+    <ClInclude Include="pluginsdk\_plugin_types.h" />
+    <ClInclude Include="pluginsdk\_scriptapi.h" />
+    <ClInclude Include="pluginsdk\_scriptapi_assembler.h" />
+    <ClInclude Include="pluginsdk\_scriptapi_debug.h" />
+    <ClInclude Include="pluginsdk\_scriptapi_gui.h" />
+    <ClInclude Include="pluginsdk\_scriptapi_memory.h" />
+    <ClInclude Include="pluginsdk\_scriptapi_misc.h" />
+    <ClInclude Include="pluginsdk\_scriptapi_module.h" />
+    <ClInclude Include="pluginsdk\_scriptapi_pattern.h" />
+    <ClInclude Include="pluginsdk\_scriptapi_register.h" />
+    <ClInclude Include="pluginsdk\_scriptapi_stack.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="Tracing.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="icon2.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Kura.rc" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{C1055F2B-A0C2-0005-0D1B-3C99DC93F137}</ProjectGuid>
+    <ProjectName>x64_tracer</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v100</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v100</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>G:\Workshop\x64DBG\64\release\x32\plugins\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <TargetName>Ktracer</TargetName>
+    <TargetExt>.dp32</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>G:\Workshop\x64DBG\64\release\x64\plugins\</OutDir>
+    <TargetName>Ktracer</TargetName>
+    <TargetExt>.dp64</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_WINDOWS;_USRDLL;X64_DBG_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <TargetMachine>MachineX86</TargetMachine>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>winmm.lib;psapi.lib;pluginsdk\x32dbg.lib;pluginsdk\x32bridge.lib;pluginsdk\TitanEngine\TitanEngine_x86.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_WINDOWS;_USRDLL;X64_DBG_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>winmm.lib;psapi.lib;pluginsdk\x64dbg.lib;pluginsdk\x64bridge.lib;pluginsdk\TitanEngine\TitanEngine_x64.lib;ImageHlp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
+
+
+================================================
+File: x64_tracer.vcxproj.filters
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="Header Files\pluginsdk">
+      <UniqueIdentifier>{c1da8cdf-a9ee-44c4-b3cd-1c80f423d5d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\pluginsdk\TitanEngine">
+      <UniqueIdentifier>{5e6574a6-83dc-45c6-b04d-36cc9e285f85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\pluginsdk\XEDParse">
+      <UniqueIdentifier>{9a9250a7-4eba-4138-ab27-aac113d2311d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\pluginsdk\dbghelp">
+      <UniqueIdentifier>{88c799f9-d796-4cf1-be07-6d317ab7e298}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\pluginsdk\DeviceNameResolver">
+      <UniqueIdentifier>{55d815ad-811f-46e0-ae52-5a1cb202b8c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\pluginsdk\jansson">
+      <UniqueIdentifier>{9b6e15e4-c557-4eac-86f3-3e3013411201}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\pluginsdk\lz4">
+      <UniqueIdentifier>{d0acf554-96b2-439c-a87e-01db279bec62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\pluginsdk\yara">
+      <UniqueIdentifier>{ca4b08fa-9d60-4777-9b89-15f3d0cd7507}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\pluginsdk\yara\yara">
+      <UniqueIdentifier>{adc26eed-1e00-4f24-8662-ec8902a11c2f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\pluginsdk\capstone">
+      <UniqueIdentifier>{159fe27f-06af-4f64-ab68-272e61a3608e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pluginmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Tracing.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pluginmain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\_plugin_types.h">
+      <Filter>Header Files\pluginsdk</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\_plugins.h">
+      <Filter>Header Files\pluginsdk</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\bridgemain.h">
+      <Filter>Header Files\pluginsdk</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\TitanEngine\TitanEngine.h">
+      <Filter>Header Files\pluginsdk\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\_dbgfunctions.h">
+      <Filter>Header Files\pluginsdk</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\dbghelp\dbghelp.h">
+      <Filter>Header Files\pluginsdk\dbghelp</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\DeviceNameResolver\DeviceNameResolver.h">
+      <Filter>Header Files\pluginsdk\DeviceNameResolver</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\jansson\jansson.h">
+      <Filter>Header Files\pluginsdk\jansson</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\jansson\jansson_config.h">
+      <Filter>Header Files\pluginsdk\jansson</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\lz4\lz4.h">
+      <Filter>Header Files\pluginsdk\lz4</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\lz4\lz4file.h">
+      <Filter>Header Files\pluginsdk\lz4</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\lz4\lz4hc.h">
+      <Filter>Header Files\pluginsdk\lz4</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\XEDParse\XEDParse.h">
+      <Filter>Header Files\pluginsdk\XEDParse</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\yara\yara\ahocorasick.h">
+      <Filter>Header Files\pluginsdk\yara\yara</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\yara\yara\utils.h">
+      <Filter>Header Files\pluginsdk\yara\yara</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\yara\yara\arena.h">
+      <Filter>Header Files\pluginsdk\yara\yara</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\yara\yara\atoms.h">
+      <Filter>Header Files\pluginsdk\yara\yara</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\yara\yara\compiler.h">
+      <Filter>Header Files\pluginsdk\yara\yara</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\yara\yara\elf.h">
+      <Filter>Header Files\pluginsdk\yara\yara</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\yara\yara\error.h">
+      <Filter>Header Files\pluginsdk\yara\yara</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\yara\yara\exec.h">
+      <Filter>Header Files\pluginsdk\yara\yara</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\yara\yara\exefiles.h">
+      <Filter>Header Files\pluginsdk\yara\yara</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\yara\yara\filemap.h">
+      <Filter>Header Files\pluginsdk\yara\yara</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\yara\yara\globals.h">
+      <Filter>Header Files\pluginsdk\yara\yara</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\yara\yara\hash.h">
+      <Filter>Header Files\pluginsdk\yara\yara</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\yara\yara\hex_lexer.h">
+      <Filter>Header Files\pluginsdk\yara\yara</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\yara\yara\lexer.h">
+      <Filter>Header Files\pluginsdk\yara\yara</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\yara\yara\libyara.h">
+      <Filter>Header Files\pluginsdk\yara\yara</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\yara\yara\limits.h">
+      <Filter>Header Files\pluginsdk\yara\yara</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\yara\yara\mem.h">
+      <Filter>Header Files\pluginsdk\yara\yara</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\yara\yara\modules.h">
+      <Filter>Header Files\pluginsdk\yara\yara</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\yara\yara\object.h">
+      <Filter>Header Files\pluginsdk\yara\yara</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\yara\yara\parser.h">
+      <Filter>Header Files\pluginsdk\yara\yara</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\yara\yara\pe.h">
+      <Filter>Header Files\pluginsdk\yara\yara</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\yara\yara\proc.h">
+      <Filter>Header Files\pluginsdk\yara\yara</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\yara\yara\re.h">
+      <Filter>Header Files\pluginsdk\yara\yara</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\yara\yara\re_lexer.h">
+      <Filter>Header Files\pluginsdk\yara\yara</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\yara\yara\rules.h">
+      <Filter>Header Files\pluginsdk\yara\yara</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\yara\yara\scan.h">
+      <Filter>Header Files\pluginsdk\yara\yara</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\yara\yara\sizedstr.h">
+      <Filter>Header Files\pluginsdk\yara\yara</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\yara\yara\strutils.h">
+      <Filter>Header Files\pluginsdk\yara\yara</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\yara\yara\types.h">
+      <Filter>Header Files\pluginsdk\yara\yara</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\yara\yara.h">
+      <Filter>Header Files\pluginsdk\yara</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\capstone\arm.h">
+      <Filter>Header Files\pluginsdk\capstone</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\capstone\arm64.h">
+      <Filter>Header Files\pluginsdk\capstone</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\capstone\capstone.h">
+      <Filter>Header Files\pluginsdk\capstone</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\capstone\mips.h">
+      <Filter>Header Files\pluginsdk\capstone</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\capstone\platform.h">
+      <Filter>Header Files\pluginsdk\capstone</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\capstone\ppc.h">
+      <Filter>Header Files\pluginsdk\capstone</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\capstone\sparc.h">
+      <Filter>Header Files\pluginsdk\capstone</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\capstone\systemz.h">
+      <Filter>Header Files\pluginsdk\capstone</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\capstone\x86.h">
+      <Filter>Header Files\pluginsdk\capstone</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\capstone\xcore.h">
+      <Filter>Header Files\pluginsdk\capstone</Filter>
+    </ClInclude>
+    <ClInclude Include="icons.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\_scriptapi.h">
+      <Filter>Header Files\pluginsdk</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\_scriptapi_assembler.h">
+      <Filter>Header Files\pluginsdk</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\_scriptapi_debug.h">
+      <Filter>Header Files\pluginsdk</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\_scriptapi_gui.h">
+      <Filter>Header Files\pluginsdk</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\_scriptapi_memory.h">
+      <Filter>Header Files\pluginsdk</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\_scriptapi_misc.h">
+      <Filter>Header Files\pluginsdk</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\_scriptapi_module.h">
+      <Filter>Header Files\pluginsdk</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\_scriptapi_pattern.h">
+      <Filter>Header Files\pluginsdk</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\_scriptapi_register.h">
+      <Filter>Header Files\pluginsdk</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\_scriptapi_stack.h">
+      <Filter>Header Files\pluginsdk</Filter>
+    </ClInclude>
+    <ClInclude Include="pluginsdk\bridgelist.h">
+      <Filter>Header Files\pluginsdk</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Tracing.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="icon2.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Kura.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
+
+
+================================================
+File: Win32/Debug/empty.txt
+================================================
+
+
+
+
+================================================
+File: Win32/Release/empty.txt
+================================================
+empty
+
+
+
+================================================
+File: bin/x32/empty.txt
+================================================
+
+
+
+
+================================================
+File: bin/x64/empty.txt
+================================================
+
+
+
+
+================================================
+File: pluginsdk/note.txt
+================================================
+Download the SDK from x64dbg website
+
+
+
+================================================
+File: x64/Debug/empty.txt
+================================================
+empty
+
+
+
+================================================
+File: x64/Release/empty.txt
+================================================
+empty
+
+

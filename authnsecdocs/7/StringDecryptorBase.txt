@@ -1,0 +1,410 @@
+Directory structure:
+└── mindsystemm-stringdecryptorbase/
+    ├── README.md
+    ├── StringDecryptorBase.sln
+    └── StringDecryptorBase/
+        ├── App.config
+        ├── Program.cs
+        ├── StringDecryptor.cs
+        ├── StringDecryptorBase.csproj
+        └── Properties/
+            └── AssemblyInfo.cs
+
+================================================
+File: README.md
+================================================
+# StringDecryptorBase
+ Complete basic string decryptor to help new reversers. The code is commented
+
+# What is this ?
+
+This is a base for all people new reversers who want to make a proper string decryptor
+It's using dynamic (invoke) and static approaches. 
+I commented the whole code to make sure everyone understand how it's going
+
+
+
+================================================
+File: StringDecryptorBase.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29411.108
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StringDecryptorBase", "StringDecryptorBase\StringDecryptorBase.csproj", "{68F9CF1A-248A-4A34-87A1-06C77AF15593}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{68F9CF1A-248A-4A34-87A1-06C77AF15593}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68F9CF1A-248A-4A34-87A1-06C77AF15593}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68F9CF1A-248A-4A34-87A1-06C77AF15593}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68F9CF1A-248A-4A34-87A1-06C77AF15593}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9F1AB97B-71E7-48CF-9348-F0DF79047DD2}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: StringDecryptorBase/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.5" />
+    </startup>
+</configuration>
+
+
+================================================
+File: StringDecryptorBase/Program.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Writer;
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+
+namespace StringDecryptorBase
+{
+    class Program
+    {
+        //Defining to approaches 
+        public enum Mode
+        {
+            Static,
+            Dynamic
+        }
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Written for purpose by MindSystem");
+            Console.WriteLine("don't forget to give credit if you use it !");
+            Mode mode = Mode.Dynamic;
+            //Defining a module to inspect
+            ModuleDefMD module = null;
+            //This is for the dynamic approach, pay attention if can be dangerous to load
+            //assembly you do not trust !
+            //If the assembly was made using .net core, this code should be adapted ! 
+            Assembly asm = null;
+            //Loading module from args
+            try
+            {
+                module = ModuleDefMD.Load(args[0]);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.ReadLine();
+                return;
+            }
+            try
+            {
+                asm = Assembly.LoadFrom(args[0]);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                mode = Mode.Static;
+            }
+            //Also loading the assembly, if it fails, apply static approach
+            System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
+            watch.Start();
+            Console.WriteLine("Using {0} approach", mode);
+            StringDecryptor decryptor = new StringDecryptor(FindDecryptionMethods(module), module, asm, mode);
+            int decryptedstring = 0;
+            decryptor.DecryptString(ref decryptedstring);
+            watch.Stop();
+            Console.WriteLine("Done ! Elapsed time : {0}",  watch.Elapsed.TotalSeconds);
+            Console.WriteLine("Decrypted : {0}", decryptedstring);
+            //Replacing the path 
+            string SavingPath =module.Kind == ModuleKind.Dll ?args[0].Replace(".dll", "-Deobfuscated.dll") : args[0].Replace(".exe", "-Deobfuscated.exe");
+            //Check to see if asm is mixed mode or not
+            if (module.IsILOnly)
+            {
+                //Saving option
+                var opts = new ModuleWriterOptions(module);
+                opts.MetadataOptions.Flags = MetadataFlags.PreserveAll;
+                opts.Logger = DummyLogger.NoThrowInstance;
+                //Saving the deobfuscated assembly
+               module.Write(SavingPath, opts);
+            }
+            else
+            {
+                //Same here but for mixed mode assembly
+                var opts = new NativeModuleWriterOptions(module, false);
+                opts.MetadataOptions.Flags = MetadataFlags.PreserveAll;
+                opts.Logger = DummyLogger.NoThrowInstance;
+               module.NativeWrite(SavingPath, opts);
+            }
+            Console.ReadLine();
+        }
+        public static List<MethodDef> FindDecryptionMethods(ModuleDefMD module)
+        {
+            //Creating a list of method to return
+            List<MethodDef> list = new List<MethodDef>();
+            //Looping through the type
+            foreach(TypeDef type in module.Types)
+            {
+                //Looping through the methods
+                foreach (MethodDef method in type.Methods)
+                {
+                    //Checking if method.HasBody
+                    if(method.HasBody)
+                    {
+                        //Now we loop through each instruction
+                        for(int i = 0; i < method.Body.Instructions.Count; i++)
+                        {
+                            //Just set here the condition(s)
+                            bool condition = false;
+                            if (condition)
+                            {
+                                //Adding the method to the list of decryptino method
+                                list.Add(method);
+                            }
+                        }
+                        
+                    }
+                }
+            }
+            return list;
+        }
+    }
+}
+
+
+
+================================================
+File: StringDecryptorBase/StringDecryptor.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+using static StringDecryptorBase.Program;
+
+namespace StringDecryptorBase
+{
+    class StringDecryptor
+    {
+        //We define our module here to use it in the whole class
+        public ModuleDefMD module = null;
+        //We also define the main decryption method (I use a list if multiple decryption methods
+        // are used
+        public List<MethodDef> DecryptionMeth = null;
+        //We also define an assembly to invoke method
+        public Assembly asm = null;
+        public Mode mode = Mode.Dynamic;
+        public StringDecryptor(List<MethodDef> decryption, ModuleDefMD moduledef, Assembly assembly, Mode modee)
+        {
+            DecryptionMeth = decryption;
+            module = moduledef;
+            asm = assembly;
+            mode = modee;
+        }
+        public void DecryptString(ref int amount)
+        {
+            //Checking if the method of decryption list is not empty
+            if(DecryptionMeth.Count == 0)
+            {
+                Console.WriteLine("No decryption method found, please input token of meth : ");
+            }
+            try
+            {
+                //Removing 0x
+                string corrected = Console.ReadLine().Remove(0, 2);
+                //Converting token to rid by substracting 0x06000000
+                MethodDef found = module.ResolveMethod(uint.Parse(corrected, System.Globalization.NumberStyles.HexNumber) - 0x06000000);
+                Console.WriteLine("Found decryption method : {0}", found.Name);
+                //If the method wasn't found, we ask to the use to input one
+                DecryptionMeth.Add(found);
+
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+          
+            //Looping through the type
+            foreach (TypeDef type in module.Types)
+            {
+                //Looping through the methods
+                foreach (MethodDef method in type.Methods)
+                {
+                    //Checking if method.HasBody
+                    if (method.HasBody)
+                    {
+                        //Now we loop through each instruction
+                        for (int i = 0; i < method.Body.Instructions.Count; i++)
+                        {
+                            /*
+                            [*] First check -> checking if argument is ldstr (most of the time, ldstr become int 
+                            so  you have to adapt this part
+                            [*] Second check -> checking if next instr is call (sometimes, the ldstr is not right 
+                            after the ldstr, see my toolYano deobfuscator for a more stable version
+                            [*] Third check -> checking if the call is a methoddef
+                            [*] Fourth check -> checking if the method is a decryption method
+                            */
+                            if (method.Body.Instructions[i].OpCode == OpCodes.Ldstr && method.Body.Instructions[i+1].OpCode == OpCodes.Call && method.Body.Instructions[i+1].Operand is MethodDef && DecryptionMeth.Contains((MethodDef)method.Body.Instructions[i+1].Operand))
+                            {
+                                //Getting the encrypted string
+                                string argument = method.Body.Instructions[i].Operand.ToString();
+                                string resolved;
+                                if(mode == Mode.Static)
+                                {
+                                    //decrypting the string
+                                    //STATIC APPROACH
+                                    resolved = DecryptString(argument);
+                                }
+                                else
+                                {
+                                    //DYNAMIC APPROACH
+                                    //We grab the methodDef to get its mdtoken
+                                    MethodDef toinvoke = (MethodDef)method.Body.Instructions[i + 1].Operand;
+                                    //Then we invoke the methodofdecryption to get the string
+                                    //It's more reliable but can be dangerous as it loads the assembly which
+                                    //may contains virus
+                                    resolved = (string)asm.ManifestModule.ResolveMethod(toinvoke.MDToken.ToInt32()).Invoke(null, new object[] { argument });
+                                }
+                                //Replacing the decrypted string
+                                //Here you can use resolve or resolved2, they should be the same 
+                                method.Body.Instructions[i].Operand = resolved;
+                                //Nop the call !! not deleting it ! 
+                                method.Body.Instructions[i + 1].OpCode = OpCodes.Nop;
+                                //Printing the decrypted strings
+                                amount++;
+                                Console.ForegroundColor = ConsoleColor.Green;
+                                Console.WriteLine("Decrypted : {0}", resolved);
+                                Console.ForegroundColor = ConsoleColor.White;
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+        public static string DecryptString(string str)
+        {
+            //Here you can copy the string decryption routine
+            return str;
+        }
+    }
+}
+
+
+
+================================================
+File: StringDecryptorBase/StringDecryptorBase.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{68F9CF1A-248A-4A34-87A1-06C77AF15593}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>StringDecryptorBase</RootNamespace>
+    <AssemblyName>StringDecryptorBase</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib">
+      <HintPath>..\..\..\..\Desktop\de4dot-master\Debug\net45\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="StringDecryptor.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: StringDecryptorBase/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// Les informations gÃ©nÃ©rales relatives Ã  un assembly dÃ©pendent de
+// l'ensemble d'attributs suivant. Changez les valeurs de ces attributs pour modifier les informations
+// associÃ©es Ã  un assembly.
+[assembly: AssemblyTitle("StringDecryptorBase")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("StringDecryptorBase")]
+[assembly: AssemblyCopyright("Copyright Â©  2020")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// L'affectation de la valeur false Ã  ComVisible rend les types invisibles dans cet assembly
+// aux composants COM. Si vous devez accÃ©der Ã  un type dans cet assembly Ã  partir de
+// COM, affectez la valeur true Ã  l'attribut ComVisible sur ce type.
+[assembly: ComVisible(false)]
+
+// Le GUID suivant est pour l'ID de la typelib si ce projet est exposÃ© Ã  COM
+[assembly: Guid("68f9cf1a-248a-4a34-87a1-06c77af15593")]
+
+// Les informations de version pour un assembly se composent des quatre valeurs suivantes :
+//
+//      Version principale
+//      Version secondaire
+//      NumÃ©ro de build
+//      RÃ©vision
+//
+// Vous pouvez spÃ©cifier toutes les valeurs ou indiquer les numÃ©ros de build et de rÃ©vision par dÃ©faut
+// en utilisant '*', comme indiquÃ© ci-dessousÂ :
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+

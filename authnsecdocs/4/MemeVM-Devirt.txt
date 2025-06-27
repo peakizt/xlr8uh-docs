@@ -1,0 +1,1527 @@
+Directory structure:
+└── cursedsheep-memevm-devirt/
+    ├── README.md
+    └── MemeVM-Devirt/
+        ├── App.config
+        ├── MemeVM-Devirt.csproj
+        ├── MemeVM-Devirt.sln
+        ├── Program.cs
+        ├── HandleInstructions/
+        │   ├── Handlers/
+        │   │   ├── Add.cs
+        │   │   ├── Call.cs
+        │   │   ├── Cgt.cs
+        │   │   ├── Clt.cs
+        │   │   ├── Cmp.cs
+        │   │   ├── Dup.cs
+        │   │   ├── Int.cs
+        │   │   ├── Jf.cs
+        │   │   ├── Jmp.cs
+        │   │   ├── Jt.cs
+        │   │   ├── Ldarg.cs
+        │   │   ├── Ldfld.cs
+        │   │   ├── Ldloc.cs
+        │   │   ├── Long.cs
+        │   │   ├── Newarr.cs
+        │   │   ├── Null.cs
+        │   │   ├── Pop.cs
+        │   │   ├── Ret.cs
+        │   │   ├── Stfld.cs
+        │   │   ├── Stloc.cs
+        │   │   └── String.cs
+        │   └── HandlersOld/
+        │       ├── Add.cs
+        │       ├── Call.cs
+        │       ├── Cgt.cs
+        │       ├── Clt.cs
+        │       ├── Cmp.cs
+        │       ├── Dup.cs
+        │       ├── Int.cs
+        │       ├── Jf.cs
+        │       ├── Jmp.cs
+        │       ├── Jt.cs
+        │       ├── Ldarg.cs
+        │       ├── Ldfld.cs
+        │       ├── Ldloc.cs
+        │       ├── Long.cs
+        │       ├── Newarr.cs
+        │       ├── Null.cs
+        │       ├── Pop.cs
+        │       ├── Ret.cs
+        │       ├── Stfld.cs
+        │       ├── Stloc.cs
+        │       └── String.cs
+        ├── InitPhase/
+        │   ├── IHandler.cs
+        │   ├── Initializebytes.cs
+        │   ├── Instruction.cs
+        │   ├── Opcode.cs
+        │   └── RuntimeHelpers.cs
+        └── Properties/
+            └── AssemblyInfo.cs
+
+================================================
+File: README.md
+================================================
+# MemeVM-Devirt
+A devirtualizer for MemeVM
+
+A copy&paste of vm runtime
+
+
+
+================================================
+File: MemeVM-Devirt/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.7.2" />
+    </startup>
+</configuration>
+
+
+================================================
+File: MemeVM-Devirt/MemeVM-Devirt.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{D10F9068-B297-4251-9032-9A1AAB808B3B}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>MemeVM_Devirt</RootNamespace>
+    <AssemblyName>MemeVM-Devirt</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib">
+      <HintPath>..\..\..\..\Downloads\JitUnpacker-Framework-master\bin\Debug\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="HandleInstructions\HandlersOld\Add.cs" />
+    <Compile Include="HandleInstructions\HandlersOld\Call.cs" />
+    <Compile Include="HandleInstructions\HandlersOld\Cgt.cs" />
+    <Compile Include="HandleInstructions\HandlersOld\Clt.cs" />
+    <Compile Include="HandleInstructions\HandlersOld\Cmp.cs" />
+    <Compile Include="HandleInstructions\HandlersOld\Dup.cs" />
+    <Compile Include="HandleInstructions\HandlersOld\Int.cs" />
+    <Compile Include="HandleInstructions\HandlersOld\Jf.cs" />
+    <Compile Include="HandleInstructions\HandlersOld\Jmp.cs" />
+    <Compile Include="HandleInstructions\HandlersOld\Jt.cs" />
+    <Compile Include="HandleInstructions\HandlersOld\Ldarg.cs" />
+    <Compile Include="HandleInstructions\HandlersOld\Ldfld.cs" />
+    <Compile Include="HandleInstructions\HandlersOld\Ldloc.cs" />
+    <Compile Include="HandleInstructions\HandlersOld\Long.cs" />
+    <Compile Include="HandleInstructions\HandlersOld\Newarr.cs" />
+    <Compile Include="HandleInstructions\HandlersOld\Null.cs" />
+    <Compile Include="HandleInstructions\HandlersOld\Pop.cs" />
+    <Compile Include="HandleInstructions\HandlersOld\Ret.cs" />
+    <Compile Include="HandleInstructions\HandlersOld\Stfld.cs" />
+    <Compile Include="HandleInstructions\HandlersOld\Stloc.cs" />
+    <Compile Include="HandleInstructions\HandlersOld\String.cs" />
+    <Compile Include="HandleInstructions\Handlers\Add.cs" />
+    <Compile Include="HandleInstructions\Handlers\Call.cs" />
+    <Compile Include="HandleInstructions\Handlers\Cgt.cs" />
+    <Compile Include="HandleInstructions\Handlers\Clt.cs" />
+    <Compile Include="HandleInstructions\Handlers\Cmp.cs" />
+    <Compile Include="HandleInstructions\Handlers\Dup.cs" />
+    <Compile Include="HandleInstructions\Handlers\Int.cs" />
+    <Compile Include="HandleInstructions\Handlers\Jf.cs" />
+    <Compile Include="HandleInstructions\Handlers\Jmp.cs" />
+    <Compile Include="HandleInstructions\Handlers\Jt.cs" />
+    <Compile Include="HandleInstructions\Handlers\Ldarg.cs" />
+    <Compile Include="HandleInstructions\Handlers\Ldfld.cs" />
+    <Compile Include="HandleInstructions\Handlers\Ldloc.cs" />
+    <Compile Include="HandleInstructions\Handlers\Long.cs" />
+    <Compile Include="HandleInstructions\Handlers\Newarr.cs" />
+    <Compile Include="HandleInstructions\Handlers\Null.cs" />
+    <Compile Include="HandleInstructions\Handlers\Pop.cs" />
+    <Compile Include="HandleInstructions\Handlers\Ret.cs" />
+    <Compile Include="HandleInstructions\Handlers\Stfld.cs" />
+    <Compile Include="HandleInstructions\Handlers\Stloc.cs" />
+    <Compile Include="HandleInstructions\Handlers\String.cs" />
+    <Compile Include="InitPhase\IHandler.cs" />
+    <Compile Include="InitPhase\Initializebytes.cs" />
+    <Compile Include="InitPhase\Instruction.cs" />
+    <Compile Include="InitPhase\Opcode.cs" />
+    <Compile Include="InitPhase\RuntimeHelpers.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: MemeVM-Devirt/MemeVM-Devirt.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29123.88
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MemeVM-Devirt", "MemeVM-Devirt.csproj", "{D10F9068-B297-4251-9032-9A1AAB808B3B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D10F9068-B297-4251-9032-9A1AAB808B3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D10F9068-B297-4251-9032-9A1AAB808B3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D10F9068-B297-4251-9032-9A1AAB808B3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D10F9068-B297-4251-9032-9A1AAB808B3B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {42385549-8CAE-4D56-A3A5-F1D7A917CCCB}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: MemeVM-Devirt/Program.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+using dnlib;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using dnlib.DotNet.Writer;
+using MemeVM_Devirt.InitPhase;
+
+namespace MemeVM_Devirt
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.Title = "MemeVM Devirtualizer by CursedSheep ;D";
+            Console.ForegroundColor = ConsoleColor.Green;
+            string filename;
+            try
+            {
+                filename = args[0];
+            }
+            catch
+            {
+                Console.Write("Enter file path: ");
+                filename = Console.ReadLine().Replace(@"""", "");
+            }
+            ModuleDefMD module = ModuleDefMD.Load(filename);
+            MemeVM_Devirt.InitPhase.Initializebytes.Moduledefmd = module;
+            System.Reflection.Assembly asm = System.Reflection.Assembly.LoadFrom(filename);
+            MemeVM_Devirt.InitPhase.Initializebytes.assembly = asm;
+            DeobFuscateMethods(MemeVM_Devirt.InitPhase.Initializebytes.Moduledefmd);
+            ModuleWriterOptions opt = new ModuleWriterOptions(MemeVM_Devirt.InitPhase.Initializebytes.Moduledefmd);
+            opt.MetadataOptions.Flags = MetadataFlags.PreserveAll | MetadataFlags.KeepOldMaxStack | MetadataFlags.PreserveExtraSignatureData | MetadataFlags.PreserveAllMethodRids | MetadataFlags.PreserveMemberRefRids | MetadataFlags.PreserveMethodSpecRids;
+            opt.MetadataLogger = DummyLogger.NoThrowInstance;
+            string patho = Path.GetDirectoryName(filename) + "\\" + Path.GetFileNameWithoutExtension(filename) + "-test" + Path.GetExtension(filename);
+            MemeVM_Devirt.InitPhase.Initializebytes.Moduledefmd.Write(patho, opt);
+            Console.WriteLine("saved to " + patho);
+            Console.ReadKey();
+        }
+        public static void DeobFuscateMethods(ModuleDefMD module)
+        {
+            int counter = 0;
+            Type[] asm2 = InitPhase.Initializebytes.assembly.ManifestModule.GetTypes();
+            foreach (TypeDef type in module.GetTypes())
+            {
+                foreach (MethodDef method in type.Methods)
+                {
+                    if (!method.HasBody) continue;
+                    if (!method.Body.HasInstructions) continue;
+                    var instructions = method.Body.Instructions;
+                    for (int i = 0; i < instructions.Count; i++)
+                    {
+                        if (instructions[i].OpCode == OpCodes.Ldtoken && instructions[i + 1].IsLdcI4() && (instructions[instructions.Count -3].OpCode == OpCodes.Call || instructions[instructions.Count - 2].OpCode == OpCodes.Call))
+                        {
+                            TypeDef param1 = (TypeDef)instructions[i].Operand;
+                            RuntimeTypeHandle t = asm2.First(x => x.Name == param1.ReflectionName).TypeHandle;
+                            int param2 = instructions[i + 1].GetLdcI4Value();
+                            CilBody dm = MemeVM_Devirt.InitPhase.Initializebytes.DecryptMethod(method, Type.GetTypeFromHandle(t).Assembly, param2);
+                            method.Body = dm;
+                            counter++;
+                        }
+                    }
+                }
+            }
+            Console.WriteLine("Bodies Replaced: " + counter);
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/Handlers/Add.cs
+================================================
+ï»¿using System.IO;
+using MemeVM_Devirt.InitPhase;
+
+namespace MemeVM.Runtime.Handlers {
+    class Add : IHandler {
+        public OpCode Handles => OpCode.Add;
+
+        public Instruction Deserialize(BinaryReader reader) => 
+            new Instruction(OpCode.Add);
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/Handlers/Call.cs
+================================================
+ï»¿using System;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using MemeVM_Devirt.InitPhase;
+
+namespace MemeVM.Runtime.Handlers {
+    //TODO: Generic methods
+    class Call : IHandler {
+        public OpCode Handles => OpCode.Call;
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Call, new Tuple<short, int, bool>(reader.ReadInt16(), reader.ReadInt32(), reader.ReadBoolean()));
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/Handlers/Cgt.cs
+================================================
+ï»¿using System.IO;
+using MemeVM_Devirt.InitPhase;
+
+namespace MemeVM.Runtime.Handlers {
+    class Cgt : IHandler {
+        public OpCode Handles => OpCode.Cgt;
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Cgt);
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/Handlers/Clt.cs
+================================================
+ï»¿using System.IO;
+using MemeVM_Devirt.InitPhase;
+namespace MemeVM.Runtime.Handlers {
+    class Clt : IHandler {
+        public OpCode Handles => OpCode.Clt;
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Clt);
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/Handlers/Cmp.cs
+================================================
+ï»¿using System.IO;
+using MemeVM_Devirt.InitPhase;
+
+namespace MemeVM.Runtime.Handlers {
+    class Cmp : IHandler {
+        public OpCode Handles => OpCode.Cmp;
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Cmp);
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/Handlers/Dup.cs
+================================================
+ï»¿using System.IO;
+using MemeVM_Devirt.InitPhase;
+
+namespace MemeVM.Runtime.Handlers {
+    class Dup : IHandler {
+        public OpCode Handles => OpCode.Dup;
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Dup);
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/Handlers/Int.cs
+================================================
+ï»¿using System.IO;
+using MemeVM_Devirt.InitPhase;
+
+namespace MemeVM.Runtime.Handlers {
+    class Int : IHandler {
+        public OpCode Handles => OpCode.Int32;
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Int32, reader.ReadInt32());
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/Handlers/Jf.cs
+================================================
+ï»¿using System.IO;
+using MemeVM_Devirt.InitPhase;
+
+namespace MemeVM.Runtime.Handlers {
+    class Jf : IHandler {
+        public OpCode Handles => OpCode.Jf;
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Jf, reader.ReadInt32());
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/Handlers/Jmp.cs
+================================================
+ï»¿using System.IO;
+using MemeVM_Devirt.InitPhase;
+
+namespace MemeVM.Runtime.Handlers {
+    class Jmp : IHandler {
+        public OpCode Handles => OpCode.Jmp;
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Jmp, reader.ReadInt32());
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/Handlers/Jt.cs
+================================================
+ï»¿using System.IO;
+using MemeVM_Devirt.InitPhase;
+
+namespace MemeVM.Runtime.Handlers {
+    class Jt : IHandler {
+        public OpCode Handles => OpCode.Jt;
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Jt, reader.ReadInt32());
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/Handlers/Ldarg.cs
+================================================
+ï»¿using System.IO;
+using MemeVM_Devirt.InitPhase;
+
+namespace MemeVM.Runtime.Handlers {
+    class Ldarg : IHandler {
+        public OpCode Handles => OpCode.Ldarg;
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Ldarg, reader.ReadInt16());
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/Handlers/Ldfld.cs
+================================================
+ï»¿using System;
+using System.IO;
+using MemeVM_Devirt.InitPhase;
+
+namespace MemeVM.Runtime.Handlers {
+    class Ldfld : IHandler {
+        public OpCode Handles => OpCode.Ldfld;
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Ldfld, new Tuple<short, int>(reader.ReadInt16(), reader.ReadInt32()));
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/Handlers/Ldloc.cs
+================================================
+ï»¿using System.IO;
+using MemeVM_Devirt.InitPhase;
+
+namespace MemeVM.Runtime.Handlers {
+    class Ldloc : IHandler {
+        public OpCode Handles => OpCode.Ldloc;
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Ldloc, reader.ReadInt16());
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/Handlers/Long.cs
+================================================
+ï»¿using System.IO;
+using MemeVM_Devirt.InitPhase;
+
+namespace MemeVM.Runtime.Handlers {
+    class Long : IHandler {
+        public OpCode Handles => OpCode.Int64;
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Int64, reader.ReadInt64());
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/Handlers/Newarr.cs
+================================================
+ï»¿using System;
+using System.IO;
+using MemeVM_Devirt.InitPhase;
+
+namespace MemeVM.Runtime.Handlers {
+    class Newarr : IHandler {
+        public OpCode Handles => OpCode.Newarr;
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Newarr, new Tuple<short, int>(reader.ReadInt16(), reader.ReadInt32()));
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/Handlers/Null.cs
+================================================
+ï»¿using System.IO;
+using MemeVM_Devirt.InitPhase;
+
+namespace MemeVM.Runtime.Handlers {
+    class Null : IHandler {
+        public OpCode Handles => OpCode.Null;
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Null);
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/Handlers/Pop.cs
+================================================
+ï»¿using System.IO;
+using MemeVM_Devirt.InitPhase;
+
+namespace MemeVM.Runtime.Handlers {
+    class Pop : IHandler {
+        public OpCode Handles => OpCode.Pop;
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Pop);
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/Handlers/Ret.cs
+================================================
+ï»¿using System.IO;
+using MemeVM_Devirt.InitPhase;
+
+namespace MemeVM.Runtime.Handlers {
+    class Ret : IHandler {
+        public OpCode Handles => OpCode.Ret;
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Ret);
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/Handlers/Stfld.cs
+================================================
+ï»¿using System;
+using System.IO;
+using MemeVM_Devirt.InitPhase;
+
+namespace MemeVM.Runtime.Handlers {
+    class Stfld : IHandler {
+        public OpCode Handles => OpCode.Stfld;
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Stfld, new Tuple<short, int>(reader.ReadInt16(), reader.ReadInt32()));
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/Handlers/Stloc.cs
+================================================
+ï»¿using System.IO;
+using MemeVM_Devirt.InitPhase;
+
+namespace MemeVM.Runtime.Handlers {
+    class Stloc : IHandler {
+        public OpCode Handles => OpCode.Stloc;
+
+        public Instruction Deserialize(BinaryReader reader) =>
+            new Instruction(OpCode.Stloc, reader.ReadInt16());
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/Handlers/String.cs
+================================================
+ï»¿using System.IO;
+using System.Text;
+using MemeVM_Devirt.InitPhase;
+
+namespace MemeVM.Runtime.Handlers {
+    class String : IHandler {
+        public OpCode Handles => OpCode.String;
+
+        public Instruction Deserialize(BinaryReader reader) {
+            var len = reader.ReadInt32();
+
+            return new Instruction(OpCode.String, Encoding.UTF8.GetString(reader.ReadBytes(len)));
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/HandlersOld/Add.cs
+================================================
+ï»¿using System.IO;
+using MemeVM_Devirt.InitPhase;
+using Instructiong = dnlib.DotNet.Emit.Instruction;
+using Opcodes = dnlib.DotNet.Emit.OpCodes;
+
+namespace MemeVM.Runtime.Handlerzs {
+    class Add {
+
+        public Instructiong Deserialized(Instruction ins) => new dnlib.DotNet.Emit.Instruction(Opcodes.Add);
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/HandlersOld/Call.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using MemeVM_Devirt.InitPhase;
+using Instructiong = dnlib.DotNet.Emit.Instruction;
+using Opcodes = dnlib.DotNet.Emit.OpCodes;
+
+namespace MemeVM.Runtime.Handlerzs {
+    //TODO: Generic methods
+    class Call {
+        public Instructiong Deserialized(Instruction reader)
+        {
+            try
+            {
+                var op = (Tuple<short, int, bool>)reader.Operand;
+                if (!op.Item3)
+                {
+                    var asm = Initializebytes.GetBody(MemeVM_Devirt.InitPhase.Initializebytes.assembly).GetReference(op.Item1);
+                    MemberInfo info;
+                    try
+                    {
+                        info = asm.ManifestModule.ResolveMember(op.Item2);
+                    }
+                    catch
+                    {
+                        info = null;
+                    }
+                    var target = asm.ManifestModule.ResolveMethod(op.Item2);
+                    if (info != null && (info.MemberType & MemberTypes.Constructor) == MemberTypes.Constructor)
+                    {
+                        var ctorinfo = (ConstructorInfo)info;
+                        return new Instructiong(Opcodes.Callvirt, Initializebytes.Moduledefmd.Import(ctorinfo));
+                    }
+                    else return new Instructiong(Opcodes.Call, Initializebytes.Moduledefmd.Import(target));
+                }
+                else
+                {
+                    return new Instructiong(Opcodes.Newobj, Initializebytes.Moduledefmd.Import(typeof(object)));
+                }
+            }
+            catch
+            {
+                return Opcodes.Nop.ToInstruction();
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/HandlersOld/Cgt.cs
+================================================
+ï»¿using System.IO;
+using MemeVM_Devirt.InitPhase;
+using Instructiong = dnlib.DotNet.Emit.Instruction;
+using Opcodes = dnlib.DotNet.Emit.OpCodes;
+
+namespace MemeVM.Runtime.Handlerzs {
+    class Cgt {
+        public Instructiong Deserialized(Instruction reader) => new Instructiong(Opcodes.Cgt);
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/HandlersOld/Clt.cs
+================================================
+ï»¿using MemeVM_Devirt.InitPhase;
+using System.IO;
+using Instructiong = dnlib.DotNet.Emit.Instruction;
+using Opcodes = dnlib.DotNet.Emit.OpCodes;
+
+namespace MemeVM.Runtime.Handlerzs {
+    class Clt {
+
+        public Instructiong Deserialized(Instruction reader) => new Instructiong(Opcodes.Clt);
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/HandlersOld/Cmp.cs
+================================================
+ï»¿using MemeVM_Devirt.InitPhase;
+using System.IO;
+using Instructiong = dnlib.DotNet.Emit.Instruction;
+using Opcodes = dnlib.DotNet.Emit.OpCodes;
+namespace MemeVM.Runtime.Handlerzs {
+    class Cmp {
+
+        public Instructiong Deserialized(Instruction reader) => new Instructiong(Opcodes.Ceq);
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/HandlersOld/Dup.cs
+================================================
+ï»¿using MemeVM_Devirt.InitPhase;
+using System.IO;
+using Instructiong = dnlib.DotNet.Emit.Instruction;
+using Opcodes = dnlib.DotNet.Emit.OpCodes;
+namespace MemeVM.Runtime.Handlerzs {
+    class Dup {
+        public Instructiong Deserialized(Instruction reader) => new Instructiong(Opcodes.Dup);
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/HandlersOld/Int.cs
+================================================
+ï»¿using MemeVM_Devirt.InitPhase;
+using System.IO;
+using Instructiong = dnlib.DotNet.Emit.Instruction;
+using Opcodes = dnlib.DotNet.Emit.OpCodes;
+namespace MemeVM.Runtime.Handlerzs {
+    class Int {
+
+        public Instructiong Deserialized(Instruction reader) => Instructiong.CreateLdcI4((int)reader.Operand);
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/HandlersOld/Jf.cs
+================================================
+ï»¿using System.IO;
+using MemeVM_Devirt.InitPhase;
+using Instructiong = dnlib.DotNet.Emit.Instruction;
+using Opcodes = dnlib.DotNet.Emit.OpCodes;
+namespace MemeVM.Runtime.Handlerzs {
+    class Jf  {
+        public Instructiong Deserialized(Instruction reader)
+        {
+            TargetDisplOperand t = new TargetDisplOperand((int)reader.Operand);
+            return new Instructiong(Opcodes.Brfalse, t);
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/HandlersOld/Jmp.cs
+================================================
+ï»¿using System.IO;
+using MemeVM_Devirt.InitPhase;
+using Instructiong = dnlib.DotNet.Emit.Instruction;
+using Opcodes = dnlib.DotNet.Emit.OpCodes;
+namespace MemeVM.Runtime.Handlerzs {
+    class Jmp  {
+        public Instructiong Deserialized(Instruction reader)
+        {
+            TargetDisplOperand t = new TargetDisplOperand((int)reader.Operand);
+            return new Instructiong(Opcodes.Br, t);
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/HandlersOld/Jt.cs
+================================================
+ï»¿using System.IO;
+using MemeVM_Devirt.InitPhase;
+using Instructiong = dnlib.DotNet.Emit.Instruction;
+using Opcodes = dnlib.DotNet.Emit.OpCodes;
+namespace MemeVM.Runtime.Handlerzs {
+    class Jt{
+
+        public Instructiong Deserialized(Instruction reader)
+        {
+            TargetDisplOperand t = new TargetDisplOperand((int)reader.Operand);
+            return new Instructiong(Opcodes.Brtrue, t);
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/HandlersOld/Ldarg.cs
+================================================
+ï»¿using MemeVM_Devirt.InitPhase;
+using System;
+using System.IO;
+using Instructiong = dnlib.DotNet.Emit.Instruction;
+using Opcodes = dnlib.DotNet.Emit.OpCodes;
+namespace MemeVM.Runtime.Handlerzs {
+    class Ldarg {
+        public Instructiong Deserialized(Instruction reader) => new Instructiong(Opcodes.Ldarg, (Int16)reader.Operand);
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/HandlersOld/Ldfld.cs
+================================================
+ï»¿using System;
+using System.IO;
+using MemeVM_Devirt.InitPhase;
+using Instructiong = dnlib.DotNet.Emit.Instruction;
+using Opcodes = dnlib.DotNet.Emit.OpCodes;
+namespace MemeVM.Runtime.Handlerzs {
+    class Ldfld {
+        public Instructiong Deserialized(Instruction reader)
+        {
+            var id = ((Tuple<short, int>)reader.Operand).Item1;
+            var token = ((Tuple<short, int>)reader.Operand).Item2;
+
+            var asm = Initializebytes.GetBody(MemeVM_Devirt.InitPhase.Initializebytes.assembly).GetReference(id);
+            var field = asm.ManifestModule.ResolveField(token);
+            return new Instructiong(Opcodes.Ldfld, Initializebytes.Moduledefmd.Import(field));
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/HandlersOld/Ldloc.cs
+================================================
+ï»¿using System;
+using System.IO;
+using MemeVM_Devirt.InitPhase;
+using Instructiong = dnlib.DotNet.Emit.Instruction;
+using Opcodes = dnlib.DotNet.Emit.OpCodes;
+namespace MemeVM.Runtime.Handlerzs {
+    class Ldloc{
+
+        public Instructiong Deserialized(Instruction reader) => new Instructiong(Opcodes.Ldloc, (Int16)reader.Operand);
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/HandlersOld/Long.cs
+================================================
+ï»¿using System;
+using System.IO;
+using MemeVM_Devirt.InitPhase;
+using Instructiong = dnlib.DotNet.Emit.Instruction;
+using Opcodes = dnlib.DotNet.Emit.OpCodes;
+namespace MemeVM.Runtime.Handlerzs {
+    class Long  {
+
+        public Instructiong Deserialized(Instruction reader) => new Instructiong(Opcodes.Ldc_I8, (Int64)reader.Operand);
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/HandlersOld/Newarr.cs
+================================================
+ï»¿using MemeVM_Devirt.InitPhase;
+using System;
+using System.IO;
+using Instructiong = dnlib.DotNet.Emit.Instruction;
+using Opcodes = dnlib.DotNet.Emit.OpCodes;
+namespace MemeVM.Runtime.Handlerzs {
+    class Newarr {
+        public Instructiong Deserialized(Instruction reader)
+        {
+            var tuple = (Tuple<short, int>)reader.Operand;
+
+            var refid = tuple.Item1;
+            var token = tuple.Item2;
+
+            var asm = Initializebytes.GetBody(MemeVM_Devirt.InitPhase.Initializebytes.assembly).GetReference(refid).ManifestModule;
+            var type = asm.ResolveType(token);
+            return new Instructiong(Opcodes.Newarr, Initializebytes.Moduledefmd.Import(type));
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/HandlersOld/Null.cs
+================================================
+ï»¿using MemeVM_Devirt.InitPhase;
+using System.IO;
+using Instructiong = dnlib.DotNet.Emit.Instruction;
+using Opcodes = dnlib.DotNet.Emit.OpCodes;
+namespace MemeVM.Runtime.Handlerzs {
+    class Null {
+        public Instructiong Deserialized(Instruction reader) => new Instructiong(Opcodes.Ldnull);
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/HandlersOld/Pop.cs
+================================================
+ï»¿using System.IO;
+using MemeVM_Devirt.InitPhase;
+using Instructiong = dnlib.DotNet.Emit.Instruction;
+using Opcodes = dnlib.DotNet.Emit.OpCodes;
+namespace MemeVM.Runtime.Handlerzs {
+    class Pop {
+
+        public Instructiong Deserialized(Instruction reader) => new Instructiong(Opcodes.Pop);
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/HandlersOld/Ret.cs
+================================================
+ï»¿using System.IO;
+using MemeVM_Devirt.InitPhase;
+using Instructiong = dnlib.DotNet.Emit.Instruction;
+using Opcodes = dnlib.DotNet.Emit.OpCodes;
+namespace MemeVM.Runtime.Handlerzs {
+    class Ret {
+
+        public Instructiong Deserialized(Instruction reader) => new Instructiong(Opcodes.Ret);
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/HandlersOld/Stfld.cs
+================================================
+ï»¿using MemeVM_Devirt.InitPhase;
+using System;
+using System.IO;
+using Instructiong = dnlib.DotNet.Emit.Instruction;
+using Opcodes = dnlib.DotNet.Emit.OpCodes;
+namespace MemeVM.Runtime.Handlerzs {
+    class Stfld {
+        public Instructiong Deserialized(Instruction reader)
+        {
+            var id = ((Tuple<short, int>)reader.Operand).Item1;
+            var token = ((Tuple<short, int>)reader.Operand).Item2;
+
+            var asm = Initializebytes.GetBody(MemeVM_Devirt.InitPhase.Initializebytes.assembly).GetReference(id);
+            var field = asm.ManifestModule.ResolveField(token);
+            return new Instructiong(Opcodes.Stfld, Initializebytes.Moduledefmd.Import(field));
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/HandlersOld/Stloc.cs
+================================================
+ï»¿using MemeVM_Devirt.InitPhase;
+using System;
+using System.IO;
+using Instructiong = dnlib.DotNet.Emit.Instruction;
+using Opcodes = dnlib.DotNet.Emit.OpCodes;
+namespace MemeVM.Runtime.Handlerzs {
+    class Stloc {
+
+        public Instructiong Deserialized(Instruction reader) => new Instructiong(Opcodes.Stloc, (Int16)reader.Operand);
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/HandleInstructions/HandlersOld/String.cs
+================================================
+ï»¿using MemeVM_Devirt.InitPhase;
+using System.IO;
+using System.Text;
+using Instructiong = dnlib.DotNet.Emit.Instruction;
+using Opcodes = dnlib.DotNet.Emit.OpCodes;
+namespace MemeVM.Runtime.Handlerzs {
+    class String {
+        public Instructiong Deserialized(Instruction reader)
+        {
+            return new Instructiong(Opcodes.Ldstr, (string)reader.Operand);
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/InitPhase/IHandler.cs
+================================================
+ï»¿using System.IO;
+using MemeVM_Devirt.InitPhase;
+
+namespace MemeVM_Devirt.InitPhase
+{
+    interface IHandler {
+        OpCode Handles { get; }
+        Instruction Deserialize(BinaryReader reader);
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/InitPhase/Initializebytes.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace MemeVM_Devirt.InitPhase
+{
+    internal class TargetDisplOperand : IVmOperand
+    {
+        public TargetDisplOperand(int displacement)
+        {
+            this.Displacement = displacement;
+        }
+
+        public readonly int Displacement;
+    }
+    internal interface IVmOperand
+    {
+    }
+    internal class Body
+    {
+        internal Body(Stream resourceStream)
+        {
+            this._references = new Dictionary<string, Assembly>();
+            this._methods = new List<List<Instruction>>();
+            using (DeflateStream deflateStream = new DeflateStream(resourceStream, CompressionMode.Decompress))
+            {
+                using (BinaryReader binaryReader = new BinaryReader(deflateStream))
+                {
+                    int num = binaryReader.ReadInt32();
+                    for (int i = 0; i < num; i++)
+                    {
+                        int count = binaryReader.ReadInt32();
+                        this._references.Add(Encoding.UTF8.GetString(binaryReader.ReadBytes(count)), null);
+                    }
+                    int num2 = binaryReader.ReadInt32();
+                    for (int j = 0; j < num2; j++)
+                    {
+                        int num3 = binaryReader.ReadInt32();
+                        List<Instruction> list = new List<Instruction>();
+                        for (int k = 0; k < num3; k++)
+                        {
+                            OpCode code = (OpCode)binaryReader.ReadByte();
+                            list.Add(Map.Lookup(code).Deserialize(binaryReader));
+                        }
+                        this._methods.Add(list);
+                    }
+                }
+            }
+        }
+
+        internal Assembly CurrentAssembly { get; set; }
+        internal Assembly GetReference(short index)
+        {
+            KeyValuePair<string, Assembly> keyValuePair = this._references.ElementAt((int)index);
+            if (keyValuePair.Value == null)
+            {
+                var chk = doanyexist(keyValuePair.Key);
+                if (chk.Item1 == true)
+                {
+                    this._references[keyValuePair.Key] = chk.Item2;
+                }
+                else
+                {
+                    try
+                    {
+                        this._references[keyValuePair.Key] = AppDomain.CurrentDomain.Load(new AssemblyName(keyValuePair.Key));
+                    }
+                    catch
+                    {
+                        this._references[keyValuePair.Key] = Initializebytes.assembly;
+                    }
+                }
+            }
+            return this._references[keyValuePair.Key];
+        }
+        public Tuple<bool, Assembly> doanyexist(string str)
+        {
+            var gh = this._references;
+            foreach (var g in gh)
+            {
+                if (g.Key.Equals(str)) Tuple.Create(true, g.Value);
+            }
+            return Tuple.Create(false, CurrentAssembly);
+        }
+        internal List<Instruction> GetMethod(int index)
+        {
+            return this._methods[index];
+        }
+        private readonly Dictionary<string, Assembly> _references;
+
+        private readonly List<List<Instruction>> _methods;
+    }
+    class Initializebytes
+    {
+        public static ModuleDefMD Moduledefmd;
+        public static System.Reflection.Assembly assembly;
+        public static Assembly GetReference(short index)
+        {
+            KeyValuePair<string, Assembly> keyValuePair = _references.ElementAt((int)index);
+            if (keyValuePair.Value == null)
+            {
+                _references[keyValuePair.Key] = AppDomain.CurrentDomain.Load(new AssemblyName(keyValuePair.Key));
+            }
+            return _references[keyValuePair.Key];
+        }
+        public static Dictionary<string, Assembly> _references;
+        public static void ConvertToDnBody(CilBody g,Body b, int i)
+        {
+            foreach(Instruction k in b.GetMethod(i))
+            {
+                switch (k.Code)
+                {
+                    case OpCode.Add:
+                        g.Instructions.Add(new MemeVM.Runtime.Handlerzs.Add().Deserialized(k));
+                        break;
+                    case OpCode.Call:
+                        g.Instructions.Add(new MemeVM.Runtime.Handlerzs.Call().Deserialized(k));
+                        break;
+                    case OpCode.Cgt:
+                        g.Instructions.Add(new MemeVM.Runtime.Handlerzs.Cgt().Deserialized(k));
+                        break;
+                    case OpCode.Clt:
+                        g.Instructions.Add(new MemeVM.Runtime.Handlerzs.Clt().Deserialized(k));
+                        break;
+                    case OpCode.Cmp:
+                        g.Instructions.Add(new MemeVM.Runtime.Handlerzs.Cmp().Deserialized(k));
+                        break;
+                    case OpCode.Dup:
+                        g.Instructions.Add(new MemeVM.Runtime.Handlerzs.Dup().Deserialized(k));
+                        break;
+                    case OpCode.Int32:
+                        g.Instructions.Add(new MemeVM.Runtime.Handlerzs.Int().Deserialized(k));
+                        break;
+                    case OpCode.Jf:
+                        g.Instructions.Add(new MemeVM.Runtime.Handlerzs.Jf().Deserialized(k));
+                        break;
+                    case OpCode.Jmp:
+                        g.Instructions.Add(new MemeVM.Runtime.Handlerzs.Jmp().Deserialized(k));
+                        break;
+                    case OpCode.Jt:
+                        g.Instructions.Add(new MemeVM.Runtime.Handlerzs.Jt().Deserialized(k));
+                        break;
+                    case OpCode.Ldarg:
+                        g.Instructions.Add(new MemeVM.Runtime.Handlerzs.Ldarg().Deserialized(k));
+                        break;
+                    case OpCode.Ldfld:
+                        g.Instructions.Add(new MemeVM.Runtime.Handlerzs.Ldfld().Deserialized(k));
+                        break;
+                    case OpCode.Ldloc:
+                        g.Instructions.Add(new MemeVM.Runtime.Handlerzs.Ldloc().Deserialized(k));
+                        break;
+                    case OpCode.Int64:
+                        g.Instructions.Add(new MemeVM.Runtime.Handlerzs.Long().Deserialized(k));
+                        break;
+                    case OpCode.Newarr:
+                        g.Instructions.Add(new MemeVM.Runtime.Handlerzs.Newarr().Deserialized(k));
+                        break;
+                    case OpCode.Null:
+                        g.Instructions.Add(new MemeVM.Runtime.Handlerzs.Null().Deserialized(k));
+                        break;
+                    case OpCode.Pop:
+                        g.Instructions.Add(new MemeVM.Runtime.Handlerzs.Pop().Deserialized(k));
+                        break;
+                    case OpCode.Ret:
+                        g.Instructions.Add(new MemeVM.Runtime.Handlerzs.Ret().Deserialized(k));
+                        break;
+                    case OpCode.Stfld:
+                        g.Instructions.Add(new MemeVM.Runtime.Handlerzs.Stfld().Deserialized(k));
+                        break;
+                    case OpCode.Stloc:
+                        var stl = new MemeVM.Runtime.Handlerzs.Stloc().Deserialized(k);
+                        g.Instructions.Add(stl);
+                        Local lcl = new Local(Moduledefmd.Import(stl.OpCode.GetType()).ToTypeSig());
+                        g.Variables.Locals.Add(lcl);
+                        break;
+                    case OpCode.String:
+                        g.Instructions.Add(new MemeVM.Runtime.Handlerzs.String().Deserialized(k));
+                        break;
+
+                }
+            }
+        }
+        private static CilBody ToCil(MethodDef method, Body body, int index)
+        {
+            CilBody nm = new dnlib.DotNet.Emit.CilBody();
+            IList<Local> localVariables = method.Body.Variables.Locals;
+            foreach (var localVariableInfo in localVariables)
+            {
+                nm.Variables.Locals.Add(localVariableInfo);
+            }
+            ConvertToDnBody(nm, body, index);
+            foreach (dnlib.DotNet.Emit.Instruction lmao in nm.Instructions)
+            {
+                if (lmao.GetOperand() is TargetDisplOperand)
+                {
+                    var t = (TargetDisplOperand)lmao.Operand;
+                    if(t.Displacement > 0) lmao.Operand = nm.Instructions[t.Displacement];
+                }
+            }
+            return nm;
+        }
+        public static readonly Dictionary<Assembly, Body> Bodies = new Dictionary<Assembly, Body>();
+        public static CilBody DecryptMethod(MethodDef method, Assembly asm, int index)
+        {
+            Body body = GetBody(asm);
+            body.CurrentAssembly = asm;
+            return ToCil(method, body, index);
+        }
+        internal static Body GetBody(Assembly asm)
+        {
+            var lel = (EmbeddedResource)Initializebytes.Moduledefmd.Resources.Find(" ");
+            Stream s = lel.CreateReader().AsStream();
+            if (!Bodies.ContainsKey(asm))
+            {
+                Bodies.Add(asm, new Body(s));
+            }
+            return Bodies[asm];
+        }
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/InitPhase/Instruction.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace MemeVM_Devirt.InitPhase
+{
+    internal struct Instruction
+    {
+        internal Instruction(OpCode code, object op = null)
+        {
+            this.Code = code;
+            this.Operand = op;
+        }
+
+        internal OpCode Code;
+        internal object Operand;
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/InitPhase/Opcode.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace MemeVM_Devirt.InitPhase
+{
+    internal enum OpCode : byte
+    {
+        // Token: 0x04000008 RID: 8
+        Int32,
+        // Token: 0x04000009 RID: 9
+        Int64,
+        // Token: 0x0400000A RID: 10
+        Float,
+        // Token: 0x0400000B RID: 11
+        Double,
+        // Token: 0x0400000C RID: 12
+        String,
+        // Token: 0x0400000D RID: 13
+        Null,
+        // Token: 0x0400000E RID: 14
+        Add,
+        // Token: 0x0400000F RID: 15
+        Sub,
+        // Token: 0x04000010 RID: 16
+        Mul,
+        // Token: 0x04000011 RID: 17
+        Div,
+        // Token: 0x04000012 RID: 18
+        Rem,
+        // Token: 0x04000013 RID: 19
+        Dup,
+        // Token: 0x04000014 RID: 20
+        Pop,
+        // Token: 0x04000015 RID: 21
+        Jmp,
+        // Token: 0x04000016 RID: 22
+        Jt,
+        // Token: 0x04000017 RID: 23
+        Jf,
+        // Token: 0x04000018 RID: 24
+        Je,
+        // Token: 0x04000019 RID: 25
+        Jne,
+        // Token: 0x0400001A RID: 26
+        Jge,
+        // Token: 0x0400001B RID: 27
+        Jgt,
+        // Token: 0x0400001C RID: 28
+        Jle,
+        // Token: 0x0400001D RID: 29
+        Jlt,
+        // Token: 0x0400001E RID: 30
+        Cmp,
+        // Token: 0x0400001F RID: 31
+        Cgt,
+        // Token: 0x04000020 RID: 32
+        Clt,
+        // Token: 0x04000021 RID: 33
+        Newarr,
+        // Token: 0x04000022 RID: 34
+        Ldarg,
+        // Token: 0x04000023 RID: 35
+        Ldloc,
+        // Token: 0x04000024 RID: 36
+        Ldfld,
+        // Token: 0x04000025 RID: 37
+        Ldelem,
+        // Token: 0x04000026 RID: 38
+        Starg,
+        // Token: 0x04000027 RID: 39
+        Stloc,
+        // Token: 0x04000028 RID: 40
+        Stfld,
+        // Token: 0x04000029 RID: 41
+        Stelem,
+        // Token: 0x0400002A RID: 42
+        Call,
+        // Token: 0x0400002B RID: 43
+        Ret
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/InitPhase/RuntimeHelpers.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace MemeVM_Devirt.InitPhase
+{
+    internal static class Map
+    {
+        static Map()
+        {
+            foreach (Type type in typeof(Map).Module.GetTypes())
+            {
+                if (!type.IsInterface && typeof(IHandler).IsAssignableFrom(type))
+                {
+                    IHandler handler = (IHandler)Activator.CreateInstance(type);
+                    Map.OpCodeToHandler.Add(handler.Handles, handler);
+                }
+            }
+        }
+
+        internal static IHandler Lookup(OpCode code)
+        {
+            return Map.OpCodeToHandler[code];
+        }
+
+        private static readonly Dictionary<OpCode, IHandler> OpCodeToHandler = new Dictionary<OpCode, IHandler>();
+    }
+}
+
+
+
+================================================
+File: MemeVM-Devirt/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("MemeVM-Devirt")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("MemeVM-Devirt")]
+[assembly: AssemblyCopyright("Copyright Â©  2019")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Setting ComVisible to false makes the types in this assembly not visible
+// to COM components.  If you need to access a type in this assembly from
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("d10f9068-b297-4251-9032-9a1aab808b3b")]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+

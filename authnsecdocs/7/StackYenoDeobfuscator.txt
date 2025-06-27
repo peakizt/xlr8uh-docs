@@ -1,0 +1,357 @@
+Directory structure:
+└── mindsystemm-stackyenodeobfuscator/
+    ├── README.md
+    ├── StackYenoDeobfuscator.sln
+    └── StackYenoDeobfuscator/
+        ├── App.config
+        ├── Program.cs
+        ├── StackYenoDeobfuscator.csproj
+        └── Properties/
+            └── AssemblyInfo.cs
+
+================================================
+File: README.md
+================================================
+# StackYenoDeobfuscator
+ String decryptor relying on the stack. Made for teaching
+ 
+ # What is the stack 
+ 
+ See articles above : 
+ https://docs.microsoft.com/en-us/dotnet/api/system.collections.stack?view=netcore-3.1
+ https://www.tutorialsteacher.com/csharp/csharp-stack
+ 
+ # Why decrypting string using the stack?
+ 
+ It's more reliable than checking series of instructions as argument can be initialized before the call 
+
+# Is it only possible for string? 
+
+Absolutely not, you can calculate the int of a switch or calculating math operation for example
+
+
+
+================================================
+File: StackYenoDeobfuscator.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29411.108
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StackYenoDeobfuscator", "StackYenoDeobfuscator\StackYenoDeobfuscator.csproj", "{6B760C23-42A8-401B-B4F5-445DB3F9C00E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6B760C23-42A8-401B-B4F5-445DB3F9C00E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B760C23-42A8-401B-B4F5-445DB3F9C00E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B760C23-42A8-401B-B4F5-445DB3F9C00E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B760C23-42A8-401B-B4F5-445DB3F9C00E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2CC3EA97-060C-45DD-8137-5C57646200A5}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: StackYenoDeobfuscator/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.5" />
+    </startup>
+</configuration>
+
+
+================================================
+File: StackYenoDeobfuscator/Program.cs
+================================================
+ï»¿using de4dot.blocks;
+using de4dot.blocks.cflow;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using dnlib.DotNet.Writer;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace StackYenoDeobfuscator
+{
+    class Program
+    {
+        public static void Print(string str)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write("[");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write("~");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write("] ");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine(str);
+        }
+        public static ModuleDefMD module = null;
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Welcome to yano string decryptor by MindSystem");
+            Console.WriteLine("The aim of this tool is to show how to decrypt string using the stack \n");
+
+            try
+            {
+                module = ModuleDefMD.Load(args[0]);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine("Impossible to load module, exception message : {0}", ex.Message);
+                return;
+            }
+            System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
+            watch.Start();
+            DecryptString(FindDecryptionMethod());
+            CFLow();
+            watch.Stop();
+            Console.WriteLine("\nDone ! Elapsed time : " + watch.Elapsed.TotalSeconds);
+            string SavingPath = module.Kind == ModuleKind.Dll ? args[0].Replace(".dll", "-Obfuscated.dll") : args[0].Replace(".exe", "-Obfuscated.exe");
+            if (module.IsILOnly)
+            {
+                var opts = new ModuleWriterOptions(module);
+                opts.MetadataOptions.Flags = MetadataFlags.PreserveAll;
+                opts.Logger = DummyLogger.NoThrowInstance;
+                module.Write(SavingPath, opts);
+            }
+            else
+            {
+                var opts = new NativeModuleWriterOptions(module, false);
+                opts.MetadataOptions.Flags = MetadataFlags.PreserveAll;
+                opts.Logger = DummyLogger.NoThrowInstance;
+                module.NativeWrite(SavingPath, opts);
+            }
+            Console.ReadLine();
+        }
+        public static void DecryptString(MethodDef decryption)
+        {
+            foreach (TypeDef type in module.Types)
+            {
+                foreach (MethodDef method in type.Methods)
+                {
+                    //Instanciating a new stack to push int and string
+                    //Information about the stack : https://docs.microsoft.com/en-us/dotnet/api/system.collections.stack?view=netcore-3.1
+                    //https://www.tutorialsteacher.com/csharp/csharp-stack
+                    Stack stack = new Stack();
+                    if (method.HasBody && method.Body.HasInstructions)
+                    {
+                        for (int i = 0; i < method.Body.Instructions.Count; i++)
+                        {
+                            if(method.Body.Instructions[i].OpCode == OpCodes.Ldstr)
+                            {
+                                string operand = (string)method.Body.Instructions[i].Operand;
+                                System.Tuple<string, int> tuple = new System.Tuple<string, int>(operand, i);
+                                stack.Push(tuple);
+                            }
+                            else if(method.Body.Instructions[i].IsLdcI4())
+                            {
+                                int operand = method.Body.Instructions[i].GetLdcI4Value();
+                                System.Tuple<int, int> tuple = new System.Tuple<int, int>(operand, i);
+                                stack.Push(tuple);
+                            }
+                            else if(method.Body.Instructions[i].OpCode == OpCodes.Call && method.Body.Instructions[i].Operand is MethodDef && (MethodDef)method.Body.Instructions[i].Operand == decryption)
+                            {
+                                    //If method found, we just pop the 2 args and we decrypt the string
+                                    //I also put the index of the instruction to nop it after 
+                                    System.Tuple<int, int> arg = (System.Tuple<int, int>)stack.Pop();
+                                    System.Tuple<string, int> arg2 = (System.Tuple<string, int>)stack.Pop();
+                                    string decrypted = a(arg2.Item1, arg.Item1);
+                                    Console.ForegroundColor = ConsoleColor.Green;
+                                    Print(string.Format(" {0} decrypted !", decrypted));
+                                    Console.ForegroundColor = ConsoleColor.White;
+                                    method.Body.Instructions[arg.Item2].OpCode = OpCodes.Nop;
+                                    method.Body.Instructions[arg2.Item2].OpCode = OpCodes.Nop;
+                                    method.Body.Instructions[i] = Instruction.Create(OpCodes.Ldstr, decrypted);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        public static void CFLow()
+        {
+            foreach (TypeDef type in module.Types)
+            {
+                foreach (MethodDef method in type.Methods)
+                {
+                    if (method.HasBody == false)
+                        continue;
+                    BlocksCflowDeobfuscator blocksCflowDeobfuscator = new BlocksCflowDeobfuscator();
+                    Blocks blocks = new Blocks(method);
+                    blocksCflowDeobfuscator.Initialize(blocks);
+                    blocksCflowDeobfuscator.Deobfuscate();
+                    blocks.RepartitionBlocks();
+                    IList<Instruction> list;
+                    IList<ExceptionHandler> exceptionHandlers;
+                    blocks.GetCode(out list, out exceptionHandlers);
+                    DotNetUtils.RestoreBody(method, list, exceptionHandlers);
+                }
+            }
+        }
+        internal static string a(string string_0, int int_0)
+        {
+            int num = 448617403 + int_0;
+            char[] array = string_0.ToCharArray();
+            for (int i = 0; i < array.Length; i++)
+            {
+                char[] array2 = array;
+                int num2 = i;
+                char c = array[i];
+                array2[num2] = (char)(((int)(c & 'Ã¿') ^ num++) << 8 | (int)((byte)((int)(c >> 8) ^ num++)));
+            }
+            return string.Intern(new string(array));
+        }
+        public static MethodDef FindDecryptionMethod()
+        {
+            foreach(TypeDef type in module.Types)
+            {
+                foreach(MethodDef method in type.Methods)
+                {
+                    if(method.HasBody && method.Body.HasInstructions)
+                    {
+                        if (method.ReturnType == module.CorLibTypes.String && method.Parameters.Count ==2 && method.Parameters[0].Type == module.CorLibTypes.String && method.Parameters[1].Type == module.CorLibTypes.Int32)
+                        {
+                                //Storing all the call in a list to avoid loop 
+                                List<Instruction> instr = method.Body.Instructions.Where(o => o.OpCode == OpCodes.Call).ToList();
+                                Instruction Intern = instr.FirstOrDefault(o => o.Operand.ToString().Contains("Intern"));
+                                Instruction ToCharArray = instr.FirstOrDefault(o => o.Operand.ToString().Contains("ToCharArray"));
+                                //If instruction found, then we're almost sure it's the right method
+                                if(Intern != null && ToCharArray != null)
+                                {
+                                    return method;
+                                }
+                           
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+    }
+}
+
+
+
+================================================
+File: StackYenoDeobfuscator/StackYenoDeobfuscator.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{6B760C23-42A8-401B-B4F5-445DB3F9C00E}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>StackYenoDeobfuscator</RootNamespace>
+    <AssemblyName>StackYenoDeobfuscator</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="de4dot.blocks">
+      <HintPath>..\..\..\..\Desktop\de4dot-master\Debug\net45\de4dot.blocks.dll</HintPath>
+    </Reference>
+    <Reference Include="dnlib">
+      <HintPath>..\..\..\..\Desktop\de4dot-master\Debug\net45\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: StackYenoDeobfuscator/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// Les informations gÃ©nÃ©rales relatives Ã  un assembly dÃ©pendent de
+// l'ensemble d'attributs suivant. Changez les valeurs de ces attributs pour modifier les informations
+// associÃ©es Ã  un assembly.
+[assembly: AssemblyTitle("StackYenoDeobfuscator")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("StackYenoDeobfuscator")]
+[assembly: AssemblyCopyright("Copyright Â©  2020")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// L'affectation de la valeur false Ã  ComVisible rend les types invisibles dans cet assembly
+// aux composants COM. Si vous devez accÃ©der Ã  un type dans cet assembly Ã  partir de
+// COM, affectez la valeur true Ã  l'attribut ComVisible sur ce type.
+[assembly: ComVisible(false)]
+
+// Le GUID suivant est pour l'ID de la typelib si ce projet est exposÃ© Ã  COM
+[assembly: Guid("6b760c23-42a8-401b-b4f5-445db3f9c00e")]
+
+// Les informations de version pour un assembly se composent des quatre valeurs suivantes :
+//
+//      Version principale
+//      Version secondaire
+//      NumÃ©ro de build
+//      RÃ©vision
+//
+// Vous pouvez spÃ©cifier toutes les valeurs ou indiquer les numÃ©ros de build et de rÃ©vision par dÃ©faut
+// en utilisant '*', comme indiquÃ© ci-dessousÂ :
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+

@@ -1,0 +1,332 @@
+Directory structure:
+└── miso-xyz-netshrinktrialremover/
+    ├── README.md
+    ├── netshrinkTrialExtender.sln
+    └── netshrinkTrialExtender/
+        ├── Program.cs
+        ├── netshrinkTrialExtender.csproj
+        └── Properties/
+            └── AssemblyInfo.cs
+
+================================================
+File: README.md
+================================================
+# netshrinkTrialRemover
+Removes Trial Restrication from .netshrink Applications (tested on v2.9)
+
+# What does it do
+netshrinkTrialRemover removes restrictions of protected applications, it removes
+<pre>
+- Startup Messagebox
+- 5-Days Limit
+</pre>
+
+(Password protected apps are also supported)
+
+# Screenshots
+![notProtected](https://i.imgur.com/3ciTmlx.png)
+![protected](https://i.imgur.com/U18WpY7.png)
+
+# Credits
+- 0xd4d (now wtfsck) - <a href="https://github.com/0xd4d/dnlib">dnlib</a>
+- Thanks to Prometheo for providing really usefull code, its scrapped yet will likely need it for future projects, so thanks to him!
+
+
+
+================================================
+File: netshrinkTrialExtender.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "netshrinkTrialExtender", "netshrinkTrialExtender\netshrinkTrialExtender.csproj", "{1D039729-2FA6-4A0C-BD2C-F4F977F0AA68}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1D039729-2FA6-4A0C-BD2C-F4F977F0AA68}.Debug|x86.ActiveCfg = Debug|x86
+		{1D039729-2FA6-4A0C-BD2C-F4F977F0AA68}.Debug|x86.Build.0 = Debug|x86
+		{1D039729-2FA6-4A0C-BD2C-F4F977F0AA68}.Release|x86.ActiveCfg = Release|x86
+		{1D039729-2FA6-4A0C-BD2C-F4F977F0AA68}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: netshrinkTrialExtender/Program.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using dnlib.DotNet.Writer;
+using System.IO;
+
+namespace netshrinkTrialExtender
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.Title = ".netshrink Trial Remover";
+            Console.WriteLine(".netshrink Trial Remover by misonothx");
+            Console.WriteLine(" |- https://github.com/miso-xyz/netshrinkTrialRemover/");
+            Console.WriteLine();
+            ModuleDefMD asm = ModuleDefMD.Load(args[0]);
+            bool isTrial = false;
+            bool hasPassword = false;
+            int trialVarIndex = -1;
+            if (asm.EntryPoint.Body.HasVariables)
+            {
+                foreach (var vars in asm.EntryPoint.Body.Variables)
+                {
+                    if (vars.Type.ReflectionName.ToString().ToLower() == "datetime")
+                    {
+                        isTrial = true;
+                        trialVarIndex = vars.Index;
+                        break;
+                    }
+                }
+                if (!isTrial)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Coudn't find trial variable, are you sure this assembly has been protected with .netshrink Demo version?");
+                    Console.ResetColor();
+                    Console.WriteLine("Press any keys to exit...");
+                    Console.ReadKey();
+                    System.Environment.Exit(0);
+                }
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("No variables found, cannot patch");
+                Console.ResetColor();
+                Console.WriteLine("Press any keys to exit...");
+                Console.ReadKey();
+                System.Environment.Exit(0);
+            }
+            asm.EntryPoint.Body.KeepOldMaxStack = true;
+            foreach (Instruction inst in asm.EntryPoint.Body.Instructions)
+            {
+                if (inst.OpCode.Equals(OpCodes.Newobj))
+                {
+                    if (inst.Operand.ToString().Contains("SHA256"))
+                    {
+                        hasPassword = true;
+                    }
+                }
+            }
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.Write("Requires Password: ");
+            if (hasPassword)
+            {
+                Console.WriteLine("Yes");
+            }
+            else
+            {
+                Console.WriteLine("No");
+            }
+            Console.WriteLine();
+            foreach (Instruction inst in asm.EntryPoint.Body.Instructions)
+            {
+                if (inst.OpCode.Equals(OpCodes.Ldloca_S))
+                {
+                    if (inst.Operand.ToString().Replace("V_", null).Contains(trialVarIndex.ToString()))
+                    {
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.WriteLine("Removing Trial Check & Alert...");
+                        // Prometheo's help | Code scrapped but thanks for the help, it'll be usefull for future projects
+                        // - Importer imp_ = new Importer(asm);
+                        // - asm.EntryPoint.Body.Instructions.Insert(asm.EntryPoint.Body.Instructions.IndexOf(inst) + 1, OpCodes.Ldsfld.ToInstruction(imp_.Import(typeof(DateTime).GetField("MinValue"))));
+                        // end of Prometheo's help
+                        int baseInt = asm.EntryPoint.Body.Instructions.IndexOf(inst);
+                        for (int x = baseInt; x < asm.EntryPoint.Body.Instructions.Count; x++)
+                        {
+                            if (asm.EntryPoint.Body.Instructions[baseInt].OpCode.Equals(OpCodes.Ret) || asm.EntryPoint.Body.Instructions[baseInt].OpCode.Equals(OpCodes.Leave))
+                            {
+                                asm.EntryPoint.Body.Instructions.RemoveAt(baseInt);
+                                break;
+                            }
+                            asm.EntryPoint.Body.Instructions.RemoveAt(baseInt);
+                        }
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine("Trial Check & Alert removed!");
+                        break;
+                    }
+                }
+            }
+            foreach (Instruction inst in asm.EntryPoint.Body.Instructions)
+            {
+                if (inst.OpCode.Equals(OpCodes.Ldnull) && asm.EntryPoint.Body.Instructions[asm.EntryPoint.Body.Instructions.IndexOf(inst)+1].Operand.ToString().Contains("Inequality"))
+                {
+                    Console.WriteLine();
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("Removing Starting Message Box...");
+                    int baseInt = asm.EntryPoint.Body.Instructions.IndexOf(inst) - 1;
+                    for (int x = baseInt; x < asm.EntryPoint.Body.Instructions.Count; x++)
+                    {
+                        asm.EntryPoint.Body.Instructions.RemoveAt(baseInt);
+                        if (asm.EntryPoint.Body.Instructions[baseInt].OpCode.Equals(OpCodes.Pop))
+                        {
+                            asm.EntryPoint.Body.Instructions.RemoveAt(baseInt);
+                            break;
+                        }
+                    }
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Removed Starting Message Box!");
+                    break;
+                }
+            }
+            ModuleWriterOptions moduleWriterOptions = new ModuleWriterOptions(asm);
+            moduleWriterOptions.MetadataOptions.Flags |= MetadataFlags.PreserveAll;
+            moduleWriterOptions.Logger = DummyLogger.NoThrowInstance;
+            NativeModuleWriterOptions nativeModuleWriterOptions = new NativeModuleWriterOptions(asm, true);
+            nativeModuleWriterOptions.MetadataOptions.Flags |= MetadataFlags.PreserveAll;
+            nativeModuleWriterOptions.Logger = DummyLogger.NoThrowInstance;
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine();
+            Console.WriteLine("Saving '" + Path.GetFileNameWithoutExtension(args[0]) + "-netshrinkNoTrial" + Path.GetExtension(args[0]) + "'...");
+            try
+            {
+                asm.Write(Path.GetFileNameWithoutExtension(args[0]) + "-netshrinkNoTrial" + Path.GetExtension(args[0]));
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("'" + Path.GetFileNameWithoutExtension(args[0]) + "-netshrinkNoTrial" + Path.GetExtension(args[0]) + "' successfully saved!");
+                Console.ResetColor();
+                Console.WriteLine("Press any keys to exit...");
+                Console.ReadKey();
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Failed to save '" + Path.GetFileNameWithoutExtension(args[0]) + "-netshrinkNoTrial" + Path.GetExtension(args[0]) + "' (" + ex.Message + ")");
+                Console.ResetColor();
+                Console.WriteLine("Press any keys to exit...");
+                Console.ReadKey();
+            }
+        }
+    }
+}
+
+
+================================================
+File: netshrinkTrialExtender/netshrinkTrialExtender.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{1D039729-2FA6-4A0C-BD2C-F4F977F0AA68}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>netshrinkTrialExtender</RootNamespace>
+    <AssemblyName>netshrinkTrialExtender</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>ax_chara.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib">
+      <HintPath>..\..\AikaDecrypter\AikaDecrypter\bin\Debug\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ax_chara.ico" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
+
+
+================================================
+File: netshrinkTrialExtender/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following 
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("netshrinkTrialExtender")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("netshrinkTrialExtender")]
+[assembly: AssemblyCopyright("Copyright Â©  2021")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Setting ComVisible to false makes the types in this assembly not visible 
+// to COM components.  If you need to access a type in this assembly from 
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("617b9d55-e59a-49c3-bfbc-1882e1a58a20")]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version 
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers 
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+

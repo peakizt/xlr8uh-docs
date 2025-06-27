@@ -1,0 +1,447 @@
+Directory structure:
+└── slenik-simple-deobfuscator/
+    └── SimpleDeobfuscator/
+        ├── App.config
+        ├── LiteralRenamer.cs
+        ├── Program.cs
+        ├── SimpleDeobfuscator.csproj
+        ├── SimpleDeobfuscator.sln
+        └── Properties/
+            └── AssemblyInfo.cs
+
+================================================
+File: SimpleDeobfuscator/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.7.2" />
+    </startup>
+</configuration>
+
+
+================================================
+File: SimpleDeobfuscator/LiteralRenamer.cs
+================================================
+﻿using System;
+using System.Linq;
+using System.Text;
+using Mono.Cecil;
+
+namespace SimpleDeobfuscator
+{
+    public static class LiteralRenamer
+    {
+        public static void FixNaming(ModuleDefinition module)
+        {
+            foreach (var type in module.GetTypes())
+                FixTypeNaming(type);
+
+            foreach (var type in module.GetTypes())
+                FixMembersNaming(type);
+
+            foreach (var type in module.GetTypes())
+                FixMethodBodyReferenceNaming(type);
+        }
+
+        private static void FixTypeNaming(TypeDefinition type)
+        {
+            if (type.Name == "<Module>")
+                return;
+
+            FixNaming(type, t => t.Namespace, (t, name) => t.Namespace = name, "Ns_");
+
+            const string privateImplDetailsPrefix = "<PrivateImplementationDetails>";
+            const int guidInStringLength = 36;
+
+            if (type.Name.StartsWith(privateImplDetailsPrefix))
+            {
+                var switchUniqueName = "Switch_" + type.Name
+                    .Substring(privateImplDetailsPrefix.Length + 1, guidInStringLength)
+                    .Replace("-", "");
+                type.Name = switchUniqueName;
+            }
+            else
+            {
+                var typePrefix = "";
+
+                if (type.IsInterface) typePrefix = "Interface_";
+                else if (type.IsValueType) typePrefix = "Struct_";
+                else if (type.IsEnum) typePrefix = "Enum_";
+                else if (type.IsException()) typePrefix = "Exception_";
+                else if (type.IsSealed && type.IsAbstract) typePrefix = "StaticClass_";
+                else if (type.IsClass) typePrefix = "Class_";
+
+                FixNaming(type, t => t.Name, (t, name) => t.Name = name, typePrefix);
+            }
+
+            foreach (var nestedType in type.NestedTypes)
+                FixTypeNaming(nestedType);
+
+            foreach (var typeParameter in type.GenericParameters)
+                FixNaming(typeParameter, t => t.Name, (t, name) => t.Name = name);
+        }
+
+        private static void FixMembersNaming(TypeDefinition type)
+        {
+            foreach (var nestedType in type.NestedTypes)
+                FixMembersNaming(nestedType);
+
+            foreach (var field in type.Fields)
+                FixFieldNaming(field);
+
+            foreach (var property in type.Properties)
+                FixPropertyNaming(property);
+
+            foreach (var method in type.Methods)
+                FixMethodNaming(method);
+        }
+
+        private static void FixMethodBodyReferenceNaming(TypeDefinition type)
+        {
+            foreach (var nestedType in type.NestedTypes)
+                FixMethodBodyReferenceNaming(nestedType);
+
+            foreach (var method in type.Methods)
+                if (method.HasBody)
+                {
+                    var body = method.Body;
+                    foreach (var instruction in body.Instructions)
+                    {
+                        switch (instruction.Operand)
+                        {
+                            case MethodReference methodRef:
+                                FixMethodNaming(methodRef);
+                                break;
+
+                            case FieldReference fieldRef:
+                                FixFieldNaming(fieldRef);
+                                break;
+                        }
+                    }
+                }
+        }
+
+        private static void FixMethodNaming(MethodReference method)
+        {
+            if (method.Name == ".ctor" || method.Name == ".cctor")
+                return;
+
+            FixNaming(method, t => t.Name, (t, name) => t.Name = name, "_" + TypeNameToMemberPrefix(method.ReturnType.GetElementType().Name));
+        }
+
+        private static void FixFieldNaming(FieldReference field)
+        {
+            FixNaming(field, t => t.Name, (t, name) => t.Name = name,
+                TypeNameToMemberPrefix(field.FieldType.GetElementType().Name));
+        }
+
+        private static void FixPropertyNaming(PropertyReference property)
+        {
+            FixNaming(property, t => t.Name, (t, name) => t.Name = name,
+                TypeNameToMemberPrefix(property.PropertyType.GetElementType().Name));
+        }
+
+        private static string TypeNameToMemberPrefix(string memberName)
+        {
+            return memberName.Replace('.', '_').Replace('[', '_').Replace(']', '_').Replace('`', '_') + "_";
+        }
+
+        private static bool IsException(this TypeDefinition type)
+        {
+            try
+            {
+                for (var currentType = type; currentType != null; currentType = currentType.BaseType?.Resolve())
+                    if (currentType.Name.Contains("Exception"))
+                        return true;
+            }
+            catch (Exception e)
+            {
+                Program.WriteOutput($"Warning: unable to resolve type {type.FullName} or one of its ancestors");
+                Program.WriteOutput($"\t {e.Message}");
+            }
+
+            return false;
+        }
+
+        private static void FixNaming<T>(T member, Func<T, string> getFunc, Action<T, string> setFunc,
+            string namePrefix = "")
+        {
+            var currentName = getFunc(member);
+            var newName = TryFixName(currentName);
+            if (newName != currentName)
+            {
+                setFunc(member, namePrefix + newName);
+            }
+        }
+
+        /// <summary>
+        /// Fix non-printed symbols in <paramref name="name"/> (if they exists).
+        /// </summary>
+        private static string TryFixName(string name)
+        {
+            if (name.Length == 0)
+                return "";
+
+            var newName = new StringBuilder(name.Length);
+
+            if (name[0] == '_' || IsLatinLetter(name[0]))
+                newName.Append(name[0]);
+            else
+                newName.AppendCharAsPrintable(name[0]);
+
+            foreach (var с in name.Skip(1))
+                if (с == '_' || с == '.' || IsLatinLetterOrDigit(с))
+                    newName.Append(с);
+                else
+                    newName.AppendCharAsPrintable(с);
+
+            return newName.ToString();
+        }
+
+        private static bool IsLatinLetter(char c)
+        {
+            return c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z';
+        }
+        private static bool IsLatinLetterOrDigit(char c)
+        {
+            return c >= '0' && c <= '9' || IsLatinLetter(c);
+        }
+
+        /// <summary>
+        /// Convert char <paramref name="c"/> to printable set of chars, that can be part of member name.
+        /// </summary>
+        private static void AppendCharAsPrintable(this StringBuilder stringBuilder, char c)
+        {
+            stringBuilder.Append(GetCharForCode(c & 31)); // bits 0..4
+            c >>= 5;
+            stringBuilder.Append(GetCharForCode(c & 63)); // bits 5..10
+            c >>= 6;
+            stringBuilder.Append(GetCharForCode(c & 63)); // bits 11..15
+        }
+
+        /// <summary>
+        /// Convert 6-bit value to text in XXEncode-like style.
+        /// </summary>
+        /// <param name="code">6-bit value in interval [0..63] that will be converted to symbol.</param>
+        /// <returns>Symbol, that definitely can be a part of method name.</returns>
+        /// <remarks>for 5-bit value [0..31] returns only letters.</remarks>
+        private static char GetCharForCode(int code)
+        {
+            const int latinLettersCount = 'Z' - 'A' + 1; // 27
+
+            if (code < latinLettersCount) // 0 .. 26
+                return (char)('A' + code);
+            code -= latinLettersCount;
+            if (code < latinLettersCount) // 27 .. 53
+                return (char)('a' + code);
+            code -= latinLettersCount;
+            return (char)('0' + code); // 54 .. 63
+        }
+    }
+}
+
+
+
+================================================
+File: SimpleDeobfuscator/Program.cs
+================================================
+ï»¿using System;
+using System.IO;
+using Mono.Cecil;
+
+namespace SimpleDeobfuscator
+{
+    public class Program
+    {
+        private static void Main(string[] args)
+        {
+            if (args.Length == 0)
+            {
+                WriteHelp();
+                return;
+            }
+
+            ProcessFile(args[0]);
+        }
+
+        const string DeobfuscatedLibSuffix = "_1";
+
+        private static void ProcessFile(string sourceFileName)
+        {
+            try
+            {
+                // get the assembly given the path name, and get the main module 
+                var assembly = AssemblyDefinition.ReadAssembly(sourceFileName);
+                foreach (var module in assembly.Modules)
+                    LiteralRenamer.FixNaming(module);
+                
+                var directoryName = Path.GetDirectoryName(sourceFileName);
+                var fileName = Path.GetFileNameWithoutExtension(sourceFileName);
+                var fileExt = Path.GetExtension(sourceFileName);
+
+                var destFileName = Path.Combine(directoryName, fileName + DeobfuscatedLibSuffix + fileExt);
+                assembly.Write(destFileName);
+            }
+            catch (Exception e)
+            {
+                WriteOutput($"Error while processing file:\n{e}");
+            }
+        }
+
+        public static void WriteOutput(string line)
+        {
+            Console.WriteLine(line);
+        }
+
+        private static void WriteHelp()
+        {
+            WriteOutput("Usage:");
+            WriteOutput($"\t{nameof(SimpleDeobfuscator)}.exe <path_to_binary file>");
+            WriteOutput("Examples:");
+            WriteOutput($"\t{nameof(SimpleDeobfuscator)}.exe ConsoleApp1.exe");
+            WriteOutput("\tConsoleApp1.exe will be deobfuscated and saved as ConsoleApp1_1.exe.");
+            WriteOutput($"\t{nameof(SimpleDeobfuscator)}.exe SomeLib.dll");
+            WriteOutput("\tSomeLib.dll will be deobfuscated and saved as SomeLib_1.exe.");
+        }
+    }
+}
+
+
+
+================================================
+File: SimpleDeobfuscator/SimpleDeobfuscator.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{4E883DF4-533A-4541-A86B-2BBF53C82CB4}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>SimpleDeobfuscator</RootNamespace>
+    <AssemblyName>SimpleDeobfuscator</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="LiteralRenamer.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Mono.Cecil">
+      <Version>0.11.3</Version>
+    </PackageReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: SimpleDeobfuscator/SimpleDeobfuscator.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleDeobfuscator", "SimpleDeobfuscator.csproj", "{4E883DF4-533A-4541-A86B-2BBF53C82CB4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4E883DF4-533A-4541-A86B-2BBF53C82CB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E883DF4-533A-4541-A86B-2BBF53C82CB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E883DF4-533A-4541-A86B-2BBF53C82CB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E883DF4-533A-4541-A86B-2BBF53C82CB4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {50CF44EF-C8B2-4320-A603-92B859750D0F}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: SimpleDeobfuscator/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("SimpleDeobfuscator")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("SimpleDeobfuscator")]
+[assembly: AssemblyCopyright("Copyright Â©  2020")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Setting ComVisible to false makes the types in this assembly not visible
+// to COM components.  If you need to access a type in this assembly from
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("4e883df4-533a-4541-a86b-2bbf53c82cb4")]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+

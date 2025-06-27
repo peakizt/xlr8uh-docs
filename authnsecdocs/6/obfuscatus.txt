@@ -1,0 +1,1282 @@
+Directory structure:
+└── stschake-obfuscatus/
+    ├── README.md
+    ├── obfuscatus.sln
+    ├── StringTestTarget/
+    │   ├── Program.cs
+    │   ├── StringTestTarget.csproj
+    │   └── Properties/
+    │       └── AssemblyInfo.cs
+    ├── obfuscatus/
+    │   ├── DisableReflector.cs
+    │   ├── ExceptionReporter.cs
+    │   ├── Extensions.cs
+    │   ├── INamingScheme.cs
+    │   ├── IObfuscationMethod.cs
+    │   ├── MethodIdentifier.cs
+    │   ├── StringObfuscator.cs
+    │   ├── SuppressIldasm.cs
+    │   ├── obfuscatus.csproj
+    │   └── Properties/
+    │       └── AssemblyInfo.cs
+    └── obfuscatusTest/
+        ├── BaseObfuscatorTest.cs
+        ├── BranchHelper.cs
+        ├── DisableReflectorTest.cs
+        ├── MethodIdentifierTest.cs
+        ├── StringObfuscatorTest.cs
+        ├── SuppressIldasmTest.cs
+        ├── obfuscatusTest.csproj
+        ├── Properties/
+        │   └── AssemblyInfo.cs
+        ├── Targets/
+        │   └── BaseTestTarget.cs
+        └── Tools/
+            └── ildasm/
+
+================================================
+File: README.md
+================================================
+# Introduction
+
+latin obfuscatus, past participle of obfuscare - to be evasive, unclear, or confusing
+
+# License
+
+    obfuscatus
+    Copyright (C) 2011  Stefan Schake
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+================================================
+File: obfuscatus.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "obfuscatus", "obfuscatus\obfuscatus.csproj", "{B0C1EA0F-4952-487A-AC5B-5048879974E3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Targets", "Targets", "{91EB57EA-61D1-49B2-A9EE-56ADAE37CE2D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StringTestTarget", "StringTestTarget\StringTestTarget.csproj", "{BBFEA522-25D3-4CA4-8242-2FF1E1F36CBA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "obfuscatusTest", "obfuscatusTest\obfuscatusTest.csproj", "{CA30CC25-9E2F-4D36-AEE7-D2E74274B1CA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|Mixed Platforms = Debug|Mixed Platforms
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|Mixed Platforms = Release|Mixed Platforms
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B0C1EA0F-4952-487A-AC5B-5048879974E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0C1EA0F-4952-487A-AC5B-5048879974E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0C1EA0F-4952-487A-AC5B-5048879974E3}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{B0C1EA0F-4952-487A-AC5B-5048879974E3}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{B0C1EA0F-4952-487A-AC5B-5048879974E3}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B0C1EA0F-4952-487A-AC5B-5048879974E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0C1EA0F-4952-487A-AC5B-5048879974E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0C1EA0F-4952-487A-AC5B-5048879974E3}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{B0C1EA0F-4952-487A-AC5B-5048879974E3}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{B0C1EA0F-4952-487A-AC5B-5048879974E3}.Release|x86.ActiveCfg = Release|Any CPU
+		{BBFEA522-25D3-4CA4-8242-2FF1E1F36CBA}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{BBFEA522-25D3-4CA4-8242-2FF1E1F36CBA}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{BBFEA522-25D3-4CA4-8242-2FF1E1F36CBA}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{BBFEA522-25D3-4CA4-8242-2FF1E1F36CBA}.Debug|x86.ActiveCfg = Debug|x86
+		{BBFEA522-25D3-4CA4-8242-2FF1E1F36CBA}.Debug|x86.Build.0 = Debug|x86
+		{BBFEA522-25D3-4CA4-8242-2FF1E1F36CBA}.Release|Any CPU.ActiveCfg = Release|x86
+		{BBFEA522-25D3-4CA4-8242-2FF1E1F36CBA}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{BBFEA522-25D3-4CA4-8242-2FF1E1F36CBA}.Release|Mixed Platforms.Build.0 = Release|x86
+		{BBFEA522-25D3-4CA4-8242-2FF1E1F36CBA}.Release|x86.ActiveCfg = Release|x86
+		{BBFEA522-25D3-4CA4-8242-2FF1E1F36CBA}.Release|x86.Build.0 = Release|x86
+		{CA30CC25-9E2F-4D36-AEE7-D2E74274B1CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA30CC25-9E2F-4D36-AEE7-D2E74274B1CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA30CC25-9E2F-4D36-AEE7-D2E74274B1CA}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{CA30CC25-9E2F-4D36-AEE7-D2E74274B1CA}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{CA30CC25-9E2F-4D36-AEE7-D2E74274B1CA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CA30CC25-9E2F-4D36-AEE7-D2E74274B1CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA30CC25-9E2F-4D36-AEE7-D2E74274B1CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA30CC25-9E2F-4D36-AEE7-D2E74274B1CA}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{CA30CC25-9E2F-4D36-AEE7-D2E74274B1CA}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{CA30CC25-9E2F-4D36-AEE7-D2E74274B1CA}.Release|x86.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BBFEA522-25D3-4CA4-8242-2FF1E1F36CBA} = {91EB57EA-61D1-49B2-A9EE-56ADAE37CE2D}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: StringTestTarget/Program.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace StringTestTarget
+{
+
+
+    static class StringHelper
+    {
+        private static bool _initialized;
+        private static List<string> _list;
+
+        private static void Initialize()
+        {
+            _list = new List<string>(16);
+            _list.Add("Help");
+            _list.Add("Extra");
+            _list.Add("Secret");
+            _initialized = true;
+        }
+
+        public static string Get(int index)
+        {
+            if (!_initialized)
+                Initialize();
+
+            return _list[index];
+        }
+    }
+
+    class Program
+    {
+
+        private static string TestPrivate()
+        {
+            return "Private";
+        }
+
+        private static string TestProtected()
+        {
+            return "Protected";
+        }
+
+        internal static string TestInternal()
+        {
+            return "Internal";
+        }
+
+        public static string TestPublic()
+        {
+            return "Public";
+        }
+
+        public static void HandleSomething(string test)
+        {
+            var temporary = test.Split(',');
+        }
+
+        static void Main()
+        {
+            try
+            {
+                HandleSomething("some");
+                HandleSomething("test");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: StringTestTarget/StringTestTarget.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{BBFEA522-25D3-4CA4-8242-2FF1E1F36CBA}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>StringTestTarget</RootNamespace>
+    <AssemblyName>StringTestTarget</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
+
+
+================================================
+File: StringTestTarget/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following 
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("StringTestTarget")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("Microsoft")]
+[assembly: AssemblyProduct("StringTestTarget")]
+[assembly: AssemblyCopyright("Copyright Â© Microsoft 2011")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Setting ComVisible to false makes the types in this assembly not visible 
+// to COM components.  If you need to access a type in this assembly from 
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("81f9d03a-24a7-4c0d-b189-8fa4c4b0eca0")]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version 
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers 
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+
+================================================
+File: obfuscatus/DisableReflector.cs
+================================================
+ï»¿using Mono.Cecil;
+using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
+
+namespace obfuscatus
+{
+
+    /// <summary>
+    /// Reflector 7.0, as all previous versions, is borderline bad for a decompiler and will crash at the smallest nuisance.
+    /// This proves the point.
+    /// </summary>
+    public class DisableReflector : IObfuscationMethod
+    {
+        public string Name
+        {
+            get { return "Disable Reflector"; }
+        }
+
+        public bool Process(AssemblyDefinition def)
+        {
+            foreach (var type in def.MainModule.Types)
+                ProcessType(def, type);
+
+            return true;
+        }
+
+        private static void ProcessType(AssemblyDefinition def, TypeDefinition type)
+        {
+            foreach (var method in type.Methods)
+                ProcessMethod(def, type, method);
+        }
+
+        private static void ProcessMethod(AssemblyDefinition def, TypeDefinition type, MethodDefinition method)
+        {
+            if (!method.HasBody || method.Body.Instructions.Count < 1)
+                return;
+
+            var processor = method.Body.GetILProcessor();
+            method.Body.Variables.Add(new VariableDefinition("dummy", def.MainModule.Import(typeof (void))));
+            // invalid load
+            processor.InsertFront(processor.Create(OpCodes.Ldloc, method.Body.Variables.Count - 1));
+            method.Body.Variables.RemoveAt(method.Body.Variables.Count - 1);
+            // jump to skip on execution
+            processor.InsertFront(processor.Create(OpCodes.Br, processor.Body.Instructions[1]));
+        }
+    }
+
+}
+
+
+================================================
+File: obfuscatus/ExceptionReporter.cs
+================================================
+ï»¿using Mono.Cecil;
+using Mono.Cecil.Cil;
+
+namespace obfuscatus
+{
+
+    public class ExceptionReporter : IObfuscationMethod
+    {
+        public string Name
+        {
+            get { return "Exception Handler"; }
+        }
+
+        public bool Process(AssemblyDefinition def)
+        {
+                foreach (var type in def.MainModule.Types)
+                ProcessType(def, type);
+
+            return true;
+        }
+
+        private static void ProcessType(AssemblyDefinition def, TypeDefinition type)
+        {
+            foreach (var method in type.Methods)
+                ProcessMethod(def, type, method);
+        }
+
+        private static void ProcessMethod(AssemblyDefinition def, TypeDefinition type, MethodDefinition method)
+        {
+            if (!method.HasBody || method.Body.Instructions.Count < 1)
+                return;
+
+            var newHandler = new ExceptionHandler(ExceptionHandlerType.Catch);
+            newHandler.TryStart = method.Body.Instructions[0];
+            newHandler.TryEnd = method.Body.Instructions[method.Body.Instructions.Count - 1];
+            // todo: add handler to body (create new static class to avoid code bloat) and register bounds with newHandler
+            method.Body.ExceptionHandlers.Add(newHandler);
+        }
+    }
+
+}
+
+
+================================================
+File: obfuscatus/Extensions.cs
+================================================
+ï»¿using Mono.Cecil.Cil;
+
+namespace obfuscatus
+{
+
+    public static class ILProcessorExtensions
+    {
+        public static void InsertFront(this ILProcessor processor, Instruction instr)
+        {
+            if (processor.Body.Instructions.Count <= 0)
+                processor.Append(instr);
+            else
+                processor.InsertBefore(processor.Body.Instructions[0], instr);
+        }
+    }
+
+}
+
+
+================================================
+File: obfuscatus/INamingScheme.cs
+================================================
+ï»¿using Mono.Cecil;
+
+namespace obfuscatus
+{
+
+    public interface INamingScheme
+    {
+        string GetName(MethodIdentifier mid);
+        string GetOriginalName(MethodIdentifier mid);
+    }
+
+}
+
+
+================================================
+File: obfuscatus/IObfuscationMethod.cs
+================================================
+ï»¿using Mono.Cecil;
+
+namespace obfuscatus
+{
+
+    public interface IObfuscationMethod
+    {
+        string Name { get; }
+
+        bool Process(AssemblyDefinition def);
+    }
+
+}
+
+
+================================================
+File: obfuscatus/MethodIdentifier.cs
+================================================
+ï»¿using Mono.Cecil;
+
+namespace obfuscatus
+{
+
+    public class MethodIdentifier
+    {
+        public string Name { get; set; }
+        public string Class { get; set; }
+        public string[] ParameterTypes { get; set; }
+
+        public MethodIdentifier(MethodDefinition mdef)
+        {
+            Name = mdef.Name;
+            if (!mdef.IsStatic && mdef.DeclaringType != null)
+                Class = mdef.DeclaringType.Name;
+            ParameterTypes = new string[mdef.Parameters.Count];
+            for (int i = 0; i < mdef.Parameters.Count; i++)
+                ParameterTypes[i] = mdef.Parameters[i].ParameterType.FullName;
+        }
+    }
+
+}
+
+
+================================================
+File: obfuscatus/StringObfuscator.cs
+================================================
+ï»¿using System.Collections.Generic;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+
+namespace obfuscatus
+{
+
+    public class StringObfuscator : IObfuscationMethod
+    {
+        public string Name
+        {
+            get { return "String Obfuscator"; }
+        }
+
+        public List<string> FoundStrings { get; private set; }
+
+        private MethodDefinition _getMethod;
+        private FieldDefinition _initializedField;
+        private FieldDefinition _listField;
+        private MethodDefinition _initializeMethod;
+        private TypeDefinition _type;
+
+        public bool Process(AssemblyDefinition assembly)
+        {
+            var types = assembly.MainModule.Types;
+
+            FoundStrings = new List<string>();
+            AddHandler(assembly);
+
+            foreach (var type in types)
+                ProcessType(type);
+
+            FinalizeHandler(assembly);
+            return true;
+        }
+
+        private void AddHandler(AssemblyDefinition assembly)
+        {
+            _type = new TypeDefinition("obfuscatus", "StringHandler",
+                                       TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.AutoClass |
+                                       TypeAttributes.AnsiClass | TypeAttributes.BeforeFieldInit |
+                                       TypeAttributes.Abstract, assembly.MainModule.Import(typeof (object)));
+            
+
+            _initializedField = new FieldDefinition("_initialized", FieldAttributes.Private | FieldAttributes.Static,
+                                                       assembly.MainModule.Import(typeof(bool)));
+            _listField = new FieldDefinition("_list", FieldAttributes.Private | FieldAttributes.Static,
+                                                assembly.MainModule.Import(typeof(List<string>)));
+            _initializeMethod = new MethodDefinition("Initialize", MethodAttributes.Private | MethodAttributes.Static,
+                                            assembly.MainModule.Import(typeof(void)));
+            _type.Methods.Add(_initializeMethod);
+            _type.Fields.Add(_initializedField);
+            _type.Fields.Add(_listField);
+
+            _getMethod = new MethodDefinition("Get", MethodAttributes.Public | MethodAttributes.Static,
+                                              assembly.MainModule.Import(typeof(string)));
+            _getMethod.Parameters.Add(new ParameterDefinition(assembly.MainModule.Import(typeof(int))));
+
+            _type.Methods.Add(_getMethod);
+
+            {
+                var processor = _getMethod.Body.GetILProcessor();
+                processor.Body.InitLocals = true;
+                processor.Body.Variables.Add(new VariableDefinition(assembly.MainModule.Import(typeof (string))));
+                processor.Body.Variables.Add(new VariableDefinition(assembly.MainModule.Import(typeof (bool))));
+                processor.Emit(OpCodes.Ldsfld, _initializedField);
+                processor.Emit(OpCodes.Stloc_1);
+                processor.Emit(OpCodes.Ldloc_1);
+                processor.Emit(OpCodes.Nop);
+                processor.Emit(OpCodes.Call, _initializeMethod);
+                processor.Emit(OpCodes.Ldsfld, _listField);
+                processor.Emit(OpCodes.Ldarg_0);
+                processor.Emit(OpCodes.Callvirt, assembly.MainModule.Import(typeof (List<string>).GetMethod("get_Item")));
+                processor.Emit(OpCodes.Stloc_0);
+                processor.Emit(OpCodes.Ldloc_0);
+                processor.Emit(OpCodes.Ret);
+                // fix up initialization check
+                processor.Replace(processor.Body.Instructions[3],
+                                  processor.Create(OpCodes.Brtrue_S, processor.Body.Instructions[5]));
+            }
+        }
+
+        private void FinalizeHandler(AssemblyDefinition assembly)
+        {
+            var processor = _initializeMethod.Body.GetILProcessor();
+            processor.Emit(OpCodes.Ldc_I4, FoundStrings.Count);
+            processor.Emit(OpCodes.Newobj, assembly.MainModule.Import(typeof(List<string>).GetConstructors()[1]));
+            processor.Emit(OpCodes.Stsfld, _listField);
+            foreach (var str in FoundStrings)
+            {
+                processor.Emit(OpCodes.Ldsfld, _listField);
+                processor.Emit(OpCodes.Ldstr, str);
+                processor.Emit(OpCodes.Callvirt, assembly.MainModule.Import(typeof(List<string>).GetMethod("Add")));
+            }
+            processor.Emit(OpCodes.Ldc_I4_1);
+            processor.Emit(OpCodes.Stsfld, _initializedField);
+            processor.Emit(OpCodes.Ret);
+            assembly.MainModule.Types.Add(_type);
+        }
+
+        private void ProcessType(TypeDefinition type)
+        {
+            if (!type.HasMethods)
+                return;
+
+            foreach (var method in type.Methods)
+                ProcessMethod(method);
+        }
+
+        private void ProcessMethod(MethodDefinition method)
+        {
+            if (!method.HasBody)
+                return;
+
+            var processor = method.Body.GetILProcessor();
+            var instructionsToReplace = new Dictionary<Instruction, int>();
+            foreach (var instruction in method.Body.Instructions)
+            {
+                if (instruction.OpCode.Code != Code.Ldstr)
+                    continue;
+
+                if (!(instruction.Operand is string))
+                    continue;
+
+                FoundStrings.Add(instruction.Operand as string);
+                instructionsToReplace.Add(instruction, FoundStrings.Count - 1);
+            }
+
+            foreach (var kvp in instructionsToReplace)
+            {
+                processor.InsertAfter(kvp.Key, processor.Create(OpCodes.Call, _getMethod));
+                processor.Replace(kvp.Key, processor.Create(OpCodes.Ldc_I4, kvp.Value));
+            }
+        }
+    }
+
+}
+
+
+================================================
+File: obfuscatus/SuppressIldasm.cs
+================================================
+ï»¿using System;
+using System.Runtime.CompilerServices;
+using Mono.Cecil;
+using System.Linq;
+
+namespace obfuscatus
+{
+
+    public class SuppressIldasm : IObfuscationMethod
+    {
+        public string Name
+        {
+            get { return "Suppress IL DASM"; }
+        }
+
+        public bool Process(AssemblyDefinition def)
+        {
+            var suppressIldasmType = typeof (SuppressIldasmAttribute);
+
+            if (def.CustomAttributes.Any(ca => ca.AttributeType.FullName == suppressIldasmType.FullName))
+                return false;
+
+            var ctr = def.MainModule.Import(suppressIldasmType.GetConstructor(Type.EmptyTypes));
+            def.CustomAttributes.Add(new CustomAttribute(ctr));
+            return true;
+        }
+    }
+
+}
+
+
+================================================
+File: obfuscatus/obfuscatus.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{B0C1EA0F-4952-487A-AC5B-5048879974E3}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>obfuscatus</RootNamespace>
+    <AssemblyName>obfuscatus</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Mono.Cecil">
+      <HintPath>..\..\cecil\bin\net_4_0_Debug\Mono.Cecil.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Mdb">
+      <HintPath>..\..\cecil\bin\net_4_0_Debug\Mono.Cecil.Mdb.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Pdb">
+      <HintPath>..\..\cecil\bin\net_4_0_Debug\Mono.Cecil.Pdb.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Rocks">
+      <HintPath>..\..\cecil\bin\net_4_0_Debug\Mono.Cecil.Rocks.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DisableReflector.cs" />
+    <Compile Include="ExceptionReporter.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="INamingScheme.cs" />
+    <Compile Include="IObfuscationMethod.cs" />
+    <Compile Include="MethodIdentifier.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StringObfuscator.cs" />
+    <Compile Include="SuppressIldasm.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
+
+
+================================================
+File: obfuscatus/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following 
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("obfuscatus")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("Microsoft")]
+[assembly: AssemblyProduct("obfuscatus")]
+[assembly: AssemblyCopyright("Copyright Â© Microsoft 2011")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Setting ComVisible to false makes the types in this assembly not visible 
+// to COM components.  If you need to access a type in this assembly from 
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("c12f6e5f-ee3c-426e-bd25-b0a22be2a814")]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version 
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers 
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+
+================================================
+File: obfuscatusTest/BaseObfuscatorTest.cs
+================================================
+ï»¿using System.IO;
+using Mono.Cecil;
+using NUnit.Framework;
+
+namespace obfuscatusTest
+{
+
+    public abstract class BaseObfuscatorTest
+    {
+        protected AssemblyDefinition GetTarget(string target)
+        {
+            var filePath = "Targets" + Path.DirectorySeparatorChar + target + "TestTarget";
+            if (!File.Exists(filePath + ".dll") && !File.Exists(filePath + ".exe"))
+                throw new FileNotFoundException("Test target " + target + " was not found", filePath);
+
+            filePath += File.Exists(filePath + ".dll") ? ".dll" : ".exe";
+            var def = AssemblyDefinition.ReadAssembly(filePath);
+            Assert.NotNull(def);
+            return def;
+        }
+    }
+
+}
+
+
+================================================
+File: obfuscatusTest/BranchHelper.cs
+================================================
+ï»¿using Mono.Cecil;
+using Mono.Cecil.Cil;
+using NUnit.Framework;
+
+namespace obfuscatusTest
+{
+
+    public static class BranchHelper
+    {
+        
+        /// <summary>
+        /// Verifies branches of a method and tries to detect corruption due to obfuscation
+        /// </summary>
+        /// <param name="method">the method to check, must have a body</param>
+        public static void VerifyBranches(MethodDefinition method)
+        {
+            Assert.True(method.HasBody);
+
+            foreach (var instruction in method.Body.Instructions)
+            {
+                if (instruction.OpCode.Code == Code.Br || instruction.OpCode.Code == Code.Br_S)
+                {
+                    Assert.IsNotNull(instruction.Operand, "Branch operand is null");
+                    var operand = instruction.Operand as Instruction;
+                    Assert.IsNotNull(operand, "Branch operand is not an instruction");
+                    Assert.AreNotEqual(instruction, operand, "Branch instruction and operand are equal");
+                    Assert.AreNotEqual(instruction.Offset, operand.Offset, "Branch instruction has same offset as target");
+                }
+            }
+        }
+
+    }
+
+}
+
+
+================================================
+File: obfuscatusTest/DisableReflectorTest.cs
+================================================
+ï»¿using NUnit.Framework;
+using obfuscatus;
+
+namespace obfuscatusTest
+{
+    
+    [TestFixture]
+    public class DisableReflectorTest : BaseObfuscatorTest
+    {
+
+        [Test]
+        public void ProcessesTestTarget()
+        {
+            var target = GetTarget("String");
+            var obfuscator = new DisableReflector();
+            Assert.IsTrue(obfuscator.Process(target));
+            target.Write("rewritten-disablereflector.exe");
+        }
+
+    }
+
+}
+
+
+================================================
+File: obfuscatusTest/MethodIdentifierTest.cs
+================================================
+ï»¿using System;
+using Mono.Cecil;
+using NUnit.Framework;
+using obfuscatus;
+
+namespace obfuscatusTest
+{
+    
+    [TestFixture]
+    public class MethodIdentifierTest
+    {
+        private AssemblyDefinition _assembly;
+       
+        [TestFixtureSetUp]
+        public void SetUp()
+        {
+            _assembly = AssemblyDefinition.CreateAssembly(new AssemblyNameDefinition("Test", new Version(1, 0)),
+                                                          "Test", ModuleKind.Windows);
+        }
+
+        private MethodDefinition CreateDefinition(string name, MethodAttributes attributes, Type returnType)
+        {
+            return new MethodDefinition(name, attributes, _assembly.MainModule.Import(returnType));
+        }
+
+        [Test]
+        public void RetainsMethodName()
+        {
+            var identifier = new MethodIdentifier(CreateDefinition("SomeName", MethodAttributes.Static | MethodAttributes.Public, typeof(void)));
+            Assert.AreEqual("SomeName", identifier.Name);
+        }
+
+    }
+
+}
+
+
+================================================
+File: obfuscatusTest/StringObfuscatorTest.cs
+================================================
+ï»¿using System;
+using Mono.Cecil.Cil;
+using NUnit.Framework;
+using obfuscatus;
+using obfuscatusTest.Targets;
+
+namespace obfuscatusTest
+{
+
+    [TestFixture]
+    public class StringObfuscatorTest : BaseObfuscatorTest
+    {
+
+        private class BranchesTestTarget : BaseTestTarget
+        {
+            protected override void GenerateBody()
+            {
+                Nop(125);
+                LoadString("Test A");
+                LoadString("Test B");
+                Processor.InsertFront(Processor.Create(OpCodes.Br_S,
+                                                       EntryMethod.Body.Instructions[
+                                                           EntryMethod.Body.Instructions.Count - 1]));
+                Ret();
+            }
+        }
+
+        [Test]
+        public void DoesNotCorruptBranches()
+        {
+            var targetGenerator = new BranchesTestTarget();
+            var target = targetGenerator.Generate();
+            var sizeBefore = targetGenerator.EntryMethod.Body.Instructions.Count;
+
+            var obfuscator = new StringObfuscator();
+            Assert.IsTrue(obfuscator.Process(target));
+
+            var sizeAfter = targetGenerator.EntryMethod.Body.Instructions.Count;
+            Assert.Greater(sizeAfter, sizeBefore);
+                
+            BranchHelper.VerifyBranches(targetGenerator.EntryMethod);
+        }
+        
+        [Test]
+        public void ProcessesTestTarget()
+        {
+            var target = GetTarget("String");
+            var obfuscator = new StringObfuscator();
+            Assert.IsTrue(obfuscator.Process(target));
+        }
+
+        [Test]
+        public void IgnoresAccessibility()
+        {
+            var target = GetTarget("String");
+            var obfuscator = new StringObfuscator();
+            Assert.IsTrue(obfuscator.Process(target));
+            Assert.Contains("Public", obfuscator.FoundStrings, "Missed public accessibility");
+            Assert.Contains("Private", obfuscator.FoundStrings, "Missed private accessibility");
+            Assert.Contains("Protected", obfuscator.FoundStrings, "Missed protected accessibility");
+            Assert.Contains("Internal", obfuscator.FoundStrings, "Missed internal accessibility");
+        }
+
+    }
+
+}
+
+
+
+================================================
+File: obfuscatusTest/SuppressIldasmTest.cs
+================================================
+ï»¿using System.Diagnostics;
+using System.IO;
+using NUnit.Framework;
+using obfuscatus;
+
+namespace obfuscatusTest
+{
+
+    [TestFixture]
+    public class SuppressIldasmTest : BaseObfuscatorTest
+    {
+
+        [Test]
+        public void ProcessesTestTarget()
+        {
+            var target = GetTarget("String");
+            var obfuscator = new SuppressIldasm();
+            Assert.IsTrue(obfuscator.Process(target));
+            target.Write("string-suppressildasm.exe");
+        }
+
+        [Test]
+        public void SuppressesIldasm()
+        {
+            string toolPath = "Tools//ildasm//";
+            const string tempPath = "SuppressesIldasm.exe";
+
+            // if the resource file is missing, ildasm will fail silently
+            if (!File.Exists(toolPath + "ildasm.exe") || !File.Exists(toolPath + "ILDasmrc.dll"))
+                Assert.Fail("Test requires ildasm tool");
+            toolPath += "ildasm.exe";
+
+            Process toolProcess = null;
+            try
+            {
+                // process the test target first and write the resulting assembly
+                var target = GetTarget("String");
+                var obfuscator = new SuppressIldasm();
+                Assert.IsTrue(obfuscator.Process(target));
+                target.Write(tempPath);
+
+                // start the tool
+                toolProcess = new Process
+                                  {
+                                      StartInfo = new ProcessStartInfo(toolPath)
+                                                      {
+                                                          Arguments = "/TEXT " + tempPath,
+                                                          UseShellExecute = false,
+                                                          CreateNoWindow = true,
+                                                          RedirectStandardError = true
+                                                      }
+                                  };
+                toolProcess.Start();
+                if (!toolProcess.WaitForExit(10000))
+                    Assert.Fail("Tool process didn't exit in 10 seconds");
+                
+                // test if ildasm correctly refused to process the assembly
+                var error = toolProcess.StandardError.ReadToEnd();
+                Assert.IsNotNullOrEmpty(error);
+                Assert.AreEqual("Protected module -- cannot disassemble\r\n", error);
+            }
+            finally
+            {
+                if (File.Exists(tempPath))
+                    File.Delete(tempPath);
+
+                if (toolProcess != null && !toolProcess.HasExited)
+                    toolProcess.Kill();
+            }
+        }
+
+    }
+
+}
+
+
+================================================
+File: obfuscatusTest/obfuscatusTest.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{CA30CC25-9E2F-4D36-AEE7-D2E74274B1CA}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>obfuscatusTest</RootNamespace>
+    <AssemblyName>obfuscatusTest</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Mono.Cecil, Version=0.9.4.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\cecil\bin\net_4_0_Debug\Mono.Cecil.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Mdb">
+      <HintPath>..\..\cecil\bin\net_4_0_Debug\Mono.Cecil.Mdb.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Pdb">
+      <HintPath>..\..\cecil\bin\net_4_0_Debug\Mono.Cecil.Pdb.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Rocks, Version=0.9.4.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\cecil\bin\net_4_0_Debug\Mono.Cecil.Rocks.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework, Version=2.5.8.10295, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\NUnit 2.5.8\bin\net-2.0\framework\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BaseObfuscatorTest.cs" />
+    <Compile Include="BranchHelper.cs" />
+    <Compile Include="DisableReflectorTest.cs" />
+    <Compile Include="MethodIdentifierTest.cs" />
+    <Compile Include="StringObfuscatorTest.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SuppressIldasmTest.cs" />
+    <Compile Include="Targets\BaseTestTarget.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Targets\StringTestTarget.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Tools\ildasm\ildasm.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Tools\ildasm\IlDasmrc.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\obfuscatus\obfuscatus.csproj">
+      <Project>{B0C1EA0F-4952-487A-AC5B-5048879974E3}</Project>
+      <Name>obfuscatus</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
+
+
+================================================
+File: obfuscatusTest/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following 
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("obfuscatusTest")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("Microsoft")]
+[assembly: AssemblyProduct("obfuscatusTest")]
+[assembly: AssemblyCopyright("Copyright Â© Microsoft 2011")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Setting ComVisible to false makes the types in this assembly not visible 
+// to COM components.  If you need to access a type in this assembly from 
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("5e753e1f-21bc-4dcf-9731-15ba08b8aef2")]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version 
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers 
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+
+================================================
+File: obfuscatusTest/Targets/BaseTestTarget.cs
+================================================
+ï»¿using System;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+
+namespace obfuscatusTest.Targets
+{
+
+    /// <summary>
+    /// a base class for dynamically generated test targets
+    /// </summary>
+    public abstract class BaseTestTarget
+    {
+        public AssemblyDefinition Assembly;
+        public TypeDefinition ProgramType;
+        public MethodDefinition EntryMethod;
+        public ILProcessor Processor;
+
+        public AssemblyDefinition Generate()
+        {
+            Assembly =
+                AssemblyDefinition.CreateAssembly(new AssemblyNameDefinition("BaseTestTarget", new Version(1, 0)),
+                                                  "JumpTestTarget", ModuleKind.Console);
+
+            ProgramType = new TypeDefinition("BaseTestTarget", "Program",
+                                                 TypeAttributes.Public | TypeAttributes.AnsiClass |
+                                                 TypeAttributes.AutoClass | TypeAttributes.BeforeFieldInit |
+                                                 TypeAttributes.Abstract, Assembly.MainModule.Import(typeof(object)));
+
+            EntryMethod = new MethodDefinition("Main", MethodAttributes.Public | MethodAttributes.Static,
+                                                   Assembly.MainModule.Import(typeof(void)));
+            Processor = EntryMethod.Body.GetILProcessor();
+            GenerateBody();
+
+            ProgramType.Methods.Add(EntryMethod);
+            Assembly.MainModule.Types.Add(ProgramType);
+            Assembly.MainModule.EntryPoint = EntryMethod;
+            return Assembly;
+        }
+
+        protected abstract void GenerateBody();
+
+        protected void Nop(int count)
+        {
+            for (int i = 0; i < count; i++)
+                Processor.Emit(OpCodes.Nop);
+        }
+
+        protected void LoadString(string value)
+        {
+            Processor.Emit(OpCodes.Ldstr, value);
+        }
+
+        protected void Ret()
+        {
+            Processor.Emit(OpCodes.Ret);
+        }
+    }
+
+}
+
+

@@ -1,0 +1,1174 @@
+Directory structure:
+└── mindsystemm-memedevirtualizer/
+    ├── README.md
+    ├── MemeDevirtualizer.sln
+    └── MemeDevirtualizer/
+        ├── App.config
+        ├── MemeDevirtualizer.csproj
+        ├── OpCodeList.cs
+        ├── Program.cs
+        ├── Properties/
+        │   └── AssemblyInfo.cs
+        ├── bin/
+        │   └── Debug/
+        │       ├── MemeDevirtualizer.exe.config
+        │       └── MemeDevirtualizer.rar
+        └── obj/
+            └── Debug/
+                ├── DesignTimeResolveAssemblyReferences.cache
+                ├── DesignTimeResolveAssemblyReferencesInput.cache
+                ├── MemeDevirtualizer.csproj.CopyComplete
+                ├── MemeDevirtualizer.csproj.FileListAbsolute.txt
+                └── MemeDevirtualizer.csprojAssemblyReference.cache
+
+================================================
+File: README.md
+================================================
+# MemeDevirtualizer
+Devirtualizer for MemeVM
+
+# What does it?
+
+It simply devirutalizes the method virtualized by MemeVM. This is made for education purposes 
+as MemeVM is not really stable...
+
+I'll add comment to make it more explicit !
+
+
+
+
+
+================================================
+File: MemeDevirtualizer.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29411.108
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MemeDevirtualizer", "MemeDevirtualizer\MemeDevirtualizer.csproj", "{FA66EFEB-311A-4A04-B2DA-EFC95A369D08}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FA66EFEB-311A-4A04-B2DA-EFC95A369D08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA66EFEB-311A-4A04-B2DA-EFC95A369D08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA66EFEB-311A-4A04-B2DA-EFC95A369D08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA66EFEB-311A-4A04-B2DA-EFC95A369D08}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A7448F54-DA2E-48F0-B52F-2ECA41935AE3}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: MemeDevirtualizer/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.5" />
+    </startup>
+</configuration>
+
+
+================================================
+File: MemeDevirtualizer/MemeDevirtualizer.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{FA66EFEB-311A-4A04-B2DA-EFC95A369D08}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>MemeDevirtualizer</RootNamespace>
+    <AssemblyName>MemeDevirtualizer</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib">
+      <HintPath>..\..\..\..\Desktop\Reverse Engineering\Utils\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="OpCodeList.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: MemeDevirtualizer/OpCodeList.cs
+================================================
+ï»¿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using static MemeDevirtualizer.Program;
+
+namespace MemeDevirtualizer
+{
+    internal struct Instruction
+    {
+        // Token: 0x0600000D RID: 13 RVA: 0x00002320 File Offset: 0x00000520
+        internal Instruction(OpCode code, object op = null)
+        {
+            this.Code = code;
+            this.Operand = op;
+        }
+
+        // Token: 0x04000005 RID: 5
+        internal OpCode Code;
+
+        // Token: 0x04000006 RID: 6
+        internal object Operand;
+    }
+    internal class Add : IHandler
+    {
+        // Token: 0x17000003 RID: 3
+        // (get) Token: 0x06000010 RID: 16 RVA: 0x000023CA File Offset: 0x000005CA
+        public OpCode Handles
+        {
+            get
+            {
+                return OpCode.Add;
+            }
+        }
+
+  
+
+        // Token: 0x06000012 RID: 18 RVA: 0x000024AC File Offset: 0x000006AC
+        public Instruction Deserialize(BinaryReader reader)
+        {
+            return new Instruction(OpCode.Add, null);
+        }
+    }
+    internal class Call : IHandler
+    {
+        // Token: 0x17000004 RID: 4
+        // (get) Token: 0x06000014 RID: 20 RVA: 0x000024BE File Offset: 0x000006BE
+        public OpCode Handles
+        {
+            get
+            {
+                return OpCode.Call;
+            }
+        }
+
+
+        // Token: 0x06000017 RID: 23 RVA: 0x00002684 File Offset: 0x00000884
+        public Instruction Deserialize(BinaryReader reader)
+        {
+            return new Instruction(OpCode.Call, new Tuple<short, int, bool>(reader.ReadInt16(), reader.ReadInt32(), reader.ReadBoolean()));
+        }
+    }
+    internal class Cgt : IHandler
+    {
+        // Token: 0x17000005 RID: 5
+        // (get) Token: 0x06000019 RID: 25 RVA: 0x000026AD File Offset: 0x000008AD
+        public OpCode Handles
+        {
+            get
+            {
+                return OpCode.Cgt;
+            }
+        }
+        // Token: 0x0600001B RID: 27 RVA: 0x00002791 File Offset: 0x00000991
+        public Instruction Deserialize(BinaryReader reader)
+        {
+            return new Instruction(OpCode.Cgt, null);
+        }
+    }
+    internal class Clt : IHandler
+    {
+        // Token: 0x17000006 RID: 6
+        // (get) Token: 0x0600001D RID: 29 RVA: 0x000027A4 File Offset: 0x000009A4
+        public OpCode Handles
+        {
+            get
+            {
+                return OpCode.Clt;
+            }
+        }
+
+      
+
+        // Token: 0x0600001F RID: 31 RVA: 0x00002885 File Offset: 0x00000A85
+        public Instruction Deserialize(BinaryReader reader)
+        {
+            return new Instruction(OpCode.Clt, null);
+        }
+    }
+    internal class Cmp : IHandler
+    {
+        // Token: 0x17000007 RID: 7
+        // (get) Token: 0x06000021 RID: 33 RVA: 0x00002898 File Offset: 0x00000A98
+        public OpCode Handles
+        {
+            get
+            {
+                return OpCode.Cmp;
+            }
+        }
+
+    
+
+        // Token: 0x06000023 RID: 35 RVA: 0x00002979 File Offset: 0x00000B79
+        public Instruction Deserialize(BinaryReader reader)
+        {
+            return new Instruction(OpCode.Cmp, null);
+        }
+    }
+    internal class Dup : IHandler
+    {
+        // Token: 0x17000008 RID: 8
+        // (get) Token: 0x06000025 RID: 37 RVA: 0x0000298C File Offset: 0x00000B8C
+        public OpCode Handles
+        {
+            get
+            {
+                return OpCode.Dup;
+            }
+        }
+
+        // Token: 0x06000027 RID: 39 RVA: 0x000029C4 File Offset: 0x00000BC4
+        public Instruction Deserialize(BinaryReader reader)
+        {
+            return new Instruction(OpCode.Dup, null);
+        }
+    }
+    // Token: 0x02000010 RID: 16
+    internal class Int : IHandler
+    {
+        // Token: 0x17000009 RID: 9
+        // (get) Token: 0x06000029 RID: 41 RVA: 0x000029D7 File Offset: 0x00000BD7
+        public OpCode Handles
+        {
+            get
+            {
+                return OpCode.Int32;
+            }
+        }
+        // Token: 0x0600002B RID: 43 RVA: 0x000029EE File Offset: 0x00000BEE
+        public Instruction Deserialize(BinaryReader reader)
+        {
+            return new Instruction(OpCode.Int32, reader.ReadInt32());
+        }
+    }
+    internal class Jf : IHandler
+    {
+        // Token: 0x1700000A RID: 10
+        // (get) Token: 0x0600002D RID: 45 RVA: 0x00002A0A File Offset: 0x00000C0A
+        public OpCode Handles
+        {
+            get
+            {
+                return OpCode.Jf;
+            }
+        }
+
+      
+
+        // Token: 0x0600002F RID: 47 RVA: 0x00002A4E File Offset: 0x00000C4E
+        public Instruction Deserialize(BinaryReader reader)
+        {
+            return new Instruction(OpCode.Jf, reader.ReadInt32());
+        }
+    }
+    internal class Jmp : IHandler
+    {
+        // Token: 0x1700000B RID: 11
+        // (get) Token: 0x06000031 RID: 49 RVA: 0x00002A6B File Offset: 0x00000C6B
+        public OpCode Handles
+        {
+            get
+            {
+                return OpCode.Jmp;
+            }
+        }
+
+        
+        // Token: 0x06000033 RID: 51 RVA: 0x00002A82 File Offset: 0x00000C82
+        public Instruction Deserialize(BinaryReader reader)
+        {
+            return new Instruction(OpCode.Jmp, reader.ReadInt32());
+        }
+    }
+    internal class Jt : IHandler
+    {
+        // Token: 0x1700000C RID: 12
+        // (get) Token: 0x06000035 RID: 53 RVA: 0x00002A9F File Offset: 0x00000C9F
+        public OpCode Handles
+        {
+            get
+            {
+                return OpCode.Jt;
+            }
+        }
+
+      
+
+        // Token: 0x06000037 RID: 55 RVA: 0x00002ADF File Offset: 0x00000CDF
+        public Instruction Deserialize(BinaryReader reader)
+        {
+            return new Instruction(OpCode.Jt, reader.ReadInt32());
+        }
+    }
+    internal class Ldarg : IHandler
+    {
+        // Token: 0x1700000D RID: 13
+        // (get) Token: 0x06000039 RID: 57 RVA: 0x00002AFC File Offset: 0x00000CFC
+        public OpCode Handles
+        {
+            get
+            {
+                return OpCode.Ldarg;
+            }
+        }
+
+      
+
+        // Token: 0x0600003B RID: 59 RVA: 0x00002B20 File Offset: 0x00000D20
+        public Instruction Deserialize(BinaryReader reader)
+        {
+            return new Instruction(OpCode.Ldarg, reader.ReadInt16());
+        }
+    }
+    internal class Ldfld : IHandler
+    {
+        // Token: 0x1700000E RID: 14
+        // (get) Token: 0x0600003D RID: 61 RVA: 0x00002B3D File Offset: 0x00000D3D
+        public OpCode Handles
+        {
+            get
+            {
+                return OpCode.Ldfld;
+            }
+        }
+
+     
+
+        // Token: 0x0600003F RID: 63 RVA: 0x00002BB5 File Offset: 0x00000DB5
+        public Instruction Deserialize(BinaryReader reader)
+        {
+            return new Instruction(OpCode.Ldfld, new Tuple<short, int>(reader.ReadInt16(), reader.ReadInt32()));
+        }
+    }
+    internal class Ldloc : IHandler
+    {
+        // Token: 0x1700000F RID: 15
+        // (get) Token: 0x06000041 RID: 65 RVA: 0x00002BD8 File Offset: 0x00000DD8
+        public OpCode Handles
+        {
+            get
+            {
+                return OpCode.Ldloc;
+            }
+        }
+
+     
+
+        // Token: 0x06000043 RID: 67 RVA: 0x00002C00 File Offset: 0x00000E00
+        public Instruction Deserialize(BinaryReader reader)
+        {
+            return new Instruction(OpCode.Ldloc, reader.ReadInt16());
+        }
+    }
+    internal class Long : IHandler
+    {
+        // Token: 0x17000010 RID: 16
+        // (get) Token: 0x06000045 RID: 69 RVA: 0x00002C1D File Offset: 0x00000E1D
+        public OpCode Handles
+        {
+            get
+            {
+                return OpCode.Int64;
+            }
+        }
+
+     
+
+        // Token: 0x06000047 RID: 71 RVA: 0x00002C34 File Offset: 0x00000E34
+        public Instruction Deserialize(BinaryReader reader)
+        {
+            return new Instruction(OpCode.Int64, reader.ReadInt64());
+        }
+    }
+    internal class Newarr : IHandler
+    {
+        // Token: 0x17000011 RID: 17
+        // (get) Token: 0x06000049 RID: 73 RVA: 0x00002C50 File Offset: 0x00000E50
+        public OpCode Handles
+        {
+            get
+            {
+                return OpCode.Newarr;
+            }
+        }
+
+    
+
+        // Token: 0x0600004B RID: 75 RVA: 0x00002CB9 File Offset: 0x00000EB9
+        public Instruction Deserialize(BinaryReader reader)
+        {
+            return new Instruction(OpCode.Newarr, new Tuple<short, int>(reader.ReadInt16(), reader.ReadInt32()));
+        }
+    }
+    internal class Null : IHandler
+    {
+        // Token: 0x17000012 RID: 18
+        // (get) Token: 0x0600004D RID: 77 RVA: 0x00002CDC File Offset: 0x00000EDC
+        public OpCode Handles
+        {
+            get
+            {
+                return OpCode.Null;
+            }
+        }
+
+
+        // Token: 0x0600004F RID: 79 RVA: 0x00002CEE File Offset: 0x00000EEE
+        public Instruction Deserialize(BinaryReader reader)
+        {
+            return new Instruction(OpCode.Null, null);
+        }
+    }
+    internal class Pop : IHandler
+    {
+        // Token: 0x17000013 RID: 19
+        // (get) Token: 0x06000051 RID: 81 RVA: 0x00002D00 File Offset: 0x00000F00
+        public OpCode Handles
+        {
+            get
+            {
+                return OpCode.Pop;
+            }
+        }
+
+    
+
+        // Token: 0x06000053 RID: 83 RVA: 0x00002D12 File Offset: 0x00000F12
+        public Instruction Deserialize(BinaryReader reader)
+        {
+            return new Instruction(OpCode.Pop, null);
+        }
+    }
+    internal class Ret : IHandler
+    {
+        // Token: 0x17000014 RID: 20
+        // (get) Token: 0x06000055 RID: 85 RVA: 0x00002D25 File Offset: 0x00000F25
+        public OpCode Handles
+        {
+            get
+            {
+                return OpCode.Ret;
+            }
+        }
+
+     
+
+        // Token: 0x06000057 RID: 87 RVA: 0x00002D32 File Offset: 0x00000F32
+        public Instruction Deserialize(BinaryReader reader)
+        {
+            return new Instruction(OpCode.Ret, null);
+        }
+    }
+    internal class Stfld : IHandler
+    {
+        // Token: 0x17000015 RID: 21
+        // (get) Token: 0x06000059 RID: 89 RVA: 0x00002D45 File Offset: 0x00000F45
+        public OpCode Handles
+        {
+            get
+            {
+                return OpCode.Stfld;
+            }
+        }
+
+
+        // Token: 0x0600005B RID: 91 RVA: 0x00002DC8 File Offset: 0x00000FC8
+        public Instruction Deserialize(BinaryReader reader)
+        {
+            return new Instruction(OpCode.Stfld, new Tuple<short, int>(reader.ReadInt16(), reader.ReadInt32()));
+        }
+    }
+    internal class Stloc : IHandler
+    {
+        // Token: 0x17000016 RID: 22
+        // (get) Token: 0x0600005D RID: 93 RVA: 0x00002DEB File Offset: 0x00000FEB
+        public OpCode Handles
+        {
+            get
+            {
+                return OpCode.Stloc;
+            }
+        }
+
+
+        // Token: 0x0600005F RID: 95 RVA: 0x00002E13 File Offset: 0x00001013
+        public Instruction Deserialize(BinaryReader reader)
+        {
+            return new Instruction(OpCode.Stloc, reader.ReadInt16());
+        }
+    }
+    internal class String : IHandler
+    {
+        // Token: 0x17000017 RID: 23
+        // (get) Token: 0x06000061 RID: 97 RVA: 0x00002E30 File Offset: 0x00001030
+        public OpCode Handles
+        {
+            get
+            {
+                return OpCode.String;
+            }
+        }
+
+  
+
+        // Token: 0x06000063 RID: 99 RVA: 0x00002E48 File Offset: 0x00001048
+        public Instruction Deserialize(BinaryReader reader)
+        {
+            int count = reader.ReadInt32();
+            return new Instruction(OpCode.String, Encoding.UTF8.GetString(reader.ReadBytes(count)));
+        }
+    }
+}
+
+
+
+================================================
+File: MemeDevirtualizer/Program.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using dnlib.DotNet.Writer;
+using dnlib.IO;
+using dnlib.W32Resources;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace MemeDevirtualizer
+{
+    class Program
+    {
+        public static ModuleDefMD module;
+        static void Main(string[] args)
+        {
+string strr =@"                     __  __                     _____             _      _   
+                    |  \/  |                   |  __ \           (_)    | |  
+                    | \  / | ___ _ __ ___   ___| |  | | _____   ___ _ __| |_ 
+                    | |\/| |/ _ \ '_ ` _ \ / _ \ |  | |/ _ \ \ / / | '__| __|
+                    | |  | |  __/ | | | | |  __/ |__| |  __/\ V /| | |  | |_ 
+                    |_|  |_|\___|_| |_| |_|\___|_____/ \___| \_/ |_|_|   \__|";
+            Console.WriteLine(strr);
+            Console.WriteLine("                              - by MindSystem \n");
+            try
+            {
+                module = ModuleDefMD.Load(args[0]);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine("Load a virtualized assembly into this exe");
+                Console.ReadLine();
+                return;
+            }
+            asmRefAdder();
+            List<MethodDef> Virtualized = FindVirtualizedMethod(module);
+            Dictionary<MethodDef, int> MethodIndex;
+            MethodIndex = FindMethodIndex(Virtualized);
+            foreach (MethodDef meth in MethodIndex.Keys)
+            {
+                Console.WriteLine("Find Virtualized method : {0} with index {1}", meth.Name, MethodIndex[meth]); ;
+            }
+            Stream str = null;
+            foreach(EmbeddedResource res in module.Resources)
+            {
+                if(res.Name == " ")
+                {
+                    DataReader red = res.CreateReader();
+                    str = red.AsStream();
+                    break;
+                }
+              
+            }
+            Decompress(str);
+            foreach(MethodDef method in MethodIndex.Keys)
+            {
+                RecoverMethod(method, MethodIndex[method]);
+      //          method.Body.SimplifyMacros(method.Parameters);
+            }
+
+            string SavingPath = module.Kind == ModuleKind.Dll ? args[0].Replace(".dll", "-Obfuscated.dll") : args[0].Replace(".exe", "-Obfuscated.exe");
+            if (module.IsILOnly)
+            {
+                var opts = new ModuleWriterOptions(module);
+                opts.MetadataOptions.Flags = MetadataFlags.PreserveAll;
+                opts.MetadataOptions.Flags = MetadataFlags.KeepOldMaxStack;
+              //  opts.Logger = DummyLogger.NoThrowInstance;
+               module.Write(SavingPath, opts);
+            }
+            else
+            {
+                var opts = new NativeModuleWriterOptions(module, false);
+                opts.MetadataOptions.Flags = MetadataFlags.PreserveAll;
+            //    opts.Logger = DummyLogger.NoThrowInstance;
+                module.NativeWrite(SavingPath, opts);
+            }
+        }
+
+        private static void asmRefAdder()
+        {
+            var asmResolver = new AssemblyResolver { EnableTypeDefCache = true };
+            var modCtx = new ModuleContext(asmResolver);
+            asmResolver.DefaultModuleContext = modCtx;
+            var asmRefs = module.GetAssemblyRefs().ToList();
+            module.Context = modCtx;
+            foreach (var asmRef in asmRefs)
+            {
+                try
+                {
+                    if (asmRef == null)
+                        continue;
+                    var asm = asmResolver.Resolve(asmRef.FullName, module);
+                    if (asm == null)
+                        continue;
+                    ((AssemblyResolver)module.Context.AssemblyResolver).AddToCache(asm);
+
+                }
+                catch
+                {
+
+                }
+            }
+        }
+        public static void RecoverMethod(MethodDef method, int index)
+        {
+            method.Body.Instructions.Clear();
+            List<Instruction> VMBody = _methods[index];
+            foreach (Instruction instr in VMBody)
+            {
+                method.Body.Instructions.Add(CreateInstr(instr, method));
+            }
+            CorrectBranches(method);
+        }
+        public static void CorrectBranches(MethodDef method)
+        {
+            for(int i = 0; i < method.Body.Instructions.Count-1;i++)
+            {
+                if(method.Body.Instructions[i].OpCode == OpCodes.Ldstr && method.Body.Instructions[i].Operand.ToString().Contains("BrTrue|"))
+                {
+                    string operand = method.Body.Instructions[i].Operand.ToString();
+                    int GoodInstruction = Convert.ToInt32(operand.Split('|')[1]);
+                    method.Body.Instructions[i] = dnlib.DotNet.Emit.Instruction.Create(OpCodes.Brtrue, method.Body.Instructions[GoodInstruction]);
+                }
+                else if (method.Body.Instructions[i].OpCode == OpCodes.Ldstr && method.Body.Instructions[i].Operand.ToString().Contains("BrFalse|"))
+                {
+                    string operand = method.Body.Instructions[i].Operand.ToString();
+                    int GoodInstruction = Convert.ToInt32(operand.Split('|')[1]);
+                    method.Body.Instructions[i] = dnlib.DotNet.Emit.Instruction.Create(OpCodes.Brfalse, method.Body.Instructions[GoodInstruction]);
+                }
+                else if (method.Body.Instructions[i].OpCode == OpCodes.Ldstr && method.Body.Instructions[i].Operand.ToString().Contains("Br|"))
+                {
+                    string operand = method.Body.Instructions[i].Operand.ToString();
+                    int GoodInstruction = Convert.ToInt32(operand.Split('|')[1]);
+                    method.Body.Instructions[i] = dnlib.DotNet.Emit.Instruction.Create(OpCodes.Brfalse, method.Body.Instructions[GoodInstruction]);
+                }
+            }
+        }
+        internal static string GetReference(short index)
+        {
+            KeyValuePair<string, Assembly> keyValuePair = _references.ElementAt((int)index);
+            bool flag = keyValuePair.Value == null;
+            if (flag)
+            {
+                _references[keyValuePair.Key] = AppDomain.CurrentDomain.Load(new AssemblyName(keyValuePair.Key));
+            }
+            return _references[keyValuePair.Key].Location;
+        }
+        public static Stack Stack = new Stack();
+        public static dnlib.DotNet.Emit.Instruction CreateInstr(Instruction instr, MethodDef meth)
+        {
+            switch(instr.Code)
+            {
+                case OpCode.Add:
+                    Stack.Pop();
+                    Stack.Pop();
+                    return dnlib.DotNet.Emit.Instruction.Create(OpCodes.Add);
+                case OpCode.Call:
+                    Tuple<short, int, bool> tuple = (Tuple<short, int, bool>)instr.Operand;
+                    ModuleDefMD str = ModuleDefMD.Load(GetReference(tuple.Item1));
+                    IMethod meh = (IMethod)str.ResolveToken((uint)tuple.Item2);
+                    module.Import(meh);
+                    return dnlib.DotNet.Emit.Instruction.Create(OpCodes.Call, module.Import(meh));
+                case OpCode.Cgt:
+                    Stack.Pop();
+                    Stack.Pop();
+                    return dnlib.DotNet.Emit.Instruction.Create(OpCodes.Cgt);
+                case OpCode.Clt:
+                    Stack.Pop();
+                    Stack.Pop();
+                    return dnlib.DotNet.Emit.Instruction.Create(OpCodes.Clt);
+              //  case OpCode.Cmp:
+                //    return dnlib.DotNet.Emit.Instruction.Create(OpCodes.C);
+                case OpCode.Div:
+                    Stack.Pop();
+                    Stack.Pop();
+                    return dnlib.DotNet.Emit.Instruction.Create(OpCodes.Div);
+                case OpCode.Dup:
+                    object value = Stack.Pop();
+                    Stack.Push(value);
+                    Stack.Push(value);
+                    return dnlib.DotNet.Emit.Instruction.Create(OpCodes.Dup);
+                case OpCode.Jf:
+                    Stack.Pop();
+                    return dnlib.DotNet.Emit.Instruction.Create(OpCodes.Ldstr, string.Format("BrFalse|{0}",meth.Body.Instructions[(int)instr.Operand]));
+                case OpCode.Jmp:
+                    return dnlib.DotNet.Emit.Instruction.Create(OpCodes.Ldstr, string.Format("Br|{0}", meth.Body.Instructions[(int)instr.Operand]));
+                case OpCode.Jt:
+                    Stack.Pop();
+                    return dnlib.DotNet.Emit.Instruction.Create(OpCodes.Ldstr, string.Format("BrTrue|{0}", meth.Body.Instructions[(int)instr.Operand]));
+                case OpCode.Int32:
+                    Stack.Push((int)instr.Operand);
+                    return dnlib.DotNet.Emit.Instruction.Create(OpCodes.Ldc_I4, (int)instr.Operand);
+                case OpCode.Ldarg:
+                    //A fix
+                    Stack.Push(meth.Parameters[(int)((short)instr.Operand)]);
+                    return dnlib.DotNet.Emit.Instruction.Create(ldarg(Convert.ToInt32(instr.Operand)));
+                case OpCode.Ldfld:
+                    Stack.Pop();
+                    int item2 = ((Tuple<short, int>)instr.Operand).Item2;
+                    FieldDef fld = module.ResolveField((uint)item2);
+                    Stack.Push(fld.InitialValue);
+                    return dnlib.DotNet.Emit.Instruction.Create(OpCodes.Ldfld, fld);
+                case OpCode.Ldloc:
+                    //A fix
+                    Local l = meth.Body.Variables[(short)instr.Operand];
+                    Stack.Push(l);
+                    return dnlib.DotNet.Emit.Instruction.Create(OpCodes.Ldloc, l);
+                case OpCode.Mul:
+                    return dnlib.DotNet.Emit.Instruction.Create(OpCodes.Mul);
+                case OpCode.Int64:
+                    Stack.Push((int)instr.Operand);
+                    return dnlib.DotNet.Emit.Instruction.Create(OpCodes.Ldc_I8, (long)instr.Operand);
+                case OpCode.Newarr:
+                    Stack.Pop();
+                    Tuple<short, int> tuple3 = (Tuple<short, int>)instr.Operand;
+                    Stack.Push(module.ResolveTypeDef((uint)tuple3.Item2)) ;
+                    return dnlib.DotNet.Emit.Instruction.Create(OpCodes.Newarr, module.ResolveTypeDef((uint)tuple3.Item2));
+                case OpCode.Null:
+                    return dnlib.DotNet.Emit.Instruction.Create(OpCodes.Nop);
+                case OpCode.Pop:
+                    Stack.Pop();
+                    return dnlib.DotNet.Emit.Instruction.Create(OpCodes.Pop);
+                case OpCode.Ret:
+                    return dnlib.DotNet.Emit.Instruction.Create(OpCodes.Ret);
+                case OpCode.Stfld:
+                    Stack.Pop();
+                    int item22 = ((Tuple<short, int>)instr.Operand).Item2;
+                    return dnlib.DotNet.Emit.Instruction.Create(OpCodes.Stfld, module.ResolveField((uint)item22));
+                case OpCode.Stloc:
+                    
+                    var loc = Stack.Pop();
+                    Local ll = meth.Body.Variables.Add(new Local(module.Import(loc.GetType()).ToTypeSig()));
+                    return dnlib.DotNet.Emit.Instruction.Create(OpCodes.Stloc, ll);
+                case OpCode.String:
+                    Stack.Push((string)instr.Operand);
+                    return dnlib.DotNet.Emit.Instruction.Create(OpCodes.Ldstr, (string)instr.Operand);
+                default:
+                    return dnlib.DotNet.Emit.Instruction.Create(OpCodes.Nop);
+            }
+        }
+        public static dnlib.DotNet.Emit.OpCode ldarg(int index)
+        {
+            switch (index)
+            {
+                case 0:
+                    return OpCodes.Ldarg_0;
+                case 1:
+                    return OpCodes.Ldarg_1;
+                case 2:
+                    return OpCodes.Ldarg_2;
+                case 3:
+                    return OpCodes.Ldarg_3;
+                default:
+                    return OpCodes.Ldarg_0;
+            }
+        }
+        public static dnlib.DotNet.Emit.OpCode ldloc(int index)
+        {
+            switch (index)
+            {
+                case 0:
+                    return OpCodes.Ldloc_0;
+                case 1:
+                    return OpCodes.Ldloc_1;
+                case 2:
+                    return OpCodes.Ldloc_2;
+                case 3:
+                    return OpCodes.Ldloc_3;
+                default:
+                    return OpCodes.Ldloc_0;
+            }
+        }
+        public static dnlib.DotNet.Emit.OpCode stloc(int index)
+        {
+            switch(index)
+            {
+                case 0:
+                    return OpCodes.Stloc_0;
+                case 1:
+                    return OpCodes.Stloc_1;
+                case 2:
+                    return OpCodes.Stloc_2;
+                case 3:
+                    return OpCodes.Stloc_3;
+                default:
+                    return OpCodes.Stloc_0;
+            }
+        }
+        public static Dictionary<MethodDef, int> FindMethodIndex(List<MethodDef> Virtualized)
+        {
+            Dictionary<MethodDef, int> MethodIndex = new Dictionary<MethodDef, int>();
+            foreach (MethodDef method in Virtualized)
+            {
+                for(int i = 0; i < method.Body.Instructions.Count;i++)
+                {
+                    if (method.Body.Instructions[i].IsLdcI4())
+                    {
+                        MethodIndex[method] = method.Body.Instructions[i].GetLdcI4Value();
+                        break;
+                    }
+
+                }
+            }
+            return MethodIndex;
+        }
+        public static List<MethodDef> FindVirtualizedMethod(ModuleDefMD module)
+        {
+            List<MethodDef> VirtualizedMeth = new List<MethodDef>();
+            foreach(TypeDef type in module.Types)
+            {
+                foreach(MethodDef method in type.Methods)
+                {
+                    if (!method.HasBody || !method.Body.HasInstructions)
+                        continue;
+                    for(int i = 0; i < method.Body.Instructions.Count-1;i++)
+                    {
+                        if(method.Body.Instructions[i].OpCode == OpCodes.Call && method.Body.Instructions[i].Operand.ToString().Contains("MemeVM"))
+                        {
+                            VirtualizedMeth.Add(method);
+                            break;
+                        }
+                    }
+                }
+            }
+            return VirtualizedMeth;
+        }
+        #region InternalCode
+        public static Dictionary<string, Assembly> _references;
+        public static List<List<Instruction>> _methods;
+        public static void Decompress(Stream resourceStream)
+        {
+            _references = new Dictionary<string, Assembly>();
+            _methods = new List<List<Instruction>>();
+            using (DeflateStream deflateStream = new DeflateStream(resourceStream, CompressionMode.Decompress))
+            {
+                using (BinaryReader binaryReader = new BinaryReader(deflateStream))
+                {
+                    int num = binaryReader.ReadInt32();
+                    for (int i = 0; i < num; i++)
+                    {
+                        int count = binaryReader.ReadInt32();
+                        _references.Add(Encoding.UTF8.GetString(binaryReader.ReadBytes(count)), null);
+                    }
+                    int num2 = binaryReader.ReadInt32();
+                    for (int j = 0; j < num2; j++)
+                    {
+                        Console.WriteLine("Working with method {0}", _methods.Count);
+                        int num3 = binaryReader.ReadInt32();
+                        List<Instruction> list = new List<Instruction>();
+                        for (int k = 0; k < num3; k++)
+                        {
+                            OpCode code = (OpCode)binaryReader.ReadByte();
+                            Instruction instr = Map.Lookup(code).Deserialize(binaryReader);
+                            Console.WriteLine("Recovered OpCodes {0}, with operand {1}", instr.Code, instr.Operand);
+                            list.Add(instr);
+                        }
+                        _methods.Add(list);
+                    }
+                }
+            }
+        }
+        internal enum OpCode : byte
+        {
+            // Token: 0x04000008 RID: 8
+            Int32,
+            // Token: 0x04000009 RID: 9
+            Int64,
+            // Token: 0x0400000A RID: 10
+            Float,
+            // Token: 0x0400000B RID: 11
+            Double,
+            // Token: 0x0400000C RID: 12
+            String,
+            // Token: 0x0400000D RID: 13
+            Null,
+            // Token: 0x0400000E RID: 14
+            Add,
+            // Token: 0x0400000F RID: 15
+            Sub,
+            // Token: 0x04000010 RID: 16
+            Mul,
+            // Token: 0x04000011 RID: 17
+            Div,
+            // Token: 0x04000012 RID: 18
+            Rem,
+            // Token: 0x04000013 RID: 19
+            Dup,
+            // Token: 0x04000014 RID: 20
+            Pop,
+            // Token: 0x04000015 RID: 21
+            Jmp,
+            // Token: 0x04000016 RID: 22
+            Jt,
+            // Token: 0x04000017 RID: 23
+            Jf,
+            // Token: 0x04000018 RID: 24
+            Je,
+            // Token: 0x04000019 RID: 25
+            Jne,
+            // Token: 0x0400001A RID: 26
+            Jge,
+            // Token: 0x0400001B RID: 27
+            Jgt,
+            // Token: 0x0400001C RID: 28
+            Jle,
+            // Token: 0x0400001D RID: 29
+            Jlt,
+            // Token: 0x0400001E RID: 30
+            Cmp,
+            // Token: 0x0400001F RID: 31
+            Cgt,
+            // Token: 0x04000020 RID: 32
+            Clt,
+            // Token: 0x04000021 RID: 33
+            Newarr,
+            // Token: 0x04000022 RID: 34
+            Ldarg,
+            // Token: 0x04000023 RID: 35
+            Ldloc,
+            // Token: 0x04000024 RID: 36
+            Ldfld,
+            // Token: 0x04000025 RID: 37
+            Ldelem,
+            // Token: 0x04000026 RID: 38
+            Starg,
+            // Token: 0x04000027 RID: 39
+            Stloc,
+            // Token: 0x04000028 RID: 40
+            Stfld,
+            // Token: 0x04000029 RID: 41
+            Stelem,
+            // Token: 0x0400002A RID: 42
+            Call,
+            // Token: 0x0400002B RID: 43
+            Ret
+        }
+        #endregion
+    }
+    internal interface IHandler
+    {
+        // Token: 0x17000002 RID: 2
+        // (get) Token: 0x0600000A RID: 10
+        MemeDevirtualizer.Program.OpCode Handles { get; }
+
+        // Token: 0x0600000B RID: 11
+        
+
+        // Token: 0x0600000C RID: 12
+        Instruction Deserialize(BinaryReader reader);
+    }
+    internal static class Map
+    {
+        // Token: 0x0600000E RID: 14 RVA: 0x00002334 File Offset: 0x00000534
+        static Map()
+        {
+         //   Assembly Runtime = Assembly.LoadFrom(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\MemeVM.Runtime.dll");
+            foreach (Type type in typeof(Map).Module.GetTypes())
+            {
+                bool isInterface = type.IsInterface;
+                if (!isInterface)
+                {
+                    bool flag = !typeof(IHandler).IsAssignableFrom(type);
+                    if (!flag)
+                    {
+                        IHandler handler = (IHandler)Activator.CreateInstance(type);
+                        Map.OpCodeToHandler.Add(handler.Handles, handler);
+                    }
+                }
+            }
+        }
+
+        // Token: 0x0600000F RID: 15 RVA: 0x000023BD File Offset: 0x000005BD
+        internal static IHandler Lookup(MemeDevirtualizer.Program.OpCode code)
+        {
+            return Map.OpCodeToHandler[code];
+        }
+
+        // Token: 0x0400002C RID: 44
+        private static readonly Dictionary<MemeDevirtualizer.Program.OpCode, IHandler> OpCodeToHandler = new Dictionary<MemeDevirtualizer.Program.OpCode, IHandler>();
+    }
+   
+}
+
+
+
+================================================
+File: MemeDevirtualizer/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// Les informations gÃ©nÃ©rales relatives Ã  un assembly dÃ©pendent de
+// l'ensemble d'attributs suivant. Changez les valeurs de ces attributs pour modifier les informations
+// associÃ©es Ã  un assembly.
+[assembly: AssemblyTitle("MemeDevirtualizer")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("MemeDevirtualizer")]
+[assembly: AssemblyCopyright("Copyright Â©  2020")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// L'affectation de la valeur false Ã  ComVisible rend les types invisibles dans cet assembly
+// aux composants COM. Si vous devez accÃ©der Ã  un type dans cet assembly Ã  partir de
+// COM, affectez la valeur true Ã  l'attribut ComVisible sur ce type.
+[assembly: ComVisible(false)]
+
+// Le GUID suivant est pour l'ID de la typelib si ce projet est exposÃ© Ã  COM
+[assembly: Guid("fa66efeb-311a-4a04-b2da-efc95a369d08")]
+
+// Les informations de version pour un assembly se composent des quatre valeurs suivantes :
+//
+//      Version principale
+//      Version secondaire
+//      NumÃ©ro de build
+//      RÃ©vision
+//
+// Vous pouvez spÃ©cifier toutes les valeurs ou indiquer les numÃ©ros de build et de rÃ©vision par dÃ©faut
+// en utilisant '*', comme indiquÃ© ci-dessousÂ :
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+
+================================================
+File: MemeDevirtualizer/bin/Debug/MemeDevirtualizer.exe.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.5" />
+    </startup>
+</configuration>
+
+
+================================================
+File: MemeDevirtualizer/bin/Debug/MemeDevirtualizer.rar
+================================================
+[Non-text file]
+
+
+================================================
+File: MemeDevirtualizer/obj/Debug/DesignTimeResolveAssemblyReferences.cache
+================================================
+[Non-text file]
+
+
+================================================
+File: MemeDevirtualizer/obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache
+================================================
+[Non-text file]
+
+
+================================================
+File: MemeDevirtualizer/obj/Debug/MemeDevirtualizer.csproj.CopyComplete
+================================================
+
+
+
+================================================
+File: MemeDevirtualizer/obj/Debug/MemeDevirtualizer.csproj.FileListAbsolute.txt
+================================================
+C:\Users\nicol\source\repos\MemeDevirtualizer\MemeDevirtualizer\bin\Debug\MemeDevirtualizer.exe.config
+C:\Users\nicol\source\repos\MemeDevirtualizer\MemeDevirtualizer\bin\Debug\MemeDevirtualizer.exe
+C:\Users\nicol\source\repos\MemeDevirtualizer\MemeDevirtualizer\bin\Debug\MemeDevirtualizer.pdb
+C:\Users\nicol\source\repos\MemeDevirtualizer\MemeDevirtualizer\bin\Debug\dnlib.dll
+C:\Users\nicol\source\repos\MemeDevirtualizer\MemeDevirtualizer\obj\Debug\MemeDevirtualizer.csprojAssemblyReference.cache
+C:\Users\nicol\source\repos\MemeDevirtualizer\MemeDevirtualizer\obj\Debug\MemeDevirtualizer.csproj.CopyComplete
+C:\Users\nicol\source\repos\MemeDevirtualizer\MemeDevirtualizer\obj\Debug\MemeDevirtualizer.exe
+C:\Users\nicol\source\repos\MemeDevirtualizer\MemeDevirtualizer\obj\Debug\MemeDevirtualizer.pdb
+
+
+
+================================================
+File: MemeDevirtualizer/obj/Debug/MemeDevirtualizer.csprojAssemblyReference.cache
+================================================
+[Non-text file]
+

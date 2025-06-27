@@ -1,0 +1,504 @@
+Directory structure:
+└── jomtek-universal-proxy-remover/
+    ├── README.md
+    ├── Jomtek's Proxy Remover.sln
+    └── Jomtek's Proxy Remover/
+        ├── App.config
+        ├── Jomtek's Proxy Remover.csproj
+        ├── Program.cs
+        ├── ProxyRemover.cs
+        └── Properties/
+            └── AssemblyInfo.cs
+
+================================================
+File: README.md
+================================================
+
+
+# Jomtek's Universal Proxy-Remover
+Unfortunately, at the moment, this proxy fixer can only fix proxies which return literal values.
+For example, this proxy won't get fixed :
+
+    static int myProxy() {
+    	return 1 + 1;
+    } 
+
+But I'm doing my best to update it asap :)
+
+# What is a proxy ?
+When we're talking about IL code and .NET reverse engineering, a "proxy" is an intermediate method to a value.
+Quick example
+
+    static void main(string[] args) {
+    	Console.WriteLine(myProxy());
+    }
+    
+    static int myProxy() {
+    	return "hello!;
+    }
+
+
+As you can see, proxies can make values harder to read. Now imagine this applied to thousands of values, submersed in thousands of lines of code...
+
+# Proxy depth
+Obviously, proxies can call other proxies, which will then call other proxies... That's why I added a "depth" setting on this proxy remover. Quick example of a depth 2 proxified code. 
+
+    static void main(string[] args) {
+	    Console.WriteLine(myProxy());
+    }
+    
+    static int myProxy() {
+	    return anotherProxy();
+    }
+    
+    static int anotherProxy() {
+	    return "hello!";
+    }
+
+<br>Result after proxy removal :
+
+    static void main(string[] args) {
+	    Console.WriteLine("hello!");
+    }
+
+# Credits
+Special thanks to
+- the NetShields Obfuscator community
+- [0x4d4](https://github.com/0xd4d) (dnlib's inventor)
+- [Mindsystemm](https://github.com/MindSystemm) (a nice friend of mine)
+
+
+
+================================================
+File: Jomtek's Proxy Remover.sln
+================================================
+ï»¿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30128.74
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jomtek's Proxy Remover", "Jomtek's Proxy Remover\Jomtek's Proxy Remover.csproj", "{66FA1749-D522-4CF6-9D36-D4418F950D4B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{66FA1749-D522-4CF6-9D36-D4418F950D4B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66FA1749-D522-4CF6-9D36-D4418F950D4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66FA1749-D522-4CF6-9D36-D4418F950D4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66FA1749-D522-4CF6-9D36-D4418F950D4B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {96C3FCE8-2F79-41C3-B6D5-601F62713E69}
+	EndGlobalSection
+EndGlobal
+
+
+
+================================================
+File: Jomtek's Proxy Remover/App.config
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.8" />
+    </startup>
+</configuration>
+
+
+================================================
+File: Jomtek's Proxy Remover/Jomtek's Proxy Remover.csproj
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{66FA1749-D522-4CF6-9D36-D4418F950D4B}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Jomtek_s_Proxy_Remover</RootNamespace>
+    <AssemblyName>Jomtek%27s Proxy Remover</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dnlib">
+      <HintPath>..\..\..\..\Documents\Software cracking\Development\dnlib\dnlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ProxyRemover.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
+
+
+================================================
+File: Jomtek's Proxy Remover/Program.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Jomtek_s_Proxy_Remover
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            while (true)
+            {
+                Console.Clear();
+
+                string modulePath = "";
+                int proxyDepth = 0;
+
+                try
+                {
+                    modulePath = args[0];
+                }
+                catch (IndexOutOfRangeException)
+                {
+                    Console.WriteLine("Error : no module selected... press ENTER to exit.");
+                    Console.ReadLine();
+                    Environment.Exit(0);
+                }
+
+                Console.Write("Proxy depth : ");
+                int.TryParse(Console.ReadLine(), out proxyDepth);
+
+                if (proxyDepth < 1)
+                {
+                    Console.WriteLine("Invalid proxy depth (should be greater than 1)");
+                    Thread.Sleep(700);
+                    continue;
+                }
+
+                Console.Clear();
+
+                ModuleContext modCtx = ModuleDef.CreateModuleContext();
+                ModuleDefMD module = ModuleDefMD.Load(modulePath, modCtx);
+
+                var myProxyRemover = new ProxyRemover(module, modulePath);
+                int removedProxies = myProxyRemover.RemoveProxiesFromTypes(module.Types, proxyDepth);
+
+                if (removedProxies > 0) Console.WriteLine();
+                Console.WriteLine(removedProxies + " proxies removed");
+                Console.WriteLine();
+
+                if (removedProxies > 0)
+                {
+                    Console.WriteLine("Saving module...");
+                    myProxyRemover.SaveModule();
+                }
+
+
+                Console.WriteLine("Done.");
+                Console.ReadLine();
+                break;
+            }
+        }
+    }
+}
+
+
+
+================================================
+File: Jomtek's Proxy Remover/ProxyRemover.cs
+================================================
+ï»¿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using dnlib.DotNet.Writer;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Jomtek_s_Proxy_Remover
+{
+    class ProxyRemover
+    {
+        private ModuleDef module;
+        private string modulePath;
+        private Dictionary<string, OpCode> opcodesDict;
+
+        public ProxyRemover(ModuleDef module, string modulePath)
+        {
+            this.module = module;
+            this.modulePath = modulePath;
+
+            opcodesDict = new Dictionary<string, OpCode>();
+            opcodesDict.Add("System.String", OpCodes.Ldstr);
+            opcodesDict.Add("System.Int32", OpCodes.Ldc_I4);
+            opcodesDict.Add("System.SByte", OpCodes.Ldc_I4_S);
+            opcodesDict.Add("System.Boolean", OpCodes.Ldc_I4_1);
+        }
+
+        private bool IsTypeAnalyzable(TypeDef moduleType) =>
+            moduleType.HasMethods && !moduleType.Namespace.Contains(".My");
+
+        private bool IsProxyTypeAnalyzable(string proxyType) {
+            return new string[] { "System.String", "System.Int32", "System.SByte", "System.Boolean" }.Contains(proxyType);
+        }
+
+        private bool IsMethodProxy(MethodDef method, IList<Instruction> instructions) =>
+            method.HasReturnType && !method.HasParams() && instructions.Count == 2; 
+    
+        private Dictionary<MDToken, object> AnalyzeMethods(IList<MethodDef> methods)
+        {
+            var proxyDict = new Dictionary<MDToken, object>();
+            
+            foreach (MethodDef method in methods)
+            {
+                if (method.Body != null)
+                {
+                    IList<Instruction> methodInstructions = method.Body.Instructions;
+
+                    if (IsMethodProxy(method, methodInstructions) && IsProxyTypeAnalyzable(method.ReturnType.ToString()))
+                    {
+                        object methodReturnValue = methodInstructions[0].Operand; // from the ld instruction, just before the ret
+                        OpCode ldOpcode = methodInstructions[0].OpCode;
+
+                        if (method.ReturnType.ToString() == "System.Boolean")
+                            methodReturnValue = ldOpcode == OpCodes.Ldc_I4_1;
+
+                        proxyDict[method.MDToken] = methodReturnValue;
+                    }
+                }
+            }
+
+            return proxyDict;
+        }
+
+        private MethodDef[] RemoveProxies(IList<MethodDef> methods, Dictionary<MDToken, object> proxies)
+        {
+            var removedMethods = new List<MethodDef>();
+
+            foreach (MethodDef method in methods)
+            {
+                if (method.Body != null)
+                {
+                    int counter = 0;
+                    for (int i = 0; i < method.Body.Instructions.Count - 1; i++)
+                    {
+                        Instruction instruction = method.Body.Instructions[counter];
+
+                        if (instruction.OpCode == OpCodes.Call && counter > 0)
+                        {
+                            try
+                            {
+                                MethodDef calledFunc = (MethodDef)instruction.Operand;
+                                if (proxies.ContainsKey(calledFunc.MDToken))
+                                {
+                                    object resolvedValue = proxies[calledFunc.MDToken];
+                                    string resolvedValueType = resolvedValue.GetType().ToString();
+
+                                    if (IsProxyTypeAnalyzable(resolvedValueType))
+                                    {
+                                        if (method.Body.Instructions[counter - 1].OpCode == OpCodes.Ldarg_0)
+                                        {
+                                            method.Body.Instructions.RemoveAt(counter - 1);
+                                            counter--;
+                                        }
+
+                                        removedMethods.Add(calledFunc);
+                                        proxies.Remove(calledFunc.MDToken);
+
+                                        instruction.OpCode = opcodesDict[resolvedValueType];
+
+                                        if (resolvedValueType == "System.Boolean")
+                                            if (!(bool)resolvedValue) instruction.OpCode = OpCodes.Ldc_I4_0;
+                                            else
+                                                instruction.Operand = resolvedValue;
+
+                                        Console.WriteLine("Removed proxy " + calledFunc.MDToken.ToString());
+                                    }
+                                }
+                            } catch (InvalidCastException) {}
+                        }
+
+                        counter++;
+                    }
+                }
+            }
+
+            return removedMethods.ToArray();
+        }
+
+        private void RemoveUnusedProxies(TypeDef moduleType, Dictionary<MDToken, object> globalProxiesList)
+        {
+            int counter = 0;
+            for (int x = 0; x < moduleType.Methods.Count; x++) // Remove unused proxies
+            {
+                MethodDef method = moduleType.Methods[counter];
+
+                if (globalProxiesList.ContainsKey(method.MDToken))
+                {
+                    method.Body.Instructions.Clear();
+                    moduleType.Methods.RemoveAt(counter);
+                    globalProxiesList.Remove(method.MDToken);
+                    counter--;
+                }
+
+                counter++;
+            }
+        }
+        public int RemoveProxiesFromTypes(IEnumerable<TypeDef> moduleTypes, int cycles)
+        {
+            var globalProxiesList = new Dictionary<MDToken, object>();
+            int totalRemovedMethods = 0;
+
+            for (int i = 0; i < cycles; i++)
+            {
+                int removedMethodsThisCycle = 0;
+
+                // Analyze types
+                foreach (TypeDef moduleType in moduleTypes)
+                {
+                    if (IsTypeAnalyzable(moduleType))
+                    {
+                        if (moduleType.DeclaringType != null && !IsTypeAnalyzable(moduleType.DeclaringType)) continue;
+
+                        Dictionary<MDToken, object> foundProxies =
+                            AnalyzeMethods(moduleType.Methods);
+
+                        globalProxiesList = globalProxiesList.Union(foundProxies).ToDictionary(x => x.Key, x => x.Value);
+                    }
+                }
+
+                // Remove proxies
+                foreach (TypeDef moduleType in moduleTypes)
+                {
+                    if (IsTypeAnalyzable(moduleType))
+                    {
+                        if (moduleType.DeclaringType != null && !IsTypeAnalyzable(moduleType.DeclaringType)) continue;
+
+                        MethodDef[] removedMethods = RemoveProxies(moduleType.Methods, globalProxiesList);
+                        removedMethodsThisCycle += removedMethods.Count();
+
+                        foreach (MethodDef method in removedMethods) // Remove used proxies
+                            moduleType.Methods.Remove(method);
+                    }
+                }
+
+                // Remove unused proxies
+                foreach (TypeDef moduleType in moduleTypes)
+                {
+                    RemoveUnusedProxies(moduleType, globalProxiesList);
+                }
+
+                totalRemovedMethods += removedMethodsThisCycle;
+
+                if (removedMethodsThisCycle == 0)
+                    break;
+            }
+
+            return totalRemovedMethods;
+        }
+
+        public void SaveModule()
+        {
+            string savePath = Path.ChangeExtension(modulePath, null);
+
+            var moduleOptions = new ModuleWriterOptions(module);
+            moduleOptions.MetadataOptions.Flags = MetadataFlags.KeepOldMaxStack;
+            moduleOptions.MetadataLogger = DummyLogger.NoThrowInstance;
+
+            module.Write(savePath + "_fixed" + Path.GetExtension(modulePath), moduleOptions);
+        }
+    }
+}
+
+
+
+================================================
+File: Jomtek's Proxy Remover/Properties/AssemblyInfo.cs
+================================================
+ï»¿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("Jomtek's Proxy Remover")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("Jomtek's Proxy Remover")]
+[assembly: AssemblyCopyright("Copyright Â©  2020")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Setting ComVisible to false makes the types in this assembly not visible
+// to COM components.  If you need to access a type in this assembly from
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("66fa1749-d522-4cf6-9d36-d4418f950d4b")]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
